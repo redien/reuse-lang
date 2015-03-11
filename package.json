@@ -1,0 +1,14 @@
+{
+  "name": "reuse-lang",
+  "version": "1.0.0",
+  "description": "",
+  "main": "reuse.js",
+  "scripts": {
+    "test": "mocha **/*.unit.js"
+  },
+  "author": "Jesper Oskarsson",
+  "license": "Public Domain",
+  "devDependencies": {
+    "should": "^5.1.0"
+  }
+}
