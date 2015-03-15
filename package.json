@@ -23,7 +23,7 @@
         "blanket": {
             "pattern": [
                 "/lib/",
-                "/units/"
+                "/unit/"
             ],
             "data-cover-never": [
                 "/node_modules/"
