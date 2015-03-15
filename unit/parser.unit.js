@@ -30,7 +30,11 @@ describe('parser', function () {
         it('should return an error given an unexpected closing brace', function (done) {
             parser.parse('((a) a))', function (error, parsedProgram) {
                 should(error).not.be.null;
-                return done();
+
+                parser.parse('2)', function (error, parsedProgram) {
+                    should(error).not.be.null;
+                    return done();
+                });
             });
         });
 
