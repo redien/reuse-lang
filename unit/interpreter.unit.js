@@ -181,5 +181,41 @@ describe('interpreter', function () {
                 return done();
             });
         });
+
+        it('should evaluate (((lambda (x) (lambda () x)) 7)) to 7', function (done) {
+            var parsedProgram = {
+                kind: 'list',
+                elements: [
+                    {
+                        kind: 'list',
+                        elements: [
+                            {
+                                kind: 'list',
+                                elements: [
+                                    {kind: 'atom', value: 'lambda'},
+                                    {kind: 'list', elements: [
+                                        {kind: 'atom', value: 'x'}
+                                    ]},
+                                    {
+                                        kind: 'list',
+                                        elements: [
+                                            {kind: 'atom', value: 'lambda'},
+                                            {kind: 'list', elements: []},
+                                            {kind: 'atom', value: 'x'}
+                                        ]
+                                    }
+                                ]
+                            },
+                            {kind: 'atom', value: '7'}
+                        ]
+                    }
+                ]
+            };
+
+            interpreter.evaluate(parsedProgram, function (error, value) {
+                value.should.equal(7);
+                return done();
+            });
+        });
     });
 });
