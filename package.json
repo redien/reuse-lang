@@ -4,11 +4,19 @@
   "description": "",
   "main": "reuse.js",
   "scripts": {
-    "test": "mocha **/*.unit.js"
+    "test": "mocha **/*.unit.js",
+    "coverage-travis-ci": "mocha --require blanket -R travis-cov **/*.unit.js",
+    "coverage-coveralls-io": "./utility-scripts/coveralls.sh",
+    "coverage": "mocha --require blanket -R html-cov **/*.unit.js > coverage.html",
+    "unit-test": "mocha **/*.unit.js"
   },
   "author": "Jesper Oskarsson",
   "license": "Public Domain",
   "devDependencies": {
-    "should": "^5.1.0"
+    "blanket": "1.1.6",
+    "coveralls": "2.11.2",
+    "mocha-lcov-reporter": "0.0.1",
+    "should": "5.1.0",
+    "travis-cov": "0.2.5"
   }
 }

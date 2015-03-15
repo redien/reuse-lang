@@ -11,6 +11,17 @@
 # You should have received a copy of the CC0 Public Domain Dedication along with this software.
 # If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-/node_modules/
+# Get the position in the job list
+job_version=`echo $TRAVIS_JOB_NUMBER | egrep -o "\.[0-9]$" | egrep -o [0-9]`
 
-npm-debug.log
+# If we're the first job for this build, send coverage information.
+# We need to test this as sending the coverage information multiple times
+# produces an error in some cases.
+if test -z "$job_version" -o "$job_version" = "1"
+then
+    # Cover tests
+    mocha --require blanket -R mocha-lcov-reporter "**/*.unit.js" > javascript-coverage.info
+
+    # Send to coveralls.io
+    cat javascript-coverage.info | ./node_modules/coveralls/bin/coveralls.js
+fi
