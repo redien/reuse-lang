@@ -7,7 +7,7 @@ reuse-lang is a pure functional Lisp-like language for writing reusable business
 
 **Q. Why a Lisp?**
 
-**A.** It makes for a small core language and thus gives a small implementation of that language.
+**A.** It makes for a small core language and thus makes the implementation of that language small.
 
 **Q. Why a pure functional language?**
 
