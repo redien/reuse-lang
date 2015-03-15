@@ -16,7 +16,6 @@ process.stdin.on('end', function () {
         if (error) { throw error; }
         interpreter.evaluate(parsedProgram, function (error, value) {
             if (error) { throw error; }
-            process.stdout.write('\nOutput:\n');
             process.stdout.write(value.toString());
             process.stdout.write('\n');
         });
