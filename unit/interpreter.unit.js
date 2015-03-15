@@ -60,7 +60,6 @@ describe('interpreter', function () {
                     ]}
                 ]};
 
-            debugger;
             interpreter.evaluate(parsedProgram, function (error, value) {
                 value.should.be.Array;
                 value.length.should.equal(2);
@@ -117,6 +116,102 @@ describe('interpreter', function () {
 
             interpreter.evaluate(parsedProgram, function (error, value) {
                 value.should.equal(42);
+                return done();
+            });
+        });
+
+        it('should return an error given too many arguments to a function call', function (done) {
+            var parsedProgram =
+                {kind: 'list', elements: [
+                    {kind: 'list', elements: [
+                        {kind: 'atom', value: 'lambda'},
+                        {kind: 'list', elements: [
+                            {kind: 'atom', value: 'x'}
+                        ]},
+                        {kind: 'atom', value: 'x'}
+                    ]},
+                    {kind: 'atom', value: '42'},
+                    {kind: 'atom', value: '5'}
+                ]};
+
+            interpreter.evaluate(parsedProgram, function (error, value) {
+                should(error).not.be.null;
+                return done();
+            });
+        });
+
+        it('should return an error given too few arguments to a function call', function (done) {
+            var parsedProgram =
+                {kind: 'list', elements: [
+                    {kind: 'list', elements: [
+                        {kind: 'atom', value: 'lambda'},
+                        {kind: 'list', elements: [
+                            {kind: 'atom', value: 'x'}
+                        ]},
+                        {kind: 'atom', value: 'x'}
+                    ]}
+                ]};
+
+            interpreter.evaluate(parsedProgram, function (error, value) {
+                should(error).not.be.null;
+                return done();
+            });
+        });
+
+        it('should return an unbound variable error given x', function (done) {
+            var parsedProgram = {kind: 'atom', value: 'x'};
+
+            interpreter.evaluate(parsedProgram, function (error, value) {
+                should(error).not.be.null;
+                return done();
+            });
+        });
+
+        it('should return an unbound variable error given (lambda () x)', function (done) {
+            var parsedProgram =
+                {kind: 'list', elements: [
+                    {kind: 'atom', value: 'lambda'},
+                    {kind: 'list', elements: []},
+                    {kind: 'atom', value: 'x'}
+                ]};
+
+            interpreter.evaluate(parsedProgram, function (error, value) {
+                should(error).not.be.null;
+                return done();
+            });
+        });
+
+        it('should return an unbound variable error given (lambda () (x))', function (done) {
+            var parsedProgram =
+                {kind: 'list', elements: [
+                    {kind: 'atom', value: 'lambda'},
+                    {kind: 'list', elements: []},
+                    {kind: 'list', elements: [
+                        {kind: 'atom', value: 'x'}
+                    ]}
+                ]};
+
+            interpreter.evaluate(parsedProgram, function (error, value) {
+                should(error).not.be.null;
+                return done();
+            });
+        });
+
+        it('should return an unbound variable error given (lambda (x) (x y))', function (done) {
+            var parsedProgram =
+                {kind: 'list', elements: [
+                    {kind: 'atom', value: 'lambda'},
+                    {kind: 'list', elements: [
+                        {kind: 'atom', value: 'x'},
+                    ]},
+                    {kind: 'list', elements: [
+                        {kind: 'atom', value: 'x'},
+                        {kind: 'atom', value: 'y'}
+                    ]}
+                ]};
+
+            interpreter.evaluate(parsedProgram, function (error, value) {
+                should(error).not.be.null;
                 return done();
             });
         });
@@ -231,6 +326,34 @@ describe('interpreter', function () {
 
             interpreter.evaluate(parsedProgram, function (error, value) {
                 value.should.equal(7);
+                return done();
+            });
+        });
+
+        it('should evaluate ((lambda (x) (x 42)) (lambda (x) x)) to 42', function (done) {
+            var parsedProgram =
+                {kind: 'list', elements: [
+                    {kind: 'list', elements: [
+                        {kind: 'atom', value: 'lambda'},
+                        {kind: 'list', elements: [
+                            {kind: 'atom', value: 'x'}
+                        ]},
+                        {kind: 'list', elements: [
+                            {kind: 'atom', value: 'x'},
+                            {kind: 'atom', value: '42'}
+                        ]}
+                    ]},
+                    {kind: 'list', elements: [
+                        {kind: 'atom', value: 'lambda'},
+                        {kind: 'list', elements: [
+                            {kind: 'atom', value: 'x'}
+                        ]},
+                        {kind: 'atom', value: 'x'},
+                    ]},
+                ]};
+
+            interpreter.evaluate(parsedProgram, function (error, value) {
+                value.should.equal(42);
                 return done();
             });
         });

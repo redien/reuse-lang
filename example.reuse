@@ -1,2 +1,2 @@
 
-((lambda (x) x) 2 2)
+(lambda (y) (x y))
