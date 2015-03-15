@@ -1,5 +1,6 @@
 
-var compiler = require('./compiler');
+var parser = require('./lib/parser');
+var interpreter = require('./lib/interpreter');
 
 process.stdin.setEncoding('utf8');
 
@@ -11,6 +12,13 @@ process.stdin.on('readable', function () {
     }
 });
 process.stdin.on('end', function () {
-    var compiledProgram = compiler.compile(program);
-    process.stdout.write(compiledProgram);
+    parser.parse(program, function (error, parsedProgram) {
+        if (error) { throw error; }
+        interpreter.evaluate(parsedProgram, function (error, value) {
+            if (error) { throw error; }
+            process.stdout.write('\nOutput:\n');
+            process.stdout.write(value.toString());
+            process.stdout.write('\n');
+        });
+    });
 });

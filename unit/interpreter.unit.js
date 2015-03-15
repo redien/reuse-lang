@@ -4,7 +4,7 @@ var interpreter = require('../lib/interpreter');
 
 describe('interpreter', function () {
     describe('evaluate', function () {
-        it('should evaluate {kind: "atom", value: "3"} to 3', function (done) {
+        it('should evaluate 3 to 3', function (done) {
             var parsedProgram = {
                 kind: 'atom',
                 value: '3'
@@ -16,7 +16,7 @@ describe('interpreter', function () {
             });
         });
 
-        it('should evaluate {kind: "atom", value: "-5"} to -5', function (done) {
+        it('should evaluate -5 to -5', function (done) {
             var parsedProgram = {
                 kind: 'atom',
                 value: '-5'
@@ -209,6 +209,45 @@ describe('interpreter', function () {
                             {kind: 'atom', value: '7'}
                         ]
                     }
+                ]
+            };
+
+            interpreter.evaluate(parsedProgram, function (error, value) {
+                value.should.equal(7);
+                return done();
+            });
+        });
+
+        it('should evaluate (((lambda (x) x) (lambda (x) x)) 7) to 7', function (done) {
+            var parsedProgram = {
+                kind: 'list',
+                elements: [
+                    {
+                        kind: 'list',
+                        elements: [
+                            {
+                                kind: 'list',
+                                elements: [
+                                    {kind: 'atom', value: 'lambda'},
+                                    {kind: 'list', elements: [
+                                        {kind: 'atom', value: 'x'}
+                                    ]},
+                                    {kind: 'atom', value: 'x'}
+                                ]
+                            },
+                            {
+                                kind: 'list',
+                                elements: [
+                                    {kind: 'atom', value: 'lambda'},
+                                    {kind: 'list', elements: [
+                                        {kind: 'atom', value: 'x'}
+                                    ]},
+                                    {kind: 'atom', value: 'x'}
+                                ]
+                            }
+                        ]
+                    },
+                    {kind: 'atom', value: '7'}
                 ]
             };
 
