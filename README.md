@@ -17,6 +17,10 @@ reuse-lang is a pure functional Lisp-like language for writing reusable business
 
 **A.** You don't. Reuse is not a general-purpose language. It's meant for creating reuseable libraries that implement business logic. If you need side-effects, you will have to rely on the host language.
 
+**Q. How come it's implemented in Javascript?**
+
+**A.** Javascript is [quite portable](https://github.com/svaarala/duktape), has a big mind-share with lots of libraries and is probably not going anywhere anytime soon.
+
 ## Use
 ```
 node reuse.js < example.reuse
