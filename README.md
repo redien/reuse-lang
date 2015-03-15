@@ -5,14 +5,17 @@ reuse-lang is a pure functional Lisp-like language for writing reusable business
 
 ## Design rationale
 
-*Q. Why a Lisp?*
-*A.* It makes for a small core language and thus gives a small implementation of that language.
+**Q. Why a Lisp?**
 
-*Q. Why a pure functional language?*
-*A.* Having no side-effects should make it trivial to translate to other languages.
+**A.** It makes for a small core language and thus gives a small implementation of that language.
 
-*Q. But then how do I do ___?*
-*A.* You don't. Reuse is not a general-purpose language. It's meant for creating reuseable libraries that implement business logic. If you need side-effects, you will have to rely on the host language.
+**Q. Why a pure functional language?**
+
+**A.** Having no side-effects should make it trivial to translate to other languages.
+
+**Q. But then how do I do ___?**
+
+**A.** You don't. Reuse is not a general-purpose language. It's meant for creating reuseable libraries that implement business logic. If you need side-effects, you will have to rely on the host language.
 
 ## Use
 ```
