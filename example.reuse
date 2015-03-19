@@ -1,2 +1,1 @@
-
-(lambda (y) (x y))
+(head ())

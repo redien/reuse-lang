@@ -16,6 +16,27 @@ var validator = require('../lib/validator');
 
 describe('validator', function () {
     describe('validate', function () {
+        it('should return null if no errors were found', function (done) {
+            var parsedProgram =
+                {kind: 'list', elements: [
+                    {kind: 'list', elements: [
+                        {kind: 'atom', value: 'lambda'},
+                        {kind: 'list', elements: [
+                            {kind: 'atom', value: 'x'},
+                            {kind: 'atom', value: 'y'}
+                        ]},
+                        {kind: 'atom', value: 'x'}
+                    ]},
+                    {kind: 'atom', value: '42'},
+                    {kind: 'atom', value: '5'}
+                ]};
+
+            validator.validate(parsedProgram, function (error) {
+                should(error).be.null;
+                return done();
+            });
+        });
+
         it('should return an error given too many arguments to a function call', function (done) {
             var parsedProgram =
                 {kind: 'list', elements: [
@@ -66,6 +87,20 @@ describe('validator', function () {
             });
         });
 
+        it('should return an unbound variable error given (f ())', function (done) {
+            var parsedProgram =
+                {kind: 'list', elements: [
+                    {kind: 'atom', value: 'f'},
+                    {kind: 'list', elements: []}
+                ]};
+
+            validator.validate(parsedProgram, function (error) {
+                should(error).not.be.null;
+                error.type.should.equal('UnboundVariable');
+                return done();
+            });
+        });
+
         it('should return an unbound variable error given (lambda () x)', function (done) {
             var parsedProgram =
                 {kind: 'list', elements: [
@@ -94,6 +129,51 @@ describe('validator', function () {
             validator.validate(parsedProgram, function (error) {
                 should(error).not.be.null;
                 error.type.should.equal('UnboundVariable');
+                return done();
+            });
+        });
+
+        it('should NOT return an error given (lambda (x) (x))', function (done) {
+            var parsedProgram =
+                {kind: 'list', elements: [
+                    {kind: 'atom', value: 'lambda'},
+                    {kind: 'list', elements: [
+                        {kind: 'atom', value: 'x'}
+                    ]},
+                    {kind: 'list', elements: [
+                        {kind: 'atom', value: 'x'}
+                    ]}
+                ]};
+
+            validator.validate(parsedProgram, function (error) {
+                should(error).be.null;
+                return done();
+            });
+        });
+
+        it('should NOT return an error given (list 1 2)', function (done) {
+            var parsedProgram =
+                {kind: 'list', elements: [
+                    {kind: 'atom', value: 'list'},
+                    {kind: 'atom', value: '1'},
+                    {kind: 'atom', value: '2'}
+                ]};
+
+            validator.validate(parsedProgram, function (error) {
+                should(error).be.null;
+                return done();
+            });
+        });
+
+        it('should NOT return an error given (head ())', function (done) {
+            var parsedProgram =
+                {kind: 'list', elements: [
+                    {kind: 'atom', value: 'head'},
+                    {kind: 'list', elements: []}
+                ]};
+
+            validator.validate(parsedProgram, function (error) {
+                should(error).be.null;
                 return done();
             });
         });
