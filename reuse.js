@@ -13,7 +13,6 @@
 
 var parser = require('./lib/parser');
 var interpreter = require('./lib/interpreter');
-var validator = require('./lib/validator');
 
 process.stdin.setEncoding('utf8');
 
@@ -27,18 +26,15 @@ process.stdin.on('readable', function () {
 process.stdin.on('end', function () {
     parser.parse(program, function (error, parsedProgram) {
         if (error) { throw error; }
-        validator.validate(parsedProgram, function (error) {
+        interpreter.evaluate(parsedProgram, function (error, value) {
             if (error) { throw error; }
-            interpreter.evaluate(parsedProgram, function (error, value) {
-                if (error) { throw error; }
-                
-                if (value === null) {
-                    value = 'null';
-                }
-                
-                process.stdout.write(value.toString());
-                process.stdout.write('\n');
-            });
+
+            if (value === null) {
+                value = 'null';
+            }
+
+            process.stdout.write(value.toString());
+            process.stdout.write('\n');
         });
     });
 });
