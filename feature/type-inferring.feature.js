@@ -12,15 +12,10 @@
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 var should = require('should');
-var compiler = require('../lib/compiler');
+var reuse = require('../lib/reuse.js');
 
-describe('compiler', function () {
-    describe('compileParsedProgram', function () {
-        it('should compile null into an empty program', function () {
-            var parsedProgram = null;
-            var compiledProgram = compiler.compileParsedProgram(parsedProgram);
-
-            compiledProgram.should.equal('');
-        });
+describe('Type Inferring', function () {
+    describe('Literals', function () {
+        
     });
 });
