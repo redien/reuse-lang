@@ -16,123 +16,94 @@ var parser = require('../lib/parser');
 
 describe('parser', function () {
     describe('parse', function () {
-        it('should parse an empty string to null', function (done) {
-            parser.parse('', function (error, parsedProgram) {
-                should(parsedProgram).be.null;
-                return done();
-            });
+        it('should parse an empty string to null', function () {
+            var result = parser.parse('');
+            should(result.value).be.null;
         });
 
-        it('should parse an empty list to {kind: "list", elements: []}', function (done) {
-            parser.parse('()', function (error, parsedProgram) {
-                parsedProgram.kind.should.equal('list');
-                parsedProgram.elements.should.be.Array;
-                parsedProgram.elements.length.should.equal(0);
-                return done();
-            });
+        it('should parse an empty list to {kind: "list", elements: []}', function () {
+            var result = parser.parse('()');
+            result.value.kind.should.equal('list');
+            result.value.elements.should.be.Array;
+            result.value.elements.length.should.equal(0);
         });
 
-        it('should return an "unbalanced-parentheses" error given an opening brace without a closing one', function (done) {
-            parser.parse('(', function (error, parsedProgram) {
-                should(error).not.be.null;
-                error.message.should.equal('unbalanced-parentheses');
-                return done();
-            });
+        it('should return an "unbalanced-parentheses" error given an opening brace without a closing one', function () {
+            var result = parser.parse('(');
+            should(result.error).not.be.null;
+            result.error.message.should.equal('unbalanced-parentheses');
         });
 
-        it('should return an "unbalanced-parentheses" error given too few closing braces', function (done) {
-            parser.parse('(()', function (error, parsedProgram) {
-                should(error).not.be.null;
-                error.message.should.equal('unbalanced-parentheses');
-                return done();
-            });
+        it('should return an "unbalanced-parentheses" error given too few closing braces', function () {
+            var result = parser.parse('(()');
+            should(result.error).not.be.null;
+            result.error.message.should.equal('unbalanced-parentheses');
         });
 
-        it('should return an error given an unexpected closing brace', function (done) {
-            parser.parse('((a) a))', function (error, parsedProgram) {
-                should(error).not.be.null;
+        it('should return an error given an unexpected closing brace', function () {
+            var result = parser.parse('((a) a))');
+            should(result.error).not.be.null;
 
-                parser.parse('2)', function (error, parsedProgram) {
-                    should(error).not.be.null;
-                    return done();
-                });
-            });
+            result = parser.parse('2)');
+            should(result.error).not.be.null;
         });
 
-        it('should parse an atom named "atom" to {kind: "atom", value: "atom"}', function (done) {
-            parser.parse('atom', function (error, parsedProgram) {
-                parsedProgram.kind.should.equal('atom');
-                parsedProgram.value.should.equal('atom');
-                return done();
-            });
+        it('should parse an atom named "atom" to {kind: "atom", value: "atom"}', function () {
+            var result = parser.parse('atom');
+            result.value.kind.should.equal('atom');
+            result.value.value.should.equal('atom');
         });
 
-        it('should parse an atom in a list into the list\'s elements array', function (done) {
-            parser.parse('(atom)', function (error, parsedProgram) {
-                parsedProgram.elements[0].kind.should.equal('atom');
-                return done();
-            });
+        it('should parse an atom in a list into the list\'s elements array', function () {
+            var result = parser.parse('(atom)');
+            result.value.elements[0].kind.should.equal('atom');
         });
 
-        it('should parse a list in a list into the first list\'s elements array', function (done) {
-            parser.parse('(())', function (error, parsedProgram) {
-                parsedProgram.elements[0].kind.should.equal('list');
-                return done();
-            });
+        it('should parse a list in a list into the first list\'s elements array', function () {
+            var result = parser.parse('(())');
+            result.value.elements[0].kind.should.equal('list');
         });
 
-        it('should parse an atom nested in two lists', function (done) {
-            parser.parse('((atom))', function (error, parsedProgram) {
-                parsedProgram.kind.should.equal('list');
-                parsedProgram.elements[0].kind.should.equal('list');
-                parsedProgram.elements[0].elements[0].kind.should.equal('atom');
-                return done();
-            });
+        it('should parse an atom nested in two lists', function () {
+            var result = parser.parse('((atom))');
+            result.value.kind.should.equal('list');
+            result.value.elements[0].kind.should.equal('list');
+            result.value.elements[0].elements[0].kind.should.equal('atom');
         });
 
-        it('should parse atoms with any name', function (done) {
+        it('should parse atoms with any name', function () {
             var program = 'nameofsomeatom';
-            parser.parse(program, function (error, parsedProgram) {
-                parsedProgram.kind.should.equal('atom');
-                parsedProgram.value.should.equal(program);
-                return done();
-            });
+            var result = parser.parse(program);
+            result.value.kind.should.equal('atom');
+            result.value.value.should.equal(program);
         });
 
-        it('should parse several atoms in a list', function (done) {
-            parser.parse('(atom atom)', function (error, parsedProgram) {
-                parsedProgram.elements[0].kind.should.equal('atom');
-                parsedProgram.elements[1].kind.should.equal('atom');
-                return done();
-            });
+        it('should parse several atoms in a list', function () {
+            var result = parser.parse('(atom atom)');
+            result.value.elements[0].kind.should.equal('atom');
+            result.value.elements[1].kind.should.equal('atom');
         });
 
-        it('should parse mixed lists and atoms in a list', function (done) {
-            parser.parse('(atom (atom) atom)', function (error, parsedProgram) {
-                parsedProgram.elements[0].kind.should.equal('atom');
-                parsedProgram.elements[1].kind.should.equal('list');
-                parsedProgram.elements[1].elements[0].kind.should.equal('atom');
-                parsedProgram.elements[2].kind.should.equal('atom');
-                return done();
-            });
+        it('should parse mixed lists and atoms in a list', function () {
+            var result = parser.parse('(atom (atom) atom)');
+            result.value.elements[0].kind.should.equal('atom');
+            result.value.elements[1].kind.should.equal('list');
+            result.value.elements[1].elements[0].kind.should.equal('atom');
+            result.value.elements[2].kind.should.equal('atom');
         });
         
-        it('should handle arbitrary number of spaces', function (done) {
-            parser.parse('  (  atom ( atom) atom  )', function (error, parsedProgram) {
-                parsedProgram.elements[0].kind.should.equal('atom');
-                parsedProgram.elements[1].kind.should.equal('list');
-                parsedProgram.elements[1].elements[0].kind.should.equal('atom');
-                parsedProgram.elements[2].kind.should.equal('atom');
-                return done();
-            });
+        it('should handle arbitrary number of spaces', function () {
+            var result = parser.parse('  (  atom ( atom) atom  )');
+            result.value.elements[0].kind.should.equal('atom');
+            result.value.elements[1].kind.should.equal('list');
+            result.value.elements[1].elements[0].kind.should.equal('atom');
+            result.value.elements[2].kind.should.equal('atom');
         });
         
-        it('should treat new-lines and tabs as spaces', function (done) {
-            parser.parse('\t(\n\natom \n \r \n\r)', function (error, parsedProgram) {
-                parsedProgram.kind.should.equal('list');
-                parsedProgram.elements[0].kind.should.equal('atom');
-                return done();
-            });
+        it('should treat new-lines and tabs as spaces', function () {
+            var result = parser.parse('\t(\n\natom \n \r \n\r)');
+            result.value.kind.should.equal('list');
+            result.value.elements[0].kind.should.equal('atom');
         });
     });
 });
