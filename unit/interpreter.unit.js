@@ -16,35 +16,29 @@ var interpreter = require('../lib/interpreter');
 
 describe('interpreter', function () {
     describe('evaluate', function () {
-        it('should evaluate 3 to 3', function (done) {
+        it('should evaluate 3 to 3', function () {
             var parsedProgram = {kind: 'atom', value: '3'};
             
-            interpreter.evaluate(parsedProgram, function (error, value) {
-                value.should.equal(3);
-                return done();
-            });
+            var result = interpreter.evaluate(parsedProgram);
+            result.value.should.equal(3);
         });
 
-        it('should evaluate -5 to -5', function (done) {
+        it('should evaluate -5 to -5', function () {
             var parsedProgram = {kind: 'atom', value: '-5'};
 
-            interpreter.evaluate(parsedProgram, function (error, value) {
-                value.should.equal(-5);
-                return done();
-            });
+            var result = interpreter.evaluate(parsedProgram);
+            result.value.should.equal(-5);
         });
 
-        it('should evaluate () to []', function (done) {
+        it('should evaluate () to []', function () {
             var parsedProgram = {kind: 'list', elements: []};
 
-            interpreter.evaluate(parsedProgram, function (error, value) {
-                value.should.be.Array;
-                value.length.should.equal(0);
-                return done();
-            });
+            var result = interpreter.evaluate(parsedProgram);
+            result.value.should.be.Array;
+            result.value.length.should.equal(0);
         });
 
-        it('should evaluate (list 1 ()) to [1, []]', function (done) {
+        it('should evaluate (list 1 ()) to [1, []]', function () {
             var parsedProgram =
                 {kind: 'list', elements: [
                     {kind: 'atom', value: 'list'},
@@ -52,17 +46,15 @@ describe('interpreter', function () {
                     {kind: 'list', elements: []}
                 ]};
 
-            interpreter.evaluate(parsedProgram, function (error, value) {
-                value.should.be.Array;
-                value.length.should.equal(2);
-                value[0].should.equal(1);
-                value[1].should.be.Array;
-                value[1].length.should.equal(0);
-                return done();
-            });
+            var result = interpreter.evaluate(parsedProgram);
+            result.value.should.be.Array;
+            result.value.length.should.equal(2);
+            result.value[0].should.equal(1);
+            result.value[1].should.be.Array;
+            result.value[1].length.should.equal(0);
         });
 
-        it('should evaluate (list 2 (list 3 ())) to [2, [3, []]]', function (done) {
+        it('should evaluate (list 2 (list 3 ())) to [2, [3, []]]', function () {
             var parsedProgram =
                 {kind: 'list', elements: [
                     {kind: 'atom', value: 'list'},
@@ -74,34 +66,30 @@ describe('interpreter', function () {
                     ]}
                 ]};
 
-            interpreter.evaluate(parsedProgram, function (error, value) {
-                value.should.be.Array;
-                value.length.should.equal(2);
-                value[0].should.equal(2);
-                value[1].should.be.Array;
-                value[1].length.should.equal(2);
-                value[1][0].should.equal(3);
-                value[1][1].should.be.Array;
-                value[1][1].length.should.equal(0);
-                return done();
-            });
+            var result = interpreter.evaluate(parsedProgram);
+            result.value.should.be.Array;
+            result.value.length.should.equal(2);
+            result.value[0].should.equal(2);
+            result.value[1].should.be.Array;
+            result.value[1].length.should.equal(2);
+            result.value[1][0].should.equal(3);
+            result.value[1][1].should.be.Array;
+            result.value[1][1].length.should.equal(0);
         });
 
-        it('should evaluate (head ()) []', function (done) {
+        it('should evaluate (head ()) []', function () {
             var parsedProgram =
                 {kind: 'list', elements: [
                     {kind: 'atom', value: 'head'},
                     {kind: 'list', elements: []}
                 ]};
 
-            interpreter.evaluate(parsedProgram, function (error, value) {
-                value.should.be.Array;
-                value.length.should.equal(0);
-                return done();
-            });
+            var result = interpreter.evaluate(parsedProgram);
+            result.value.should.be.Array;
+            result.value.length.should.equal(0);
         });
 
-        it('should evaluate ((lambda () 1)) to 1', function (done) {
+        it('should evaluate ((lambda () 1)) to 1', function () {
             var parsedProgram =
                 {kind: 'list', elements: [
                     {kind: 'list', elements: [
@@ -111,13 +99,11 @@ describe('interpreter', function () {
                     ]}
                 ]};
 
-            interpreter.evaluate(parsedProgram, function (error, value) {
-                value.should.equal(1);
-                return done();
-            });
+            var result = interpreter.evaluate(parsedProgram);
+            result.value.should.equal(1);
         });
 
-        it('should evaluate ((lambda () ())) to []', function (done) {
+        it('should evaluate ((lambda () ())) to []', function () {
             var parsedProgram =
                 {kind: 'list', elements: [
                     {kind: 'list', elements: [
@@ -127,14 +113,12 @@ describe('interpreter', function () {
                     ]}
                 ]};
 
-            interpreter.evaluate(parsedProgram, function (error, value) {
-                value.should.be.Array;
-                value.length.should.equal(0);
-                return done();
-            });
+            var result = interpreter.evaluate(parsedProgram);
+            result.value.should.be.Array;
+            result.value.length.should.equal(0);
         });
 
-        it('should evaluate ((lambda (x) x) 42) to 42', function (done) {
+        it('should evaluate ((lambda (x) x) 42) to 42', function () {
             var parsedProgram =
                 {kind: 'list', elements: [
                     {kind: 'list', elements: [
@@ -147,13 +131,11 @@ describe('interpreter', function () {
                     {kind: 'atom', value: '42'}
                 ]};
 
-            interpreter.evaluate(parsedProgram, function (error, value) {
-                value.should.equal(42);
-                return done();
-            });
+            var result = interpreter.evaluate(parsedProgram);
+            result.value.should.equal(42);
         });
 
-        it('should evaluate ((lambda (x) x) ()) to []', function (done) {
+        it('should evaluate ((lambda (x) x) ()) to []', function () {
             var parsedProgram =
                 {kind: 'list', elements: [
                     {kind: 'list', elements: [
@@ -166,14 +148,12 @@ describe('interpreter', function () {
                     {kind: 'list', elements: []}
                 ]};
 
-            interpreter.evaluate(parsedProgram, function (error, value) {
-                value.should.be.Array;
-                value.length.should.equal(0);
-                return done();
-            });
+            var result = interpreter.evaluate(parsedProgram);
+            result.value.should.be.Array;
+            result.value.length.should.equal(0);
         });
 
-        it('should evaluate ((lambda (x y) y) () 2) to 2', function (done) {
+        it('should evaluate ((lambda (x y) y) () 2) to 2', function () {
             var parsedProgram =
                 {kind: 'list', elements: [
                     {kind: 'list', elements: [
@@ -188,13 +168,11 @@ describe('interpreter', function () {
                     {kind: 'atom', value: '2'}
                 ]};
 
-            interpreter.evaluate(parsedProgram, function (error, value) {
-                value.should.equal(2);
-                return done();
-            });
+            var result = interpreter.evaluate(parsedProgram);
+            result.value.should.equal(2);
         });
 
-        it('should evaluate ((lambda (x y) x) () 2) to []', function (done) {
+        it('should evaluate ((lambda (x y) x) () 2) to []', function () {
             var parsedProgram =
                 {kind: 'list', elements: [
                     {kind: 'list', elements: [
@@ -209,14 +187,12 @@ describe('interpreter', function () {
                     {kind: 'atom', value: '2'}
                 ]};
 
-            interpreter.evaluate(parsedProgram, function (error, value) {
-                value.should.be.Array;
-                value.length.should.equal(0);
-                return done();
-            });
+            var result = interpreter.evaluate(parsedProgram);
+            result.value.should.be.Array;
+            result.value.length.should.equal(0);
         });
 
-        it('should evaluate (((lambda (x) (lambda () x)) 7)) to 7', function (done) {
+        it('should evaluate (((lambda (x) (lambda () x)) 7)) to 7', function () {
             var parsedProgram =
                 {kind: 'list', elements: [
                     {kind: 'list', elements: [
@@ -235,13 +211,11 @@ describe('interpreter', function () {
                     ]}
                 ]};
 
-            interpreter.evaluate(parsedProgram, function (error, value) {
-                value.should.equal(7);
-                return done();
-            });
+            var result = interpreter.evaluate(parsedProgram);
+            result.value.should.equal(7);
         });
 
-        it('should evaluate (((lambda (x) x) (lambda (x) x)) 7) to 7', function (done) {
+        it('should evaluate (((lambda (x) x) (lambda (x) x)) 7) to 7', function () {
             var parsedProgram =
                 {kind: 'list', elements: [
                     {kind: 'list', elements: [
@@ -263,13 +237,11 @@ describe('interpreter', function () {
                     {kind: 'atom', value: '7'}
                 ]};
 
-            interpreter.evaluate(parsedProgram, function (error, value) {
-                value.should.equal(7);
-                return done();
-            });
+            var result = interpreter.evaluate(parsedProgram);
+            result.value.should.equal(7);
         });
 
-        it('should evaluate ((lambda (x) (x 42)) (lambda (x) x)) to 42', function (done) {
+        it('should evaluate ((lambda (x) (x 42)) (lambda (x) x)) to 42', function () {
             var parsedProgram =
                 {kind: 'list', elements: [
                     {kind: 'list', elements: [
@@ -291,10 +263,8 @@ describe('interpreter', function () {
                     ]},
                 ]};
 
-            interpreter.evaluate(parsedProgram, function (error, value) {
-                value.should.equal(42);
-                return done();
-            });
+            var result = interpreter.evaluate(parsedProgram);
+            result.value.should.equal(42);
         });
     });
 });
