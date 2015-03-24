@@ -32,9 +32,18 @@ describe('parser', function () {
             });
         });
 
-        it('should return an error given an opening brace without a closing one', function (done) {
+        it('should return an "unbalanced-parentheses" error given an opening brace without a closing one', function (done) {
             parser.parse('(', function (error, parsedProgram) {
                 should(error).not.be.null;
+                error.message.should.equal('unbalanced-parentheses');
+                return done();
+            });
+        });
+
+        it('should return an "unbalanced-parentheses" error given too few closing braces', function (done) {
+            parser.parse('(()', function (error, parsedProgram) {
+                should(error).not.be.null;
+                error.message.should.equal('unbalanced-parentheses');
                 return done();
             });
         });

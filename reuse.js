@@ -11,8 +11,7 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-var parser = require('./lib/parser');
-var interpreter = require('./lib/interpreter');
+var reuse = require('./lib/reuse');
 
 process.stdin.setEncoding('utf8');
 
@@ -24,17 +23,8 @@ process.stdin.on('readable', function () {
     }
 });
 process.stdin.on('end', function () {
-    parser.parse(program, function (error, parsedProgram) {
-        if (error) { throw error; }
-        interpreter.evaluate(parsedProgram, function (error, value) {
-            if (error) { throw error; }
-
-            if (value === null) {
-                value = 'null';
-            }
-
-            process.stdout.write(value.toString());
-            process.stdout.write('\n');
-        });
+    reuse.evaluate(program, function (value) {
+        process.stdout.write(value.toString());
+        process.stdout.write('\n');
     });
 });

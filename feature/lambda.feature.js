@@ -17,48 +17,55 @@ var reuse = require('../lib/reuse.js');
 describe('Lambda', function () {
     describe('Evaluation', function () {
         it('should evaluate ((lambda () ())) to []', function (done) {
-            reuse.evaluate('((lambda () ()))', function (value) {
+            reuse.evaluate('((lambda () ()))', function (error, value) {
                 value.should.be.Array;
                 value.length.should.equal(0);
                 return done();
             });
         });
 
-        it('should evaluate ((lambda () 42)) to 42', function (done) {
-            reuse.evaluate('((lambda () 42))', function (value) {
-                value.should.equal(42);
+        it('should evaluate ((lambda () 1)) to 1', function (done) {
+            reuse.evaluate('((lambda () 1))', function (error, value) {
+                value.should.equal(1);
+                return done();
+            });
+        });
+
+        it('should evaluate (((lambda (f) f) (lambda () 2))) to 2', function (done) {
+            reuse.evaluate('(((lambda (f) f) (lambda () 2)))', function (error, value) {
+                value.should.equal(2);
                 return done();
             });
         });
     });
     
     describe('Variable Binding', function () {
-        it('should evaluate ((lambda (x) x) 33) to 33', function (done) {
-            reuse.evaluate('((lambda (x) x) 33)', function (value) {
-                value.should.equal(33);
+        it('should evaluate ((lambda (x) x) 3) to 3', function (done) {
+            reuse.evaluate('((lambda (x) x) 3)', function (error, value) {
+                value.should.equal(3);
                 return done();
             });
         });
 
-        it('should evaluate ((lambda (x y) x) 22 33) to 22', function (done) {
-            reuse.evaluate('((lambda (x y) x) 22 33)', function (value) {
-                value.should.equal(22);
+        it('should evaluate ((lambda (x y) x) 4 5) to 4', function (done) {
+            reuse.evaluate('((lambda (x y) x) 4 5)', function (error, value) {
+                value.should.equal(4);
                 return done();
             });
         });
 
-        it('should evaluate ((lambda (x y) y) 22 33) to 33', function (done) {
-            reuse.evaluate('((lambda (x y) y) 22 33)', function (value) {
-                value.should.equal(33);
+        it('should evaluate ((lambda (x y) y) 6 7) to 7', function (done) {
+            reuse.evaluate('((lambda (x y) y) 6 7)', function (error, value) {
+                value.should.equal(7);
                 return done();
             });
         });
     });
-    
+
     describe('Nested Declarations', function () {
-        it('should evaluate (((lambda (x) (lambda (y) y)) 33) 22) to 22', function (done) {
-            reuse.evaluate('(((lambda (x) (lambda (y) y)) 33) 22)', function (value) {
-                value.should.equal(22);
+        it('should evaluate (((lambda (x) (lambda (y) y)) 8) 9) to 9', function (done) {
+            reuse.evaluate('(((lambda (x) (lambda (y) y)) 8) 9)', function (error, value) {
+                value.should.equal(9);
                 return done();
             });
         });

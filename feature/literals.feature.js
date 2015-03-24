@@ -14,17 +14,17 @@
 var should = require('should');
 var reuse = require('../lib/reuse.js');
 
-describe('Basic Types', function () {
+describe('Literals', function () {
     describe('int32', function () {
         it('should evaluate to itself', function (done) {
-            reuse.evaluate('3', function (value) {
+            reuse.evaluate('3', function (error, value) {
                 value.should.equal(3);
                 return done();
             });
         });
 
         it('should include negative numbers', function (done) {
-            reuse.evaluate('-42', function (value) {
+            reuse.evaluate('-42', function (error, value) {
                 value.should.equal(-42);
                 return done();
             });
@@ -33,7 +33,7 @@ describe('Basic Types', function () {
 
     describe('list', function () {
         it('should evaluate () to []', function (done) {
-            reuse.evaluate('()', function (value) {
+            reuse.evaluate('()', function (error, value) {
                 value.should.be.Array;
                 value.length.should.equal(0);
                 return done();
