@@ -16,6 +16,19 @@ var reuse = require('../lib/reuse.js');
 
 describe('Type Inferring', function () {
     describe('Literals', function () {
-        
+        it('should generated type int32 given 42', function () {
+            var ast = reuse.generateTypedAst('42');
+            ast.type.should.equal('int32');
+        });
+
+        it('should generated type int32 given -34', function () {
+            var ast = reuse.generateTypedAst('-34');
+            ast.type.should.equal('int32');
+        });
+
+        it('should generated type () given ()', function () {
+            var ast = reuse.generateTypedAst('()');
+            ast.type.should.equal('()');
+        });
     });
 });

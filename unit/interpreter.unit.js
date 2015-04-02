@@ -18,7 +18,7 @@ describe('interpreter', function () {
     describe('evaluate', function () {
         it('should evaluate 3 to 3', function () {
             var parsedProgram = {kind: 'atom', value: '3'};
-            
+
             var result = interpreter.evaluate(parsedProgram);
             result.value.should.equal(3);
         });
