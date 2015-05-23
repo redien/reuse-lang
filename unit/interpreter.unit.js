@@ -13,25 +13,26 @@
 
 var should = require('should');
 var interpreter = require('../lib/interpreter');
+var ast = require('../lib/ast-builder');
 
 describe('interpreter', function () {
     describe('evaluate', function () {
         it('should evaluate 3 to 3', function () {
-            var parsedProgram = {kind: 'atom', value: '3'};
+            var parsedProgram = ast('3');
 
             var result = interpreter.evaluate(parsedProgram);
             result.value.should.equal(3);
         });
 
         it('should evaluate -5 to -5', function () {
-            var parsedProgram = {kind: 'atom', value: '-5'};
+            var parsedProgram = ast('-5');
 
             var result = interpreter.evaluate(parsedProgram);
             result.value.should.equal(-5);
         });
 
         it('should evaluate () to []', function () {
-            var parsedProgram = {kind: 'list', elements: []};
+            var parsedProgram = ast([]);
 
             var result = interpreter.evaluate(parsedProgram);
             result.value.should.be.Array;
@@ -39,12 +40,7 @@ describe('interpreter', function () {
         });
 
         it('should evaluate (list 1 ()) to [1, []]', function () {
-            var parsedProgram =
-                {kind: 'list', elements: [
-                    {kind: 'atom', value: 'list'},
-                    {kind: 'atom', value: '1'},
-                    {kind: 'list', elements: []}
-                ]};
+            var parsedProgram = ast(['list', '1', []]);
 
             var result = interpreter.evaluate(parsedProgram);
             result.value.should.be.Array;
@@ -55,16 +51,7 @@ describe('interpreter', function () {
         });
 
         it('should evaluate (list 2 (list 3 ())) to [2, [3, []]]', function () {
-            var parsedProgram =
-                {kind: 'list', elements: [
-                    {kind: 'atom', value: 'list'},
-                    {kind: 'atom', value: '2'},
-                    {kind: 'list', elements: [
-                        {kind: 'atom', value: 'list'},
-                        {kind: 'atom', value: '3'},
-                        {kind: 'list', elements: []}
-                    ]}
-                ]};
+            var parsedProgram = ast(['list', '2', ['list', '3', []]]);
 
             var result = interpreter.evaluate(parsedProgram);
             result.value.should.be.Array;
@@ -78,11 +65,7 @@ describe('interpreter', function () {
         });
 
         it('should evaluate (head ()) []', function () {
-            var parsedProgram =
-                {kind: 'list', elements: [
-                    {kind: 'atom', value: 'head'},
-                    {kind: 'list', elements: []}
-                ]};
+            var parsedProgram = ast(['head', []]);
 
             var result = interpreter.evaluate(parsedProgram);
             result.value.should.be.Array;
@@ -90,28 +73,14 @@ describe('interpreter', function () {
         });
 
         it('should evaluate ((lambda () 1)) to 1', function () {
-            var parsedProgram =
-                {kind: 'list', elements: [
-                    {kind: 'list', elements: [
-                        {kind: 'atom', value: 'lambda'},
-                        {kind: 'list', elements: []},
-                        {kind: 'atom', value: '1'}
-                    ]}
-                ]};
+            var parsedProgram = ast([['lambda', [], '1']]);
 
             var result = interpreter.evaluate(parsedProgram);
             result.value.should.equal(1);
         });
 
         it('should evaluate ((lambda () ())) to []', function () {
-            var parsedProgram =
-                {kind: 'list', elements: [
-                    {kind: 'list', elements: [
-                        {kind: 'atom', value: 'lambda'},
-                        {kind: 'list', elements: []},
-                        {kind: 'list', elements: []}
-                    ]}
-                ]};
+            var parsedProgram = ast([['lambda', [], []]]);
 
             var result = interpreter.evaluate(parsedProgram);
             result.value.should.be.Array;
@@ -119,34 +88,14 @@ describe('interpreter', function () {
         });
 
         it('should evaluate ((lambda (x) x) 42) to 42', function () {
-            var parsedProgram =
-                {kind: 'list', elements: [
-                    {kind: 'list', elements: [
-                        {kind: 'atom', value: 'lambda'},
-                        {kind: 'list', elements: [
-                            {kind: 'atom', value: 'x'}
-                        ]},
-                        {kind: 'atom', value: 'x'}
-                    ]},
-                    {kind: 'atom', value: '42'}
-                ]};
+            var parsedProgram = ast([['lambda', ['x'], 'x'], '42']);
 
             var result = interpreter.evaluate(parsedProgram);
             result.value.should.equal(42);
         });
 
         it('should evaluate ((lambda (x) x) ()) to []', function () {
-            var parsedProgram =
-                {kind: 'list', elements: [
-                    {kind: 'list', elements: [
-                        {kind: 'atom', value: 'lambda'},
-                        {kind: 'list', elements: [
-                            {kind: 'atom', value: 'x'}
-                        ]},
-                        {kind: 'atom', value: 'x'}
-                    ]},
-                    {kind: 'list', elements: []}
-                ]};
+            var parsedProgram = ast([['lambda', ['x'], 'x'], []]);
 
             var result = interpreter.evaluate(parsedProgram);
             result.value.should.be.Array;
@@ -154,38 +103,14 @@ describe('interpreter', function () {
         });
 
         it('should evaluate ((lambda (x y) y) () 2) to 2', function () {
-            var parsedProgram =
-                {kind: 'list', elements: [
-                    {kind: 'list', elements: [
-                        {kind: 'atom', value: 'lambda'},
-                        {kind: 'list', elements: [
-                            {kind: 'atom', value: 'x'},
-                            {kind: 'atom', value: 'y'}
-                        ]},
-                        {kind: 'atom', value: 'y'}
-                    ]},
-                    {kind: 'list', elements: []},
-                    {kind: 'atom', value: '2'}
-                ]};
+            var parsedProgram = ast([['lambda', ['x', 'y'], 'y'], [], '2']);
 
             var result = interpreter.evaluate(parsedProgram);
             result.value.should.equal(2);
         });
 
         it('should evaluate ((lambda (x y) x) () 2) to []', function () {
-            var parsedProgram =
-                {kind: 'list', elements: [
-                    {kind: 'list', elements: [
-                        {kind: 'atom', value: 'lambda'},
-                        {kind: 'list', elements: [
-                            {kind: 'atom', value: 'x'},
-                            {kind: 'atom', value: 'y'}
-                        ]},
-                        {kind: 'atom', value: 'x'}
-                    ]},
-                    {kind: 'list', elements: []},
-                    {kind: 'atom', value: '2'}
-                ]};
+            var parsedProgram = ast([['lambda', ['x', 'y'], 'x'], [], '2']);
 
             var result = interpreter.evaluate(parsedProgram);
             result.value.should.be.Array;
@@ -193,75 +118,21 @@ describe('interpreter', function () {
         });
 
         it('should evaluate (((lambda (x) (lambda () x)) 7)) to 7', function () {
-            var parsedProgram =
-                {kind: 'list', elements: [
-                    {kind: 'list', elements: [
-                        {kind: 'list', elements: [
-                            {kind: 'atom', value: 'lambda'},
-                            {kind: 'list', elements: [
-                                {kind: 'atom', value: 'x'}
-                            ]},
-                            {kind: 'list', elements: [
-                                {kind: 'atom', value: 'lambda'},
-                                {kind: 'list', elements: []},
-                                {kind: 'atom', value: 'x'}
-                            ]}
-                        ]},
-                        {kind: 'atom', value: '7'}
-                    ]}
-                ]};
+            var parsedProgram = ast([[['lambda', ['x'], ['lambda', [], 'x']], '7']]);
 
             var result = interpreter.evaluate(parsedProgram);
             result.value.should.equal(7);
         });
 
         it('should evaluate (((lambda (x) x) (lambda (x) x)) 7) to 7', function () {
-            var parsedProgram =
-                {kind: 'list', elements: [
-                    {kind: 'list', elements: [
-                        {kind: 'list', elements: [
-                            {kind: 'atom', value: 'lambda'},
-                            {kind: 'list', elements: [
-                                {kind: 'atom', value: 'x'}
-                            ]},
-                            {kind: 'atom', value: 'x'}
-                        ]},
-                        {kind: 'list', elements: [
-                            {kind: 'atom', value: 'lambda'},
-                            {kind: 'list', elements: [
-                                {kind: 'atom', value: 'x'}
-                            ]},
-                            {kind: 'atom', value: 'x'}
-                        ]}
-                    ]},
-                    {kind: 'atom', value: '7'}
-                ]};
+            var parsedProgram = ast([[['lambda', ['x'], 'x'], ['lambda', ['x'], 'x']], '7']);
 
             var result = interpreter.evaluate(parsedProgram);
             result.value.should.equal(7);
         });
 
         it('should evaluate ((lambda (x) (x 42)) (lambda (x) x)) to 42', function () {
-            var parsedProgram =
-                {kind: 'list', elements: [
-                    {kind: 'list', elements: [
-                        {kind: 'atom', value: 'lambda'},
-                        {kind: 'list', elements: [
-                            {kind: 'atom', value: 'x'}
-                        ]},
-                        {kind: 'list', elements: [
-                            {kind: 'atom', value: 'x'},
-                            {kind: 'atom', value: '42'}
-                        ]}
-                    ]},
-                    {kind: 'list', elements: [
-                        {kind: 'atom', value: 'lambda'},
-                        {kind: 'list', elements: [
-                            {kind: 'atom', value: 'x'}
-                        ]},
-                        {kind: 'atom', value: 'x'},
-                    ]},
-                ]};
+            var parsedProgram = ast([['lambda', ['x'], ['x', '42']], ['lambda', ['x'], 'x']]);
 
             var result = interpreter.evaluate(parsedProgram);
             result.value.should.equal(42);
