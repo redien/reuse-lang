@@ -1,6 +1,6 @@
 
 # reuse-lang - a pure functional lisp-like language for writing
-# reusable business-logic in an extremely portable way.
+# reusable algorithms in an extremely portable way.
 #
 # Written in 2015 by Jesper Oskarsson jesosk@gmail.com
 #

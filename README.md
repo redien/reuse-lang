@@ -1,7 +1,7 @@
 # reuse-lang
 ![version](http://img.shields.io/badge/version-0.1.0-blue.svg) [![Public Domain](http://img.shields.io/badge/public%20domain%3F-yes-blue.svg)](http://creativecommons.org/publicdomain/zero/1.0/) [![SemVer](http://img.shields.io/badge/SemVer-2.0.0-blue.svg)](http://semver.org/spec/v2.0.0.html) ![development stage](http://img.shields.io/badge/development%20stage-alpha-orange.svg)
 
-reuse-lang is a pure functional Lisp-like language for writing reusable business-logic in an extremely portable way.
+reuse-lang is a pure functional Lisp-like language for writing reusable algorithms in an extremely portable way.
 
 ## Design rationale
 
@@ -61,7 +61,7 @@ This will generate a file named `coverage.html` in the project root directory wh
 
 ## Copy
 
-reuse-lang - a pure functional lisp-like language for writing reusable business-logic in an extremely portable way.
+reuse-lang - a pure functional lisp-like language for writing reusable algorithms in an extremely portable way.
 
 Written in 2015 by Jesper Oskarsson jesosk@gmail.com
 
