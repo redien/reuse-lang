@@ -150,6 +150,17 @@ describe('alphaConverter', function () {
         convertedAst.elements[1].elements[2].value.should.equal('x2');
     });
 
+    it('should given no defined variables and (lambda (X) (lambda (X) X)) return (lambda (X) (lambda (X2) X2))', function () {
+        var convertedAst = alphaConverter.renameShadowingSymbols(
+            ast(['lambda', ['x'], ['lambda', ['x'], 'x']]),
+            []
+        );
+
+        convertedAst.elements[1].elements[0].value.should.equal('x');
+        convertedAst.elements[2].elements[1].elements[0].value.should.equal('x2');
+        convertedAst.elements[2].elements[2].value.should.equal('x2');
+    });
+
     it('should given (()) return (())', function () {
         var convertedAst = alphaConverter.renameShadowingSymbols(
             ast([[]]),
