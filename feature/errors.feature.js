@@ -15,24 +15,12 @@ var should = require('should');
 var reuse = require('../lib/reuse.js');
 
 describe('Errors', function () {
-    it('should return parsing errors', function (done) {
-        var testPrograms = [
-            '(',
-            '(()',
-            '(()))'
-        ];
+    it('should given too many opening parentheses return an unbalanced-parentheses error', function (done) {
+        reuse.evaluate('(()', function (error, value) {
+            should(error).not.be.null;
 
-        var successes = 0;
-        testPrograms.forEach(function (program) {
-            reuse.evaluate(program, function (error, value) {
-                should(error).not.be.null;
-                error.message.should.equal('unbalanced-parentheses');
-
-                successes += 1;
-            });
+            error.message.should.equal('unbalanced-parentheses');
+            done();
         });
-
-        successes.should.equal(testPrograms.length);
-        return done();
     });
 });
