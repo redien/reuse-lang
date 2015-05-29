@@ -78,6 +78,11 @@ describe('parser', function () {
             should(result.error).not.be.null;
         });
 
+        it('should not allow (\'s in atoms', function () {
+            var result = parser.parse('(abc()');
+            should(result.error).not.be.null;
+        });
+
         it('should parse (atom)', function () {
             var result = parser.parse('(atom)');
             result.asts[0].elements[0].kind.should.equal('atom');
