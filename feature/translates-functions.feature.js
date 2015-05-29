@@ -12,15 +12,11 @@
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 var should = require('should');
-var reuse = require('../lib/reuse.js');
+var reuse = require('../lib/reuse');
 
-describe('Errors', function () {
-    it('should given too many opening parentheses return an unbalanced-parentheses error', function (done) {
-        reuse.evaluate('(()', function (error, value) {
-            should(error).not.be.null;
-
-            error.message.should.equal('unbalanced-parentheses');
-            done();
-        });
+describe('Translates functions', function () {
+    it('should translate (lambda (x) x) to "function (x) { return x; }"', function () {
+        var result = reuse.translate('(lambda (x) x)');
+        result.value.should.equal('function (x) { return x; }');
     });
 });

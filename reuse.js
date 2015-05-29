@@ -23,10 +23,9 @@ process.stdin.on('readable', function () {
     }
 });
 process.stdin.on('end', function () {
-    reuse.evaluate(program, function (error, value) {
-        if (error) { throw error; }
+    var result = reuse.translate(program);
+    if (result.error) { throw result.error; }
 
-        process.stdout.write(value.toString());
-        process.stdout.write('\n');
-    });
+    process.stdout.write(result.value.toString());
+    process.stdout.write('\n');
 });
