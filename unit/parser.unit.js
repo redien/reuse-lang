@@ -91,7 +91,7 @@ describe('parser', function () {
             result.value.elements[1].elements[0].kind.should.equal('atom');
             result.value.elements[2].kind.should.equal('atom');
         });
-        
+
         it('should handle arbitrary number of spaces', function () {
             var result = parser.parse('  (  atom ( atom) atom  )');
             result.value.elements[0].kind.should.equal('atom');
@@ -99,7 +99,7 @@ describe('parser', function () {
             result.value.elements[1].elements[0].kind.should.equal('atom');
             result.value.elements[2].kind.should.equal('atom');
         });
-        
+
         it('should treat new-lines and tabs as spaces', function () {
             var result = parser.parse('\t(\n\natom \n \r \n\r)');
             result.value.kind.should.equal('list');
