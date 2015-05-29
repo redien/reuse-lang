@@ -22,19 +22,19 @@ var ast_should_be_empty_list = function (ast) {
 
 describe('parser', function () {
     describe('parse', function () {
-        it('should parse an empty string to an empty array', function () {
+        it('should return no asts given an empty string', function () {
             var result = parser.parse('');
             result.asts.should.be.Array;
             result.asts.length.should.equal(0);
         });
 
-        it('should parse a program consisting of only whitespace to []', function () {
+        it('should return no asts given a program consisting of only whitespace', function () {
             var result = parser.parse('   \n\t   \r ');
             result.asts.should.be.Array;
             result.asts.length.should.equal(0);
         });
 
-        it('should parse an empty list to {kind: "list", elements: []}', function () {
+        it('should parse () to {kind: "list", elements: []}', function () {
             var result = parser.parse('()');
             ast_should_be_empty_list(result.asts[0]);
         });
@@ -43,6 +43,13 @@ describe('parser', function () {
             var result = parser.parse('something');
             result.asts[0].kind.should.equal('atom');
             result.asts[0].value.should.equal('something');
+        });
+
+        it('should parse atoms with any name', function () {
+            var program = 'nameofsomeatom';
+            var result = parser.parse(program);
+            result.asts[0].kind.should.equal('atom');
+            result.asts[0].value.should.equal(program);
         });
 
         it('should parse a program of several asts and return them', function () {
@@ -71,37 +78,30 @@ describe('parser', function () {
             should(result.error).not.be.null;
         });
 
-        it('should parse an atom in a list into the list\'s elements array', function () {
+        it('should parse (atom)', function () {
             var result = parser.parse('(atom)');
             result.asts[0].elements[0].kind.should.equal('atom');
         });
 
-        it('should parse a list in a list into the first list\'s elements array', function () {
+        it('should parse (())', function () {
             var result = parser.parse('(())');
             result.asts[0].elements[0].kind.should.equal('list');
         });
 
-        it('should parse an atom nested in two lists', function () {
+        it('should parse ((atom))', function () {
             var result = parser.parse('((atom))');
             result.asts[0].kind.should.equal('list');
             result.asts[0].elements[0].kind.should.equal('list');
             result.asts[0].elements[0].elements[0].kind.should.equal('atom');
         });
 
-        it('should parse atoms with any name', function () {
-            var program = 'nameofsomeatom';
-            var result = parser.parse(program);
-            result.asts[0].kind.should.equal('atom');
-            result.asts[0].value.should.equal(program);
-        });
-
-        it('should parse several atoms in a list', function () {
+        it('should parse (atom atom)', function () {
             var result = parser.parse('(atom atom)');
             result.asts[0].elements[0].kind.should.equal('atom');
             result.asts[0].elements[1].kind.should.equal('atom');
         });
 
-        it('should parse mixed lists and atoms in a list', function () {
+        it('should parse (atom (atom) atom)', function () {
             var result = parser.parse('(atom (atom) atom)');
             result.asts[0].elements[0].kind.should.equal('atom');
             result.asts[0].elements[1].kind.should.equal('list');
