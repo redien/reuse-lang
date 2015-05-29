@@ -16,14 +16,25 @@ var alphaConverter = require('../lib/alpha-converter');
 var ast = require('../lib/ast-builder');
 
 describe('alphaConverter', function () {
-    it('should return an identical AST when no conversion is necessary', function () {
+    it('should return an identical AST when no transformation is necessary', function () {
         alphaConverter.renameShadowingSymbols(
             ast(['lambda', ['y'], 'y']),
             ['x']
         ).should.match(ast(['lambda', ['y'], 'y']));
     });
 
-    it('should not rename an atom Y if it shadows an already defined symbol', function () {
+    it('should not modify the original AST', function () {
+        var originalAst = ast(['lambda', ['y'], 'y']);
+        var convertedAst = alphaConverter.renameShadowingSymbols(
+            originalAst,
+            ['y']
+        );
+
+        originalAst.elements[1].elements[0].value.should.equal('y');
+        originalAst.elements[2].value.should.equal('y');
+    });
+
+    it('should apply transformation x [x] -> x', function () {
         var convertedAst = alphaConverter.renameShadowingSymbols(
             ast('x'),
             ['x']
@@ -31,7 +42,7 @@ describe('alphaConverter', function () {
         convertedAst.value.should.equal('x');
     });
 
-    it('should given (lambda (X) X) for any symbol X, rename X if it shadows an already defined symbol', function () {
+    it('should apply transformation (lambda (X) X) [X] -> (lambda (Y) Y)', function () {
         var convertedAst = alphaConverter.renameShadowingSymbols(
             ast(['lambda', ['y'], 'y']),
             ['y']
@@ -47,17 +58,7 @@ describe('alphaConverter', function () {
         convertedAst.elements[2].value.should.not.equal('x');
     });
 
-    it('should given (lambda (Y X) X) for any symbol X, rename X if it shadows an already defined symbol', function () {
-        var convertedAst = alphaConverter.renameShadowingSymbols(
-            ast(['lambda', ['x', 'y'], 'y']),
-            ['y']
-        );
-        convertedAst.elements[1].elements[0].value.should.equal('x');
-        convertedAst.elements[1].elements[1].value.should.not.equal('y');
-        convertedAst.elements[2].value.should.not.equal('y');
-    });
-
-    it('should given (lambda (Y) Y) rename Y to Y2 for any symbol Y', function () {
+    it('should apply transformation (lambda (y) y) [y] -> (lambda (y2) y2)', function () {
         var convertedAst = alphaConverter.renameShadowingSymbols(
             ast(['lambda', ['x'], 'x']),
             ['x']
@@ -67,18 +68,7 @@ describe('alphaConverter', function () {
         convertedAst.elements[2].value.should.equal('x2');
     });
 
-    it('should given (lambda (Y) (lambda (Y) Y)) and a defined symbol Y return (lambda (Y2) (lambda (Y3) Y3))', function () {
-        var convertedAst = alphaConverter.renameShadowingSymbols(
-            ast(['lambda', ['x'], ['lambda', ['x'], 'x']]),
-            ['x']
-        );
-
-        convertedAst.elements[1].elements[0].value.should.equal('x2');
-        convertedAst.elements[2].elements[1].elements[0].value.should.equal('x3');
-        convertedAst.elements[2].elements[2].value.should.equal('x3');
-    });
-
-    it('should given (lambda (Y33) Y33)) and a defined symbol Y33 return (lambda (Y34) Y34))', function () {
+    it('should apply transformation (lambda (y33) y33)) [y33] -> (lambda (y34) y34))', function () {
         var convertedAst = alphaConverter.renameShadowingSymbols(
             ast(['lambda', ['x33'], 'x33']),
             ['x33']
@@ -88,19 +78,18 @@ describe('alphaConverter', function () {
         convertedAst.elements[2].value.should.equal('x34');
     });
 
-    it('should not modify the original AST', function () {
-        var originalAst = ast(['lambda', ['y'], 'y']);
+    it('should apply transformation (lambda (X) (lambda (X) X)) [] -> (lambda (X) (lambda (Y) Y))', function () {
         var convertedAst = alphaConverter.renameShadowingSymbols(
-            originalAst,
-            ['y']
+            ast(['lambda', ['x'], ['lambda', ['x'], 'x']]),
+            []
         );
 
-        originalAst.elements[1].elements[0].value.should.equal('y');
-        originalAst.elements[2].value.should.equal('y');
+        convertedAst.elements[1].elements[0].value.should.equal('x');
+        convertedAst.elements[2].elements[1].elements[0].value.should.equal('x2');
+        convertedAst.elements[2].elements[2].value.should.equal('x2');
     });
 
-
-    it('should given (lambda (X) (lambda (Y) Y)) rename Y if it shadows an already defined symbol', function () {
+    it('should apply transformation (lambda (X) (lambda (Y) Y)) [Y] -> (lambda (X) (lambda (Z) Z))', function () {
         var convertedAst = alphaConverter.renameShadowingSymbols(
             ast(['lambda', ['y'], ['lambda', ['x'], 'x']]),
             ['x']
@@ -120,8 +109,28 @@ describe('alphaConverter', function () {
         convertedAst.elements[2].elements[2].value.should.not.equal('y');
     });
 
+    it('should apply transformation (lambda (y) (lambda (y) y)) [y] -> (lambda (y2) (lambda (y3) y3))', function () {
+        var convertedAst = alphaConverter.renameShadowingSymbols(
+            ast(['lambda', ['x'], ['lambda', ['x'], 'x']]),
+            ['x']
+        );
 
-    it('should given (Y (lambda (X) X)) for any symbol X, rename X if it shadows an already defined symbol', function () {
+        convertedAst.elements[1].elements[0].value.should.equal('x2');
+        convertedAst.elements[2].elements[1].elements[0].value.should.equal('x3');
+        convertedAst.elements[2].elements[2].value.should.equal('x3');
+    });
+
+    it('should apply transformation (lambda (Y X) X) [X] -> (lambda (Y Z) Z)', function () {
+        var convertedAst = alphaConverter.renameShadowingSymbols(
+            ast(['lambda', ['x', 'y'], 'y']),
+            ['y']
+        );
+        convertedAst.elements[1].elements[0].value.should.equal('x');
+        convertedAst.elements[1].elements[1].value.should.not.equal('y');
+        convertedAst.elements[2].value.should.not.equal('y');
+    });
+
+    it('should apply transformation (Y (lambda (X) X)) [X] -> (Y (lambda (Z) Z))', function () {
         var convertedAst = alphaConverter.renameShadowingSymbols(
             ast(['x', ['lambda', ['y'], 'y']]),
             ['y']
@@ -131,16 +140,7 @@ describe('alphaConverter', function () {
         convertedAst.elements[1].elements[2].value.should.not.equal('y');
     });
 
-    it('should given (Y Z (lambda (X) X)) for any symbol X, rename X if it shadows an already defined symbol', function () {
-        var convertedAst = alphaConverter.renameShadowingSymbols(
-            ast(['x', 'z', ['lambda', ['y'], 'y']]),
-            ['y']
-        );
-        convertedAst.elements[2].elements[1].elements[0].value.should.not.equal('y');
-        convertedAst.elements[2].elements[2].value.should.not.equal('y');
-    });
-
-    it('should given defined variables [X1, X2] and (X1 (lambda (X1) X2)) return (X1 (lambda (X3) X2))', function () {
+    it('should apply transformation (X (lambda (X) Y)) [X Y] -> (X (lambda (Z) Y))', function () {
         var convertedAst = alphaConverter.renameShadowingSymbols(
             ast(['x1', ['lambda', ['x1'], 'x2']]),
             ['x1', 'x2']
@@ -150,21 +150,19 @@ describe('alphaConverter', function () {
         convertedAst.elements[1].elements[2].value.should.equal('x2');
     });
 
-    it('should given no defined variables and (lambda (X) (lambda (X) X)) return (lambda (X) (lambda (X2) X2))', function () {
+    it('should apply transformation (Y Z (lambda (X) X)) [X] -> (Y Z (lambda (A) A))', function () {
         var convertedAst = alphaConverter.renameShadowingSymbols(
-            ast(['lambda', ['x'], ['lambda', ['x'], 'x']]),
-            []
+            ast(['x', 'z', ['lambda', ['y'], 'y']]),
+            ['y']
         );
-
-        convertedAst.elements[1].elements[0].value.should.equal('x');
-        convertedAst.elements[2].elements[1].elements[0].value.should.equal('x2');
-        convertedAst.elements[2].elements[2].value.should.equal('x2');
+        convertedAst.elements[2].elements[1].elements[0].value.should.not.equal('y');
+        convertedAst.elements[2].elements[2].value.should.not.equal('y');
     });
 
-    it('should given (()) return (())', function () {
+    it('should apply transformation (()) [] -> (())', function () {
         var convertedAst = alphaConverter.renameShadowingSymbols(
             ast([[]]),
-            ['y']
+            []
         );
 
         convertedAst.elements.length.should.equal(1);
