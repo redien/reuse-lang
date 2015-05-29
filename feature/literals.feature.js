@@ -30,14 +30,4 @@ describe('Literals', function () {
             });
         });
     });
-
-    describe('list', function () {
-        it('should evaluate () to []', function (done) {
-            reuse.evaluate('()', function (error, value) {
-                value.should.be.Array;
-                value.length.should.equal(0);
-                return done();
-            });
-        });
-    });
 });
