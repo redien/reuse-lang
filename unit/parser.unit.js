@@ -21,6 +21,11 @@ describe('parser', function () {
             should(result.value).be.null;
         });
 
+        it('should parse a program consisting of only whitespace to null', function () {
+            var result = parser.parse('   \n\t   \r ');
+            should(result.value).be.null;
+        });
+
         it('should parse an empty list to {kind: "list", elements: []}', function () {
             var result = parser.parse('()');
             result.value.kind.should.equal('list');
