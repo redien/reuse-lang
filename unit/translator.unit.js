@@ -12,11 +12,15 @@
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 var should = require('should');
-var reuse = require('../lib/reuse');
+var translator = require('../lib/translator');
+var ast = require('../lib/ast-builder');
 
-describe('Translates functions', function () {
-    it('should translate (lambda (x) x) to "function (x) { return x; }"', function () {
-        var result = reuse.translate('(lambda (x) x)');
-        result.value.should.equal('function (x) { return x; }');
+describe('translator', function () {
+    describe('Translates lambdas', function () {
+        it('should translate (lambda (x) x) to "function (x) { return x; }"', function () {
+            var program = ast(['lambda', ['x'], 'x']);
+            var result = translator.translate(program);
+            result.value.should.equal('function (x) { return x; }');
+        });
     });
 });
