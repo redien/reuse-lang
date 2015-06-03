@@ -15,7 +15,7 @@ var should = require('should');
 var alphaConverter = require('../lib/alpha-converter');
 var ast = require('../lib/ast-builder');
 
-describe('alphaConverter', function () {
+describe('alpha-converter', function () {
     it('should return an identical AST when no transformation is necessary', function () {
         alphaConverter.renameShadowingSymbols(
             ast(['lambda', ['y'], 'y']),

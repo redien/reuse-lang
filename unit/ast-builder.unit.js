@@ -14,7 +14,7 @@
 var should = require('should');
 var ast = require('../lib/ast-builder.js');
 
-describe('astBuilder', function () {
+describe('ast-builder', function () {
     it('should return an atom given the string "abc"', function () {
         ast('abc').kind.should.equal('atom');
     });

@@ -21,111 +21,109 @@ var ast_should_be_empty_list = function (ast) {
 };
 
 describe('parser', function () {
-    describe('parse', function () {
-        it('should return no asts given an empty string', function () {
-            var result = parser.parse('');
-            result.asts.should.be.Array;
-            result.asts.length.should.equal(0);
-        });
+    it('should return no asts given an empty string', function () {
+        var result = parser.parse('');
+        result.asts.should.be.Array;
+        result.asts.length.should.equal(0);
+    });
 
-        it('should return no asts given a program consisting of only whitespace', function () {
-            var result = parser.parse('   \n\t   \r ');
-            result.asts.should.be.Array;
-            result.asts.length.should.equal(0);
-        });
+    it('should return no asts given a program consisting of only whitespace', function () {
+        var result = parser.parse('   \n\t   \r ');
+        result.asts.should.be.Array;
+        result.asts.length.should.equal(0);
+    });
 
-        it('should parse () to {kind: "list", elements: []}', function () {
-            var result = parser.parse('()');
-            ast_should_be_empty_list(result.asts[0]);
-        });
+    it('should parse () to {kind: "list", elements: []}', function () {
+        var result = parser.parse('()');
+        ast_should_be_empty_list(result.asts[0]);
+    });
 
-        it('should parse an atom named "something" to {kind: "atom", value: "something"}', function () {
-            var result = parser.parse('something');
-            result.asts[0].kind.should.equal('atom');
-            result.asts[0].value.should.equal('something');
-        });
+    it('should parse an atom named "something" to {kind: "atom", value: "something"}', function () {
+        var result = parser.parse('something');
+        result.asts[0].kind.should.equal('atom');
+        result.asts[0].value.should.equal('something');
+    });
 
-        it('should parse atoms with any name', function () {
-            var program = 'nameofsomeatom';
-            var result = parser.parse(program);
-            result.asts[0].kind.should.equal('atom');
-            result.asts[0].value.should.equal(program);
-        });
+    it('should parse atoms with any name', function () {
+        var program = 'nameofsomeatom';
+        var result = parser.parse(program);
+        result.asts[0].kind.should.equal('atom');
+        result.asts[0].value.should.equal(program);
+    });
 
-        it('should parse a program of several asts and return them', function () {
-            var result = parser.parse('(b c) a');
-            result.asts[0].kind.should.equal('list');
-            result.asts[1].kind.should.equal('atom');
-        });
+    it('should parse a program of several asts and return them', function () {
+        var result = parser.parse('(b c) a');
+        result.asts[0].kind.should.equal('list');
+        result.asts[1].kind.should.equal('atom');
+    });
 
-        it('should return an "unbalanced-parentheses" error given an opening brace without a closing one', function () {
-            var result = parser.parse('(');
-            should(result.error).not.be.null;
-            result.error.message.should.equal('unbalanced-parentheses');
-        });
+    it('should return an "unbalanced-parentheses" error given an opening brace without a closing one', function () {
+        var result = parser.parse('(');
+        should(result.error).not.be.null;
+        result.error.message.should.equal('unbalanced-parentheses');
+    });
 
-        it('should return an "unbalanced-parentheses" error given too few closing braces', function () {
-            var result = parser.parse('(()');
-            should(result.error).not.be.null;
-            result.error.message.should.equal('unbalanced-parentheses');
-        });
+    it('should return an "unbalanced-parentheses" error given too few closing braces', function () {
+        var result = parser.parse('(()');
+        should(result.error).not.be.null;
+        result.error.message.should.equal('unbalanced-parentheses');
+    });
 
-        it('should return an error given an unexpected closing brace', function () {
-            var result = parser.parse('((a) a))');
-            should(result.error).not.be.null;
+    it('should return an error given an unexpected closing brace', function () {
+        var result = parser.parse('((a) a))');
+        should(result.error).not.be.null;
 
-            result = parser.parse('2)');
-            should(result.error).not.be.null;
-        });
+        result = parser.parse('2)');
+        should(result.error).not.be.null;
+    });
 
-        it('should not allow (\'s in atoms', function () {
-            var result = parser.parse('(abc()');
-            should(result.error).not.be.null;
-        });
+    it('should not allow (\'s in atoms', function () {
+        var result = parser.parse('(abc()');
+        should(result.error).not.be.null;
+    });
 
-        it('should parse (atom)', function () {
-            var result = parser.parse('(atom)');
-            result.asts[0].elements[0].kind.should.equal('atom');
-        });
+    it('should parse (atom)', function () {
+        var result = parser.parse('(atom)');
+        result.asts[0].elements[0].kind.should.equal('atom');
+    });
 
-        it('should parse (())', function () {
-            var result = parser.parse('(())');
-            result.asts[0].elements[0].kind.should.equal('list');
-        });
+    it('should parse (())', function () {
+        var result = parser.parse('(())');
+        result.asts[0].elements[0].kind.should.equal('list');
+    });
 
-        it('should parse ((atom))', function () {
-            var result = parser.parse('((atom))');
-            result.asts[0].kind.should.equal('list');
-            result.asts[0].elements[0].kind.should.equal('list');
-            result.asts[0].elements[0].elements[0].kind.should.equal('atom');
-        });
+    it('should parse ((atom))', function () {
+        var result = parser.parse('((atom))');
+        result.asts[0].kind.should.equal('list');
+        result.asts[0].elements[0].kind.should.equal('list');
+        result.asts[0].elements[0].elements[0].kind.should.equal('atom');
+    });
 
-        it('should parse (atom atom)', function () {
-            var result = parser.parse('(atom atom)');
-            result.asts[0].elements[0].kind.should.equal('atom');
-            result.asts[0].elements[1].kind.should.equal('atom');
-        });
+    it('should parse (atom atom)', function () {
+        var result = parser.parse('(atom atom)');
+        result.asts[0].elements[0].kind.should.equal('atom');
+        result.asts[0].elements[1].kind.should.equal('atom');
+    });
 
-        it('should parse (atom (atom) atom)', function () {
-            var result = parser.parse('(atom (atom) atom)');
-            result.asts[0].elements[0].kind.should.equal('atom');
-            result.asts[0].elements[1].kind.should.equal('list');
-            result.asts[0].elements[1].elements[0].kind.should.equal('atom');
-            result.asts[0].elements[2].kind.should.equal('atom');
-        });
+    it('should parse (atom (atom) atom)', function () {
+        var result = parser.parse('(atom (atom) atom)');
+        result.asts[0].elements[0].kind.should.equal('atom');
+        result.asts[0].elements[1].kind.should.equal('list');
+        result.asts[0].elements[1].elements[0].kind.should.equal('atom');
+        result.asts[0].elements[2].kind.should.equal('atom');
+    });
 
-        it('should handle arbitrary number of spaces', function () {
-            var result = parser.parse('  (  atom ( atom) atom  )');
-            result.asts[0].elements[0].kind.should.equal('atom');
-            result.asts[0].elements[1].kind.should.equal('list');
-            result.asts[0].elements[1].elements[0].kind.should.equal('atom');
-            result.asts[0].elements[2].kind.should.equal('atom');
-        });
+    it('should handle arbitrary number of spaces', function () {
+        var result = parser.parse('  (  atom ( atom) atom  )');
+        result.asts[0].elements[0].kind.should.equal('atom');
+        result.asts[0].elements[1].kind.should.equal('list');
+        result.asts[0].elements[1].elements[0].kind.should.equal('atom');
+        result.asts[0].elements[2].kind.should.equal('atom');
+    });
 
-        it('should treat new-lines and tabs as spaces', function () {
-            var result = parser.parse('\t(\n\natom \n \r \n\r)');
-            result.asts[0].kind.should.equal('list');
-            result.asts[0].elements[0].kind.should.equal('atom');
-        });
+    it('should treat new-lines and tabs as spaces', function () {
+        var result = parser.parse('\t(\n\natom \n \r \n\r)');
+        result.asts[0].kind.should.equal('list');
+        result.asts[0].elements[0].kind.should.equal('atom');
     });
 });
