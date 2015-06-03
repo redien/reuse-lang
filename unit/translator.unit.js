@@ -14,13 +14,34 @@
 var should = require('should');
 var translator = require('../lib/translator');
 var ast = require('../lib/ast-builder');
+var serialize = require('../lib/ast-serializer');
+
+var it_should_translate_from_to = function(from, to) {
+    it('should translate ' + serialize(from) + ' to ' + to, function () {
+        checkTranslation(from, to);
+    });
+};
+
+var checkTranslation = function (from, to) {
+    var result = translator.translate(from);
+    result.value.should.equal(to);
+};
 
 describe('translator', function () {
     describe('Translates lambdas', function () {
-        it('should translate (lambda (x) x) to "function (x) { return x; }"', function () {
-            var program = ast(['lambda', ['x'], 'x']);
-            var result = translator.translate(program);
-            result.value.should.equal('function (x) { return x; }');
-        });
+        it_should_translate_from_to(
+            ast(['export', 'identity', ['lambda', ['x'], 'x']]),
+            'module.exports.identity = function (x) { return x; }'
+        );
+
+        it_should_translate_from_to(
+            ast(['export', 'identity', ['lambda', ['y'], 'y']]),
+            'module.exports.identity = function (y) { return y; }'
+        );
+
+        it_should_translate_from_to(
+            ast(['export', 'otherName', ['lambda', ['x'], 'x']]),
+            'module.exports.otherName = function (x) { return x; }'
+        );
     });
 });
