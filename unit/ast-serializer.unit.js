@@ -12,7 +12,7 @@
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 var should = require('should');
-var serialize = require('../lib/ast-serializer.js');
+var serialize = require('../lib/ast-serializer');
 var ast = require('../lib/ast-builder');
 
 describe('ast-serializer', function () {

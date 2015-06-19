@@ -12,7 +12,7 @@
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 var should = require('should');
-var ast = require('../lib/ast-builder.js');
+var ast = require('../lib/ast-builder');
 
 describe('ast-builder', function () {
     it('should return an atom given the string "abc"', function () {
