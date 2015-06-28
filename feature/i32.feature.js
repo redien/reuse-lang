@@ -21,4 +21,12 @@ describe('i32', function () {
             '(export randomInteger (lambda () 42))'
         );
     });
+
+    describe('i32-add', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'module.randomInteger()',
+            42,
+            '(export randomInteger (lambda () (i32_add 40 2)))'
+        );
+    });
 });
