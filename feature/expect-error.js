@@ -2,18 +2,20 @@
 var should = require('should');
 var nodeTester = require('./node-tester');
 
-var it_should_return_error_given_program = function (error, program) {
-    it('should throw error ' + error + ' given ' + program, function () {
+var it_should_return_error_given_program = function (expectedError, line, column, program) {
+    it('should throw error ' + expectedError + ' at line ' + line + ' column ' + column + ' given ' + program, function () {
         var threw = false;
         try {
             nodeTester.evaluateExpressionWithProgram(undefined, program);
-        } catch (exception) {
-            exception.message.should.equal(error);
+        } catch (error) {
+            error.message.should.equal(expectedError);
+            error.line.should.equal(line);
+            error.column.should.equal(column);
             threw = true;
         }
 
         if (!threw) {
-            throw new Error("Expected to return error " + error);
+            throw new Error("Expected to return error " + expectedError);
         }
     });
 };

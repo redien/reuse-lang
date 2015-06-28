@@ -43,4 +43,26 @@ describe('i32-constructor', function () {
         var result = i32Constructor(ast('f23b'));
         should(result.isConstant).not.equal(true);
     });
+
+    it('should throw error "i32_constant_too_large" given 2147483648', function () {
+        var error;
+        try {
+            var result = i32Constructor(ast('2147483648'));
+        } catch (e) {
+            error = e;
+        }
+
+        error.message.should.equal('i32_constant_too_large');
+    });
+
+    it('should throw error "i32_constant_too_small" given -2147483649', function () {
+        var error;
+        try {
+            var result = i32Constructor(ast('-2147483649'));
+        } catch (e) {
+            error = e;
+        }
+
+        error.message.should.equal('i32_constant_too_small');
+    });
 });

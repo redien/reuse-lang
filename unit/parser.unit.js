@@ -126,4 +126,14 @@ describe('parser', function () {
         result.asts[0].kind.should.equal('list');
         result.asts[0].elements[0].kind.should.equal('atom');
     });
+
+    it('should assign line information to atoms', function () {
+        var result = parser.parse('\n\n(atom)\n');
+        result.asts[0].elements[0].line.should.equal(3);
+    });
+
+    it('should assign column information to atoms', function () {
+        var result = parser.parse('\n(atom)\n');
+        result.asts[0].elements[0].column.should.equal(2);
+    });
 });

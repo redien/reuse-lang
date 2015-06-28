@@ -36,11 +36,13 @@ describe('i32', function () {
 
         it_should_return_error_given_program(
             'i32_constant_too_large',
+            1, 29,
             '(export tooLarge (lambda () 2147483648))'
         );
 
         it_should_return_error_given_program(
             'i32_constant_too_small',
+            1, 29,
             '(export tooSmall (lambda () -2147483649))'
         );
     });
