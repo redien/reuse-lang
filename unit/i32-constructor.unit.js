@@ -13,34 +13,34 @@
 
 var should = require('should');
 var ast = require('../lib/ast-builder');
-var int32Constructor = require('../lib/int32-constructor');
+var i32Constructor = require('../lib/i32-constructor');
 
-describe('int32-constructor', function () {
-    it('should give an atom 32 type int32', function () {
-        var result = int32Constructor(ast('32'));
+describe('i32-constructor', function () {
+    it('should give an atom 32 type i32', function () {
+        var result = i32Constructor(ast('32'));
         result.isConstant.should.equal(true);
-        result.type.value.should.equal('int32');
+        result.type.value.should.equal('i32');
     });
 
-    it('should give an atom -0 type int32', function () {
-        var result = int32Constructor(ast('-0'));
+    it('should give an atom -0 type i32', function () {
+        var result = i32Constructor(ast('-0'));
         result.isConstant.should.equal(true);
-        result.type.value.should.equal('int32');
+        result.type.value.should.equal('i32');
         result.value.should.equal('-0');
     });
 
-    it('should not give an atom 0a type int32', function () {
-        var result = int32Constructor(ast('0a'));
+    it('should not give an atom 0a type i32', function () {
+        var result = i32Constructor(ast('0a'));
         should(result.isConstant).not.equal(true);
     });
 
-    it('should not give an atom foo9 type int32', function () {
-        var result = int32Constructor(ast('foo9'));
+    it('should not give an atom foo9 type i32', function () {
+        var result = i32Constructor(ast('foo9'));
         should(result.isConstant).not.equal(true);
     });
 
-    it('should not give an atom f23b type int32', function () {
-        var result = int32Constructor(ast('f23b'));
+    it('should not give an atom f23b type i32', function () {
+        var result = i32Constructor(ast('f23b'));
         should(result.isConstant).not.equal(true);
     });
 });

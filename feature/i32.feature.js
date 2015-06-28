@@ -13,7 +13,7 @@
 
 var it_should_evaluate_expression_to_value_given_program = require('./node-tester.js');
 
-describe('int32', function () {
+describe('i32', function () {
     describe('Constants', function () {
         it_should_evaluate_expression_to_value_given_program(
             'module.randomInteger()',

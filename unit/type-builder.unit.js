@@ -16,8 +16,8 @@ var type = require('../lib/type-builder');
 
 describe('type-builder', function () {
     it('should build a type constant from a string', function () {
-        var result = type('int32');
+        var result = type('i32');
         result.kind.should.equal('constant');
-        result.value.should.equal('int32');
+        result.value.should.equal('i32');
     });
 });

@@ -2,7 +2,7 @@
 /* Pure functional */
 
 // Primitive Types:
-//   Int32
+//   i32
 //   String
 //   (Lambda (a) b) = (lambda (a) b)
 //   (Tuple a b) = (tuple a b)
