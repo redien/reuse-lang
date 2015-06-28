@@ -13,10 +13,12 @@
 
 var it_should_evaluate_expression_to_value_given_program = require('./node-tester.js');
 
-describe('Lambdas', function () {
-    it_should_evaluate_expression_to_value_given_program(
-        'module.identity(3)',
-        3,
-        '(export identity (lambda (x) x))'
-    );
+describe('int32', function () {
+    describe('Constants', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'module.randomInteger()',
+            42,
+            '(export randomInteger (lambda () 42))'
+        );
+    });
 });

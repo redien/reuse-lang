@@ -42,4 +42,9 @@ describe('translator', function () {
         ast(['export', 'otherName', ['lambda', ['x'], 'x']]),
         'module.exports.otherName = function (x) { return x; }'
     );
+
+    it_should_translate_from_to(
+        ast(['export', 'f', ['lambda', [], '32']]),
+        'module.exports.f = function () { return 32; }'
+    );
 });
