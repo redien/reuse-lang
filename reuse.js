@@ -24,7 +24,13 @@ process.stdin.on('readable', function () {
 });
 process.stdin.on('end', function () {
     var result = reuse.translate(program);
-    if (result.error) { throw result.error; }
+    if (result.error) {
+        console.error('\n');
+        console.error('> Encountered error: ' + result.error.message);
+        console.error('>   at line ' + result.error.line + ' column ' + result.error.column);
+        console.error('');
+        return;
+    }
 
     process.stdout.write(result.value.toString());
     process.stdout.write('\n');
