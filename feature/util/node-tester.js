@@ -1,6 +1,6 @@
 
 var fs = require('fs');
-var reuse = require('../lib/reuse.js');
+var reuse = require(__dirname + '/../../lib/reuse.js');
 
 var generateTestModuleName = function () {
     // Make sure we don't get the cached module when we require.

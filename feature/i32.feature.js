@@ -11,8 +11,8 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-var it_should_evaluate_expression_to_value_given_program = require('./expect-value');
-var it_should_return_error_given_program = require('./expect-error');
+var it_should_evaluate_expression_to_value_given_program = require('./util/expect-value');
+var it_should_return_error_given_program = require('./util/expect-error');
 
 describe('i32', function () {
     describe('Constants', function () {
