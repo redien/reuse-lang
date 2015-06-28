@@ -20,6 +20,18 @@ describe('i32', function () {
             42,
             '(export randomInteger (lambda () 42))'
         );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.maxValue()',
+            2147483647,
+            '(export maxValue (lambda () 2147483647))'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.minValue()',
+            -2147483648,
+            '(export minValue (lambda () -2147483648))'
+        );
     });
 
     describe('i32-add', function () {
@@ -27,6 +39,18 @@ describe('i32', function () {
             'module.randomInteger()',
             42,
             '(export randomInteger (lambda () (i32_add 40 2)))'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.wrapAbove()',
+            -2147483648,
+            '(export wrapAbove (lambda () (i32_add 2147483647 1)))'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.wrapAbove()',
+            2147483647,
+            '(export wrapAbove (lambda () (i32_add -2147483648 -1)))'
         );
     });
 });
