@@ -11,7 +11,8 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-var it_should_evaluate_expression_to_value_given_program = require('./node-tester.js');
+var it_should_evaluate_expression_to_value_given_program = require('./expect-value');
+var it_should_return_error_given_program = require('./expect-error');
 
 describe('i32', function () {
     describe('Constants', function () {
@@ -32,9 +33,19 @@ describe('i32', function () {
             -2147483648,
             '(export minValue (lambda () -2147483648))'
         );
+
+        it_should_return_error_given_program(
+            'i32_constant_too_large',
+            '(export tooLarge (lambda () 2147483648))'
+        );
+
+        it_should_return_error_given_program(
+            'i32_constant_too_small',
+            '(export tooSmall (lambda () -2147483649))'
+        );
     });
 
-    describe('i32-add', function () {
+    describe('i32_add', function () {
         it_should_evaluate_expression_to_value_given_program(
             'module.randomInteger()',
             42,
@@ -48,9 +59,9 @@ describe('i32', function () {
         );
 
         it_should_evaluate_expression_to_value_given_program(
-            'module.wrapAbove()',
+            'module.wrapBelow()',
             2147483647,
-            '(export wrapAbove (lambda () (i32_add -2147483648 -1)))'
+            '(export wrapBelow (lambda () (i32_add -2147483648 -1)))'
         );
     });
 });

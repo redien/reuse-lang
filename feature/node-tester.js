@@ -1,26 +1,32 @@
 
 var fs = require('fs');
-var should = require('should');
 var reuse = require('../lib/reuse.js');
 
 var generateTestModuleName = function () {
     // Make sure we don't get the cached module when we require.
     return __dirname + '/test-module' + Math.random() + '.js';
 };
+module.exports.generateTestModuleName = generateTestModuleName;
 
-var it_should_evaluate_expression_to_value_given_program = function (expression, expected, program) {
-    it('should evaluate ' + expression + ' to ' + JSON.stringify(expected) + ' given ' + program, function () {
-        var testModuleName = generateTestModuleName();
-        fs.writeFileSync(testModuleName, reuse.translate(program).value);
+var evaluateExpressionWithProgram = function (expression, program) {
+    var testModuleName = generateTestModuleName();
+
+    var translation = reuse.translate(program);
+    if (translation.error) {
+        throw translation.error;
+    }
+
+    fs.writeFileSync(testModuleName, translation.value);
+
+    try {
         var module = require(testModuleName);
-        try {
-            eval(expression).should.equal(expected);
-            fs.unlinkSync(testModuleName);
-        } catch (exception) {
-            fs.unlinkSync(testModuleName);
-            throw exception;
-        }
-    });
-};
+        var result = eval(expression);
+        fs.unlinkSync(testModuleName);
+        return result;
 
-module.exports = it_should_evaluate_expression_to_value_given_program;
+    } catch (exception) {
+        fs.unlinkSync(testModuleName);
+        throw exception;
+    }
+};
+module.exports.evaluateExpressionWithProgram = evaluateExpressionWithProgram;
