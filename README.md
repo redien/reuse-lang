@@ -6,14 +6,15 @@ reuse-lang is a pure functional Lisp-like language for writing reusable algorith
 ## Design rationale
 
 The goal is for the language and compiler to have the following properties:
-- **Be easy to understand and make changes to.** (And thus have a tiny code base compared to other language implementations.)
-- **Be available on as many platforms as possible.** (By making it simple to add new target platforms and languages, in order to allow the reuse of the same algorithms everywhere.)
-- **Reduce the surface area for bugs.** (By removing complexities such as side-effects for the majority of code we use.)
+- **Be easy to understand and make changes to.** And thus have a tiny code base compared to other language implementations.
+- **Be available on as many platforms as possible.** By making it simple to add new target platforms and languages, in order to allow the reuse of the same algorithms everywhere.
+- **Reduce the surface area for bugs.** By removing complexities such as side-effects for the majority of code we use.
 - **Optimize for speed and memory usage only when it doesn't conflict with the above mentioned points.**
 
 The goal is **not** to do any of the following:
-- **Create a general-purpose language.** (The idea is to use the generated libraries in a host language and handle any side-effects etc. there.)
-- **Re-invent Haskell.** (Haskell does Haskell really well already.)
+- **Create a general-purpose language.** The idea is to use the generated libraries in a host language and handle any side-effects etc. there.
+- **Re-invent Haskell.** Haskell does Haskell really well already.
+- **Write Monte-Carlo simulations.** Optimizing for real-time, simulation-type algorithms is outside the scope and can be done much easier in other languages. (But why not reuse code for things other than the simulation itself?)
 
 ## Use
 ```
