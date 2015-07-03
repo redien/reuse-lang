@@ -13,9 +13,9 @@
 
 var fs = require('fs');
 var should = require('should');
-var translator = require('../lib/translator');
-var ast = require('../lib/ast-builder');
-var serialize = require('../lib/ast-serializer');
+var translator = require('../../lib/javascript-translator/translator');
+var ast = require('../../lib/ast-builder');
+var serialize = require('../../lib/ast-serializer');
 
 var it_should_translate_from_to = function(from, to) {
     it('should translate ' + serialize(from) + ' to ' + to, function () {
@@ -23,11 +23,11 @@ var it_should_translate_from_to = function(from, to) {
     });
 };
 
-var standardLibrary = fs.readFileSync(__dirname + '/../lib/standard-library.js').toString();
+var intrinsics = fs.readFileSync(__dirname + '/../../lib/javascript-translator/intrinsics.js').toString();
 
 var checkTranslation = function (from, to) {
     var result = translator.translate(from);
-    result.value.should.equal(standardLibrary + to);
+    result.value.should.equal(intrinsics + to);
 };
 
 describe('translator', function () {
