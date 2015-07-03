@@ -5,21 +5,15 @@ reuse-lang is a pure functional Lisp-like language for writing reusable algorith
 
 ## Design rationale
 
-**Q. Why a Lisp?**
+The goal is for the language and compiler to have the following properties:
+- **Be easy to understand and make changes to.** (And thus have a tiny code base compared to other language implementations.)
+- **Make it simple to add new target platforms and languages.** (To be available on as many platforms as possible, in order to allow the reuse of the same algorithms everywhere.)
+- **Reducing the surface area for bugs by reducing the complexity for the majority of code we use.** (Writing algorithms in a pure functional language reduces complexity by removing side-effects from the equation.)
+- **Optimize for speed and memory usage only when it doesn't conflict with the above mentioned points.**
 
-**A.** It makes for a small core language and thus makes the implementation of that language small.
-
-**Q. Why a pure functional language?**
-
-**A.** Having no side-effects should make it trivial to translate to other languages.
-
-**Q. But then how do I do ___?**
-
-**A.** You don't. Reuse is not a general-purpose language. It's meant for creating reuseable libraries that implement business logic. If you need side-effects, you will have to rely on the host language.
-
-**Q. How come it's implemented in Javascript?**
-
-**A.** Javascript is [quite portable](https://github.com/svaarala/duktape), has a big mind-share with lots of libraries and is probably not going anywhere anytime soon.
+The goal is **not** to do any of the following:
+- **Create a general-purpose language.** (The idea is to use the generated libraries in a host language and handle any side-effects etc. there.)
+- **Re-invent Haskell.** (Haskell does Haskell really well already.)
 
 ## Use
 ```
