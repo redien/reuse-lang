@@ -34,38 +34,43 @@ describe('translator', function () {
     describe('Variables', function () {
         it_should_translate_from_to(
             ast(['export', 'identity', ['lambda', ['x'], 'x']]),
-            'module.exports.identity = function (x) { return x; }'
+            'module.exports.identity = (function (x) { return x; });'
         );
 
         it_should_translate_from_to(
             ast(['export', 'identity', ['lambda', ['y'], 'y']]),
-            'module.exports.identity = function (y) { return y; }'
+            'module.exports.identity = (function (y) { return y; });'
         );
     });
 
     describe('Names', function () {
         it_should_translate_from_to(
             ast(['export', 'otherName', ['lambda', ['x'], 'x']]),
-            'module.exports.otherName = function (x) { return x; }'
+            'module.exports.otherName = (function (x) { return x; });'
         );
     });
 
     describe('Constants', function () {
         it_should_translate_from_to(
             ast(['export', 'f', ['lambda', [], '32']]),
-            'module.exports.f = function () { return 32; }'
+            'module.exports.f = (function () { return 32; });'
         );
     });
 
     describe('Function Application', function () {
         it_should_translate_from_to(
             ast(['export', 'f', ['lambda', [], ['g', '11']]]),
-            'module.exports.f = function () { return g(11); }'
+            'module.exports.f = (function () { return g(11); });'
         );
 
         it_should_translate_from_to(
             ast(['export', 'f', ['lambda', [], ['g', '11', '12']]]),
-            'module.exports.f = function () { return g(11, 12); }'
+            'module.exports.f = (function () { return g(11, 12); });'
+        );
+
+        it_should_translate_from_to(
+            ast(['export', 'f', ['lambda', [], [['lambda', ['x'], ['g', 'x']], '1']]]),
+            'module.exports.f = (function () { return (function (x) { return g(x); })(1); });'
         );
     });
 });
