@@ -27,8 +27,8 @@ node reuse.js < example.reuse
 ```
 
 #### Target platforms
-| Target Host   | Build Status | Built Configurations | Node.js Versions   |
-| :------------ | :----------: | :------------------- | :----------------- |
+| Target Host   | Build Status | Built Configurations |
+| :------------ | :----------: | :------------------: |
 | linux-gcc | [![travis-ci build status](https://travis-ci.org/redien/reuse-lang.svg?branch=master)](https://travis-ci.org/redien/reuse-lang) | x64, Node.js 0.10 |
 | linux-gcc | [![travis-ci build status](https://travis-ci.org/redien/reuse-lang.svg?branch=master)](https://travis-ci.org/redien/reuse-lang) | x64, Node.js 0.11 |
 
