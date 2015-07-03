@@ -7,7 +7,7 @@ reuse-lang is a pure functional Lisp-like language for writing reusable algorith
 
 The goal is for the language and compiler to have the following properties:
 - **Be easy to understand and make changes to.** (And thus have a tiny code base compared to other language implementations.)
-- **Make it simple to add new target platforms and languages.** (To be available on as many platforms as possible, in order to allow the reuse of the same algorithms everywhere.)
+- **Be available on as many platforms as possible.** (By making it simple to add new target platforms and languages, in order to allow the reuse of the same algorithms everywhere.)
 - **Reducing the surface area for bugs by reducing the complexity for the majority of code we use.** (Writing algorithms in a pure functional language reduces complexity by removing side-effects from the equation.)
 - **Optimize for speed and memory usage only when it doesn't conflict with the above mentioned points.**
 
