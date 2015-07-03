@@ -90,5 +90,11 @@ describe('translator', function () {
             ast(['export', 'f', ['lambda', [], [['lambda', ['x'], 'x'], '1']]]),
             'module.exports.f = (function () { return (function (x) { return x; })(1); });'
         );
+
+        // Function arguments should be translated
+        it_should_translate_from_to(
+            ast(['export', 'f', ['lambda', [], ['g', ['lambda', ['x'], 'x']]]]),
+            'module.exports.f = (function () { return g((function (x) { return x; })); });'
+        );
     });
 });
