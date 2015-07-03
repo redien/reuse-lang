@@ -32,18 +32,20 @@ var checkTranslation = function (from, to) {
 
 describe('translator', function () {
     describe('Variables', function () {
+        // Evaluation of variable
         it_should_translate_from_to(
             ast(['export', 'identity', ['lambda', ['x'], 'x']]),
             'module.exports.identity = (function (x) { return x; });'
         );
+    });
 
+    describe('Names', function () {
+        // Evaluation of variable with another name
         it_should_translate_from_to(
             ast(['export', 'identity', ['lambda', ['y'], 'y']]),
             'module.exports.identity = (function (y) { return y; });'
         );
-    });
 
-    describe('Names', function () {
         it_should_translate_from_to(
             ast(['export', 'otherName', ['lambda', ['x'], 'x']]),
             'module.exports.otherName = (function (x) { return x; });'
@@ -51,6 +53,7 @@ describe('translator', function () {
     });
 
     describe('Constants', function () {
+        // i32 constant literal
         it_should_translate_from_to(
             ast(['export', 'f', ['lambda', [], '32']]),
             'module.exports.f = (function () { return 32; });'
@@ -58,19 +61,34 @@ describe('translator', function () {
     });
 
     describe('Function Application', function () {
+        // Function application with no arguments
+        it_should_translate_from_to(
+            ast(['export', 'f', ['lambda', [], ['g']]]),
+            'module.exports.f = (function () { return g(); });'
+        );
+
+        // Function application with one argument
         it_should_translate_from_to(
             ast(['export', 'f', ['lambda', [], ['g', '11']]]),
             'module.exports.f = (function () { return g(11); });'
         );
 
+        // Function application with two arguments
         it_should_translate_from_to(
             ast(['export', 'f', ['lambda', [], ['g', '11', '12']]]),
             'module.exports.f = (function () { return g(11, 12); });'
         );
 
+        // Function application of lambda literal with no arguments
         it_should_translate_from_to(
-            ast(['export', 'f', ['lambda', [], [['lambda', ['x'], ['g', 'x']], '1']]]),
-            'module.exports.f = (function () { return (function (x) { return g(x); })(1); });'
+            ast(['export', 'f', ['lambda', [], [['lambda', [], '1']]]]),
+            'module.exports.f = (function () { return (function () { return 1; })(); });'
+        );
+
+        // Function application of lambda literal with one argument
+        it_should_translate_from_to(
+            ast(['export', 'f', ['lambda', [], [['lambda', ['x'], 'x'], '1']]]),
+            'module.exports.f = (function () { return (function (x) { return x; })(1); });'
         );
     });
 });
