@@ -27,11 +27,10 @@ node reuse.js < example.reuse
 ```
 
 #### Target platforms
-publicdash.js is written using node.js-style modules.
-
 | Target Host   | Build Status | Built Configurations | Node.js Versions   |
 | :------------ | :----------: | :------------------- | :----------------- |
-| linux-gcc | [![travis-ci build status](https://travis-ci.org/redien/reuse-lang.svg?branch=master)](https://travis-ci.org/redien/reuse-lang) | x64 | 0.10, 0.11 |
+| linux-gcc | [![travis-ci build status](https://travis-ci.org/redien/reuse-lang.svg?branch=master)](https://travis-ci.org/redien/reuse-lang) | x64, Node.js 0.10 |
+| linux-gcc | [![travis-ci build status](https://travis-ci.org/redien/reuse-lang.svg?branch=master)](https://travis-ci.org/redien/reuse-lang) | x64, Node.js 0.11 |
 
 ## Development
 [![devDependencies](https://david-dm.org/redien/reuse-lang/dev-status.svg)](https://david-dm.org/redien/reuse-lang#info=devDependencies)
