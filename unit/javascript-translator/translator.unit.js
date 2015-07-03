@@ -17,8 +17,8 @@ var translator = require('../../lib/javascript-translator/translator');
 var ast = require('../../lib/ast-builder');
 var serialize = require('../../lib/ast-serializer');
 
-var it_should_translate_from_to = function(from, to) {
-    it('should translate ' + serialize(from) + ' to ' + to, function () {
+var it_should_translate_from_to = function(text, from, to) {
+    it(text, function () {
         checkTranslation(from, to);
     });
 };
@@ -30,69 +30,70 @@ var checkTranslation = function (from, to) {
     result.value.should.equal(intrinsics + to);
 };
 
-describe('translator', function () {
+describe('Javascript translator', function () {
     describe('Variables', function () {
-        // Evaluation of variable
         it_should_translate_from_to(
+            'evaluate a variable',
             ast(['export', 'identity', ['lambda', ['x'], 'x']]),
             'module.exports.identity = (function (x) { return x; });'
         );
     });
 
     describe('Names', function () {
-        // Evaluation of variable with another name
         it_should_translate_from_to(
+            'evaluate a variable with another name',
             ast(['export', 'identity', ['lambda', ['y'], 'y']]),
             'module.exports.identity = (function (y) { return y; });'
         );
 
         it_should_translate_from_to(
+            'evaluate a variable with a longer name',
             ast(['export', 'otherName', ['lambda', ['x'], 'x']]),
             'module.exports.otherName = (function (x) { return x; });'
         );
     });
 
     describe('Constants', function () {
-        // i32 constant literal
         it_should_translate_from_to(
+            'evaluate an i32 constant',
             ast(['export', 'f', ['lambda', [], '32']]),
             'module.exports.f = (function () { return 32; });'
         );
     });
 
     describe('Function Application', function () {
-        // Function application with no arguments
         it_should_translate_from_to(
+            'apply a function with no arguments',
             ast(['export', 'f', ['lambda', [], ['g']]]),
             'module.exports.f = (function () { return g(); });'
         );
 
-        // Function application with one argument
         it_should_translate_from_to(
+            'apply a function with one argument',
             ast(['export', 'f', ['lambda', [], ['g', '11']]]),
             'module.exports.f = (function () { return g(11); });'
         );
 
-        // Function application with two arguments
         it_should_translate_from_to(
+            'apply a function with two arguments',
             ast(['export', 'f', ['lambda', [], ['g', '11', '12']]]),
             'module.exports.f = (function () { return g(11, 12); });'
         );
 
-        // Function application of lambda literal with no arguments
         it_should_translate_from_to(
+            'apply a lambda literal with no arguments',
             ast(['export', 'f', ['lambda', [], [['lambda', [], '1']]]]),
             'module.exports.f = (function () { return (function () { return 1; })(); });'
         );
 
-        // Function application of lambda literal with one argument
         it_should_translate_from_to(
+            'apply a lambda literal with one argument',
             ast(['export', 'f', ['lambda', [], [['lambda', ['x'], 'x'], '1']]]),
             'module.exports.f = (function () { return (function (x) { return x; })(1); });'
         );
 
-        // Function arguments should be translated
         it_should_translate_from_to(
+            'translate function arguments',
             ast(['export', 'f', ['lambda', [], ['g', ['lambda', ['x'], 'x']]]]),
             'module.exports.f = (function () { return g((function (x) { return x; })); });'
         );
