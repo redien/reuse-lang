@@ -53,37 +53,37 @@ describe('parser', function () {
         result.asts[1].kind.should.equal('atom');
     });
 
-    it('should return an "unbalanced-parentheses" error given an opening brace without a closing one', function () {
+    it('should return an "unbalanced_parentheses" error given an opening brace without a closing one', function () {
         var result = parser.parse('(');
-        result.error.message.should.equal('unbalanced-parentheses');
+        result.error.message.should.equal('unbalanced_parentheses');
     });
 
-    it('should return an "unbalanced-parentheses" error given too few closing braces', function () {
+    it('should return an "unbalanced_parentheses" error given too few closing braces', function () {
         var result = parser.parse('(()');
-        result.error.message.should.equal('unbalanced-parentheses');
+        result.error.message.should.equal('unbalanced_parentheses');
     });
 
-    it('should return an "unbalanced-parentheses" error given an unexpected closing brace', function () {
+    it('should return an "unbalanced_parentheses" error given an unexpected closing brace', function () {
         var result = parser.parse('((a) a))');
-        result.error.message.should.equal('unbalanced-parentheses');
+        result.error.message.should.equal('unbalanced_parentheses');
 
         result = parser.parse('2)');
-        result.error.message.should.equal('unbalanced-parentheses');
+        result.error.message.should.equal('unbalanced_parentheses');
     });
 
-    it('should return an "expected-whitespace" error given an opening brace directly after an atom', function () {
+    it('should return an "expected_whitespace" error given an opening brace directly after an atom', function () {
         var result = parser.parse('(abc())');
-        result.error.message.should.equal('expected-whitespace');
+        result.error.message.should.equal('expected_whitespace');
     });
 
-    it('should return an "expected-whitespace" error given a closing brace directly before an atom', function () {
+    it('should return an "expected_whitespace" error given a closing brace directly before an atom', function () {
         var result = parser.parse('(()abc)');
-        result.error.message.should.equal('expected-whitespace');
+        result.error.message.should.equal('expected_whitespace');
     });
 
-    it('should return an "expected-whitespace" error given a closing brace directly before an opening brace', function () {
+    it('should return an "expected_whitespace" error given a closing brace directly before an opening brace', function () {
         var result = parser.parse('(()())');
-        result.error.message.should.equal('expected-whitespace');
+        result.error.message.should.equal('expected_whitespace');
     });
 
     it('should parse (atom)', function () {
