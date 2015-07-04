@@ -59,22 +59,20 @@ describe('parser', function () {
 
     it('should return an "unbalanced-parentheses" error given an opening brace without a closing one', function () {
         var result = parser.parse('(');
-        should(result.error).not.be.null;
         result.error.message.should.equal('unbalanced-parentheses');
     });
 
     it('should return an "unbalanced-parentheses" error given too few closing braces', function () {
         var result = parser.parse('(()');
-        should(result.error).not.be.null;
         result.error.message.should.equal('unbalanced-parentheses');
     });
 
-    it('should return an error given an unexpected closing brace', function () {
+    it('should return an "unbalanced-parentheses" error given an unexpected closing brace', function () {
         var result = parser.parse('((a) a))');
-        should(result.error).not.be.null;
+        result.error.message.should.equal('unbalanced-parentheses');
 
         result = parser.parse('2)');
-        should(result.error).not.be.null;
+        result.error.message.should.equal('unbalanced-parentheses');
     });
 
     it('should not allow (\'s in atoms', function () {
