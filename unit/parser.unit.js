@@ -14,12 +14,6 @@
 var should = require('should');
 var parser = require('../lib/parser');
 
-var ast_should_be_empty_list = function (ast) {
-    ast.kind.should.equal('list');
-    ast.elements.should.be.Array;
-    ast.elements.length.should.equal(0);
-};
-
 describe('parser', function () {
     it('should return no asts given an empty string', function () {
         var result = parser.parse('');
@@ -35,7 +29,9 @@ describe('parser', function () {
 
     it('should parse () to {kind: "list", elements: []}', function () {
         var result = parser.parse('()');
-        ast_should_be_empty_list(result.asts[0]);
+        result.asts[0].kind.should.equal('list');
+        result.asts[0].elements.should.be.Array;
+        result.asts[0].elements.length.should.equal(0);
     });
 
     it('should parse an atom named "something" to {kind: "atom", value: "something"}', function () {
@@ -75,9 +71,19 @@ describe('parser', function () {
         result.error.message.should.equal('unbalanced-parentheses');
     });
 
-    it('should not allow (\'s in atoms', function () {
-        var result = parser.parse('(abc()');
-        should(result.error).not.be.null;
+    it('should return an "expected-whitespace" error given an opening brace directly after an atom', function () {
+        var result = parser.parse('(abc())');
+        result.error.message.should.equal('expected-whitespace');
+    });
+
+    it('should return an "expected-whitespace" error given a closing brace directly before an atom', function () {
+        var result = parser.parse('(()abc)');
+        result.error.message.should.equal('expected-whitespace');
+    });
+
+    it('should return an "expected-whitespace" error given a closing brace directly before an opening brace', function () {
+        var result = parser.parse('(()())');
+        result.error.message.should.equal('expected-whitespace');
     });
 
     it('should parse (atom)', function () {
