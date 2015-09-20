@@ -98,4 +98,12 @@ describe('Javascript translator', function () {
             'module.exports.f = (function () { return g((function (x) { return x; })); });'
         );
     });
+
+    describe('Function Definition', function () {
+        it_should_translate_from_to(
+            'define a lambda literal with two arguments',
+            ast(['export', 'f', ['lambda', ['a', 'b'], ['a', 'b']]]),
+            'module.exports.f = (function (a, b) { return a(b); });'
+        );
+    });
 });
