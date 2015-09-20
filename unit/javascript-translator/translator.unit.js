@@ -55,7 +55,7 @@ describe('Javascript translator', function () {
 
     describe('Constants', function () {
         it_should_translate_from_to(
-            'evaluate an i32 constant',
+            'evaluate a 32-bit integer constant',
             ast(['export', 'f', ['lambda', [], '32']]),
             'module.exports.f = (function () { return 32; });'
         );
