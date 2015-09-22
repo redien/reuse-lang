@@ -13,10 +13,10 @@
     "author": "Jesper Oskarsson",
     "license": "Public Domain",
     "devDependencies": {
-        "blanket": "1.1.6",
-        "coveralls": "2.11.2",
-        "mocha-lcov-reporter": "0.0.1",
-        "should": "5.1.0",
+        "blanket": "1.1.7",
+        "coveralls": "2.11.4",
+        "mocha-lcov-reporter": "1.0.0",
+        "should": "7.1.0",
         "travis-cov": "0.2.5"
     },
     "config": {
