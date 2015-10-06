@@ -106,4 +106,12 @@ describe('Javascript translator', function () {
             'module.exports.f = (function (a, b) { return a(b); });'
         );
     });
+
+    describe('Variable Definition', function () {
+        it_should_translate_from_to(
+            'define a variable in an expression',
+            ast(['export', 'f', ['lambda', ['x'], ['define', ['a', 'x'], 'a']]]),
+            'module.exports.f = (function (x) { return (function (a) { return a; })(x); });'
+        );
+    });
 });
