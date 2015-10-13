@@ -41,4 +41,17 @@ describe('ast-builder', function () {
     it('should return a list of a list given [[]]', function () {
         ast([[]]).elements[0].kind.should.equal('list');
     });
+
+    it('should include the line number of atoms', function () {
+        var result = ast(['abc']);
+        result.elements[0].line.should.equal(1);
+    });
+
+    it('should include the column number of atoms', function () {
+        var result = ast(['abc']);
+        result.elements[0].column.should.equal(2);
+
+        result = ast(['abc', ['def']]);
+        result.elements[1].elements[0].column.should.equal(7);
+    });
 });

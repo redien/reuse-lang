@@ -114,4 +114,40 @@ describe('Javascript translator', function () {
             'module.exports.f = (function (x) { return (function (a) { return a; })(x); });'
         );
     });
+
+    describe('Exported Names', function () {
+        it_should_translate_from_to(
+            'should export variables matching [a-zA-Z0-9_]+',
+            ast(['export', 'abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTIUVWXYZ0123456789_', '1']),
+            'module.exports.abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTIUVWXYZ0123456789_ = 1;'
+        );
+
+        it('should return an exported_symbol_contains_invalid_character error given a symbol with any other characters', function () {
+            var result = translator.translate(
+                ast(['export', '+', '1'])
+            );
+
+            result.error.message.should.equal('exported_symbol_contains_invalid_character');
+            result.error.line.should.equal(1);
+            result.error.column.should.equal(9);
+
+            result = translator.translate(
+                ast(['export', '?', '1'])
+            );
+
+            result.error.message.should.equal('exported_symbol_contains_invalid_character');
+            result.error.line.should.equal(1);
+            result.error.column.should.equal(9);
+        });
+
+        it('should return an exported_symbol_contains_invalid_character error with the correct column number', function () {
+            var result = translator.translate(
+                ast(['export', 'a+', '1'])
+            );
+
+            result.error.message.should.equal('exported_symbol_contains_invalid_character');
+            result.error.line.should.equal(1);
+            result.error.column.should.equal(10);
+        });
+    });
 });
