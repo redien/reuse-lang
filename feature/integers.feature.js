@@ -12,8 +12,23 @@
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 var it_should_evaluate_expression_to_value_given_program = require('./util/expect-value');
+var it_should_return_error_given_program = require('./util/expect-error');
 
 describe('Integers', function () {
+    it_should_evaluate_expression_to_value_given_program(
+        'should support integer constants up to 2147483647 inclusive',
+        'module.value',
+        2147483647,
+        '(export value 2147483647)'
+    );
+
+    it_should_return_error_given_program(
+        'invalid_integer_constant',
+        1,
+        15,
+        '(export value 2147483648)'
+    );
+
     it_should_evaluate_expression_to_value_given_program(
         'module.add(3, 2)',
         5,
@@ -48,5 +63,11 @@ describe('Integers', function () {
         'module.multiply(3, 2)',
         6,
         '(export multiply (lambda (a b) (i32_multiply a b)))'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.negate(6)',
+        -6,
+        '(export negate (lambda (a) (i32_negate a)))'
     );
 });

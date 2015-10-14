@@ -3,7 +3,7 @@ var should = require('should');
 var nodeTester = require(__dirname + '/node-tester');
 
 var it_should_return_error_given_program = function (expectedError, line, column, program) {
-    it('should throw error ' + expectedError + ' at line ' + line + ' column ' + column + ' given ' + program, function () {
+    it('should return error ' + expectedError + ' at line ' + line + ' column ' + column + ' given ' + program, function () {
         var threw = false;
         try {
             nodeTester.evaluateExpressionWithProgram(undefined, program);
