@@ -12,11 +12,19 @@
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 var it_should_evaluate_expression_to_value_given_program = require('./util/expect-value');
+var it_should_return_error_given_program = require('./util/expect-error');
 
-describe('Symbol Names', function () {
+describe('Export', function () {
+    it_should_return_error_given_program(
+        'exported_symbol_contains_invalid_character',
+        1, 9,
+        '(export + i32_add)'
+    );
+
     it_should_evaluate_expression_to_value_given_program(
-        'module.value',
-        42,
-        '(export value (define ( 3 Å, 42) Å,))'
+        'module.second',
+        2,
+        '(export first 1) (export second 2)',
+        'should export several symbols'
     );
 });

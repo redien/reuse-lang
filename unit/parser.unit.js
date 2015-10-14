@@ -17,40 +17,40 @@ var parser = require('../lib/parser');
 describe('parser', function () {
     it('should return no asts given an empty string', function () {
         var result = parser.parse('');
-        result.asts.should.be.Array;
-        result.asts.length.should.equal(0);
+        result.elements.should.be.Array;
+        result.elements.length.should.equal(0);
     });
 
     it('should return no asts given a program consisting of only whitespace', function () {
         var result = parser.parse('   \n\t   \r ');
-        result.asts.should.be.Array;
-        result.asts.length.should.equal(0);
+        result.elements.should.be.Array;
+        result.elements.length.should.equal(0);
     });
 
     it('should parse () to {kind: "list", elements: []}', function () {
         var result = parser.parse('()');
-        result.asts[0].kind.should.equal('list');
-        result.asts[0].elements.should.be.Array;
-        result.asts[0].elements.length.should.equal(0);
+        result.elements[0].kind.should.equal('list');
+        result.elements[0].elements.should.be.Array;
+        result.elements[0].elements.length.should.equal(0);
     });
 
     it('should parse an atom named "something" to {kind: "atom", value: "something"}', function () {
         var result = parser.parse('something');
-        result.asts[0].kind.should.equal('atom');
-        result.asts[0].value.should.equal('something');
+        result.elements[0].kind.should.equal('atom');
+        result.elements[0].value.should.equal('something');
     });
 
     it('should parse atoms with any name', function () {
         var program = 'nameofsomeatom';
         var result = parser.parse(program);
-        result.asts[0].kind.should.equal('atom');
-        result.asts[0].value.should.equal(program);
+        result.elements[0].kind.should.equal('atom');
+        result.elements[0].value.should.equal(program);
     });
 
     it('should parse a program of several asts and return them', function () {
         var result = parser.parse('(b c) a');
-        result.asts[0].kind.should.equal('list');
-        result.asts[1].kind.should.equal('atom');
+        result.elements[0].kind.should.equal('list');
+        result.elements[1].kind.should.equal('atom');
     });
 
     it('should return an "unbalanced_parentheses" error given an opening brace without a closing one', function () {
@@ -88,56 +88,56 @@ describe('parser', function () {
 
     it('should parse (atom)', function () {
         var result = parser.parse('(atom)');
-        result.asts[0].elements[0].kind.should.equal('atom');
+        result.elements[0].elements[0].kind.should.equal('atom');
     });
 
     it('should parse (())', function () {
         var result = parser.parse('(())');
-        result.asts[0].elements[0].kind.should.equal('list');
+        result.elements[0].elements[0].kind.should.equal('list');
     });
 
     it('should parse ((atom))', function () {
         var result = parser.parse('((atom))');
-        result.asts[0].kind.should.equal('list');
-        result.asts[0].elements[0].kind.should.equal('list');
-        result.asts[0].elements[0].elements[0].kind.should.equal('atom');
+        result.elements[0].kind.should.equal('list');
+        result.elements[0].elements[0].kind.should.equal('list');
+        result.elements[0].elements[0].elements[0].kind.should.equal('atom');
     });
 
     it('should parse (atom atom)', function () {
         var result = parser.parse('(atom atom)');
-        result.asts[0].elements[0].kind.should.equal('atom');
-        result.asts[0].elements[1].kind.should.equal('atom');
+        result.elements[0].elements[0].kind.should.equal('atom');
+        result.elements[0].elements[1].kind.should.equal('atom');
     });
 
     it('should parse (atom (atom) atom)', function () {
         var result = parser.parse('(atom (atom) atom)');
-        result.asts[0].elements[0].kind.should.equal('atom');
-        result.asts[0].elements[1].kind.should.equal('list');
-        result.asts[0].elements[1].elements[0].kind.should.equal('atom');
-        result.asts[0].elements[2].kind.should.equal('atom');
+        result.elements[0].elements[0].kind.should.equal('atom');
+        result.elements[0].elements[1].kind.should.equal('list');
+        result.elements[0].elements[1].elements[0].kind.should.equal('atom');
+        result.elements[0].elements[2].kind.should.equal('atom');
     });
 
     it('should handle arbitrary number of spaces', function () {
         var result = parser.parse('  (  atom ( atom) atom  )');
-        result.asts[0].elements[0].kind.should.equal('atom');
-        result.asts[0].elements[1].kind.should.equal('list');
-        result.asts[0].elements[1].elements[0].kind.should.equal('atom');
-        result.asts[0].elements[2].kind.should.equal('atom');
+        result.elements[0].elements[0].kind.should.equal('atom');
+        result.elements[0].elements[1].kind.should.equal('list');
+        result.elements[0].elements[1].elements[0].kind.should.equal('atom');
+        result.elements[0].elements[2].kind.should.equal('atom');
     });
 
     it('should treat new-lines and tabs as spaces', function () {
         var result = parser.parse('\t(\n\natom \n \r \n\r)');
-        result.asts[0].kind.should.equal('list');
-        result.asts[0].elements[0].kind.should.equal('atom');
+        result.elements[0].kind.should.equal('list');
+        result.elements[0].elements[0].kind.should.equal('atom');
     });
 
     it('should assign line information to atoms', function () {
         var result = parser.parse('\n\n(atom)\n');
-        result.asts[0].elements[0].line.should.equal(3);
+        result.elements[0].elements[0].line.should.equal(3);
     });
 
     it('should assign column information to atoms', function () {
         var result = parser.parse('\n(atom)\n');
-        result.asts[0].elements[0].column.should.equal(2);
+        result.elements[0].elements[0].column.should.equal(2);
     });
 });

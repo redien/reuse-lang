@@ -43,15 +43,15 @@ describe('ast-builder', function () {
     });
 
     it('should include the line number of atoms', function () {
-        var result = ast(['abc']);
-        result.elements[0].line.should.equal(1);
+        var result = ast([['abc']]);
+        result.elements[0].elements[0].line.should.equal(1);
     });
 
     it('should include the column number of atoms', function () {
-        var result = ast(['abc']);
-        result.elements[0].column.should.equal(2);
+        var result = ast([['abc']]);
+        result.elements[0].elements[0].column.should.equal(2);
 
-        result = ast(['abc', ['def']]);
-        result.elements[1].elements[0].column.should.equal(7);
+        result = ast([['abc', ['def']]]);
+        result.elements[0].elements[1].elements[0].column.should.equal(7);
     });
 });
