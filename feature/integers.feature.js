@@ -58,4 +58,94 @@ describe('Integers', function () {
         6,
         '(export multiply (lambda (a b) (* a b)))'
     );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.greaterThan(3, 2)',
+        true,
+        '(export greaterThan (lambda (a b) (> a b)))'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.greaterThan(2, 3)',
+        false,
+        '(export greaterThan (lambda (a b) (> a b)))'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.greaterThan(3, 3)',
+        false,
+        '(export greaterThan (lambda (a b) (> a b)))'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.lesserThan(3, 2)',
+        false,
+        '(export lesserThan (lambda (a b) (< a b)))'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.lesserThan(3, 3)',
+        false,
+        '(export lesserThan (lambda (a b) (< a b)))'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.lesserThan(2, 3)',
+        true,
+        '(export lesserThan (lambda (a b) (< a b)))'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.greaterThanOrEqual(3, 2)',
+        true,
+        '(export greaterThanOrEqual (lambda (a b) (>= a b)))'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.greaterThanOrEqual(3, 3)',
+        true,
+        '(export greaterThanOrEqual (lambda (a b) (>= a b)))'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.greaterThanOrEqual(2, 3)',
+        false,
+        '(export greaterThanOrEqual (lambda (a b) (>= a b)))'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.lesserThanOrEqual(3, 2)',
+        false,
+        '(export lesserThanOrEqual (lambda (a b) (<= a b)))'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.lesserThanOrEqual(3, 3)',
+        true,
+        '(export lesserThanOrEqual (lambda (a b) (<= a b)))'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.lesserThanOrEqual(2, 3)',
+        true,
+        '(export lesserThanOrEqual (lambda (a b) (<= a b)))'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.equal(3, 2)',
+        false,
+        '(export equal (lambda (a b) (== a b)))'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.equal(3, 3)',
+        true,
+        '(export equal (lambda (a b) (== a b)))'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.equal(2, 3)',
+        false,
+        '(export equal (lambda (a b) (== a b)))'
+    );
 });
