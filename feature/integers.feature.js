@@ -16,10 +16,10 @@ var it_should_return_error_given_program = require('./util/expect-error');
 
 describe('Integers', function () {
     it_should_evaluate_expression_to_value_given_program(
-        'should support integer constants up to 2147483647 inclusive',
         'module.value',
         2147483647,
-        '(export value 2147483647)'
+        '(export value 2147483647)',
+        'should support integer constants up to 2147483647 inclusive'
     );
 
     it_should_return_error_given_program(
