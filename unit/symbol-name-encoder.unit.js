@@ -17,16 +17,21 @@ var encoder = require('../lib/symbol-name-encoder');
 describe('symbol-name-encoder', function () {
     it('should encode a name with any character into one with only [a-zA-Z0-9_]', function () {
         var result = encoder.encode('?"(#Ö:ªç');
-        result.should.match(/^[a-zA-Z0-9_]+$/);
+        result.should.equal('_63_34_40_35_214_58_170_231');
     });
 
     it('should keep characters [a-zA-Z] as they are.', function () {
-        var result = encoder.encode('abcª123');
-        result.should.match(/^abc[a-zA-Z0-9_]+$/);
+        var result = encoder.encode('abcªdef');
+        result.should.equal('abc_170def');
     });
 
     it('should encode digits', function () {
         var result = encoder.encode('123');
         result.should.not.equal('123');
+    });
+
+    it('should encode characters as UTF-32 code points', function () {
+        var result = encoder.encode('𠿰');
+        result.should.equal('_135152');
     });
 });
