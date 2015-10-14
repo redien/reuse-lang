@@ -131,6 +131,12 @@ describe('Javascript translator', function () {
             ast(['export', 'f', ['lambda', ['x'], ['define', ['a123', 'x'], 'a123']]]),
             'module.exports.f = (function (x) { return (function (a_49_50_51) { return a_49_50_51; })(x); });'
         );
+
+        it_should_translate_from_to(
+            'not encode numbers',
+            ast(['export', 'f', ['lambda', [], ['define', ['abc', '123'], 'abc']]]),
+            'module.exports.f = (function () { return (function (abc) { return abc; })(123); });'
+        );
     });
 
     describe('Exported Names', function () {
