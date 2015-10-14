@@ -19,4 +19,10 @@ describe('Define', function () {
         3,
         '(export identity (lambda (x) (define (a x) a)))'
     );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.identity(3, 4)',
+        7,
+        '(export identity (lambda (x y) (define (a x b y) (i32_add a b))))'
+    );
 });

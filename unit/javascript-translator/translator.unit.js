@@ -113,6 +113,24 @@ describe('Javascript translator', function () {
             ast(['export', 'f', ['lambda', ['x'], ['define', ['a', 'x'], 'a']]]),
             'module.exports.f = (function (x) { return (function (a) { return a; })(x); });'
         );
+
+        it_should_translate_from_to(
+            'define several variables in an expression',
+            ast(['export', 'f', ['lambda', ['x', 'y'], ['define', ['a', 'x', 'b', 'y'], ['a', 'b']]]]),
+            'module.exports.f = (function (x, y) { return (function (a, b) { return a(b); })(x, y); });'
+        );
+
+        it_should_translate_from_to(
+            'define symbols of any number of unicode characters',
+            ast(['export', 'f', ['lambda', ['x'], ['define', ['金魚', 'x'], '金魚']]]),
+            'module.exports.f = (function (x) { return (function (_37329_39770) { return _37329_39770; })(x); });'
+        );
+
+        it_should_translate_from_to(
+            'encode digits as well to avoid ambiguity in the encoding',
+            ast(['export', 'f', ['lambda', ['x'], ['define', ['a123', 'x'], 'a123']]]),
+            'module.exports.f = (function (x) { return (function (a_49_50_51) { return a_49_50_51; })(x); });'
+        );
     });
 
     describe('Exported Names', function () {
