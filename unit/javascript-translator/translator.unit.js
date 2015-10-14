@@ -27,6 +27,7 @@ var intrinsics = fs.readFileSync(__dirname + '/../../lib/javascript-translator/i
 
 var checkTranslation = function (from, to) {
     var result = translator.translate(from);
+    if (result.error) { throw result.error; }
     result.value.should.equal(intrinsics + to);
 };
 
@@ -173,5 +174,13 @@ describe('Javascript translator', function () {
             result.error.line.should.equal(1);
             result.error.column.should.equal(10);
         });
+    });
+
+    describe('Recursion', function () {
+        it_should_translate_from_to(
+            'should name the exported function if the recur special form is used inside the function body',
+            ast([['export', 'f', ['lambda', [], ['recur']]]]),
+            'module.exports.f = (function recur() { return recur(); });'
+        );
     });
 });
