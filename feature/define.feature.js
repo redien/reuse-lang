@@ -17,12 +17,14 @@ describe('Define', function () {
     it_should_evaluate_expression_to_value_given_program(
         'module.identity(3)',
         3,
-        '(export identity (lambda (x) (define (a x) a)))'
+        '(export identity (lambda (x) (define (a x) a)))',
+        'Should define new symbol in expression'
     );
 
     it_should_evaluate_expression_to_value_given_program(
         'module.identity(3, 4)',
-        7,
-        '(export identity (lambda (x y) (define (a x b y) (i32_add a b))))'
+        4,
+        '(export identity (lambda (x y) (define (a x b y) b)))',
+        'Should define several new symbols in expression'
     );
 });

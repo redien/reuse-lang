@@ -53,18 +53,18 @@ describe('Lists', function () {
     it_should_evaluate_expression_to_value_given_program(
         'module.list()',
         true,
-        '(export list (lambda () (is_nil nil)))'
+        '(export list (lambda () (nil? nil)))'
     );
 
     it_should_evaluate_expression_to_value_given_program(
         'module.list()',
         false,
-        '(export list (lambda () (is_nil 1)))'
+        '(export list (lambda () (nil? 1)))'
     );
 
     it_should_evaluate_expression_to_value_given_program(
         'module.list()',
         false,
-        '(export list (lambda () (is_nil (cons 2 nil))))'
+        '(export list (lambda () (nil? (cons 2 nil))))'
     );
 });

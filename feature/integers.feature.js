@@ -32,42 +32,30 @@ describe('Integers', function () {
     it_should_evaluate_expression_to_value_given_program(
         'module.add(3, 2)',
         5,
-        '(export add (lambda (a b) (i32_add a b)))'
+        '(export add (lambda (a b) (+ a b)))'
     );
 
     it_should_evaluate_expression_to_value_given_program(
         'module.subtract(3, 2)',
         1,
-        '(export subtract (lambda (a b) (i32_subtract a b)))'
-    );
-
-    it_should_evaluate_expression_to_value_given_program(
-        'module.subtract(3, 2)',
-        1,
-        '(export subtract (lambda (a b) (i32_subtract a b)))'
+        '(export subtract (lambda (a b) (- a b)))'
     );
 
     it_should_evaluate_expression_to_value_given_program(
         'module.divide(15, 3)',
         5,
-        '(export divide (lambda (a b) (i32_divide a b)))'
+        '(export divide (lambda (a b) (/ a b)))'
     );
 
     it_should_evaluate_expression_to_value_given_program(
         'module.divide(3, 2)',
         1,
-        '(export divide (lambda (a b) (i32_divide a b)))'
+        '(export divide (lambda (a b) (/ a b)))'
     );
 
     it_should_evaluate_expression_to_value_given_program(
         'module.multiply(3, 2)',
         6,
-        '(export multiply (lambda (a b) (i32_multiply a b)))'
-    );
-
-    it_should_evaluate_expression_to_value_given_program(
-        'module.negate(6)',
-        -6,
-        '(export negate (lambda (a) (i32_negate a)))'
+        '(export multiply (lambda (a b) (* a b)))'
     );
 });
