@@ -16,13 +16,13 @@ var it_should_evaluate_expression_to_value_given_program = require('./util/expec
 describe('Lists', function () {
     it_should_evaluate_expression_to_value_given_program(
         'JSON.stringify(module.list())',
-        '[]',
+        'null',
         '(export list (lambda () nil))'
     );
 
     it_should_evaluate_expression_to_value_given_program(
         'JSON.stringify(module.list())',
-        '[1,[]]',
+        '[1,null]',
         '(export list (lambda () (cons 1 nil)))'
     );
 
@@ -34,19 +34,19 @@ describe('Lists', function () {
 
     it_should_evaluate_expression_to_value_given_program(
         'JSON.stringify(module.list())',
-        '[]',
+        'null',
         '(export list (lambda () (first nil)))'
     );
 
     it_should_evaluate_expression_to_value_given_program(
         'JSON.stringify(module.list())',
-        '[]',
+        'null',
         '(export list (lambda () (rest (cons 1 nil))))'
     );
 
     it_should_evaluate_expression_to_value_given_program(
         'JSON.stringify(module.list())',
-        '[]',
+        'null',
         '(export list (lambda () (rest nil)))'
     );
 
