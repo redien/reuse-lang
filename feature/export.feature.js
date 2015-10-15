@@ -27,4 +27,11 @@ describe('Export', function () {
         '(export first 1) (export second 2)',
         'should export several symbols'
     );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.second',
+        3,
+        '(export first 3) (export second first)',
+        'should add exported symbols to the module scope'
+    );
 });
