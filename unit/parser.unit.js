@@ -131,6 +131,13 @@ describe('parser', function () {
         result.elements[0].elements[0].kind.should.equal('atom');
     });
 
+    it('should treat all unicode space characters as spaces', function () {
+        var result = parser.parse('(atom \u00A0\u1680\u180E\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u200B\u202F\u205F\u3000\uFEFF atom)')
+        result.elements[0].kind.should.equal('list');
+        result.elements[0].elements[0].value.should.equal('atom');
+        result.elements[0].elements[1].value.should.equal('atom');
+    });
+
     it('should assign line information to atoms', function () {
         var result = parser.parse('\n\n(atom)\n');
         result.elements[0].elements[0].line.should.equal(3);
