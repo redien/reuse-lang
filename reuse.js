@@ -11,27 +11,23 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+var fs = require('fs');
 var reuse = require('./lib/reuse');
+var parser = require('./lib/parser');
 
-process.stdin.setEncoding('utf8');
+var program = fs.readFileSync(process.argv[2]).toString();
 
-var program = '';
-process.stdin.on('readable', function () {
-    var chunk = process.stdin.read();
-    if (chunk !== null) {
-        program += chunk.toString();
-    }
+var result = reuse.translate(program, function (moduleName) {
+    var moduleString = fs.readFileSync(__dirname + '/' + moduleName).toString();
+    return parser.parse(moduleString);
 });
-process.stdin.on('end', function () {
-    var result = reuse.translate(program);
-    if (result.error) {
-        console.error('\n');
-        console.error('> Encountered error: ' + result.error.message);
-        console.error('>   at line ' + result.error.line + ' column ' + result.error.column);
-        console.error('');
-        return;
-    }
 
+if (result.error) {
+    console.error('\n');
+    console.error('> Encountered error: ' + result.error.message);
+    console.error('>   at line ' + result.error.line + ' column ' + result.error.column);
+    console.error('');
+} else {
     process.stdout.write(result.value.toString());
     process.stdout.write('\n');
-});
+}

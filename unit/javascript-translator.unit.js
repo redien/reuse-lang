@@ -13,9 +13,9 @@
 
 var fs = require('fs');
 var should = require('should');
-var translator = require('../../lib/javascript-translator/translator');
-var ast = require('../../lib/ast-builder');
-var serialize = require('../../lib/ast-serializer');
+var translator = require('../lib/javascript-translator/translator');
+var ast = require('../lib/ast-builder');
+var serialize = require('../lib/ast-serializer');
 
 var it_should_translate_from_to = function(text, from, to) {
     it(text, function () {
@@ -23,7 +23,7 @@ var it_should_translate_from_to = function(text, from, to) {
     });
 };
 
-var intrinsics = fs.readFileSync(__dirname + '/../../lib/javascript-translator/intrinsics.js').toString();
+var intrinsics = fs.readFileSync(__dirname + '/../lib/javascript-translator/intrinsics.js').toString();
 
 var checkTranslation = function (from, to) {
     var result = translator.translate(from);
@@ -120,9 +120,11 @@ describe('Javascript translator', function () {
             ast([['export', 'f', ['lambda', ['x', 'y'], ['define', ['a', 'x', 'b', 'y'], ['a', 'b']]]]]),
             'var f = (function (x, y) { return (function (a, b) { return a(b); })(x, y); }); module.exports.f = f;'
         );
+    });
 
+    describe('Symbol encoding', function () {
         it_should_translate_from_to(
-            'define symbols of any number of unicode characters',
+            'encode symbols of any number of unicode characters',
             ast([['export', 'f', ['lambda', ['x'], ['define', ['金魚', 'x'], '金魚']]]]),
             'var f = (function (x) { return (function (_37329_39770) { return _37329_39770; })(x); }); module.exports.f = f;'
         );
@@ -138,41 +140,71 @@ describe('Javascript translator', function () {
             ast([['export', 'f', ['lambda', [], ['define', ['abc', '123'], 'abc']]]]),
             'var f = (function () { return (function (abc) { return abc; })(123); }); module.exports.f = f;'
         );
+
+        it_should_translate_from_to(
+            'encode symbols in define statements',
+            ast([['define', '金魚', '1']]),
+            'var _37329_39770 = 1;'
+        );
     });
 
-    describe('Exported Names', function () {
-        it_should_translate_from_to(
-            'should export variables matching [a-zA-Z0-9_]+',
-            ast([['export', 'abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTIUVWXYZ0123456789_', '1']]),
-            'var abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTIUVWXYZ0123456789_ = 1; module.exports.abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTIUVWXYZ0123456789_ = abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTIUVWXYZ0123456789_;'
-        );
-
-        it('should return an exported_symbol_contains_invalid_character error given a symbol with any other characters', function () {
-            var result = translator.translate(
-                ast([['export', '+', '1']])
+    describe('Statements', function () {
+        describe('Exported Names', function () {
+            it_should_translate_from_to(
+                'should export variables matching [a-zA-Z0-9_]+',
+                ast([['export', 'abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTIUVWXYZ0123456789_', '1']]),
+                'var abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTIUVWXYZ_48_49_50_51_52_53_54_55_56_57_95 = 1; module.exports.abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTIUVWXYZ0123456789_ = abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTIUVWXYZ_48_49_50_51_52_53_54_55_56_57_95;'
             );
 
-            result.error.message.should.equal('exported_symbol_contains_invalid_character');
-            result.error.line.should.equal(1);
-            result.error.column.should.equal(9);
+            it('should return an exported_symbol_contains_invalid_character error given a symbol with any other characters', function () {
+                var result = translator.translate(
+                    ast([['export', '+', '1']])
+                );
 
-            result = translator.translate(
-                ast([['export', '?', '1']])
-            );
+                result.error.message.should.equal('exported_symbol_contains_invalid_character');
+                result.error.line.should.equal(1);
+                result.error.column.should.equal(9);
 
-            result.error.message.should.equal('exported_symbol_contains_invalid_character');
-            result.error.line.should.equal(1);
-            result.error.column.should.equal(9);
+                result = translator.translate(
+                    ast([['export', '?', '1']])
+                );
+
+                result.error.message.should.equal('exported_symbol_contains_invalid_character');
+                result.error.line.should.equal(1);
+                result.error.column.should.equal(9);
+            });
+
+            it('should return an exported_symbol_contains_invalid_character error with the correct column number', function () {
+                var result = translator.translate(
+                    ast([['export', 'a+', '1']])
+                );
+
+                result.error.message.should.equal('exported_symbol_contains_invalid_character');
+                result.error.line.should.equal(1);
+                result.error.column.should.equal(10);
+            });
         });
 
-        it('should return an exported_symbol_contains_invalid_character error with the correct column number', function () {
-            var result = translator.translate(
-                ast([['export', 'a+', '1']])
+        describe('Defines', function () {
+            it_should_translate_from_to(
+                'should define symbols locally in the module using the define statement',
+                ast([['define', 'abc', '123']]),
+                'var abc = 123;'
             );
 
-            result.error.message.should.equal('exported_symbol_contains_invalid_character');
-            result.error.line.should.equal(1);
-            result.error.column.should.equal(10);
+            it_should_translate_from_to(
+                'should define symbols locally in the module using the define statement',
+                ast([['define', 'abc', '123']]),
+                'var abc = 123;'
+            );
+        });
+
+        it('should return an invalid_statement error for an invalid statement', function () {
+            var result = translator.translate(
+                ast([['invalid']])
+            );
+
+            result.error.message.should.equal('invalid_statement');
         });
     });
 

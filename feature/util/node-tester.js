@@ -1,6 +1,7 @@
 
 var fs = require('fs');
-var reuse = require(__dirname + '/../../lib/reuse.js');
+var reuse = require(__dirname + '/../../lib/reuse');
+var parser = require(__dirname + '/../../lib/parser')
 
 var generateTestModuleName = function () {
     // Make sure we don't get the cached module when we require.
@@ -11,7 +12,11 @@ module.exports.generateTestModuleName = generateTestModuleName;
 var evaluateExpressionWithProgram = function (expression, program) {
     var testModuleName = generateTestModuleName();
 
-    var translation = reuse.translate(program);
+    var translation = reuse.translate(program, function (moduleName) {
+        var moduleString = fs.readFileSync(__dirname + '/../../' + moduleName).toString();
+        return parser.parse(moduleString);
+    });
+
     if (translation.error) {
         throw translation.error;
     }

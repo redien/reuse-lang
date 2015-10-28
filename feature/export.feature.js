@@ -34,4 +34,11 @@ describe('Export', function () {
         '(export first 3) (export second first)',
         'should add exported symbols to the module scope'
     );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.second()',
+        6,
+        '(export first_variable 3) (define local (lambda (x) (* x first_variable))) (export second (lambda () (local 2)))',
+        'should define an exported symbol such that a local function can access it'
+    );
 });

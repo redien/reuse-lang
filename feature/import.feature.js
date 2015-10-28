@@ -11,15 +11,13 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-var parser = require('../lib/parser');
-var translator = require('../lib/javascript-translator/translator');
-var importer = require('../lib/definition-importer');
+var it_should_evaluate_expression_to_value_given_program = require('./util/expect-value');
 
-exports.translate = function (program, moduleProvider) {
-    var ast = parser.parse(program);
-    if (ast.error) { return ast; }
-
-    var imported = importer.import(ast, moduleProvider);
-
-    return translator.translate(imported);
-};
+describe('Import', function () {
+    it_should_evaluate_expression_to_value_given_program(
+        'module.value()',
+        3,
+        '(import stdlib/functional.ru) (export value (lambda () (reduce + 0 (cons 1 (cons 2 nil)))))',
+        'import standard library functions properly'
+    );
+});
