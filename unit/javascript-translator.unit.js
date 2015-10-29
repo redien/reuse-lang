@@ -215,4 +215,48 @@ describe('Javascript translator', function () {
             'var f = (function recur() { return recur(); }); module.exports.f = f;'
         );
     });
+
+    describe('stdlib/vector.ru', function () {
+        it_should_translate_from_to(
+            'should translate (vector:new) into []',
+            ast([['import', 'stdlib/vector.ru'], ['define', 'f', ['lambda', [], ['vector:new']]]]),
+            'var f = (function () { return []; });'
+        );
+
+        it_should_translate_from_to(
+            'should translate (vector:length vector) into vector.length',
+            ast([['import', 'stdlib/vector.ru'], ['define', 'f', ['lambda', [], ['vector:length', ['vector:new']]]]]),
+            'var f = (function () { return [].length; });'
+        );
+
+        it_should_translate_from_to(
+            "should translate (vector:push vector value) into (function (vector') { return vector'.push(1), vector'; })(vector)",
+            ast([['import', 'stdlib/vector.ru'], ['define', 'f', ['lambda', [], ['vector:push', ['vector:new'], '1']]]]),
+            'var f = (function () { return (function (vector) { return vector.push(1), vector; })([]); });'
+        );
+
+        it_should_translate_from_to(
+            "should translate (vector:pop vector) into vector.slice(0, -1)",
+            ast([['import', 'stdlib/vector.ru'], ['define', 'f', ['lambda', [], ['vector:pop', ['vector:new']]]]]),
+            'var f = (function () { return [].slice(0, -1); });'
+        );
+
+        it_should_translate_from_to(
+            'should translate (vector:element-at-index vector index) into vector[index]',
+            ast([['import', 'stdlib/vector.ru'], ['define', 'f', ['lambda', [], ['vector:element-at-index', ['vector:new'], '0']]]]),
+            'var f = (function () { return [][0]; });'
+        );
+
+        it_should_translate_from_to(
+            "should translate (vector:last-element vector) into (function (vector') { return vector'[vector'.length]; })(vector)",
+            ast([['import', 'stdlib/vector.ru'], ['define', 'f', ['lambda', [], ['vector:last-element', ['vector:new']]]]]),
+            'var f = (function () { return (function (vector) { return vector[vector.length - 1]; })([]); });'
+        );
+
+        it_should_translate_from_to(
+            "should only translate function applications if the module is imported",
+            ast([['define', 'f', ['lambda', [], ['vector:last-element', ['vector:new']]]]]),
+            'var f = (function () { return vector_58last_45element(vector_58new()); });'
+        );
+    });
 });
