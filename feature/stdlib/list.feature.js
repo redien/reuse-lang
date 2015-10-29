@@ -225,6 +225,13 @@ describe('stdlib/list.ru', function () {
 
         it_should_evaluate_expression_to_value_given_program(
             'JSON.stringify(module.value())',
+            '[1,[2,null]]',
+            '(import stdlib/list.ru) (export value (lambda () (list:concatenate nil (cons 1 (cons 2 nil)))))',
+            'should return the second list given an empty list as the first'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'JSON.stringify(module.value())',
             '[1,[2,[3,[4,null]]]]',
             '(import stdlib/list.ru) (export value (lambda () (list:concatenate (cons 1 (cons 2 nil)) (cons 3 (cons 4 nil)))))',
             'should return a combined list with the items of the first list, first and the second list, second given two non-empty lists'
