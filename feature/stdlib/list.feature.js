@@ -117,12 +117,117 @@ describe('stdlib/list.ru', function () {
         );
     });
 
+    describe('list:count', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            0,
+            '(import stdlib/list.ru) (export value (lambda () (list:count nil)))',
+            'should return 0 given nil'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            1,
+            '(import stdlib/list.ru) (export value (lambda () (list:count (cons 1 nil))))',
+            'should return 1 given a list with one item'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            4,
+            '(import stdlib/list.ru) (export value (lambda () (list:count (cons 1 (cons 2 (cons 3 (cons 4 nil)))))))',
+            'should return n given a list with n items'
+        );
+    });
+
     describe('list:take', function () {
         it_should_evaluate_expression_to_value_given_program(
             'JSON.stringify(module.value())',
             'null',
             '(import stdlib/list.ru) (export value (lambda () (list:take nil 0)))',
             'should return nil taking 0'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'JSON.stringify(module.value())',
+            '[1,null]',
+            '(import stdlib/list.ru) (export value (lambda () (list:take (cons 1 nil) 1)))',
+            'should return an identical list taking 1 from a list with one item'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'JSON.stringify(module.value())',
+            '[1,null]',
+            '(import stdlib/list.ru) (export value (lambda () (list:take (cons 1 (cons 2 nil)) 1)))',
+            'should return a list with the first item taking 1 from a list with two items'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'JSON.stringify(module.value())',
+            '[1,[2,null]]',
+            '(import stdlib/list.ru) (export value (lambda () (list:take (cons 1 (cons 2 nil)) 2)))',
+            'should return an identical list taking n items from a list with n items'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'JSON.stringify(module.value())',
+            '[1,[2,null]]',
+            '(import stdlib/list.ru) (export value (lambda () (list:take (cons 1 (cons 2 (cons 3 nil))) 2)))',
+            'should return a list with the first n items taking n items from a list with n+k items'
+        );
+    });
+
+    describe('list:take-last', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'JSON.stringify(module.value())',
+            'null',
+            '(import stdlib/list.ru) (export value (lambda () (list:take-last nil 0)))',
+            'should return nil taking 0'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'JSON.stringify(module.value())',
+            '[1,null]',
+            '(import stdlib/list.ru) (export value (lambda () (list:take-last (cons 1 nil) 1)))',
+            'should return an identical list taking 1 from a list with one item'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'JSON.stringify(module.value())',
+            '[2,null]',
+            '(import stdlib/list.ru) (export value (lambda () (list:take-last (cons 1 (cons 2 nil)) 1)))',
+            'should return a list with the last item taking 1 from a list with two items'
+        );
+
+
+        it_should_evaluate_expression_to_value_given_program(
+            'JSON.stringify(module.value())',
+            '[2,[3,null]]',
+            '(import stdlib/list.ru) (export value (lambda () (list:take-last (cons 1 (cons 2 (cons 3 nil))) 2)))',
+            'should return a list with the last n items taking n items from a list with n+k items'
+        );
+    });
+
+    describe('list:concatenate', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'JSON.stringify(module.value())',
+            'null',
+            '(import stdlib/list.ru) (export value (lambda () (list:concatenate nil nil)))',
+            'should return nil given two empty lists'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'JSON.stringify(module.value())',
+            '[1,[2,null]]',
+            '(import stdlib/list.ru) (export value (lambda () (list:concatenate (cons 1 (cons 2 nil)) nil)))',
+            'should return the first list given an empty list as the second'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'JSON.stringify(module.value())',
+            '[1,[2,[3,[4,null]]]]',
+            '(import stdlib/list.ru) (export value (lambda () (list:concatenate (cons 1 (cons 2 nil)) (cons 3 (cons 4 nil)))))',
+            'should return a combined list with the items of the first list, first and the second list, second given two non-empty lists'
         );
     });
 });

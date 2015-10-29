@@ -27,5 +27,28 @@
         nil
         list)))
 
+(export list:count (lambda (list)
+    (define (count-with-accumulator (lambda (list count)
+        (if (nil? list)
+            count
+            (recur (rest list) (+ count 1)))))
+        (count-with-accumulator list 0))))
+
 (export list:take (lambda (list n)
-    nil))
+    (define (take-with-accumulator (lambda (list n new-list)
+        (if (== n 0)
+            new-list
+            (if (nil? list)
+                new-list
+                (recur (rest list) (- n 1) (cons (first list) new-list))))))
+        (list:reverse (take-with-accumulator list n nil)))))
+
+(export list:take-last (lambda (list n)
+    (list:reverse (list:take (list:reverse list) n))))
+
+(export list:concatenate (lambda (first-list second-list)
+    (define (concatenate (lambda (first-list-reversed second-list)
+        (if (nil? first-list-reversed)
+            second-list
+            (recur (rest first-list-reversed) (cons (first first-list-reversed) second-list)))))
+        (concatenate (list:reverse first-list) second-list))))
