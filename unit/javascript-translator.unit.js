@@ -210,9 +210,9 @@ describe('Javascript translator', function () {
 
     describe('Recursion', function () {
         it_should_translate_from_to(
-            'should name the exported function if the recur special form is used inside the function body',
-            ast([['export', 'f', ['lambda', [], ['recur']]]]),
-            'var f = (function recur() { return recur(); }); module.exports.f = f;'
+            'should implement partial tail call optimization by optimizing self-calls',
+            ast([['export', 'f', ['lambda', ['a'], ['self', 'a']]]]),
+            'var f = (function (a) { var self = _generate_recursive_function(arguments); while (true) { var result; result = self(a); if (result !== null && typeof result === "object" && result._reuse_isRecurValue) { continue; } break; } return result; }); module.exports.f = f;'
         );
     });
 

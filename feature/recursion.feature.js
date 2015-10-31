@@ -11,12 +11,22 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+
 var it_should_evaluate_expression_to_value_given_program = require('./util/expect-value');
+
+var factorialProgram = '(export factorial (lambda (x) (define (factorial-tail (lambda (x accumulator) (if (<= x 1) accumulator (self (- x 1) (* accumulator x))))) (factorial-tail x 1))))';
 
 describe('Recursion', function () {
     it_should_evaluate_expression_to_value_given_program(
         'module.factorial(10)',
         3628800,
-        '(export factorial (lambda (x) (define (factorial-tail (lambda (x accumulator) (if (<= x 1) accumulator (recur (- x 1) (* accumulator x))))) (factorial-tail x 1))))'
+        factorialProgram
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.factorial(1000000)',
+        0, // The result becomes zero due to the 32-bit integers.
+           // When the iteration hits a result of 0 it will not change.
+        factorialProgram
     );
 });

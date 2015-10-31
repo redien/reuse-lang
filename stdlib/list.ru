@@ -2,7 +2,7 @@
 (export list:reduce (lambda (f initial-value list)
     (if (nil? list)
         initial-value
-        (recur f (f initial-value (first list)) (rest list)))))
+        (self f (f initial-value (first list)) (rest list)))))
 
 (export list:foldl list:reduce)
 
@@ -31,7 +31,7 @@
     (define (count-with-accumulator (lambda (list count)
         (if (nil? list)
             count
-            (recur (rest list) (+ count 1)))))
+            (self (rest list) (+ count 1)))))
         (count-with-accumulator list 0))))
 
 (export list:take (lambda (list n)
@@ -40,7 +40,7 @@
             new-list
             (if (nil? list)
                 new-list
-                (recur (rest list) (- n 1) (cons (first list) new-list))))))
+                (self (rest list) (- n 1) (cons (first list) new-list))))))
         (list:reverse (take-with-accumulator list n nil)))))
 
 (export list:take-last (lambda (list n)
@@ -50,5 +50,5 @@
     (define (concatenate (lambda (first-list-reversed second-list)
         (if (nil? first-list-reversed)
             second-list
-            (recur (rest first-list-reversed) (cons (first first-list-reversed) second-list)))))
+            (self (rest first-list-reversed) (cons (first first-list-reversed) second-list)))))
         (concatenate (list:reverse first-list) second-list))))
