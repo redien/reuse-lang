@@ -5,7 +5,7 @@ reuse-lang is a pure functional Lisp-like language for writing reusable algorith
 
 ## Use
 ```
-node reuse.js < example.reuse
+node reuse.js example.reuse
 ```
 
 #### Target platforms
