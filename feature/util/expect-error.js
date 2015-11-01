@@ -8,7 +8,7 @@ var it_should_return_error_given_program = function (expectedError, line, column
         try {
             nodeTester.evaluateExpressionWithProgram(undefined, program);
         } catch (error) {
-            error.message.should.equal(expectedError);
+            error.error.should.equal(expectedError);
             error.line.should.equal(line);
             error.column.should.equal(column);
             threw = true;

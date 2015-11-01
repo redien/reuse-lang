@@ -23,9 +23,9 @@ describe('definition-importer', function () {
             return ast([['export', 'abc', '123']]);
         });
 
-        imported.elements[0].elements[0].value.should.equal('define');
-        imported.elements[0].elements[1].value.should.equal('abc');
-        imported.elements[0].elements[2].value.should.equal('123');
+        ast.value(ast.expression(ast.expression(imported, 0), 0)).should.equal('define');
+        ast.value(ast.expression(ast.expression(imported, 0), 1)).should.equal('abc');
+        ast.value(ast.expression(ast.expression(imported, 0), 2)).should.equal('123');
     });
 
     it('should define all exported symbols of an imported module in the provided expression', function () {
@@ -37,13 +37,13 @@ describe('definition-importer', function () {
             ]);
         });
 
-        imported.elements[0].elements[0].value.should.equal('define');
-        imported.elements[0].elements[1].value.should.equal('efg');
-        imported.elements[0].elements[2].value.should.equal('456');
+        ast.value(ast.expression(ast.expression(imported, 0), 0)).should.equal('define');
+        ast.value(ast.expression(ast.expression(imported, 0), 1)).should.equal('efg');
+        ast.value(ast.expression(ast.expression(imported, 0), 2)).should.equal('456');
 
-        imported.elements[1].elements[0].value.should.equal('define');
-        imported.elements[1].elements[1].value.should.equal('abc');
-        imported.elements[1].elements[2].value.should.equal('123');
+        ast.value(ast.expression(ast.expression(imported, 1), 0)).should.equal('define');
+        ast.value(ast.expression(ast.expression(imported, 1), 1)).should.equal('abc');
+        ast.value(ast.expression(ast.expression(imported, 1), 2)).should.equal('123');
     });
 
     it('should import all modules specified by import statements', function () {
@@ -63,13 +63,13 @@ describe('definition-importer', function () {
             }
         });
 
-        imported.elements[0].elements[0].value.should.equal('define');
-        imported.elements[0].elements[1].value.should.equal('efg');
-        imported.elements[0].elements[2].value.should.equal('456');
+        ast.value(ast.expression(ast.expression(imported, 0), 0)).should.equal('define');
+        ast.value(ast.expression(ast.expression(imported, 0), 1)).should.equal('efg');
+        ast.value(ast.expression(ast.expression(imported, 0), 2)).should.equal('456');
 
-        imported.elements[1].elements[0].value.should.equal('define');
-        imported.elements[1].elements[1].value.should.equal('abc');
-        imported.elements[1].elements[2].value.should.equal('123');
+        ast.value(ast.expression(ast.expression(imported, 1), 0)).should.equal('define');
+        ast.value(ast.expression(ast.expression(imported, 1), 1)).should.equal('abc');
+        ast.value(ast.expression(ast.expression(imported, 1), 2)).should.equal('123');
     });
 
     it('should preserve statements in the original ast', function () {
@@ -81,13 +81,13 @@ describe('definition-importer', function () {
             return ast([['export', 'abc', '123']]);
         });
 
-        imported.elements[0].elements[0].value.should.equal('define');
-        imported.elements[0].elements[1].value.should.equal('abc');
-        imported.elements[0].elements[2].value.should.equal('123');
+        ast.value(ast.expression(ast.expression(imported, 0), 0)).should.equal('define');
+        ast.value(ast.expression(ast.expression(imported, 0), 1)).should.equal('abc');
+        ast.value(ast.expression(ast.expression(imported, 0), 2)).should.equal('123');
 
-        imported.elements[1].elements[0].value.should.equal('export');
-        imported.elements[1].elements[1].value.should.equal('efg');
-        imported.elements[1].elements[2].value.should.equal('456');
+        ast.value(ast.expression(ast.expression(imported, 1), 0)).should.equal('export');
+        ast.value(ast.expression(ast.expression(imported, 1), 1)).should.equal('efg');
+        ast.value(ast.expression(ast.expression(imported, 1), 2)).should.equal('456');
     });
 
     it('should import definitions recursively', function () {
@@ -103,12 +103,12 @@ describe('definition-importer', function () {
             }
         });
 
-        imported.elements[0].elements[0].value.should.equal('define');
-        imported.elements[0].elements[1].value.should.equal('abc');
-        imported.elements[0].elements[2].value.should.equal('123');
+        ast.value(ast.expression(ast.expression(imported, 0), 0)).should.equal('define');
+        ast.value(ast.expression(ast.expression(imported, 0), 1)).should.equal('abc');
+        ast.value(ast.expression(ast.expression(imported, 0), 2)).should.equal('123');
 
-        imported.elements[1].elements[0].value.should.equal('export');
-        imported.elements[1].elements[1].value.should.equal('efg');
-        imported.elements[1].elements[2].value.should.equal('456');
+        ast.value(ast.expression(ast.expression(imported, 1), 0)).should.equal('export');
+        ast.value(ast.expression(ast.expression(imported, 1), 1)).should.equal('efg');
+        ast.value(ast.expression(ast.expression(imported, 1), 2)).should.equal('456');
     });
 });

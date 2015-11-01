@@ -14,11 +14,11 @@ var evaluateExpressionWithProgram = function (expression, program) {
 
     var translation = reuse.translate(program, function (moduleName) {
         var moduleString = fs.readFileSync(__dirname + '/../../' + moduleName).toString();
-        return parser.parse(moduleString);
+        return parser.value(parser.parse(moduleString));
     });
 
     if (translation.error) {
-        throw translation.error;
+        throw translation;
     }
 
     fs.writeFileSync(testModuleName, translation.value);

@@ -27,8 +27,8 @@ var intrinsics = fs.readFileSync(__dirname + '/../lib/javascript-translator/intr
 
 var checkTranslation = function (from, to) {
     var result = translator.translate(from);
-    if (result.error) { throw result.error; }
-    result.value.should.equal(intrinsics + to);
+    if (translator.isError(result)) { throw new Error(translator.errorType(result)); }
+    translator.value(result).should.equal(intrinsics + to);
 };
 
 describe('Javascript translator', function () {
@@ -161,17 +161,17 @@ describe('Javascript translator', function () {
                     ast([['export', '+', '1']])
                 );
 
-                result.error.message.should.equal('exported_symbol_contains_invalid_character');
-                result.error.line.should.equal(1);
-                result.error.column.should.equal(9);
+                translator.errorType(result).should.equal('exported_symbol_contains_invalid_character');
+                translator.errorLine(result).should.equal(1);
+                translator.errorColumn(result).should.equal(9);
 
                 result = translator.translate(
                     ast([['export', '?', '1']])
                 );
 
-                result.error.message.should.equal('exported_symbol_contains_invalid_character');
-                result.error.line.should.equal(1);
-                result.error.column.should.equal(9);
+                translator.errorType(result).should.equal('exported_symbol_contains_invalid_character');
+                translator.errorLine(result).should.equal(1);
+                translator.errorColumn(result).should.equal(9);
             });
 
             it('should return an exported_symbol_contains_invalid_character error with the correct column number', function () {
@@ -179,9 +179,9 @@ describe('Javascript translator', function () {
                     ast([['export', 'a+', '1']])
                 );
 
-                result.error.message.should.equal('exported_symbol_contains_invalid_character');
-                result.error.line.should.equal(1);
-                result.error.column.should.equal(10);
+                translator.errorType(result).should.equal('exported_symbol_contains_invalid_character');
+                translator.errorLine(result).should.equal(1);
+                translator.errorColumn(result).should.equal(10);
             });
         });
 
@@ -204,7 +204,9 @@ describe('Javascript translator', function () {
                 ast([['invalid']])
             );
 
-            result.error.message.should.equal('invalid_statement');
+            translator.errorType(result).should.equal('invalid_statement');
+            translator.errorLine(result).should.equal(1);
+            translator.errorColumn(result).should.equal(1);
         });
     });
 

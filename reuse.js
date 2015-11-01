@@ -19,7 +19,7 @@ var program = fs.readFileSync(process.argv[2]).toString();
 
 var result = reuse.translate(program, function (moduleName) {
     var moduleString = fs.readFileSync(__dirname + '/' + moduleName).toString();
-    return parser.parse(moduleString);
+    return parser.value(parser.parse(moduleString));
 });
 
 if (result.error) {

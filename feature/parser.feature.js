@@ -11,23 +11,13 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-var ast = require('./ast-builder');
+var it_should_return_error_given_program = require('./util/expect-error');
 
-module.exports = function serialize (expression) {
-    if (ast.kind(expression) === 'atom') {
-        return ast.value(expression);
-    } else {
-        var str = '(';
-        var index;
-        var count = ast.count(expression);
-        for (index = 0; index < count; ++index) {
-            var element = ast.expression(expression, index);
-            if (index !== 0) {
-                str += ' ';
-            }
-            str += serialize(element);
-        }
-
-        return str + ')';
-    }
-};
+describe('Parser', function () {
+    it_should_return_error_given_program(
+        'unbalanced_parentheses',
+        0,
+        0,
+        '(()'
+    );
+});
