@@ -3,6 +3,17 @@
 
 reuse-lang is a pure functional Lisp-like language for writing reusable algorithms in an extremely portable way.
 
+## Use
+```
+node reuse.js < example.reuse
+```
+
+#### Target platforms
+| Target Host   | Build Status | Built Configuration |
+| :------------ | :----------: | :------------------: |
+| linux-gcc | [![travis-ci build status](https://travis-ci.org/redien/reuse-lang.svg?branch=master)](https://travis-ci.org/redien/reuse-lang) | x64, Node.js 0.10 |
+| linux-gcc | [![travis-ci build status](https://travis-ci.org/redien/reuse-lang.svg?branch=master)](https://travis-ci.org/redien/reuse-lang) | x64, Node.js 0.11 |
+
 ## Design rationale
 
 The goal is for the language and compiler to have the following properties:
@@ -15,17 +26,6 @@ The goal is **not** to do any of the following:
 - **Create a general-purpose language.** The idea is to use the generated libraries in a host language and handle any side-effects etc. there.
 - **Re-invent Haskell.** Haskell does Haskell really well already.
 - **Write Monte-Carlo simulations.** Optimizing for real-time, simulation-type algorithms is outside the scope and can be done much easier in other languages. (But why not reuse code for things other than the simulation itself?)
-
-## Use
-```
-node reuse.js < example.reuse
-```
-
-#### Target platforms
-| Target Host   | Build Status | Built Configuration |
-| :------------ | :----------: | :------------------: |
-| linux-gcc | [![travis-ci build status](https://travis-ci.org/redien/reuse-lang.svg?branch=master)](https://travis-ci.org/redien/reuse-lang) | x64, Node.js 0.10 |
-| linux-gcc | [![travis-ci build status](https://travis-ci.org/redien/reuse-lang.svg?branch=master)](https://travis-ci.org/redien/reuse-lang) | x64, Node.js 0.11 |
 
 ## Development
 [![devDependencies](https://david-dm.org/redien/reuse-lang/dev-status.svg)](https://david-dm.org/redien/reuse-lang#info=devDependencies)
