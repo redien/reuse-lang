@@ -27,4 +27,64 @@ describe('Booleans', function () {
         '(export value false)',
         'should have a falsy constant name false'
     );
+
+    describe('and', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(export value (lambda () (and true true)))',
+            'should return true given true and true'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            false,
+            '(export value (lambda () (and false true)))',
+            'should return false given false and true'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            false,
+            '(export value (lambda () (and true false)))',
+            'should return false given true and false'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            false,
+            '(export value (lambda () (and false false)))',
+            'should return false given false and false'
+        );
+    });
+
+    describe('or', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(export value (lambda () (or true true)))',
+            'should return true given true and true'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(export value (lambda () (or false true)))',
+            'should return true given false and true'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(export value (lambda () (or true false)))',
+            'should return true given true and false'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            false,
+            '(export value (lambda () (or false false)))',
+            'should return false given false and false'
+        );
+    });
 });
