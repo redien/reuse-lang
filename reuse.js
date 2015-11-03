@@ -13,13 +13,11 @@
 
 var fs = require('fs');
 var reuse = require('./lib/reuse');
-var parser = require('./lib/parser');
 
 var program = fs.readFileSync(process.argv[2]).toString();
 
 var result = reuse.translate(program, function (moduleName) {
-    var moduleString = fs.readFileSync(__dirname + '/' + moduleName).toString();
-    return parser.value(parser.parse(moduleString));
+    return fs.readFileSync(__dirname + '/' + moduleName).toString();
 });
 
 if (result.error) {
@@ -28,6 +26,6 @@ if (result.error) {
     console.error('>   at line ' + result.error.line + ' column ' + result.error.column);
     console.error('');
 } else {
-    process.stdout.write(result.value.toString());
+    process.stdout.write(result.value);
     process.stdout.write('\n');
 }

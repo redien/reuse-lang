@@ -148,4 +148,22 @@ describe('Integers', function () {
         false,
         '(export equal (lambda (a b) (== a b)))'
     );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.equal(3, 2)',
+        true,
+        '(export equal (lambda (a b) (!= a b)))'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.equal(3, 3)',
+        false,
+        '(export equal (lambda (a b) (!= a b)))'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.equal(2, 3)',
+        true,
+        '(export equal (lambda (a b) (!= a b)))'
+    );
 });

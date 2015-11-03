@@ -74,14 +74,30 @@ describe('stdlib/vector.ru', function () {
             'module.value()',
             1,
             '(import stdlib/vector.ru) (export value (lambda () (vector:length (vector:pop (vector:push (vector:push (vector:new) 42) 24)))))',
-            'should decrement the length of the vector'
+            'should return a new vector with the length subtracted by one'
         );
 
         it_should_evaluate_expression_to_value_given_program(
             'module.value()',
             42,
             '(import stdlib/vector.ru) (export value (lambda () (vector:last-element (vector:pop (vector:push (vector:push (vector:new) 42) 24)))))',
-            'should change the last element'
+            'should return a new vector without the last element'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            2,
+            '(import stdlib/vector.ru) (export value (lambda () (define (two-element (vector:push (vector:push (vector:new) 42) 24)) (define (one-element (vector:pop two-element)) (vector:length two-element)))))',
+            'should not modify the original vector'
+        );
+    });
+
+    describe('vector:push', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            1,
+            '(import stdlib/vector.ru) (export value (lambda () (define (one-element (vector:push (vector:new) 42)) (define (two-element (vector:push one-element 24)) (vector:length one-element)))))',
+            'should not modify the original vector'
         );
     });
 });

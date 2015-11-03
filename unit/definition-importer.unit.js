@@ -23,7 +23,7 @@ describe('definition-importer', function () {
             return ast([['export', 'abc', '123']]);
         });
 
-        ast.value(ast.expression(ast.expression(imported, 0), 0)).should.equal('define');
+        ast.value(ast.expression(ast.expression(imported, 0), 0)).should.equal('define-from-import');
         ast.value(ast.expression(ast.expression(imported, 0), 1)).should.equal('abc');
         ast.value(ast.expression(ast.expression(imported, 0), 2)).should.equal('123');
     });
@@ -37,11 +37,11 @@ describe('definition-importer', function () {
             ]);
         });
 
-        ast.value(ast.expression(ast.expression(imported, 0), 0)).should.equal('define');
+        ast.value(ast.expression(ast.expression(imported, 0), 0)).should.equal('define-from-import');
         ast.value(ast.expression(ast.expression(imported, 0), 1)).should.equal('efg');
         ast.value(ast.expression(ast.expression(imported, 0), 2)).should.equal('456');
 
-        ast.value(ast.expression(ast.expression(imported, 1), 0)).should.equal('define');
+        ast.value(ast.expression(ast.expression(imported, 1), 0)).should.equal('define-from-import');
         ast.value(ast.expression(ast.expression(imported, 1), 1)).should.equal('abc');
         ast.value(ast.expression(ast.expression(imported, 1), 2)).should.equal('123');
     });
@@ -63,11 +63,11 @@ describe('definition-importer', function () {
             }
         });
 
-        ast.value(ast.expression(ast.expression(imported, 0), 0)).should.equal('define');
+        ast.value(ast.expression(ast.expression(imported, 0), 0)).should.equal('define-from-import');
         ast.value(ast.expression(ast.expression(imported, 0), 1)).should.equal('efg');
         ast.value(ast.expression(ast.expression(imported, 0), 2)).should.equal('456');
 
-        ast.value(ast.expression(ast.expression(imported, 1), 0)).should.equal('define');
+        ast.value(ast.expression(ast.expression(imported, 1), 0)).should.equal('define-from-import');
         ast.value(ast.expression(ast.expression(imported, 1), 1)).should.equal('abc');
         ast.value(ast.expression(ast.expression(imported, 1), 2)).should.equal('123');
     });
@@ -81,7 +81,7 @@ describe('definition-importer', function () {
             return ast([['export', 'abc', '123']]);
         });
 
-        ast.value(ast.expression(ast.expression(imported, 0), 0)).should.equal('define');
+        ast.value(ast.expression(ast.expression(imported, 0), 0)).should.equal('define-from-import');
         ast.value(ast.expression(ast.expression(imported, 0), 1)).should.equal('abc');
         ast.value(ast.expression(ast.expression(imported, 0), 2)).should.equal('123');
 
@@ -103,12 +103,34 @@ describe('definition-importer', function () {
             }
         });
 
-        ast.value(ast.expression(ast.expression(imported, 0), 0)).should.equal('define');
+        ast.value(ast.expression(ast.expression(imported, 0), 0)).should.equal('define-from-import');
         ast.value(ast.expression(ast.expression(imported, 0), 1)).should.equal('abc');
         ast.value(ast.expression(ast.expression(imported, 0), 2)).should.equal('123');
 
         ast.value(ast.expression(ast.expression(imported, 1), 0)).should.equal('export');
         ast.value(ast.expression(ast.expression(imported, 1), 1)).should.equal('efg');
         ast.value(ast.expression(ast.expression(imported, 1), 2)).should.equal('456');
+    });
+
+    it('should import definitions with the specific module name', function () {
+        var original = ast([
+            ['import', 'module-name'],
+            ['import', 'module2'],
+        ]);
+        var imported = importer.import(original, function (moduleName) {
+            if (moduleName === 'module-name') {
+                return ast([
+                    ['export', 'efg', '456']
+                ]);
+            } else if (moduleName === 'module2') {
+                return ast([
+                    ['export', 'abc', '123']
+                ]);
+            }
+        });
+
+        ast.value(ast.expression(ast.expression(imported, 0), 3)).should.equal('module-name');
+
+        ast.value(ast.expression(ast.expression(imported, 1), 3)).should.equal('module2');
     });
 });

@@ -42,6 +42,34 @@ describe('ast-builder', function () {
         });
     });
 
+    describe('line', function () {
+        it('should return the line of the given atom', function () {
+            ast.line(ast.expression(ast.expression(ast([['abc']]), 0), 0)).should.equal(1);
+        });
+    });
+
+    describe('column', function () {
+        it('should return the column of the given atom', function () {
+            ast.column(ast.expression(ast.expression(ast([['abc']]), 0), 0)).should.equal(2);
+        });
+    });
+
+    describe('setLine', function () {
+        it('should modify the atom to set the line number', function () {
+            var atom = ast('abc');
+            ast.setLine(atom, 3);
+            ast.line(atom).should.equal(3);
+        });
+    });
+
+    describe('setColumn', function () {
+        it('should modify the atom to set the column number', function () {
+            var atom = ast('abc');
+            ast.setColumn(atom, 3);
+            ast.column(atom).should.equal(3);
+        });
+    });
+
     describe('expression', function () {
         it('should return the first expression of a list given an index of 0', function () {
             ast.value(ast.expression([0, [[1, ['abc', [0, [0, null]]]], null]], 0)).should.equal('abc');
@@ -85,34 +113,6 @@ describe('ast-builder', function () {
             ast.push(list, [1, ['def', [0, [0, null]]]]);
             ast.value(ast.expression(list, 0)).should.equal('abc');
             ast.value(ast.expression(list, 1)).should.equal('def');
-        });
-    });
-
-    describe('line', function () {
-        it('should return the line of the given atom', function () {
-            ast.line(ast.expression(ast.expression(ast([['abc']]), 0), 0)).should.equal(1);
-        });
-    });
-
-    describe('column', function () {
-        it('should return the column of the given atom', function () {
-            ast.column(ast.expression(ast.expression(ast([['abc']]), 0), 0)).should.equal(2);
-        });
-    });
-
-    describe('setLine', function () {
-        it('should modify the atom to set the line number', function () {
-            var atom = ast('abc');
-            ast.setLine(atom, 3);
-            ast.line(atom).should.equal(3);
-        });
-    });
-
-    describe('setColumn', function () {
-        it('should modify the atom to set the column number', function () {
-            var atom = ast('abc');
-            ast.setColumn(atom, 3);
-            ast.column(atom).should.equal(3);
         });
     });
 

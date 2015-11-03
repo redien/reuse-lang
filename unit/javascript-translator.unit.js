@@ -11,11 +11,11 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-var fs = require('fs');
 var should = require('should');
 var translator = require('../lib/javascript-translator/translator');
 var ast = require('../lib/ast-builder');
 var serialize = require('../lib/ast-serializer');
+var definitionImporter = require('../lib/definition-importer');
 
 var it_should_translate_from_to = function(text, from, to) {
     it(text, function () {
@@ -23,12 +23,42 @@ var it_should_translate_from_to = function(text, from, to) {
     });
 };
 
-var intrinsics = fs.readFileSync(__dirname + '/../lib/javascript-translator/intrinsics.js').toString();
+var dummyExportsForModule = function (moduleName, exports) {
+    var program = ast([]);
+    exports.forEach(function (name) {
+        ast.push(program, ast(['export', name, '1']));
+    });
+    return program;
+};
 
 var checkTranslation = function (from, to) {
-    var result = translator.translate(from);
+    var imported = definitionImporter.import(from, function (moduleName) {
+        if (moduleName === 'stdlib/vector.ru') {
+            return dummyExportsForModule(moduleName, [
+                'vector:new',
+                'vector:length',
+                'vector:push',
+                'vector:pop',
+                'vector:element-at-index',
+                'vector:last-element'
+            ]);
+        } else if (moduleName === 'stdlib/string.ru') {
+            return dummyExportsForModule(moduleName, [
+                'string:new',
+                'string:length',
+                'string:push',
+                'string:code-point-at-index',
+                'string:concatenate',
+                'string:substring',
+                'string:equal?'
+            ]);
+        }
+    });
+    var result = translator.translate(imported);
     if (translator.isError(result)) { throw new Error(translator.errorType(result)); }
-    translator.value(result).should.equal(intrinsics + to);
+    translator.value(result)
+        .match(/\n(.+)$/)[1] // Only compare the last line.
+        .should.equal(to);
 };
 
 describe('Javascript translator', function () {
@@ -191,10 +221,12 @@ describe('Javascript translator', function () {
                 ast([['define', 'abc', '123']]),
                 'var abc = 123;'
             );
+        });
 
+        describe('Defines from imports', function () {
             it_should_translate_from_to(
-                'should define symbols locally in the module using the define statement',
-                ast([['define', 'abc', '123']]),
+                'should define symbols locally in the module using the define-from-import statement',
+                ast([['define-from-import', 'abc', '123', 'module']]),
                 'var abc = 123;'
             );
         });
@@ -234,7 +266,7 @@ describe('Javascript translator', function () {
         it_should_translate_from_to(
             "should translate (vector:push vector value) into (function (vector') { return vector'.push(1), vector'; })(vector)",
             ast([['import', 'stdlib/vector.ru'], ['define', 'f', ['lambda', [], ['vector:push', ['vector:new'], '1']]]]),
-            'var f = (function () { return (function (vector) { return vector.push(1), vector; })([]); });'
+            'var f = (function () { return (function (vector) { return vector.push(1), vector; })([].slice()); });'
         );
 
         it_should_translate_from_to(
@@ -262,29 +294,42 @@ describe('Javascript translator', function () {
         );
     });
 
-    describe('stringToCodePointList', function () {
-        it('should return an empty vector given an empty string', function () {
-            var result = translator.listToArray(translator.stringToCodePointList(''));
-            result.should.have.a.lengthOf(0);
-        });
+    describe('stdlib/string.ru', function () {
+        it_should_translate_from_to(
+            "should translate (string:new) to ''",
+            ast([['import', 'stdlib/string.ru'], ['define', 'f', ['lambda', [], ['string:new']]]]),
+            "var f = (function () { return ''; });"
+        );
 
-        it('should return a vector with the unicode code point of the first character in the string', function () {
-            var result = translator.listToArray(translator.stringToCodePointList('金'));
-            result.should.have.a.property(0, 37329);
-        });
+        it_should_translate_from_to(
+            "should translate (string:length string) to string.length",
+            ast([['import', 'stdlib/string.ru'], ['define', 'f', ['lambda', [], ['string:length', ['string:new']]]]]),
+            "var f = (function () { return ''.length; });"
+        );
 
-        it('should return a vector with the unicode code points of all of the characters in the string', function () {
-            var result = translator.listToArray(translator.stringToCodePointList('金魚魚魚'));
-            result.should.have.a.property(0, 37329);
-            result.should.have.a.property(1, 39770);
-            result.should.have.a.property(2, 39770);
-            result.should.have.a.property(3, 39770);
-        });
+        it_should_translate_from_to(
+            "should translate (string:push string 1) to (string + String.fromCharCode(1))",
+            ast([['import', 'stdlib/string.ru'], ['define', 'f', ['lambda', [], ['string:push', ['string:new'], '1']]]]),
+            "var f = (function () { return ('' + String.fromCharCode(1)); });"
+        );
 
-        it('should convert all code points over 0x10000 correctly', function () {
-            var result = translator.listToArray(translator.stringToCodePointList('\uD800\uDC00'));
-            result.should.have.a.property(0, 65536);
-        });
+        it_should_translate_from_to(
+            "should translate (string:code-point-at-index string 0) to _charCodeAt(string, 0)",
+            ast([['import', 'stdlib/string.ru'], ['define', 'f', ['lambda', [], ['string:code-point-at-index', ['string:new'], '0']]]]),
+            "var f = (function () { return _charCodeAt('', 0); });"
+        );
+
+        it_should_translate_from_to(
+            "should translate (string:substring string 1 2) to string.substr(1, 2)",
+            ast([['import', 'stdlib/string.ru'], ['define', 'f', ['lambda', [], ['string:substring', ['string:new'], '1', '2']]]]),
+            "var f = (function () { return ''.substr(1, 2); });"
+        );
+
+        it_should_translate_from_to(
+            "should translate (string:equal? a b) to (a === b)",
+            ast([['import', 'stdlib/string.ru'], ['define', 'f', ['lambda', [], ['string:equal?', ['string:new'], ['string:new']]]]]),
+            "var f = (function () { return ('' === ''); });"
+        );
     });
 
     describe('listToArray', function () {
