@@ -14,7 +14,6 @@
 var should = require('should');
 var translator = require('../lib/javascript-translator/translator');
 var ast = require('../lib/ast-builder');
-var serialize = require('../lib/ast-serializer');
 var definitionImporter = require('../lib/definition-importer');
 
 var it_should_translate_from_to = function(text, from, to) {
