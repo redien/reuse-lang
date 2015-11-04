@@ -1,7 +1,7 @@
 
 (export factorial
     (lambda (x)
-        (define
+        (let
             (factorial-tail
                 (lambda (x accumulator)
                     (if (== x 1)

@@ -28,14 +28,14 @@
         list)))
 
 (export list:count (lambda (list)
-    (define (count-with-accumulator (lambda (list count)
+    (let (count-with-accumulator (lambda (list count)
         (if (nil? list)
             count
             (self (rest list) (+ count 1)))))
         (count-with-accumulator list 0))))
 
 (export list:take (lambda (list n)
-    (define (take-with-accumulator (lambda (list n new-list)
+    (let (take-with-accumulator (lambda (list n new-list)
         (if (== n 0)
             new-list
             (if (nil? list)
@@ -47,7 +47,7 @@
     (list:reverse (list:take (list:reverse list) n))))
 
 (export list:concatenate (lambda (first-list second-list)
-    (define (concatenate (lambda (first-list-reversed second-list)
+    (let (concatenate (lambda (first-list-reversed second-list)
         (if (nil? first-list-reversed)
             second-list
             (self (rest first-list-reversed) (cons (first first-list-reversed) second-list)))))

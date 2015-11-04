@@ -85,21 +85,21 @@ describe('stdlib/string.ru', function () {
         it_should_evaluate_expression_to_value_given_program(
             'module.value()',
             true,
-            '(import stdlib/string.ru) (export value (lambda () (define (string (string:concatenate (string:push (string:push (string:new) 1) 2) (string:new))) (string:equal? (string:push (string:push (string:new) 1) 2) string))))',
+            '(import stdlib/string.ru) (export value (lambda () (let (string (string:concatenate (string:push (string:push (string:new) 1) 2) (string:new))) (string:equal? (string:push (string:push (string:new) 1) 2) string))))',
             'should return the first string given an empty string as the second'
         );
 
         it_should_evaluate_expression_to_value_given_program(
             'module.value()',
             true,
-            '(import stdlib/string.ru) (export value (lambda () (define (string (string:concatenate (string:new) (string:push (string:push (string:new) 1) 2))) (string:equal? (string:push (string:push (string:new) 1) 2) string))))',
+            '(import stdlib/string.ru) (export value (lambda () (let (string (string:concatenate (string:new) (string:push (string:push (string:new) 1) 2))) (string:equal? (string:push (string:push (string:new) 1) 2) string))))',
             'should return the second string given an empty string as the first'
         );
 
         it_should_evaluate_expression_to_value_given_program(
             'module.value()',
             true,
-            '(import stdlib/string.ru) (export value (lambda () (define (string (string:concatenate (string:push (string:push (string:new) 1) 2) (string:push (string:push (string:new) 4) 5))) (string:equal? (string:push (string:push (string:push (string:push (string:new) 1) 2) 4) 5) string))))',
+            '(import stdlib/string.ru) (export value (lambda () (let (string (string:concatenate (string:push (string:push (string:new) 1) 2) (string:push (string:push (string:new) 4) 5))) (string:equal? (string:push (string:push (string:push (string:push (string:new) 1) 2) 4) 5) string))))',
             'should return a combined string with the code points of the first string, first and the second string, second given two non-empty strings'
         );
 

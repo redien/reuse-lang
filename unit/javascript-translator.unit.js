@@ -137,16 +137,16 @@ describe('Javascript translator', function () {
         );
     });
 
-    describe('Variable Definition', function () {
+    describe('Let-expression', function () {
         it_should_translate_from_to(
             'define a variable in an expression',
-            ast([['export', 'f', ['lambda', ['x'], ['define', ['a', 'x'], 'a']]]]),
+            ast([['export', 'f', ['lambda', ['x'], ['let', ['a', 'x'], 'a']]]]),
             'var f = (function (x) { return (function (a) { return a; })(x); }); module.exports.f = f;'
         );
 
         it_should_translate_from_to(
             'define several variables in an expression',
-            ast([['export', 'f', ['lambda', ['x', 'y'], ['define', ['a', 'x', 'b', 'y'], ['a', 'b']]]]]),
+            ast([['export', 'f', ['lambda', ['x', 'y'], ['let', ['a', 'x', 'b', 'y'], ['a', 'b']]]]]),
             'var f = (function (x, y) { return (function (a, b) { return a(b); })(x, y); }); module.exports.f = f;'
         );
     });
@@ -154,19 +154,19 @@ describe('Javascript translator', function () {
     describe('Symbol encoding', function () {
         it_should_translate_from_to(
             'encode symbols of any number of unicode characters',
-            ast([['export', 'f', ['lambda', ['x'], ['define', ['金魚', 'x'], '金魚']]]]),
+            ast([['export', 'f', ['lambda', ['x'], ['let', ['金魚', 'x'], '金魚']]]]),
             'var f = (function (x) { return (function (_37329_39770) { return _37329_39770; })(x); }); module.exports.f = f;'
         );
 
         it_should_translate_from_to(
             'encode digits as well to avoid ambiguity in the encoding',
-            ast([['export', 'f', ['lambda', ['x'], ['define', ['a123', 'x'], 'a123']]]]),
+            ast([['export', 'f', ['lambda', ['x'], ['let', ['a123', 'x'], 'a123']]]]),
             'var f = (function (x) { return (function (a_49_50_51) { return a_49_50_51; })(x); }); module.exports.f = f;'
         );
 
         it_should_translate_from_to(
             'not encode numbers',
-            ast([['export', 'f', ['lambda', [], ['define', ['abc', '123'], 'abc']]]]),
+            ast([['export', 'f', ['lambda', [], ['let', ['abc', '123'], 'abc']]]]),
             'var f = (function () { return (function (abc) { return abc; })(123); }); module.exports.f = f;'
         );
 

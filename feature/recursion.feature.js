@@ -14,7 +14,7 @@
 
 var it_should_evaluate_expression_to_value_given_program = require('./util/expect-value');
 
-var factorialProgram = '(export factorial (lambda (x) (define (factorial-tail (lambda (x accumulator) (if (<= x 1) accumulator (self (- x 1) (* accumulator x))))) (factorial-tail x 1))))';
+var factorialProgram = '(export factorial (lambda (x) (let (factorial-tail (lambda (x accumulator) (if (<= x 1) accumulator (self (- x 1) (* accumulator x))))) (factorial-tail x 1))))';
 
 describe('Recursion', function () {
     it_should_evaluate_expression_to_value_given_program(

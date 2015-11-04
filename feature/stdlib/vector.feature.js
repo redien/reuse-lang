@@ -87,7 +87,7 @@ describe('stdlib/vector.ru', function () {
         it_should_evaluate_expression_to_value_given_program(
             'module.value()',
             2,
-            '(import stdlib/vector.ru) (export value (lambda () (define (two-element (vector:push (vector:push (vector:new) 42) 24)) (define (one-element (vector:pop two-element)) (vector:length two-element)))))',
+            '(import stdlib/vector.ru) (export value (lambda () (let (two-element (vector:push (vector:push (vector:new) 42) 24)) (let (one-element (vector:pop two-element)) (vector:length two-element)))))',
             'should not modify the original vector'
         );
     });
@@ -96,7 +96,7 @@ describe('stdlib/vector.ru', function () {
         it_should_evaluate_expression_to_value_given_program(
             'module.value()',
             1,
-            '(import stdlib/vector.ru) (export value (lambda () (define (one-element (vector:push (vector:new) 42)) (define (two-element (vector:push one-element 24)) (vector:length one-element)))))',
+            '(import stdlib/vector.ru) (export value (lambda () (let (one-element (vector:push (vector:new) 42)) (let (two-element (vector:push one-element 24)) (vector:length one-element)))))',
             'should not modify the original vector'
         );
     });

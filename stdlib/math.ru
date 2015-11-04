@@ -1,6 +1,6 @@
 
 (export math:pow (lambda (base exponent)
-    (define (pow-with-accumulator (lambda (base exponent accumulator)
+    (let (pow-with-accumulator (lambda (base exponent accumulator)
         (if (== exponent 0)
             accumulator
             (self base (- exponent 1) (* base accumulator)))))
