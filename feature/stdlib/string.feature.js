@@ -198,4 +198,127 @@ describe('stdlib/string.ru', function () {
             'should return an empty string when length is negative'
         );
     });
+
+    describe('string:decimal-string-from-integer', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(import stdlib/string.ru) (export value (lambda () (string:equal? (string:decimal-string-from-integer 0) (string:push (string:new) 48))))',
+            "should return '0' given 0"
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(import stdlib/string.ru) (export value (lambda () (string:equal? (string:decimal-string-from-integer 9) (string:push (string:new) 57))))',
+            "should return '9' given 9"
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(import stdlib/string.ru) (export value (lambda () (string:equal? (string:decimal-string-from-integer 10) (string:push (string:push (string:new) 49) 48))))',
+            "should return '10' given 10"
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(import stdlib/string.ru) (export value (lambda () (string:equal? (string:decimal-string-from-integer 19) (string:push (string:push (string:new) 49) 57))))',
+            "should return '19' given 19"
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(import stdlib/string.ru) (export value (lambda () (string:equal? (string:decimal-string-from-integer 21) (string:push (string:push (string:new) 50) 49))))',
+            "should return '21' given 21"
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(import stdlib/string.ru) (export value (lambda () (string:equal? (string:decimal-string-from-integer 2147483647) (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:new) 50) 49) 52) 55) 52) 56) 51) 54) 52) 55))))',
+            "should return '2147483647' given 2147483647"
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(import stdlib/string.ru) (export value (lambda () (string:equal? (string:decimal-string-from-integer (- 0 123)) (string:push (string:push (string:push (string:push (string:new) 45) 49) 50) 51))))',
+            "should return '-123' given -123"
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(import stdlib/string.ru) (export value (lambda () (string:equal? (string:decimal-string-from-integer (- (- 0 2147483647) 1)) (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:new) 45) 50) 49) 52) 55) 52) 56) 51) 54) 52) 56))))',
+            "should return '-2147483648' given -2147483648"
+        );
+    });
+
+    describe('string:integer-from-decimal-string', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(import stdlib/string.ru) (export value (lambda () (== (string:integer-from-decimal-string (string:new)) 0)))',
+            "should return 0 given ''"
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(import stdlib/string.ru) (export value (lambda () (== (string:integer-from-decimal-string (string:push (string:new) 48)) 0)))',
+            "should return 0 given '0'"
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(import stdlib/string.ru) (export value (lambda () (== (string:integer-from-decimal-string (string:push (string:new) 57)) 9)))',
+            "should return 9 given '9'"
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(import stdlib/string.ru) (export value (lambda () (== (string:integer-from-decimal-string (string:push (string:push (string:new) 49) 48)) 10)))',
+            "should return 10 given '10'"
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(import stdlib/string.ru) (export value (lambda () (== (string:integer-from-decimal-string (string:push (string:push (string:new) 49) 57)) 19)))',
+            "should return 19 given '19'"
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(import stdlib/string.ru) (export value (lambda () (== (string:integer-from-decimal-string (string:push (string:push (string:new) 50) 49)) 21)))',
+            "should return 21 given '21'"
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(import stdlib/string.ru) (export value (lambda () (== (string:integer-from-decimal-string (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:new) 50) 49) 52) 55) 52) 56) 51) 54) 52) 55)) 2147483647)))',
+            "should return 2147483647 given '2147483647'"
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(import stdlib/string.ru) (export value (lambda () (== (string:integer-from-decimal-string (string:push (string:push (string:push (string:push (string:new) 45) 49) 50) 51)) (- 0 123))))',
+            "should return -123 given '-123'"
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(import stdlib/string.ru) (export value (lambda () (== (string:integer-from-decimal-string (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:new) 45) 50) 49) 52) 55) 52) 56) 51) 54) 52) 56)) (- (- 0 2147483647) 1))))',
+            "should return -2147483648 given '-2147483648'"
+        );
+    });
 });

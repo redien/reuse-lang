@@ -60,6 +60,12 @@ describe('Integers', function () {
     );
 
     it_should_evaluate_expression_to_value_given_program(
+        'module.modulus(11, 3)',
+        2,
+        '(export modulus (lambda (a b) (% a b)))'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
         'module.greaterThan(3, 2)',
         true,
         '(export greaterThan (lambda (a b) (> a b)))'
