@@ -22,8 +22,8 @@ var result = reuse.translate(program, function (moduleName) {
 
 if (result.error) {
     console.error('\n');
-    console.error('> Encountered error: ' + result.error.message);
-    console.error('>   at line ' + result.error.line + ' column ' + result.error.column);
+    console.error('> Encountered error: ' + result.error);
+    console.error('>   at line ' + result.line + ' column ' + result.column);
     console.error('');
 } else {
     process.stdout.write(result.value);
