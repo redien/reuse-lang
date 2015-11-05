@@ -20,11 +20,4 @@ describe('Let', function () {
         '(export identity (lambda (x) (let (a x) a)))',
         'Should define new symbol in expression'
     );
-
-    it_should_evaluate_expression_to_value_given_program(
-        'module.identity(3, 4)',
-        4,
-        '(export identity (lambda (x y) (let (a x b y) b)))',
-        'Should define several new symbols in expression'
-    );
 });

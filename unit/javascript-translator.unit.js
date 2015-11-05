@@ -143,12 +143,6 @@ describe('Javascript translator', function () {
             ast([['export', 'f', ['lambda', ['x'], ['let', ['a', 'x'], 'a']]]]),
             'var f = (function (x) { return (function (a) { return a; })(x); }); module.exports.f = f;'
         );
-
-        it_should_translate_from_to(
-            'define several variables in an expression',
-            ast([['export', 'f', ['lambda', ['x', 'y'], ['let', ['a', 'x', 'b', 'y'], ['a', 'b']]]]]),
-            'var f = (function (x, y) { return (function (a, b) { return a(b); })(x, y); }); module.exports.f = f;'
-        );
     });
 
     describe('Symbol encoding', function () {

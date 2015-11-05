@@ -17,6 +17,6 @@ describe('Symbol Names', function () {
     it_should_evaluate_expression_to_value_given_program(
         'module.value',
         42,
-        '(export value (let ( 3 Å, 42) Å,))'
+        '(export value (let ( 3) (let (Å, 42) Å,)))'
     );
 });
