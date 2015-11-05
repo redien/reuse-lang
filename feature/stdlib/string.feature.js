@@ -35,6 +35,13 @@ describe('stdlib/string.ru', function () {
             '(import stdlib/string.ru) (export value (lambda () (string:length (string:push (string:push (string:push (string:new) 75) 76) 77))))',
             'should return n for a string with n code points'
         );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            1,
+            '(import stdlib/string.ru) (export value (lambda () (string:length (string:push (string:new) 135153))))',
+            'should return the right length for a string with code points 65536 and over'
+        );
     });
 
     describe('string:code-point-at-index', function () {
@@ -61,15 +68,15 @@ describe('stdlib/string.ru', function () {
 
         it_should_evaluate_expression_to_value_given_program(
             'module.value()',
-            44,
-            '(import stdlib/string.ru) (export value (lambda () (string:code-point-at-index (string:push (string:push (string:new) 65536) 44) 1)))',
+            135153,
+            '(import stdlib/string.ru) (export value (lambda () (string:code-point-at-index (string:push (string:push (string:new) 135152) 135153) 1)))',
             'should handle unicode points 65536 and over properly'
         );
 
         it_should_evaluate_expression_to_value_given_program(
             'module.value()',
             0,
-            '(import stdlib/string.ru) (export value (lambda () (string:code-point-at-index (string:push (string:push (string:new) 65536) 44) 2)))',
+            '(import stdlib/string.ru) (export value (lambda () (string:code-point-at-index (string:push (string:push (string:new) 33) 44) 2)))',
             'should return 0 when the index is greater than the string length'
         );
     });

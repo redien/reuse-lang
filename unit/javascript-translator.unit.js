@@ -48,7 +48,6 @@ var checkTranslation = function (from, to) {
                 'string:push',
                 'string:code-point-at-index',
                 'string:concatenate',
-                'string:substring',
                 'string:equal?'
             ]);
         }
@@ -295,27 +294,21 @@ describe('Javascript translator', function () {
         );
 
         it_should_translate_from_to(
-            "should translate (string:length string) to string.length",
+            "should translate (string:length string) to _string_length(string)",
             ast([['import', 'stdlib/string.ru'], ['define', 'f', ['lambda', [], ['string:length', ['string:new']]]]]),
-            "var f = (function () { return ''.length; });"
+            "var f = (function () { return _string_length(''); });"
         );
 
         it_should_translate_from_to(
-            "should translate (string:push string 1) to (string + String.fromCharCode(1))",
+            "should translate (string:push string 1) to _string_push(string, 1)",
             ast([['import', 'stdlib/string.ru'], ['define', 'f', ['lambda', [], ['string:push', ['string:new'], '1']]]]),
-            "var f = (function () { return ('' + String.fromCharCode(1)); });"
+            "var f = (function () { return _string_push('', 1); });"
         );
 
         it_should_translate_from_to(
             "should translate (string:code-point-at-index string 0) to _charCodeAt(string, 0)",
             ast([['import', 'stdlib/string.ru'], ['define', 'f', ['lambda', [], ['string:code-point-at-index', ['string:new'], '0']]]]),
             "var f = (function () { return _charCodeAt('', 0); });"
-        );
-
-        it_should_translate_from_to(
-            "should translate (string:substring string 1 2) to string.substr(1, 2)",
-            ast([['import', 'stdlib/string.ru'], ['define', 'f', ['lambda', [], ['string:substring', ['string:new'], '1', '2']]]]),
-            "var f = (function () { return ''.substr(1, 2); });"
         );
 
         it_should_translate_from_to(

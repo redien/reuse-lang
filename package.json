@@ -4,11 +4,12 @@
     "description": "",
     "main": "reuse.js",
     "scripts": {
-        "test": "mocha \"**/*.unit.js\" \"**/*.feature.js\"",
-        "coverage-travis-ci": "mocha --require blanket -R travis-cov \"**/*.unit.js\" \"**/*.feature.js\"",
+        "build": "node reuse lib/symbol-name-encoder.ru > lib/_symbol-name-encoder.js; mv lib/_symbol-name-encoder.js lib/symbol-name-encoder.js",
+        "test": "npm run-script build; mocha \"**/*.unit.js\" \"**/*.feature.js\"",
+        "coverage-travis-ci": "npm run-script build; mocha --require blanket -R travis-cov \"**/*.unit.js\" \"**/*.feature.js\"",
         "coverage-coveralls-io": "./utility-scripts/coveralls.sh",
-        "coverage": "mocha --require blanket -R html-cov \"**/*.unit.js\" \"**/*.feature.js\" > coverage.html",
-        "unit-test": "mocha \"**/*.unit.js\""
+        "coverage": "npm run-script build; mocha --require blanket -R html-cov \"**/*.unit.js\" \"**/*.feature.js\" > coverage.html",
+        "unit-test": "npm run-script build; mocha \"**/*.unit.js\""
     },
     "author": "Jesper Oskarsson",
     "license": "Public Domain",

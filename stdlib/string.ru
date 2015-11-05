@@ -1,6 +1,5 @@
 
 (import stdlib/list.ru)
-(import stdlib/math.ru)
 
 (export string:new (lambda ()
     (cons 0 nil)))
@@ -24,24 +23,23 @@
         (+ (first first-string) (first second-string))
         (list:concatenate (rest second-string) (rest first-string)))))
 
-(export string:substring (lambda (string start new-length)
-    (let (offset-by (lambda (list n)
-        (if (<= n 0)
-            list
-            (self (rest list) (- n 1)))))
-    (let (length (string:length string))
-    (let (end (if (> (+ start new-length) length) length (+ start new-length)))
-    (let (start (if (> start length) length start))
-    (let (new-length (if (< new-length 0) 0 (- end start)))
-    (cons
-        new-length
-        (list:take
-            (offset-by
-                (rest string)
-                (- (string:length string) end))
-            new-length)))))))))
 
 
+(comment Functions below are not dependent on the implementation above using
+    lists. It can thus be used even if the above functions are implemented
+    as the language's native data types.)
+
+(import stdlib/math.ru)
+
+(export string:substring (lambda (string start length)
+    (if (< length 0)
+        (string:new)
+        (let (string-length (string:length string))
+        (let (substring-with-accumulator (lambda (string offset length new-string)
+            (if (or (== length 0) (>= offset string-length))
+                new-string
+                (self string (+ offset 1) (- length 1) (string:push new-string (string:code-point-at-index string offset))))))
+        (substring-with-accumulator string start length (string:new)))))))
 
 (export string:equal? (lambda (first-string second-string)
     (let (code-point-equal? (lambda (first-string second-string index)
