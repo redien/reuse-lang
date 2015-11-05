@@ -44,7 +44,13 @@
         (list:reverse (take-with-accumulator list n nil)))))
 
 (export list:take-last (lambda (list n)
-    (list:reverse (list:take (list:reverse list) n))))
+    (let (count (list:count list))
+    (let (items-to-take (- count n))
+    (let (list-at-hop (lambda (list index)
+        (if (> index 0)
+            (self (rest list) (- index 1))
+            list)))
+    (list-at-hop list items-to-take))))))
 
 (export list:concatenate (lambda (first-list second-list)
     (let (concatenate (lambda (first-list-reversed second-list)

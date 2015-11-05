@@ -41,6 +41,8 @@
                 (- (string:length string) end))
             new-length)))))))))
 
+
+
 (export string:equal? (lambda (first-string second-string)
     (let (code-point-equal? (lambda (first-string second-string index)
         (if (< index (string:length first-string))
@@ -53,8 +55,6 @@
     (if (!= (string:length first-string) (string:length second-string))
         false
         (code-point-equal? first-string second-string 0)))))
-
-
 
 (export string:decimal-string-from-integer (lambda (original-integer)
     (let (min-value-string (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:new) 45) 50) 49) 52) 55) 52) 56) 51) 54) 52) 56))
