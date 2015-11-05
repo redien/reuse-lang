@@ -324,28 +324,4 @@ describe('Javascript translator', function () {
             "var f = (function () { return ('' === ''); });"
         );
     });
-
-    describe('listToArray', function () {
-        it('should return an empty array given nil', function () {
-            var result = translator.listToArray(null);
-            result.should.be.instanceOf(Array);
-            result.should.have.a.lengthOf(0);
-        });
-
-        it('should return an array with the first item in the list given a list with one item', function () {
-            var result = translator.listToArray([1, null]);
-            result.should.be.instanceOf(Array);
-            result.should.have.a.property(0, 1);
-            result.should.have.a.lengthOf(1);
-        });
-
-        it('should return an array with all items given a list with several items', function () {
-            var result = translator.listToArray([1, [3, [2, null]]]);
-            result.should.be.instanceOf(Array);
-            result.should.have.a.lengthOf(3);
-            result.should.have.a.property(0, 1);
-            result.should.have.a.property(1, 3);
-            result.should.have.a.property(2, 2);
-        });
-    });
 });
