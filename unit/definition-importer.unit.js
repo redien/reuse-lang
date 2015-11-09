@@ -120,7 +120,8 @@ describe('definition-importer', function () {
         var imported = importer.import(original, function (moduleName) {
             if (moduleName === 'module-name') {
                 return ast([
-                    ['export', 'efg', '456']
+                    ['export', 'efg', '456'],
+                    ['export', 'cde', '762']
                 ]);
             } else if (moduleName === 'module2') {
                 return ast([
@@ -130,7 +131,8 @@ describe('definition-importer', function () {
         });
 
         ast.value(ast.expression(ast.expression(imported, 0), 3)).should.equal('module-name');
+        ast.value(ast.expression(ast.expression(imported, 1), 3)).should.equal('module-name');
 
-        ast.value(ast.expression(ast.expression(imported, 1), 3)).should.equal('module2');
+        ast.value(ast.expression(ast.expression(imported, 2), 3)).should.equal('module2');
     });
 });

@@ -168,6 +168,12 @@ describe('Javascript translator', function () {
             ast([['define', '金魚', '1']]),
             'var _37329_39770 = 1;'
         );
+
+        it_should_translate_from_to(
+            'encode import as an identifier',
+            ast([['export', 'import', '1']]),
+            'var _reserved_import = 1; module.exports.import = _reserved_import;'
+        );
     });
 
     describe('Statements', function () {
@@ -222,6 +228,12 @@ describe('Javascript translator', function () {
                 'var abc = 123;'
             );
         });
+
+        it_should_translate_from_to(
+            'should strip comments from the output',
+            ast([['comment', 'some', 'symbols'], ['define-from-import', 'abc', '123', 'module']]),
+            'var abc = 123;'
+        );
 
         it('should return an invalid_statement error for an invalid statement', function () {
             var result = translator.translate(
