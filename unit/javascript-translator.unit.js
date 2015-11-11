@@ -12,9 +12,8 @@
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 var should = require('should');
-var translator = require('../lib/javascript-translator/translator');
 var ast = require('../lib/ast-builder');
-var definitionImporter = require('../lib/definition-importer');
+var translator = require('../lib/javascript-translator/translator');
 
 var it_should_translate_from_to = function(text, from, to) {
     it(text, function () {
@@ -22,37 +21,8 @@ var it_should_translate_from_to = function(text, from, to) {
     });
 };
 
-var dummyExportsForModule = function (moduleName, exports) {
-    var program = ast([]);
-    exports.forEach(function (name) {
-        ast.push(program, ast(['export', name, '1']));
-    });
-    return program;
-};
-
 var checkTranslation = function (from, to) {
-    var imported = definitionImporter.import(from, function (moduleName) {
-        if (moduleName === 'stdlib/vector.ru') {
-            return dummyExportsForModule(moduleName, [
-                'vector:new',
-                'vector:length',
-                'vector:push',
-                'vector:pop',
-                'vector:element-at-index',
-                'vector:last-element'
-            ]);
-        } else if (moduleName === 'stdlib/string.ru') {
-            return dummyExportsForModule(moduleName, [
-                'string:new',
-                'string:length',
-                'string:push',
-                'string:code-point-at-index',
-                'string:concatenate',
-                'string:equal?'
-            ]);
-        }
-    });
-    var result = translator.translate(imported);
+    var result = translator.translate(from);
     if (translator.isError(result)) { throw new Error(translator.errorType(result)); }
     translator.value(result)
         .match(/\n(.+)$/)[1] // Only compare the last line.
@@ -257,37 +227,37 @@ describe('Javascript translator', function () {
     describe('stdlib/vector.ru', function () {
         it_should_translate_from_to(
             'should translate (vector:new) into []',
-            ast([['import', 'stdlib/vector.ru'], ['define', 'f', ['lambda', [], ['vector:new']]]]),
+            ast([['define-from-import', 'vector:new', '1', 'stdlib/vector.ru'], ['define', 'f', ['lambda', [], ['vector:new']]]]),
             'var f = (function () { return []; });'
         );
 
         it_should_translate_from_to(
             'should translate (vector:length vector) into vector.length',
-            ast([['import', 'stdlib/vector.ru'], ['define', 'f', ['lambda', [], ['vector:length', ['vector:new']]]]]),
+            ast([['define-from-import', 'vector:new', '1', 'stdlib/vector.ru'], ['define-from-import', 'vector:length', '1', 'stdlib/vector.ru'], ['define', 'f', ['lambda', [], ['vector:length', ['vector:new']]]]]),
             'var f = (function () { return [].length; });'
         );
 
         it_should_translate_from_to(
             "should translate (vector:push vector value) into (function (vector') { return vector'.push(1), vector'; })(vector)",
-            ast([['import', 'stdlib/vector.ru'], ['define', 'f', ['lambda', [], ['vector:push', ['vector:new'], '1']]]]),
+            ast([['define-from-import', 'vector:new', '1', 'stdlib/vector.ru'], ['define-from-import', 'vector:push', '1', 'stdlib/vector.ru'], ['define', 'f', ['lambda', [], ['vector:push', ['vector:new'], '1']]]]),
             'var f = (function () { return (function (vector) { return vector.push(1), vector; })([].slice()); });'
         );
 
         it_should_translate_from_to(
             "should translate (vector:pop vector) into vector.slice(0, -1)",
-            ast([['import', 'stdlib/vector.ru'], ['define', 'f', ['lambda', [], ['vector:pop', ['vector:new']]]]]),
+            ast([['define-from-import', 'vector:new', '1', 'stdlib/vector.ru'], ['define-from-import', 'vector:pop', '1', 'stdlib/vector.ru'], ['define', 'f', ['lambda', [], ['vector:pop', ['vector:new']]]]]),
             'var f = (function () { return [].slice(0, -1); });'
         );
 
         it_should_translate_from_to(
             'should translate (vector:element-at-index vector index) into vector[index]',
-            ast([['import', 'stdlib/vector.ru'], ['define', 'f', ['lambda', [], ['vector:element-at-index', ['vector:new'], '0']]]]),
+            ast([['define-from-import', 'vector:new', '1', 'stdlib/vector.ru'], ['define-from-import', 'vector:element-at-index', '1', 'stdlib/vector.ru'], ['define', 'f', ['lambda', [], ['vector:element-at-index', ['vector:new'], '0']]]]),
             'var f = (function () { return [][0]; });'
         );
 
         it_should_translate_from_to(
             "should translate (vector:last-element vector) into (function (vector') { return vector'[vector'.length]; })(vector)",
-            ast([['import', 'stdlib/vector.ru'], ['define', 'f', ['lambda', [], ['vector:last-element', ['vector:new']]]]]),
+            ast([['define-from-import', 'vector:new', '1', 'stdlib/vector.ru'], ['define-from-import', 'vector:last-element', '1', 'stdlib/vector.ru'], ['define', 'f', ['lambda', [], ['vector:last-element', ['vector:new']]]]]),
             'var f = (function () { return (function (vector) { return vector[vector.length - 1]; })([]); });'
         );
 
@@ -301,31 +271,31 @@ describe('Javascript translator', function () {
     describe('stdlib/string.ru', function () {
         it_should_translate_from_to(
             "should translate (string:new) to ''",
-            ast([['import', 'stdlib/string.ru'], ['define', 'f', ['lambda', [], ['string:new']]]]),
+            ast([['define-from-import', 'string:new', '1', 'stdlib/string.ru'], ['define', 'f', ['lambda', [], ['string:new']]]]),
             "var f = (function () { return ''; });"
         );
 
         it_should_translate_from_to(
             "should translate (string:length string) to _string_length(string)",
-            ast([['import', 'stdlib/string.ru'], ['define', 'f', ['lambda', [], ['string:length', ['string:new']]]]]),
+            ast([['define-from-import', 'string:new', '1', 'stdlib/string.ru'], ['define-from-import', 'string:length', '1', 'stdlib/string.ru'], ['define', 'f', ['lambda', [], ['string:length', ['string:new']]]]]),
             "var f = (function () { return _string_length(''); });"
         );
 
         it_should_translate_from_to(
             "should translate (string:push string 1) to _string_push(string, 1)",
-            ast([['import', 'stdlib/string.ru'], ['define', 'f', ['lambda', [], ['string:push', ['string:new'], '1']]]]),
+            ast([['define-from-import', 'string:new', '1', 'stdlib/string.ru'], ['define-from-import', 'string:push', '1', 'stdlib/string.ru'], ['define', 'f', ['lambda', [], ['string:push', ['string:new'], '1']]]]),
             "var f = (function () { return _string_push('', 1); });"
         );
 
         it_should_translate_from_to(
             "should translate (string:code-point-at-index string 0) to _charCodeAt(string, 0)",
-            ast([['import', 'stdlib/string.ru'], ['define', 'f', ['lambda', [], ['string:code-point-at-index', ['string:new'], '0']]]]),
+            ast([['define-from-import', 'string:new', '1', 'stdlib/string.ru'], ['define-from-import', 'string:code-point-at-index', '1', 'stdlib/string.ru'], ['define', 'f', ['lambda', [], ['string:code-point-at-index', ['string:new'], '0']]]]),
             "var f = (function () { return _charCodeAt('', 0); });"
         );
 
         it_should_translate_from_to(
             "should translate (string:equal? a b) to (a === b)",
-            ast([['import', 'stdlib/string.ru'], ['define', 'f', ['lambda', [], ['string:equal?', ['string:new'], ['string:new']]]]]),
+            ast([['define-from-import', 'string:new', '1', 'stdlib/string.ru'], ['define-from-import', 'string:equal?', '1', 'stdlib/string.ru'], ['define', 'f', ['lambda', [], ['string:equal?', ['string:new'], ['string:new']]]]]),
             "var f = (function () { return ('' === ''); });"
         );
     });
