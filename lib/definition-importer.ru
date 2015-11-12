@@ -71,6 +71,10 @@
 (define new-define-from-import-atom (lambda (line column) (parse-tree:atom (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:new) 100) 101) 102) 105) 110) 101) 45) 102) 114) 111) 109) 45) 105) 109) 112) 111) 114) 116) line column)))
 
 (export import (lambda (program module-loader)
+    (let (make-state (lambda (program statement-index module-name redefine-exports)
+        (cons program (cons statement-index (cons module-name redefine-exports)))))
+    (let (append-state (lambda (state-list state)
+        (cons state state-list)))
     (let (convert-module (lambda (state new-program)
         (if (nil? state)
             new-program
@@ -82,11 +86,11 @@
 
             (let (state-for-next-statement (lambda ()
                 (if (< statement-index (parse-tree:count program))
-                    (cons (cons program (cons (+ statement-index 1) (cons module-name redefine-exports))) (rest state))
+                    (append-state (rest state) (make-state program (+ statement-index 1) module-name redefine-exports))
                     (rest state))))
 
             (let (state-with-imported-module (lambda (module-name)
-                (cons (cons (module-loader module-name) (cons 0 (cons module-name true))) (state-for-next-statement))))
+                (append-state (state-for-next-statement) (make-state (module-loader module-name) 0 module-name true))))
 
             (let (statement (parse-tree:child program statement-index))
             (let (form-name (parse-tree:value (parse-tree:child statement 0)))
@@ -110,4 +114,4 @@
                     (state-for-next-statement)))
 
             (self next-state new-program)))))))))))))))
-    (convert-module (cons (cons program (cons 0 (cons (string:new) false))) nil) (parse-tree:list)))))
+    (convert-module (append-state nil (make-state program 0 (string:new) false)) (parse-tree:list)))))))
