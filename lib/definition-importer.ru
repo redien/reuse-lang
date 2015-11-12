@@ -16,54 +16,7 @@
 
 (import stdlib/list.ru)
 (import stdlib/string.ru)
-
-(define parse-tree:list-kind (string:push (string:push (string:push (string:push (string:new) 108) 105) 115) 116))
-(define parse-tree:atom-kind (string:push (string:push (string:push (string:push (string:new) 97) 116) 111) 109))
-
-(define parse-tree:atom (lambda (value line column)
-    (cons 1 (cons value (cons line (cons column nil))))))
-
-(define parse-tree:list (lambda ()
-    (cons 0 nil)))
-
-(define parse-tree:kind (lambda (expression)
-    (if (== (first expression) 0)
-        parse-tree:list-kind
-        parse-tree:atom-kind)))
-
-(define parse-tree:atom? (lambda (expression)
-    (== (first expression) 1)))
-
-(define parse-tree:list? (lambda (expression)
-    (== (first expression) 0)))
-
-(define parse-tree:value (lambda (expression)
-    (first (rest expression))))
-
-(define parse-tree:line (lambda (expression)
-    (first (rest (rest expression)))))
-
-(define parse-tree:column (lambda (expression)
-    (first (rest (rest (rest expression))))))
-
-(define parse-tree:child (lambda (expression index)
-    (let (list (rest expression))
-    (let (count (list:count list))
-    (let (item-at-position (lambda (list index target-index)
-        (if (and (< index count) (< index target-index))
-            (self (rest list) (+ index 1))
-            (first list))))
-    (item-at-position list 0 index))))))
-
-(define parse-tree:count (lambda (expression)
-    (let (list (rest expression))
-    (list:count list))))
-
-(define parse-tree:push (lambda (expression child)
-    (let (list (rest expression))
-    (let (push-back (lambda (list item)
-        (list:concatenate list (cons item nil))))
-    (cons 0 (push-back list child))))))
+(import ./lib/parse-tree.ru)
 
 (define export-value (string:push (string:push (string:push (string:push (string:push (string:push (string:new) 101) 120) 112) 111) 114) 116))
 (define import-value (string:push (string:push (string:push (string:push (string:push (string:push (string:new) 105) 109) 112) 111) 114) 116))
