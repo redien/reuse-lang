@@ -70,12 +70,24 @@
 
 (define new-define-from-import-atom (lambda (line column) (parse-tree:atom (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:new) 100) 101) 102) 105) 110) 101) 45) 102) 114) 111) 109) 45) 105) 109) 112) 111) 114) 116) line column)))
 
+(define module-list-contains? (lambda (module-list module-name)
+    (if (nil? module-list)
+        false
+        (if (string:equal? module-name (first module-list))
+            true
+            (self (rest module-list) module-name)))))
+
+(define make-state (lambda (program statement-index module-name redefine-exports)
+    (cons program
+    (cons statement-index
+    (cons module-name
+          redefine-exports)))))
+
+(define append-state (lambda (state-list state)
+    (cons state state-list)))
+
 (export import (lambda (program module-loader)
-    (let (make-state (lambda (program statement-index module-name redefine-exports)
-        (cons program (cons statement-index (cons module-name redefine-exports)))))
-    (let (append-state (lambda (state-list state)
-        (cons state state-list)))
-    (let (convert-module (lambda (state new-program)
+    (let (convert-module (lambda (state new-program imported-modules)
         (if (nil? state)
             new-program
 
@@ -86,16 +98,30 @@
 
             (let (state-for-next-statement (lambda ()
                 (if (< statement-index (parse-tree:count program))
-                    (append-state (rest state) (make-state program (+ statement-index 1) module-name redefine-exports))
+                    (append-state
+                        (rest state)
+                        (make-state
+                            program
+                            (+ statement-index 1)
+                            module-name
+                            redefine-exports))
                     (rest state))))
 
             (let (state-with-imported-module (lambda (module-name)
-                (append-state (state-for-next-statement) (make-state (module-loader module-name) 0 module-name true))))
+                (append-state
+                    (state-for-next-statement)
+                    (make-state
+                        (module-loader module-name)
+                        0
+                        module-name
+                        true))))
 
             (let (statement (parse-tree:child program statement-index))
             (let (form-name (parse-tree:value (parse-tree:child statement 0)))
             (let (statement
-                (if (and redefine-exports (string:equal? export-value form-name))
+                (if (and
+                        redefine-exports
+                        (string:equal? export-value form-name))
                     (parse-tree:push (parse-tree:push (parse-tree:push (parse-tree:push (parse-tree:list)
                         (new-define-from-import-atom 0 0))
                         (parse-tree:child statement 1))
@@ -104,14 +130,37 @@
                     statement))
 
             (let (new-program
-                (if (or (string:equal? import-value form-name) (>= statement-index (parse-tree:count program)))
+                (if (or
+                        (string:equal? import-value form-name)
+                        (>= statement-index (parse-tree:count program)))
                     new-program
                     (parse-tree:push new-program statement)))
 
+            (let (module-import?
+                (and
+                    (string:equal? import-value form-name)
+                    (not (module-list-contains?
+                            imported-modules
+                            (parse-tree:value
+                                (parse-tree:child statement 1))))))
+
             (let (next-state
-                (if (string:equal? import-value form-name)
-                    (state-with-imported-module (parse-tree:value (parse-tree:child statement 1)))
+                (if module-import?
+                    (state-with-imported-module
+                        (parse-tree:value
+                            (parse-tree:child statement 1)))
                     (state-for-next-statement)))
 
-            (self next-state new-program)))))))))))))))
-    (convert-module (append-state nil (make-state program 0 (string:new) false)) (parse-tree:list)))))))
+            (let (imported-modules
+                (if module-import?
+                    (cons
+                        (parse-tree:value
+                            (parse-tree:child statement 1))
+                        imported-modules)
+                    imported-modules))
+
+            (self next-state new-program imported-modules)))))))))))))))))
+
+    (convert-module
+        (append-state nil (make-state program 0 (string:new) false))
+        (parse-tree:list) nil))))

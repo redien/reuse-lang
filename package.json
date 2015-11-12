@@ -5,11 +5,11 @@
     "main": "reuse.js",
     "scripts": {
         "build": "node reuse lib/symbol-name-encoder.ru > lib/_symbol-name-encoder.js && mv lib/_symbol-name-encoder.js lib/symbol-name-encoder.js && node reuse lib/definition-importer.ru > lib/_definition-importer.js && mv lib/_definition-importer.js lib/definition-importer.js",
-        "test": "npm run-script build && mocha \"**/*.unit.js\" \"**/*.feature.js\"",
+        "test": "npm run-script build && mocha -R progress \"**/*.unit.js\" \"**/*.feature.js\"",
         "coverage-travis-ci": "npm run-script build && mocha --require blanket -R travis-cov \"**/*.unit.js\" \"**/*.feature.js\"",
         "coverage-coveralls-io": "./utility-scripts/coveralls.sh",
         "coverage": "npm run-script build && mocha --require blanket -R html-cov \"**/*.unit.js\" \"**/*.feature.js\" > coverage.html",
-        "unit-test": "npm run-script build && mocha \"**/*.unit.js\""
+        "unit-test": "npm run-script build && mocha -R progress \"**/*.unit.js\""
     },
     "author": "Jesper Oskarsson",
     "license": "Public Domain",

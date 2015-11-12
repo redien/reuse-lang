@@ -28,6 +28,19 @@ describe('definition-importer', function () {
         ast.value(ast.expression(ast.expression(imported, 0), 2)).should.equal('123');
     });
 
+    it('should only import a module once', function () {
+        var original = ast([['import', 'module-name'], ['import', 'import-again']]);
+        var imported = importer.import(original, function (moduleName) {
+            if (moduleName === 'import-again') {
+                return ast([['import', 'module-name']]);
+            } else {
+                return ast([['export', 'abc', '123']]);
+            }
+        });
+
+        ast.count(imported).should.equal(1);
+    });
+
     it('should define all exported symbols of an imported module in the provided expression', function () {
         var original = ast([['import', 'module-name']]);
         var imported = importer.import(original, function (moduleName) {

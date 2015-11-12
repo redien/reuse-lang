@@ -87,4 +87,20 @@ describe('Booleans', function () {
             'should return false given false and false'
         );
     });
+
+    describe('not', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            false,
+            '(export value (lambda () (not true)))',
+            'should return false given true'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            true,
+            '(export value (lambda () (not false)))',
+            'should return true given false'
+        );
+    });
 });
