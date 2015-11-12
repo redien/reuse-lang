@@ -11,20 +11,13 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-var fs = require('fs');
-var reuse = require('./lib/reuse');
-var moduleLoader = require('./lib/module-loader');
+var it_should_evaluate_expression_to_value_given_program = require('./util/expect-value');
 
-var program = fs.readFileSync(process.argv[2]).toString();
-
-var result = reuse.translate(program, moduleLoader.loader);
-
-if (result.error) {
-    console.error('\n');
-    console.error('> Encountered error: ' + result.error);
-    console.error('>   at line ' + result.line + ' column ' + result.column);
-    console.error('');
-} else {
-    process.stdout.write(result.value);
-    process.stdout.write('\n');
-}
+describe('Importing local modules', function () {
+    it_should_evaluate_expression_to_value_given_program(
+        'module.value()',
+        50,
+        '(import ./feature/util/test-module.ru)(export value (lambda () (add-42 8)))',
+        'should import modules from the local filesystem given a relative path prepended by a dot'
+    );
+});
