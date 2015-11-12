@@ -20,13 +20,15 @@ describe('Recursion', function () {
     it_should_evaluate_expression_to_value_given_program(
         'module.factorial(10)',
         3628800,
-        factorialProgram
+        factorialProgram,
+        'should allow recursive function application using the self keyword'
     );
 
     it_should_evaluate_expression_to_value_given_program(
         'module.factorial(1000000)',
         0, // The result becomes zero due to the 32-bit integers.
            // When the iteration hits a result of 0 it will not change.
-        factorialProgram
+        factorialProgram,
+        'should not run out of stack space for long recursive functions'
     );
 });

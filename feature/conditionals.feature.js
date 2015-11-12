@@ -18,13 +18,15 @@ describe('Conditionals', function () {
         it_should_evaluate_expression_to_value_given_program(
             'module.value',
             1,
-            '(export value (if true 1 0))'
+            '(export value (if true 1 0))',
+            'should evaluate the first expression given true'
         );
 
         it_should_evaluate_expression_to_value_given_program(
             'module.value',
             0,
-            '(export value (if false 1 0))'
+            '(export value (if false 1 0))',
+            'should evaluate the second expression given false'
         );
     });
 });

@@ -18,6 +18,6 @@ describe('Let', function () {
         'module.identity(3)',
         3,
         '(export identity (lambda (x) (let (a x) a)))',
-        'Should define new symbol in expression'
+        'should define new symbol in expression'
     );
 });

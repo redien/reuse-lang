@@ -17,12 +17,14 @@ describe('Function Application', function () {
     it_should_evaluate_expression_to_value_given_program(
         'module.apply(1990)',
         1990,
-        '(export apply (lambda (x) ((lambda (a) a) x)))'
+        '(export apply (lambda (x) ((lambda (a) a) x)))',
+        'should apply anonymous lambda expressions'
     );
 
     it_should_evaluate_expression_to_value_given_program(
         'module.apply()',
         1111,
-        '(export apply (lambda () ((lambda (f x) (f x)) (lambda (a) a) 1111)))'
+        '(export apply (lambda () ((lambda (f x) (f x)) (lambda (a) a) 1111)))',
+        'should apply anonymous lambda expressions passed as arguments'
     );
 });
