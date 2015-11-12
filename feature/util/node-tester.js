@@ -13,7 +13,6 @@
 
 var fs = require('fs');
 var reuse = require(__dirname + '/../../lib/reuse');
-var moduleLoader = require('../../lib/module-loader');
 
 var generateTestModuleName = function () {
     // Make sure we don't get the cached module when we require.
@@ -24,7 +23,7 @@ module.exports.generateTestModuleName = generateTestModuleName;
 var evaluateExpressionWithProgram = function (expression, program) {
     var testModuleName = generateTestModuleName();
 
-    var translation = reuse.translate(program, moduleLoader.loader);
+    var translation = reuse.translate(program, reuse.moduleProvider);
 
     if (translation.error) {
         throw translation;

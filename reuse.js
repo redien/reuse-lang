@@ -13,11 +13,10 @@
 
 var fs = require('fs');
 var reuse = require('./lib/reuse');
-var moduleLoader = require('./lib/module-loader');
 
 var program = fs.readFileSync(process.argv[2]).toString();
 
-var result = reuse.translate(program, moduleLoader.loader);
+var result = reuse.translate(program, reuse.moduleProvider);
 
 if (result.error) {
     console.error('\n');
