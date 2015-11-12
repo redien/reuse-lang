@@ -69,21 +69,6 @@ describe('parser', function () {
         parser.errorType(result).should.equal('unbalanced_parentheses');
     });
 
-    it('should return an "expected_whitespace" error given an opening brace directly after an atom', function () {
-        var result = parser.parse('(abc())');
-        parser.errorType(result).should.equal('expected_whitespace');
-    });
-
-    it('should return an "expected_whitespace" error given a closing brace directly before an atom', function () {
-        var result = parser.parse('(()abc)');
-        parser.errorType(result).should.equal('expected_whitespace');
-    });
-
-    it('should return an "expected_whitespace" error given a closing brace directly before an opening brace', function () {
-        var result = parser.parse('(()())');
-        parser.errorType(result).should.equal('expected_whitespace');
-    });
-
     it('should parse (atom)', function () {
         var result = parser.value(parser.parse('(atom)'));
         ast.kind(ast.expression(ast.expression(result, 0), 0)).should.equal('atom');
