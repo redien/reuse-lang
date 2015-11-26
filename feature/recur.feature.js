@@ -14,20 +14,21 @@
 
 var it_should_evaluate_expression_to_value_given_program = require('./util/expect-value');
 
-var factorialProgram = '(export factorial (lambda (x) (let (factorial-tail (lambda (x accumulator) (if (<= x 1) accumulator (self (- x 1) (* accumulator x))))) (factorial-tail x 1))))';
+var factorialProgram = '(export factorial (lambda (x) (let (factorial-tail (lambda (x accumulator) (if (<= x 1) accumulator (recur (- x 1) (* accumulator x))))) (factorial-tail x 1))))';
 
-describe('Recursion', function () {
+describe('Optimized self-calls', function () {
     it_should_evaluate_expression_to_value_given_program(
         'module.factorial(10)',
         3628800,
         factorialProgram,
-        'should allow recursive function application using the self keyword'
+        'should allow recursive function application using the recur keyword'
     );
 
     it_should_evaluate_expression_to_value_given_program(
-        'module.value(15)',
-        55,
-        '(export value (lambda (x) (if (> x 10) (recur (- x 1)) (+ x (if (> x 0) (self (- x 1)) 0)))))',
-        'should allow both self- and recur calls in the same function'
+        'module.factorial(1000000)',
+        0, // The result becomes zero due to the 32-bit integers.
+           // When the iteration hits a result of 0 it will not change.
+        factorialProgram,
+        'should not run out of stack space for long recursive functions'
     );
 });

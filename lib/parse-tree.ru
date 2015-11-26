@@ -33,7 +33,7 @@
     (let (count (list:count list))
     (let (item-at-position (lambda (list index target-index)
         (if (and (< index count) (< index target-index))
-            (self (rest list) (+ index 1))
+            (recur (rest list) (+ index 1))
             (first list))))
     (item-at-position list 0 index))))))
 

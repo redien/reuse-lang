@@ -218,9 +218,15 @@ describe('Javascript translator', function () {
 
     describe('Recursion', function () {
         it_should_translate_from_to(
-            'should implement partial tail call optimization by optimizing self-calls',
-            ast([['export', 'f', ['lambda', ['a'], ['self', 'a']]]]),
-            'var f = (function (a) { var self = _generate_recursive_function(arguments); while (true) { var result; result = self(a); if (result !== null && typeof result === "object" && result._reuse_isRecurValue) { continue; } break; } return result; }); module.exports.f = f;'
+            'should implement stack-optimizating self-calls using the recur keyword',
+            ast([['define', 'f', ['lambda', ['a'], ['recur', 'a']]]]),
+            'var f = (function (a) { var recur = _generate_recursive_function(arguments); while (true) { var result; result = recur(a); if (result !== null && typeof result === "object" && result._reuse_isRecurValue) { continue; } break; } return result; });'
+        );
+
+        it_should_translate_from_to(
+            'should implement ordinary recursion using the self keyword',
+            ast([['define', 'f', ['lambda', ['a'], ['self', 'a']]]]),
+            'var f = (function self(a) { return self(a); });'
         );
     });
 

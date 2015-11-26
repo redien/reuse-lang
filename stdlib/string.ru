@@ -53,7 +53,7 @@
         (let (substring-with-accumulator (lambda (string offset length new-string)
             (if (or (== length 0) (>= offset string-length))
                 new-string
-                (self string (+ offset 1) (- length 1) (string:push new-string (string:code-point-at-index string offset))))))
+                (recur string (+ offset 1) (- length 1) (string:push new-string (string:code-point-at-index string offset))))))
         (substring-with-accumulator string start length (string:new)))))))
 
 (export string:equal? (lambda (first-string second-string)
@@ -62,7 +62,7 @@
             (if (==
                     (string:code-point-at-index first-string index)
                     (string:code-point-at-index second-string index))
-                (self first-string second-string (+ index 1))
+                (recur first-string second-string (+ index 1))
                 false)
             true)))
     (if (!= (string:length first-string) (string:length second-string))
@@ -84,7 +84,7 @@
                     (let (new-integer (- integer (* new-factor exponent)))
                     (let (new-exponent (/ exponent 10))
                     (let (new-string (if (!= original-integer new-integer) (string:push string (+ 48 new-factor)) string))
-                        (self new-integer new-string new-exponent new-factor))))))))
+                        (recur new-integer new-string new-exponent new-factor))))))))
             (decimal-string-from-integer-with-accumulators original-integer prefixed-string 1000000000 0))))))))))
 
 (export string:integer-from-decimal-string (lambda (string)
@@ -94,7 +94,7 @@
     (let (integer-from-decimal-string-with-accumulator (lambda (string index exponent integer)
         (if (== index length)
             (* negativity-factor integer)
-            (self string (+ index 1) (/ exponent 10) (+ integer (* exponent (- (string:code-point-at-index string index) 48)))))))
+            (recur string (+ index 1) (/ exponent 10) (+ integer (* exponent (- (string:code-point-at-index string index) 48)))))))
     (if (== length 0)
         0
         (let (exponent (math:pow 10 (- (- length start-index) 1)))

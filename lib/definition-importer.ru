@@ -28,7 +28,7 @@
         false
         (if (string:equal? module-name (first module-list))
             true
-            (self (rest module-list) module-name)))))
+            (recur (rest module-list) module-name)))))
 
 (define make-state (lambda (program statement-index module-name redefine-exports)
     (cons program
@@ -112,7 +112,7 @@
                         imported-modules)
                     imported-modules))
 
-            (self next-state new-program imported-modules)))))))))))))))))
+            (recur next-state new-program imported-modules)))))))))))))))))
 
     (convert-module
         (append-state nil (make-state program 0 (string:new) false))
