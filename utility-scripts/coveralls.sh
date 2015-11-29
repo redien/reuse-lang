@@ -20,7 +20,7 @@ job_version=`echo $TRAVIS_JOB_NUMBER | egrep -o "\.[0-9]$" | egrep -o [0-9]`
 if test -z "$job_version" -o "$job_version" = "1"
 then
     # Cover tests
-    mocha --require blanket -R mocha-lcov-reporter "**/*.unit.js" > javascript-coverage.info
+    mocha --timeout 30000 --require blanket -R mocha-lcov-reporter "**/*.unit.js" > javascript-coverage.info
 
     # Send to coveralls.io
     cat javascript-coverage.info | ./node_modules/coveralls/bin/coveralls.js

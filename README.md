@@ -9,7 +9,7 @@ node reuse.js example.reuse
 ```
 
 #### Target platforms
-| Target Hosts   | Node.js versions | Build Status | 
+| Target Hosts   | Node.js versions | Build Status |
 | :------------ | :----------: | :------------------: |
 | linux-gcc, osx | 0.10, 0.11, 0.12, iojs, 4.0, 4.1 | [![travis-ci build status](https://travis-ci.org/redien/reuse-lang.svg?branch=master)](https://travis-ci.org/redien/reuse-lang) |
 
@@ -31,12 +31,10 @@ The goal is **not** to do any of the following:
 
 Fork the project and install dependencies:
 ```
-npm install -g mocha
 npm install
 ```
 
-#### Test
-reuse-lang performs testing using mocha and should.js.
+then you can run the tests with:
 
 ```
 npm test
