@@ -12,24 +12,50 @@
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 var fs = require('fs');
-var reuse = require(__dirname + '/../../lib/reuse');
+var child_process = require('child_process');
 
-var generateTestModuleName = function () {
-    // Make sure we don't get the cached module when we require.
-    return __dirname + '/test-module' + Math.random() + '.js';
+var generateName = function (base, fileEnding) {
+    return __dirname + '/' + base + Math.random() + fileEnding;
 };
-module.exports.generateTestModuleName = generateTestModuleName;
 
-var evaluateExpressionWithProgram = function (expression, program) {
-    var testModuleName = generateTestModuleName();
+var writeTempFile = function (base, fileEnding, contents) {
+    var fileName = generateName(base, fileEnding);
+    fs.writeFileSync(fileName, contents);
+    return fileName;
+};
 
-    var translation = reuse.translate(program, reuse.moduleProvider);
+var translateProgramString = function (program) {
+    var inputFile = writeTempFile('input-file', '.ru', program);
+    try {
+        var json = child_process.execSync('node reuse.js ' + inputFile + ' --format=json', {
+            stdio: [null, null],
+            cwd: __dirname + '/../../',
+            timeout: 30000 // If process takes more than 30 seconds
+                           // something is wrong.
+        });
 
-    if (translation.error) {
-        throw translation;
+        try {
+            fs.unlinkSync(inputFile);
+        } catch (error) {}
+
+        var result = JSON.parse(json);
+        if (result.error) {
+            throw result;
+        }
+
+        return result.value;
+
+    } catch (error) {
+        try {
+            fs.unlinkSync(inputFile);
+        } catch (error) {}
+        throw error;
     }
+};
 
-    fs.writeFileSync(testModuleName, translation.value);
+var evaluate = function (expression, translation) {
+    // Make sure we don't get the cached module when we require.
+    var testModuleName = writeTempFile('test-module', '.js', translation);
 
     try {
         var module = require(testModuleName);
@@ -41,5 +67,10 @@ var evaluateExpressionWithProgram = function (expression, program) {
         fs.unlinkSync(testModuleName);
         throw exception;
     }
+};
+
+var evaluateExpressionWithProgram = function (expression, program) {
+    var translation = translateProgramString(program);
+    return evaluate(expression, translation);
 };
 module.exports.evaluateExpressionWithProgram = evaluateExpressionWithProgram;

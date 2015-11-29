@@ -12,18 +12,55 @@
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 var fs = require('fs');
+var flags = require('flags');
 var reuse = require('./lib/reuse');
+
+flags.defineString('format', 'human', 'Format of output. Can be either human or json.');
+flags.parse(process.argv.slice(3));
+
+if (process.argv[2] === undefined) {
+    console.error('\n');
+    console.error('> No inputfile given.');
+    console.error('');
+    process.exit(1);
+}
 
 var program = fs.readFileSync(process.argv[2]).toString();
 
-var result = reuse.translate(program, reuse.moduleProvider);
+var moduleProvider = function (moduleName) {
+    return fs.readFileSync(__dirname + '/' + moduleName).toString();
+};
 
-if (result.error) {
-    console.error('\n');
-    console.error('> Encountered error: ' + result.error);
-    console.error('>   at line ' + result.line + ' column ' + result.column);
-    console.error('');
+var result = reuse.translate(program, moduleProvider);
+
+if (flags.get('format') === 'human') {
+    if (reuse.isError(result)) {
+        console.error('\n');
+        console.error('> Encountered error: ' + reuse.errorType(result));
+        console.error('>   at line ' + reuse.errorLine(result) + ' column ' + reuse.errorColumn(result));
+        console.error('');
+        process.exit(2);
+    } else {
+        process.stdout.write(reuse.value(result));
+        process.stdout.write('\n');
+    }
+
+} else if (flags.get('format') === 'json') {
+    if (reuse.isError(result)) {
+        process.stdout.write(JSON.stringify({
+            error: reuse.errorType(result),
+            line: reuse.errorLine(result),
+            column: reuse.errorColumn(result)
+        }));
+    } else {
+        process.stdout.write(JSON.stringify({
+            value: reuse.value(result)
+        }));
+    }
+
 } else {
-    process.stdout.write(result.value);
-    process.stdout.write('\n');
+    console.error('\n');
+    console.error('> Invalid format: ' + flags.get('format'));
+    console.error('');
+    process.exit(3);
 }
