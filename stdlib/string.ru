@@ -46,28 +46,33 @@
 
 (import stdlib/math.ru)
 
-(export string:substring (lambda (string start length)
+(define substring (lambda (string start length string-length)
     (if (< length 0)
         (string:new)
-        (let (string-length (string:length string))
-        (let (substring-with-accumulator (lambda (string offset length new-string)
+        (let (substring-with-accumulator (lambda (offset length new-string)
             (if (or (== length 0) (>= offset string-length))
                 new-string
-                (recur string (+ offset 1) (- length 1) (string:push new-string (string:code-point-at-index string offset))))))
-        (substring-with-accumulator string start length (string:new)))))))
+                (recur (+ offset 1) (- length 1) (string:push new-string (string:code-point-at-index string offset))))))
+        (substring-with-accumulator start length (string:new))))))
 
-(export string:equal? (lambda (first-string second-string)
-    (let (code-point-equal? (lambda (first-string second-string index)
-        (if (< index (string:length first-string))
+(export string:substring (lambda (string start length)
+    (substring string start length (string:length string))))
+
+(define equal? (lambda (first-string first-string-length second-string second-string-length)
+    (let (code-point-equal? (lambda (index)
+        (if (< index first-string-length)
             (if (==
                     (string:code-point-at-index first-string index)
                     (string:code-point-at-index second-string index))
-                (recur first-string second-string (+ index 1))
+                (recur (+ index 1))
                 false)
             true)))
-    (if (!= (string:length first-string) (string:length second-string))
+    (if (!= first-string-length second-string-length)
         false
-        (code-point-equal? first-string second-string 0)))))
+        (code-point-equal? 0)))))
+
+(export string:equal? (lambda (first-string second-string)
+    (equal? first-string (string:length first-string) second-string (string:length second-string))))
 
 (export string:decimal-string-from-integer (lambda (original-integer)
     (let (min-value-string (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:new) 45) 50) 49) 52) 55) 52) 56) 51) 54) 52) 56))
