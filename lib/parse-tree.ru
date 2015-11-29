@@ -14,6 +14,9 @@
 
 )
 
+(import stdlib/string.ru)
+(import stdlib/list.ru)
+
 (export parse-tree:list-kind (string:push (string:push (string:push (string:push (string:new) 108) 105) 115) 116))
 (export parse-tree:atom-kind (string:push (string:push (string:push (string:push (string:new) 97) 116) 111) 109))
 

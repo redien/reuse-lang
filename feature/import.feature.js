@@ -13,11 +13,18 @@
 
 var it_should_evaluate_expression_to_value_given_program = require('./util/expect-value');
 
-describe('Importing local modules', function () {
+describe('Importing modules', function () {
     it_should_evaluate_expression_to_value_given_program(
         'module.value()',
         50,
         '(import ./feature/util/test-module.ru)(export value (lambda () (add-42 8)))',
         'should import modules from the local filesystem given a relative path prepended by a dot'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.value()',
+        51,
+        '(import ./feature/util/test-module.ru something)(export value (lambda () (something:add-42 9)))',
+        'should prepend imported symbols with the specified name followed by a colon'
     );
 });

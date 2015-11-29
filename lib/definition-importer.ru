@@ -30,11 +30,12 @@
             true
             (recur (rest module-list) module-name)))))
 
-(define make-state (lambda (program statement-index module-name redefine-exports)
+(define make-state (lambda (program statement-index module-name import-prefix redefine-exports)
     (cons program
     (cons statement-index
     (cons module-name
-          redefine-exports)))))
+    (cons import-prefix
+          redefine-exports))))))
 
 (define append-state (lambda (state-list state)
     (cons state state-list)))
@@ -47,7 +48,25 @@
             (let (program (first (first state)))
             (let (statement-index (first (rest (first state))))
             (let (module-name (first (rest (rest (first state)))))
-            (let (redefine-exports (rest (rest (rest (first state)))))
+            (let (import-prefix (first (rest (rest (rest (first state))))))
+            (let (redefine-exports (rest (rest (rest (rest (first state))))))
+
+            (let (statement (parse-tree:child program statement-index))
+            (let (form-name (parse-tree:value (parse-tree:child statement 0)))
+
+            (let (module-import?
+                (and
+                    (string:equal? import-value form-name)
+                    (not (module-list-contains?
+                            imported-modules
+                            (parse-tree:value
+                                (parse-tree:child statement 1))))))
+            (let (import-prefix
+                (if (and
+                        module-import?
+                        (== (parse-tree:count statement) 3))
+                    (string:push (parse-tree:value (parse-tree:child statement 2)) 58)
+                    import-prefix))
 
             (let (state-for-next-statement (lambda ()
                 (if (< statement-index (parse-tree:count program))
@@ -57,6 +76,7 @@
                             program
                             (+ statement-index 1)
                             module-name
+                            import-prefix
                             redefine-exports))
                     (rest state))))
 
@@ -67,17 +87,16 @@
                         (module-loader module-name)
                         0
                         module-name
+                        import-prefix
                         true))))
 
-            (let (statement (parse-tree:child program statement-index))
-            (let (form-name (parse-tree:value (parse-tree:child statement 0)))
             (let (statement
                 (if (and
                         redefine-exports
                         (string:equal? export-value form-name))
                     (parse-tree:push (parse-tree:push (parse-tree:push (parse-tree:push (parse-tree:list)
                         (new-define-from-import-atom 0 0))
-                        (parse-tree:child statement 1))
+                        (parse-tree:atom (string:concatenate import-prefix (parse-tree:value (parse-tree:child statement 1))) 0 0))
                         (parse-tree:child statement 2))
                         (parse-tree:atom module-name 0 0))
                     statement))
@@ -88,14 +107,6 @@
                         (>= statement-index (parse-tree:count program)))
                     new-program
                     (parse-tree:push new-program statement)))
-
-            (let (module-import?
-                (and
-                    (string:equal? import-value form-name)
-                    (not (module-list-contains?
-                            imported-modules
-                            (parse-tree:value
-                                (parse-tree:child statement 1))))))
 
             (let (next-state
                 (if module-import?
@@ -112,8 +123,8 @@
                         imported-modules)
                     imported-modules))
 
-            (recur next-state new-program imported-modules)))))))))))))))))
+            (recur next-state new-program imported-modules)))))))))))))))))))
 
     (convert-module
-        (append-state nil (make-state program 0 (string:new) false))
+        (append-state nil (make-state program 0 (string:new) (string:new) false))
         (parse-tree:list) nil))))

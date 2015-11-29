@@ -40,6 +40,11 @@ then you can run the tests with:
 npm test
 ```
 
+#### Bugs/TODO
+
+* Using an imported value from a parent module doesn't produce an error when it wasn't defined in the current module.
+* Should produce an error when no values are used from an imported module.
+
 #### Code coverage
 [![Coverage Status](https://img.shields.io/coveralls/redien/reuse-lang.svg)](https://coveralls.io/r/redien/reuse-lang?branch=master)
 

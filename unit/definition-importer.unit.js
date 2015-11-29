@@ -148,4 +148,15 @@ describe('definition-importer', function () {
 
         ast.value(ast.expression(ast.expression(imported, 2), 3)).should.equal('module2');
     });
+
+    it('should prepend imported symbols with the specified name given as a second argument followed by a colon', function () {
+        var original = ast([['import', 'module-name', 'some-name']]);
+        var imported = importer.import(original, function (moduleName) {
+            return ast([['export', 'abc', '123']]);
+        });
+
+        ast.value(ast.expression(ast.expression(imported, 0), 0)).should.equal('define-from-import');
+        ast.value(ast.expression(ast.expression(imported, 0), 1)).should.equal('some-name:abc');
+        ast.value(ast.expression(ast.expression(imported, 0), 2)).should.equal('123');
+    });
 });
