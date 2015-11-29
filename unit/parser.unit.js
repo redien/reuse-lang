@@ -122,13 +122,33 @@ describe('parser', function () {
         ast.value(ast.expression(ast.expression(result, 0), 1)).should.equal('atom');
     });
 
-    it('should assign line information to atoms', function () {
-        var result = parser.value(parser.parse('\n\n(atom)\n'));
-        ast.line(ast.expression(ast.expression(result, 0), 0)).should.equal(3);
+    it('should assign a line number of 1 to an atom at the start of input', function () {
+        var result = parser.value(parser.parse('atom'));
+        ast.line(ast.expression(result, 0)).should.equal(1);
     });
 
-    it('should assign column information to atoms', function () {
-        var result = parser.value(parser.parse('\n(atom)\n'));
-        ast.column(ast.expression(ast.expression(result, 0), 0)).should.equal(2);
+    it('should assign a line number of 2 to an atom at the start of the second line', function () {
+        var result = parser.value(parser.parse('\natom'));
+        ast.line(ast.expression(result, 0)).should.equal(2);
+    });
+
+    it('should assign a line number of n+1 to an atom after the the nth new line character', function () {
+        var result = parser.value(parser.parse('\n(\n\n  atom\n)'));
+        ast.line(ast.expression(ast.expression(result, 0), 0)).should.equal(4);
+    });
+
+    it('should assign a column number of 1 to an atom at the start of input', function () {
+        var result = parser.value(parser.parse('atom'));
+        ast.column(ast.expression(result, 0)).should.equal(1);
+    });
+
+    it('should assign a column number of 1 to an atom at the start of a new line', function () {
+        var result = parser.value(parser.parse('(\natom)'));
+        ast.column(ast.expression(ast.expression(result, 0), 0)).should.equal(1);
+    });
+
+    it('should assign a column number of n+1 to an atom with n characters between itself and a previous new line', function () {
+        var result = parser.value(parser.parse('\n(123 atom)'));
+        ast.column(ast.expression(ast.expression(result, 0), 1)).should.equal(6);
     });
 });

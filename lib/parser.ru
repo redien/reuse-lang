@@ -66,8 +66,8 @@
 (define close-parenthesis 41)
 (define line-feed 10)
 
-(define intermediate-result-new (lambda (expression index row)
-    (cons 0 (cons expression (cons index row)))))
+(define intermediate-result-new (lambda (expression index row row-start)
+    (cons 0 (cons expression (cons index (cons row row-start))))))
 
 (define intermediate-result-expression (lambda (result)
     (first (rest result))))
@@ -76,14 +76,16 @@
     (first (rest (rest result)))))
 
 (define intermediate-result-row (lambda (result)
-    (rest (rest (rest result)))))
+    (first (rest (rest (rest result))))))
+
+(define intermediate-result-row-start (lambda (result)
+    (rest (rest (rest (rest result))))))
 
 (define intermediate-result-new-error (lambda ()
     (cons 1 nil)))
 
 (define intermediate-result-error? (lambda (result)
     (== (first result) 1)))
-
 
 (define part-of-atom? (lambda (character)
     (not (or
@@ -92,7 +94,7 @@
                 (== character open-parenthesis))
             (== character close-parenthesis)))))
 
-(define parse-atom (lambda (program index row)
+(define parse-atom (lambda (program index row row-start)
     (let (parse-atom-value (lambda (program index value)
         (if (< index (string:length program))
             (let (character (string:code-point-at-index program index))
@@ -102,7 +104,7 @@
             value)))
     (let (value (parse-atom-value program index (string:new)))
     (let (next-index (+ index (string:length value)))
-    (intermediate-result-new (parse-tree:atom value row index) next-index row))))))
+    (intermediate-result-new (parse-tree:atom value row (+ (- index row-start) 1)) next-index row row-start))))))
 
 (define string-end? (lambda (program index)
     (>= index (string:length program))))
@@ -113,32 +115,33 @@
         (let (character (string:code-point-at-index program index))
         (== character close-parenthesis)))))
 
-(define parse-expression (lambda (program index row)
+(define parse-expression (lambda (program index row row-start)
     (let (character (string:code-point-at-index program index))
     (if (== character open-parenthesis)
-        (parse-list program (+ index 1) row (parse-tree:list) close-parenthesis? string-end?)
-        (parse-atom program index row)))))
+        (parse-list program (+ index 1) row row-start (parse-tree:list) close-parenthesis? string-end?)
+        (parse-atom program index row row-start)))))
 
-(define parse-list (lambda (program index row list stop? error?)
+(define parse-list (lambda (program index row row-start list stop? error?)
     (if (stop? program index)
-        (intermediate-result-new list (+ index 1) row)
+        (intermediate-result-new list (+ index 1) row row-start)
     (if (error? program index)
         (intermediate-result-new-error)
         (let (character (string:code-point-at-index program index))
         (if (== character line-feed)
-            (recur program (+ index 1) (+ row 1) list stop? error?)
+            (recur program (+ index 1) (+ row 1) (+ index 1) list stop? error?)
         (if (whitespace? character)
-            (recur program (+ index 1) row list stop? error?)
-            (let (intermediate-result (parse-expression program index row))
+            (recur program (+ index 1) row row-start list stop? error?)
+            (let (intermediate-result (parse-expression program index row row-start))
             (if (intermediate-result-error? intermediate-result)
                 intermediate-result
                 (let (expression (intermediate-result-expression intermediate-result))
                 (let (next-index (intermediate-result-index intermediate-result))
                 (let (next-row (intermediate-result-row intermediate-result))
-                (recur program next-index next-row (parse-tree:push list expression) stop? error?)))))))))))))
+                (let (next-row-start (intermediate-result-row-start intermediate-result))
+                (recur program next-index next-row next-row-start (parse-tree:push list expression) stop? error?))))))))))))))
 
 (export parse (lambda (program)
-    (let (intermediate-result (parse-list program 0 1 (parse-tree:list) string-end? close-parenthesis?))
+    (let (intermediate-result (parse-list program 0 1 0 (parse-tree:list) string-end? close-parenthesis?))
     (if (intermediate-result-error? intermediate-result)
         unbalanced-parentheses-error
         (let (parsed-program (intermediate-result-expression intermediate-result))
