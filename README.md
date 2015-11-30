@@ -28,6 +28,7 @@ The goal is **not** to do any of the following:
 
 ## Development
 [![devDependencies](https://david-dm.org/redien/reuse-lang/dev-status.svg)](https://david-dm.org/redien/reuse-lang#info=devDependencies)
+[![Code Climate](https://d3s6mut3hikguw.cloudfront.net/github/redien/reuse-lang/badges/gpa.svg)](https://codeclimate.com/github/redien/reuse-lang)
 
 Fork the project and install dependencies:
 ```
