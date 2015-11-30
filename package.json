@@ -4,6 +4,7 @@
   "description": "",
   "main": "reuse.js",
   "scripts": {
+    "check-dependencies": "ncu --error-level 2",
     "build": "node reuse lib/symbol-name-encoder.ru > lib/_symbol-name-encoder.js && mv lib/_symbol-name-encoder.js lib/symbol-name-encoder.js && node reuse lib/definition-importer.ru > lib/_definition-importer.js && mv lib/_definition-importer.js lib/definition-importer.js && node reuse lib/parser.ru > lib/_parser.js && mv lib/_parser.js lib/parser.js",
     "test": "npm run-script build && mocha \"**/*.unit.js\" \"**/*.feature.js\"",
     "coverage-travis-ci": "npm run-script build && mocha --timeout 30000 --require blanket -R travis-cov \"**/*.unit.js\" \"**/*.feature.js\"",
@@ -14,11 +15,12 @@
   "author": "Jesper Oskarsson",
   "license": "Public Domain",
   "devDependencies": {
-    "blanket": "1.1.7",
+    "blanket": "1.2.1",
     "coveralls": "2.11.4",
     "mocha": "2.3.4",
     "mocha-lcov-reporter": "1.0.0",
-    "should": "7.1.0",
+    "npm-check-updates": "2.5.1",
+    "should": "7.1.1",
     "travis-cov": "0.2.5"
   },
   "config": {
