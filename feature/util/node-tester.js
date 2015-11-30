@@ -24,36 +24,28 @@ var writeTempFile = function (base, fileEnding, contents) {
     return fileName;
 };
 
-var translateProgramString = function (program) {
+var translateProgramString = function (program, callback) {
     var inputFile = writeTempFile('input-file', '.ru', program);
-    try {
-        var json = child_process.execSync('node reuse.js ' + inputFile + ' --format=json', {
-            stdio: [null, null],
-            cwd: __dirname + '/../../',
-            timeout: 30000 // If process takes more than 30 seconds
-                           // something is wrong.
-        });
 
+    child_process.exec('node reuse.js ' + inputFile + ' --format=json', {
+        stdio: [null, null],
+        cwd: __dirname + '/../../',
+        timeout: 30000 // If process takes more than 30 seconds
+                       // something is wrong.
+    }, function (error, json) {
         try {
             fs.unlinkSync(inputFile);
         } catch (error) {}
 
-        var result = JSON.parse(json);
-        if (result.error) {
-            throw result;
+        if (error) {
+            return callback(error);
         }
 
-        return result.value;
-
-    } catch (error) {
-        try {
-            fs.unlinkSync(inputFile);
-        } catch (error) {}
-        throw error;
-    }
+        return callback(null, JSON.parse(json));
+    });
 };
 
-var evaluate = function (expression, translation) {
+var evaluate = function (expression, translation, callback) {
     // Make sure we don't get the cached module when we require.
     var testModuleName = writeTempFile('test-module', '.js', translation);
 
@@ -61,16 +53,33 @@ var evaluate = function (expression, translation) {
         var module = require(testModuleName);
         var result = eval(expression);
         fs.unlinkSync(testModuleName);
-        return result;
 
-    } catch (exception) {
+        return callback(null, result);
+
+    } catch (error) {
         fs.unlinkSync(testModuleName);
-        throw exception;
+
+        return callback(error);
     }
 };
 
-var evaluateExpressionWithProgram = function (expression, program) {
-    var translation = translateProgramString(program);
-    return evaluate(expression, translation);
+var evaluateExpressionWithProgram = function (expression, program, callback) {
+    var translation = translateProgramString(program, function (error, translation) {
+        if (error) {
+            return callback(error);
+        }
+
+        if (translation.error) {
+            return callback(translation);
+        }
+
+        return evaluate(expression, translation.value, function (error, result) {
+            if (error) {
+                return callback(error);
+            }
+
+            return callback(null, result);
+        });
+    });
 };
 module.exports.evaluateExpressionWithProgram = evaluateExpressionWithProgram;
