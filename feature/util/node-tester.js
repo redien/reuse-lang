@@ -57,7 +57,9 @@ var evaluate = function (expression, translation, callback) {
         return callback(null, result);
 
     } catch (error) {
-        fs.unlinkSync(testModuleName);
+        try {
+            fs.unlinkSync(testModuleName);
+        } catch (error) {}
 
         return callback(error);
     }
