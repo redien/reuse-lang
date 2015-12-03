@@ -33,18 +33,19 @@
                 (rest string)
                 (+ index 1))))))
 
-(export string:concatenate (lambda (first-string second-string)
-    (cons
-        (+ (first first-string) (first second-string))
-        (list:concatenate (rest second-string) (rest first-string)))))
-
-
 
 (comment Functions below are not dependent on the implementation above using
-    lists. It can thus be used even if the above functions are implemented
-    as the language's native data types.)
+    lists. They can thus be used even if the above functions are implemented
+    as the host language's native data types.)
 
 (import stdlib/math.ru)
+
+(export string:concatenate (lambda (first-string second-string)
+    (let (concatenate-with-index (lambda (accumulator string index)
+        (if (< index (string:length string))
+            (recur (string:push accumulator (string:code-point-at-index string index)) string (+ index 1))
+            accumulator)))
+    (concatenate-with-index first-string second-string 0))))
 
 (define substring (lambda (string start length string-length)
     (if (< length 0)
