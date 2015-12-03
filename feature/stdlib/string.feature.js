@@ -14,6 +14,24 @@
 var it_should_evaluate_expression_to_value_given_program = require('../util/expect-value');
 
 describe('stdlib/string.ru', function () {
+    describe('string:new', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            '',
+            '(import stdlib/string.ru) (export value (lambda () (let (apply (lambda (f) (f))) (apply string:new))))',
+            'should be possible to pass as an argument'
+        );
+    });
+
+    describe('string:push', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            'd',
+            '(import stdlib/string.ru) (export value (lambda () (let (apply (lambda (f s x) (f s x))) (apply string:push (string:new) 100))))',
+            'should be possible to pass as an argument'
+        );
+    });
+
     describe('string:length', function () {
         it_should_evaluate_expression_to_value_given_program(
             'module.value()',
@@ -41,6 +59,13 @@ describe('stdlib/string.ru', function () {
             1,
             '(import stdlib/string.ru) (export value (lambda () (string:length (string:push (string:new) 135153))))',
             'should return the right length for a string with code points 65536 and over'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            0,
+            '(import stdlib/string.ru) (export value (lambda () (let (apply (lambda (f x) (f x))) (apply string:length (string:new)))))',
+            'should be possible to pass as an argument'
         );
     });
 
@@ -78,6 +103,13 @@ describe('stdlib/string.ru', function () {
             0,
             '(import stdlib/string.ru) (export value (lambda () (string:code-point-at-index (string:push (string:push (string:new) 33) 44) 2)))',
             'should return 0 when the index is greater than the string length'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            0,
+            '(import stdlib/string.ru) (export value (lambda () (let (apply (lambda (f x) (f x 0))) (apply string:code-point-at-index (string:new)))))',
+            'should be possible to pass as an argument'
         );
     });
 

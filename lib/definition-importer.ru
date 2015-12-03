@@ -69,7 +69,7 @@
                     import-prefix))
 
             (let (state-for-next-statement (lambda ()
-                (if (< statement-index (parse-tree:count program))
+                (if (< (+ statement-index 1) (parse-tree:count program))
                     (append-state
                         (rest state)
                         (make-state
@@ -80,11 +80,11 @@
                             redefine-exports))
                     (rest state))))
 
-            (let (state-with-imported-module (lambda (module-name)
+            (let (state-with-imported-module (lambda (module-name imported-module)
                 (append-state
                     (state-for-next-statement)
                     (make-state
-                        (module-loader module-name)
+                        imported-module
                         0
                         module-name
                         import-prefix
@@ -110,9 +110,13 @@
 
             (let (next-state
                 (if module-import?
-                    (state-with-imported-module
-                        (parse-tree:value
-                            (parse-tree:child statement 1)))
+                    (let (module-name (parse-tree:value (parse-tree:child statement 1)))
+                    (let (loaded-module (module-loader module-name))
+                    (if (> (parse-tree:count loaded-module) 0)
+                        (state-with-imported-module
+                            module-name
+                            loaded-module)
+                        (state-for-next-statement))))
                     (state-for-next-statement)))
 
             (let (imported-modules
@@ -125,6 +129,11 @@
 
             (recur next-state new-program imported-modules)))))))))))))))))))
 
-    (convert-module
-        (append-state nil (make-state program 0 (string:new) (string:new) false))
-        (parse-tree:list) nil))))
+    (if (> (parse-tree:count program) 0)
+        (convert-module
+            (append-state
+                nil
+                (make-state program 0 (string:new) (string:new) false))
+            (parse-tree:list)
+            nil)
+        (parse-tree:list)))))
