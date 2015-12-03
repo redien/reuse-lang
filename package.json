@@ -5,7 +5,7 @@
   "main": "reuse.js",
   "scripts": {
     "check-dependencies": "ncu --error-level 2",
-    "build": "node reuse lib/symbol-name-encoder.ru > lib/_symbol-name-encoder.js && mv lib/_symbol-name-encoder.js lib/symbol-name-encoder.js && node reuse lib/definition-importer.ru > lib/_definition-importer.js && mv lib/_definition-importer.js lib/definition-importer.js && node reuse lib/parser.ru > lib/_parser.js && mv lib/_parser.js lib/parser.js",
+    "build": "node reuse lib/symbol-name-encoder.ru > lib/_symbol-name-encoder.js && node reuse lib/definition-importer.ru > lib/_definition-importer.js && node reuse lib/parser.ru > lib/_parser.js && mv lib/_symbol-name-encoder.js lib/symbol-name-encoder.js && mv lib/_definition-importer.js lib/definition-importer.js && mv lib/_parser.js lib/parser.js",
     "test": "npm run-script build && mocha \"**/*.unit.js\" \"**/*.feature.js\"",
     "coverage-travis-ci": "npm run-script build && mocha --timeout 30000 --require blanket -R travis-cov \"**/*.unit.js\" \"**/*.feature.js\"",
     "coverage-coveralls-io": "./utility-scripts/coveralls.sh",
