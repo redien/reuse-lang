@@ -19,7 +19,7 @@ var it_should_evaluate_expression_to_value_given_program = function (expression,
 
     it(message, function (done) {
         nodeTester.evaluateExpressionWithProgram(expression, program, function (error, result) {
-            if (error) { throw error; }
+            if (error) { throw new Error(JSON.stringify(error)); }
             result.should.equal(expected);
             done();
         });
