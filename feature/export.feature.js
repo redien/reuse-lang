@@ -15,12 +15,6 @@ var it_should_evaluate_expression_to_value_given_program = require('./util/expec
 var it_should_return_error_given_program = require('./util/expect-error');
 
 describe('Export', function () {
-    it_should_return_error_given_program(
-        'exported_symbol_contains_invalid_character',
-        1, 9,
-        '(export + i32_add)'
-    );
-
     it_should_evaluate_expression_to_value_given_program(
         'module.second',
         2,

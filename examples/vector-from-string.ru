@@ -23,3 +23,10 @@
             (recur string (+ index 1) (vector:push vector (string:code-point-at-index string index)))
             vector)))
     (vector-from-string-with-accumulator string 0 (vector:new)))))
+
+(export stringFromVector (lambda (vector)
+    (let (string-from-vector-with-accumulator (lambda (vector index string)
+        (if (< index (vector:length vector))
+            (recur vector (+ index 1) (string:push string (vector:element-at-index vector index)))
+            string)))
+    (string-from-vector-with-accumulator vector 0 (string:new)))))

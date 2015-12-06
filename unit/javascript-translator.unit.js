@@ -154,33 +154,17 @@ describe('Javascript translator', function () {
                 'var abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTIUVWXYZ_48_49_50_51_52_53_54_55_56_57_95 = 1; module.exports.abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTIUVWXYZ0123456789_ = _export(abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTIUVWXYZ_48_49_50_51_52_53_54_55_56_57_95);'
             );
 
-            it('should return an exported_symbol_contains_invalid_character error given a symbol with any other characters', function () {
-                var result = translator.translate(
-                    ast([['export', '+', '1']])
-                );
+            it_should_translate_from_to(
+                'should remove question marks from the end and prepend the symbol with is_',
+                ast([['export', 'question?', '1']]),
+                'var question_63 = 1; module.exports.is_question = _export(question_63);'
+            );
 
-                translator.errorType(result).should.equal('exported_symbol_contains_invalid_character');
-                translator.errorLine(result).should.equal(1);
-                translator.errorColumn(result).should.equal(9);
-
-                result = translator.translate(
-                    ast([['export', '?', '1']])
-                );
-
-                translator.errorType(result).should.equal('exported_symbol_contains_invalid_character');
-                translator.errorLine(result).should.equal(1);
-                translator.errorColumn(result).should.equal(9);
-            });
-
-            it('should return an exported_symbol_contains_invalid_character error with the correct column number', function () {
-                var result = translator.translate(
-                    ast([['export', 'a+', '1']])
-                );
-
-                translator.errorType(result).should.equal('exported_symbol_contains_invalid_character');
-                translator.errorLine(result).should.equal(1);
-                translator.errorColumn(result).should.equal(10);
-            });
+            it_should_translate_from_to(
+                'should encode any other character as an underscore',
+                ast([['export', '=-ab#c€', '1']]),
+                'var _61_45ab_35c_8364 = 1; module.exports.__ab_c_ = _export(_61_45ab_35c_8364);'
+            );
         });
 
         describe('Defines', function () {
