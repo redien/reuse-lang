@@ -32,12 +32,9 @@
       "data-cover-never": [
         "/node_modules/"
       ]
-    },
-    "travis-cov": {
-      "threshold": 90
     }
   },
   "dependencies": {
-    "flags": "^0.1.3"
+    "flags": "0.1.3"
   }
 }

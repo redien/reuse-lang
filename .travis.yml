@@ -30,7 +30,9 @@ before_install:
   - git clone https://github.com/creationix/nvm.git ~/.nvm
   - source ~/.nvm/nvm.sh
   - nvm install $NODE_VERSION
+  - npm -g install npm@latest-2
   - node --version
+  - npm --version
 
 install: npm install
 
