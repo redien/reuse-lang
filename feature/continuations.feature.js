@@ -12,27 +12,19 @@
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 var it_should_evaluate_expression_to_value_given_program = require('./util/expect-value');
-var it_should_return_error_given_program = require('./util/expect-error');
 
-describe('Export', function () {
+describe('Continuation passing', function () {
     it_should_evaluate_expression_to_value_given_program(
-        'module.second',
-        2,
-        '(export first 1) (export second 2)',
-        'should export several symbols'
+        'module.value("abc", "d", function (x) { return x; })',
+        'abcd',
+        '(import stdlib/string.ru)(export value (lambda (x y f) (string:concatenate x (f y))))',
+        'should handle arguments to callbacks correctly'
     );
 
     it_should_evaluate_expression_to_value_given_program(
-        'module.second',
-        3,
-        '(export first 3) (export second first)',
-        'should add exported symbols to the module scope'
-    );
-
-    it_should_evaluate_expression_to_value_given_program(
-        'module.second()',
-        6,
-        '(export first_variable 3) (define local (lambda (x) (* x first_variable))) (export second (lambda () (local 2)))',
-        'should define an exported symbol such that a local function can access it'
+        'module.value("abc", "d", function (f, x) { return f(x); })',
+        'abcd',
+        '(import stdlib/string.ru)(export value (lambda (x y f) (f (lambda (y) (string:concatenate x y)) y)))',
+        'should handle functions passed as arguments to callbacks correctly'
     );
 });

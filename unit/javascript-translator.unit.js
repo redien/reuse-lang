@@ -33,104 +33,104 @@ describe('Javascript translator', function () {
     describe('Variables', function () {
         it_should_translate_from_to(
             'evaluate a variable',
-            ast([['export', 'identity', ['lambda', ['x'], 'x']]]),
-            'var identity = (function (x) { return x; }); module.exports.identity = identity;'
+            ast([['define', 'identity', ['lambda', ['x'], 'x']]]),
+            'var identity = (function (x) { return x; });'
         );
     });
 
     describe('Names', function () {
         it_should_translate_from_to(
             'evaluate a variable with another name',
-            ast([['export', 'identity', ['lambda', ['y'], 'y']]]),
-            'var identity = (function (y) { return y; }); module.exports.identity = identity;'
+            ast([['define', 'identity', ['lambda', ['y'], 'y']]]),
+            'var identity = (function (y) { return y; });'
         );
 
         it_should_translate_from_to(
             'evaluate a variable with a longer name',
-            ast([['export', 'otherName', ['lambda', ['x'], 'x']]]),
-            'var otherName = (function (x) { return x; }); module.exports.otherName = otherName;'
+            ast([['define', 'otherName', ['lambda', ['x'], 'x']]]),
+            'var otherName = (function (x) { return x; });'
         );
     });
 
     describe('Constants', function () {
         it_should_translate_from_to(
             'evaluate a 32-bit integer constant',
-            ast([['export', 'f', ['lambda', [], '32']]]),
-            'var f = (function () { return 32; }); module.exports.f = f;'
+            ast([['define', 'f', ['lambda', [], '32']]]),
+            'var f = (function () { return 32; });'
         );
     });
 
     describe('Function Application', function () {
         it_should_translate_from_to(
             'apply a function with no arguments',
-            ast([['export', 'f', ['lambda', [], ['g']]]]),
-            'var f = (function () { return g(); }); module.exports.f = f;'
+            ast([['define', 'f', ['lambda', [], ['g']]]]),
+            'var f = (function () { return g(); });'
         );
 
         it_should_translate_from_to(
             'apply a function with one argument',
-            ast([['export', 'f', ['lambda', [], ['g', '11']]]]),
-            'var f = (function () { return g(11); }); module.exports.f = f;'
+            ast([['define', 'f', ['lambda', [], ['g', '11']]]]),
+            'var f = (function () { return g(11); });'
         );
 
         it_should_translate_from_to(
             'apply a function with two arguments',
-            ast([['export', 'f', ['lambda', [], ['g', '11', '12']]]]),
-            'var f = (function () { return g(11, 12); }); module.exports.f = f;'
+            ast([['define', 'f', ['lambda', [], ['g', '11', '12']]]]),
+            'var f = (function () { return g(11, 12); });'
         );
 
         it_should_translate_from_to(
             'apply a lambda literal with no arguments',
-            ast([['export', 'f', ['lambda', [], [['lambda', [], '1']]]]]),
-            'var f = (function () { return (function () { return 1; })(); }); module.exports.f = f;'
+            ast([['define', 'f', ['lambda', [], [['lambda', [], '1']]]]]),
+            'var f = (function () { return (function () { return 1; })(); });'
         );
 
         it_should_translate_from_to(
             'apply a lambda literal with one argument',
-            ast([['export', 'f', ['lambda', [], [['lambda', ['x'], 'x'], '1']]]]),
-            'var f = (function () { return (function (x) { return x; })(1); }); module.exports.f = f;'
+            ast([['define', 'f', ['lambda', [], [['lambda', ['x'], 'x'], '1']]]]),
+            'var f = (function () { return (function (x) { return x; })(1); });'
         );
 
         it_should_translate_from_to(
             'translate function arguments',
-            ast([['export', 'f', ['lambda', [], ['g', ['lambda', ['x'], 'x']]]]]),
-            'var f = (function () { return g((function (x) { return x; })); }); module.exports.f = f;'
+            ast([['define', 'f', ['lambda', [], ['g', ['lambda', ['x'], 'x']]]]]),
+            'var f = (function () { return g((function (x) { return x; })); });'
         );
     });
 
     describe('Function Definition', function () {
         it_should_translate_from_to(
             'define a lambda literal with two arguments',
-            ast([['export', 'f', ['lambda', ['a', 'b'], ['a', 'b']]]]),
-            'var f = (function (a, b) { return a(b); }); module.exports.f = f;'
+            ast([['define', 'f', ['lambda', ['a', 'b'], ['a', 'b']]]]),
+            'var f = (function (a, b) { return a(b); });'
         );
     });
 
     describe('Let-expression', function () {
         it_should_translate_from_to(
             'define a variable in an expression',
-            ast([['export', 'f', ['lambda', ['x'], ['let', ['a', 'x'], 'a']]]]),
-            'var f = (function (x) { return (function (a) { return a; })(x); }); module.exports.f = f;'
+            ast([['define', 'f', ['lambda', ['x'], ['let', ['a', 'x'], 'a']]]]),
+            'var f = (function (x) { return (function (a) { return a; })(x); });'
         );
     });
 
     describe('Symbol encoding', function () {
         it_should_translate_from_to(
             'encode symbols of any number of unicode characters',
-            ast([['export', 'f', ['lambda', ['x'], ['let', ['金魚', 'x'], '金魚']]]]),
-            'var f = (function (x) { return (function (_37329_39770) { return _37329_39770; })(x); }); module.exports.f = f;'
+            ast([['define', 'f', ['lambda', ['x'], ['let', ['金魚', 'x'], '金魚']]]]),
+            'var f = (function (x) { return (function (_37329_39770) { return _37329_39770; })(x); });'
         );
 
         it_should_translate_from_to(
             'encode digits as well to avoid ambiguity in the encoding',
-            ast([['export', 'f', ['lambda', ['x'], ['let', ['a123', 'x'], 'a123']]]]),
-            'var f = (function (x) { return (function (a_49_50_51) { return a_49_50_51; })(x); }); module.exports.f = f;'
+            ast([['define', 'f', ['lambda', ['x'], ['let', ['a123', 'x'], 'a123']]]]),
+            'var f = (function (x) { return (function (a_49_50_51) { return a_49_50_51; })(x); });'
         );
 
         it_should_translate_from_to(
             'not encode numbers',
-            ast([['export', 'f', ['lambda', [], ['let', ['abc', '123'], 'abc']]]]),
-            'var f = (function () { return (function (abc) { return abc; })(123); }); module.exports.f = f;'
+            ast([['define', 'f', ['lambda', [], ['let', ['abc', '123'], 'abc']]]]),
+            'var f = (function () { return (function (abc) { return abc; })(123); });'
         );
 
         it_should_translate_from_to(
@@ -142,7 +142,7 @@ describe('Javascript translator', function () {
         it_should_translate_from_to(
             'encode import as an identifier',
             ast([['export', 'import', '1']]),
-            'var _reserved_import = 1; module.exports.import = _reserved_import;'
+            'var _reserved_import = 1; module.exports.import = _export(_reserved_import);'
         );
     });
 
@@ -151,36 +151,20 @@ describe('Javascript translator', function () {
             it_should_translate_from_to(
                 'should export variables matching [a-zA-Z0-9_]+',
                 ast([['export', 'abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTIUVWXYZ0123456789_', '1']]),
-                'var abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTIUVWXYZ_48_49_50_51_52_53_54_55_56_57_95 = 1; module.exports.abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTIUVWXYZ0123456789_ = abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTIUVWXYZ_48_49_50_51_52_53_54_55_56_57_95;'
+                'var abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTIUVWXYZ_48_49_50_51_52_53_54_55_56_57_95 = 1; module.exports.abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTIUVWXYZ0123456789_ = _export(abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTIUVWXYZ_48_49_50_51_52_53_54_55_56_57_95);'
             );
 
-            it('should return an exported_symbol_contains_invalid_character error given a symbol with any other characters', function () {
-                var result = translator.translate(
-                    ast([['export', '+', '1']])
-                );
+            it_should_translate_from_to(
+                'should remove question marks from the end and prepend the symbol with is_',
+                ast([['export', 'question?', '1']]),
+                'var question_63 = 1; module.exports.is_question = _export(question_63);'
+            );
 
-                translator.errorType(result).should.equal('exported_symbol_contains_invalid_character');
-                translator.errorLine(result).should.equal(1);
-                translator.errorColumn(result).should.equal(9);
-
-                result = translator.translate(
-                    ast([['export', '?', '1']])
-                );
-
-                translator.errorType(result).should.equal('exported_symbol_contains_invalid_character');
-                translator.errorLine(result).should.equal(1);
-                translator.errorColumn(result).should.equal(9);
-            });
-
-            it('should return an exported_symbol_contains_invalid_character error with the correct column number', function () {
-                var result = translator.translate(
-                    ast([['export', 'a+', '1']])
-                );
-
-                translator.errorType(result).should.equal('exported_symbol_contains_invalid_character');
-                translator.errorLine(result).should.equal(1);
-                translator.errorColumn(result).should.equal(10);
-            });
+            it_should_translate_from_to(
+                'should encode any other character as an underscore',
+                ast([['export', '=-ab#c€', '1']]),
+                'var _61_45ab_35c_8364 = 1; module.exports.__ab_c_ = _export(_61_45ab_35c_8364);'
+            );
         });
 
         describe('Defines', function () {
