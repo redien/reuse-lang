@@ -19,7 +19,7 @@
     "coveralls": "2.11.4",
     "mocha": "2.3.4",
     "mocha-lcov-reporter": "1.0.0",
-    "npm-check-updates": "2.5.1",
+    "npm-check-updates": "2.5.4",
     "should": "7.1.1",
     "travis-cov": "0.2.5"
   },
