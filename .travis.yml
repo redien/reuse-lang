@@ -16,9 +16,11 @@ env:
     - NODE_VERSION="0.10"
     - NODE_VERSION="0.11"
     - NODE_VERSION="0.12"
+    - NODE_VERSION="iojs"
     - NODE_VERSION="4.0"
     - NODE_VERSION="4.1"
-    - NODE_VERSION="iojs"
+    - NODE_VERSION="4.2"
+    - NODE_VERSION="5.1"
 os:
     - linux
     - osx
@@ -28,7 +30,9 @@ before_install:
   - git clone https://github.com/creationix/nvm.git ~/.nvm
   - source ~/.nvm/nvm.sh
   - nvm install $NODE_VERSION
+  - npm -g install npm@latest-2
   - node --version
+  - npm --version
 
 install: npm install
 

@@ -15,8 +15,27 @@ var fs = require('fs');
 var should = require('should');
 var ast = require('../lib/ast-builder');
 var importer = require('../lib/definition-importer');
+var pts = require('../lib/parse-tree-serializer');
 
 describe('definition-importer', function () {
+    it('should not import anything given no import statements', function () {
+        var original = ast([]);
+        var imported = importer.import(original, function (moduleName) {
+            throw new Error("Tried to import " + moduleName);
+        });
+
+        ast.count(imported).should.equal(0);
+    });
+
+    it('should import an empty module', function () {
+        var original = ast([['import', 'module']]);
+        var imported = importer.import(original, function (moduleName) {
+            return ast([]);
+        });
+
+        ast.count(imported).should.equal(0);
+    });
+
     it('should define an exported symbol of an imported module in the provided expression', function () {
         var original = ast([['import', 'module-name']]);
         var imported = importer.import(original, function (moduleName) {
@@ -64,6 +83,7 @@ describe('definition-importer', function () {
             ['import', 'module-name'],
             ['import', 'module2'],
         ]);
+        debugger;
         var imported = importer.import(original, function (moduleName) {
             if (moduleName === 'module-name') {
                 return ast([

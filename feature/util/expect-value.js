@@ -13,12 +13,17 @@
 
 var should = require('should');
 var nodeTester = require(__dirname + '/node-tester');
+var util = require('util');
 
 var it_should_evaluate_expression_to_value_given_program = function (expression, expected, program, message) {
     message = message || 'should evaluate ' + expression + ' to ' + JSON.stringify(expected) + ' given ' + program;
 
-    it(message, function () {
-        nodeTester.evaluateExpressionWithProgram(expression, program).should.equal(expected);
+    it(message, function (done) {
+        nodeTester.evaluateExpressionWithProgram(expression, program, function (error, result) {
+            if (error) { throw new Error(util.inspect(error)); }
+            result.should.equal(expected);
+            done();
+        });
     });
 };
 

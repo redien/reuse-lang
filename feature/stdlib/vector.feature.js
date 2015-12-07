@@ -14,6 +14,15 @@
 var it_should_evaluate_expression_to_value_given_program = require('../util/expect-value');
 
 describe('stdlib/vector.ru', function () {
+    describe('vector:new', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            0,
+            '(import stdlib/vector.ru) (export value (lambda () (let (apply (lambda (f) (f))) (vector:length (apply vector:new)))))',
+            'should be possible to pass as an argument'
+        );
+    });
+
     describe('vector:length', function () {
         it_should_evaluate_expression_to_value_given_program(
             'module.value()',
@@ -34,6 +43,13 @@ describe('stdlib/vector.ru', function () {
             4,
             '(import stdlib/vector.ru) (export value (lambda () (vector:length (vector:push (vector:push (vector:push (vector:push (vector:new) 42) 42) 42) 42))))',
             'should return the number of elements in the vector for vectors with more than one element'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            0,
+            '(import stdlib/vector.ru) (export value (lambda () (let (apply (lambda (f v) (f v))) (apply vector:length (vector:new)))))',
+            'should be possible to pass as an argument'
         );
     });
 
@@ -57,6 +73,13 @@ describe('stdlib/vector.ru', function () {
             33,
             '(import stdlib/vector.ru) (export value (lambda () (vector:element-at-index (vector:push (vector:push (vector:push (vector:push (vector:new) 11) 22) 33) 44) 2)))',
             'should return the n-th element given an index of n-1'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            1,
+            '(import stdlib/vector.ru) (export value (lambda () (let (apply (lambda (f v) (f v 0))) (apply vector:element-at-index (vector:push (vector:new) 1)))))',
+            'should be possible to pass as an argument'
         );
     });
 
@@ -90,6 +113,13 @@ describe('stdlib/vector.ru', function () {
             '(import stdlib/vector.ru) (export value (lambda () (let (two-element (vector:push (vector:push (vector:new) 42) 24)) (let (one-element (vector:pop two-element)) (vector:length two-element)))))',
             'should not modify the original vector'
         );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            0,
+            '(import stdlib/vector.ru) (export value (lambda () (let (apply (lambda (f v) (f v))) (vector:length (apply vector:pop (vector:push (vector:new) 1))))))',
+            'should be possible to pass as an argument'
+        );
     });
 
     describe('vector:push', function () {
@@ -98,6 +128,13 @@ describe('stdlib/vector.ru', function () {
             1,
             '(import stdlib/vector.ru) (export value (lambda () (let (one-element (vector:push (vector:new) 42)) (let (two-element (vector:push one-element 24)) (vector:length one-element)))))',
             'should not modify the original vector'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            1,
+            '(import stdlib/vector.ru) (export value (lambda () (let (apply (lambda (f v) (f v 1))) (vector:length (apply vector:push (vector:new))))))',
+            'should be possible to pass as an argument'
         );
     });
 });

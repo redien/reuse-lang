@@ -11,7 +11,7 @@ node reuse.js example.reuse
 #### Target platforms
 | Target Hosts   | Node.js versions | Build Status |
 | :------------ | :----------: | :------------------: |
-| linux-gcc, osx | 0.10, 0.11, 0.12, iojs, 4.0, 4.1 | [![travis-ci build status](https://travis-ci.org/redien/reuse-lang.svg?branch=master)](https://travis-ci.org/redien/reuse-lang) |
+| linux-gcc, osx | 0.10, 0.11, 0.12, iojs, 4.0, 4.1, 4.2, 5.1 | [![travis-ci build status](https://travis-ci.org/redien/reuse-lang.svg?branch=master)](https://travis-ci.org/redien/reuse-lang) |
 
 ## Design rationale
 

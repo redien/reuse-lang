@@ -14,17 +14,6 @@
 var should = require('should');
 var ast = require('../lib/ast-builder');
 
-// The AST is build out of lists like so:
-// [0,
-//    [[1, 'abc'],
-//    [[1, 'def'],
-//    [[0, null],
-//    null]]]]
-//
-// from
-//
-// ['abc', 'def', []]
-
 describe('ast-builder', function () {
     describe('kind', function () {
         it('should return "atom" for an atom', function () {
@@ -51,22 +40,6 @@ describe('ast-builder', function () {
     describe('column', function () {
         it('should return the column of the given atom', function () {
             ast.column(ast.expression(ast.expression(ast([['abc']]), 0), 0)).should.equal(2);
-        });
-    });
-
-    describe('setLine', function () {
-        it('should modify the atom to set the line number', function () {
-            var atom = ast('abc');
-            ast.setLine(atom, 3);
-            ast.line(atom).should.equal(3);
-        });
-    });
-
-    describe('setColumn', function () {
-        it('should modify the atom to set the column number', function () {
-            var atom = ast('abc');
-            ast.setColumn(atom, 3);
-            ast.column(atom).should.equal(3);
         });
     });
 
@@ -97,22 +70,6 @@ describe('ast-builder', function () {
                 [[1, ['abc', [0, [0, null]]]],
                 [[1, ['abc', [0, [0, null]]]],
                 null]]]]).should.equal(3);
-        });
-    });
-
-    describe('push', function () {
-        it('should modify the list by adding the expression to it', function () {
-            var list = [0, null];
-            ast.push(list, [1, ['abc', [0, [0, null]]]]);
-            ast.value(ast.expression(list, 0)).should.equal('abc');
-        });
-
-        it('should add expression to the end of the list', function () {
-            var list = [0, null];
-            ast.push(list, [1, ['abc', [0, [0, null]]]]);
-            ast.push(list, [1, ['def', [0, [0, null]]]]);
-            ast.value(ast.expression(list, 0)).should.equal('abc');
-            ast.value(ast.expression(list, 1)).should.equal('def');
         });
     });
 

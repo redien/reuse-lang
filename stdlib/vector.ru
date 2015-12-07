@@ -38,5 +38,10 @@
             (rest vector)
             (+ index 1)))))
 
+
+(comment Functions below are not dependent on the implementation above using
+    lists. It can thus be used even if the above functions are implemented
+    as the host language's native data types.)
+
 (export vector:last-element (lambda (vector)
-    (first (rest vector))))
+    (vector:element-at-index vector (- (vector:length vector) 1))))
