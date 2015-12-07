@@ -15,3 +15,5 @@
 )
 
 (export add-42 (lambda (x) (+ x 42)))
+(export add-50 (lambda (x) (add-42 (+ x 8))))
+(define two 123)

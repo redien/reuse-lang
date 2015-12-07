@@ -12,6 +12,7 @@
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 var it_should_evaluate_expression_to_value_given_program = require('./util/expect-value');
+var it_should_return_error_given_program = require('./util/expect-error');
 
 describe('Importing modules', function () {
     it_should_evaluate_expression_to_value_given_program(
@@ -26,5 +27,26 @@ describe('Importing modules', function () {
         51,
         '(import ./feature/util/test-module.ru something)(export value (lambda () (something:add-42 9)))',
         'should prepend imported symbols with the specified name followed by a colon'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.value()',
+        52,
+        '(import ./feature/util/test-module.ru something)(export value (lambda () (something:add-50 2)))',
+        'should keep references to exported symbols consistent after they are imported'
+    );
+
+    it_should_evaluate_expression_to_value_given_program(
+        'module.value()',
+        44,
+        '(define two 2)(import ./feature/util/test-module.ru something)(export value (lambda () (something:add-42 two)))',
+        'should not redefine local symbols with local symbols from imported modules'
+    );
+
+    it_should_return_error_given_program(
+        'unused_import',
+        1,
+        2,
+        '(import stdlib/string.ru)'
     );
 });
