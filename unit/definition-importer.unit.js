@@ -15,6 +15,7 @@ var fs = require('fs');
 var should = require('should');
 var ast = require('../lib/ast-builder');
 var importer = require('../lib/definition-importer');
+var pts = require('../lib/parse-tree-serializer');
 
 describe('definition-importer', function () {
     it('should not import anything given no import statements', function () {
@@ -82,6 +83,7 @@ describe('definition-importer', function () {
             ['import', 'module-name'],
             ['import', 'module2'],
         ]);
+        debugger;
         var imported = importer.import(original, function (moduleName) {
             if (moduleName === 'module-name') {
                 return ast([
