@@ -42,11 +42,4 @@ describe('Importing modules', function () {
         '(define two 2)(import ./feature/util/test-module.ru something)(export value (lambda () (something:add-42 two)))',
         'should not redefine local symbols with local symbols from imported modules'
     );
-
-    it_should_return_error_given_program(
-        'unused_import',
-        1,
-        2,
-        '(import stdlib/string.ru)'
-    );
 });
