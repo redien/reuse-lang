@@ -64,3 +64,15 @@
     (let (push-back (lambda (list item)
         (list:concatenate list (cons item nil))))
     (cons 0 (push-back list child))))))
+
+(define transform-list (lambda (list child-index new-list should-replace? replace)
+    (if (< child-index (parse-tree:count list))
+        (recur list (+ child-index 1) (parse-tree:push new-list (parse-tree:transform (parse-tree:child list child-index) should-replace? replace)) should-replace? replace)
+        new-list)))
+
+(export parse-tree:transform (lambda (parse-tree should-replace? replace)
+    (if (should-replace? parse-tree)
+        (replace parse-tree)
+        (if (parse-tree:list? parse-tree)
+            (transform-list parse-tree 0 (parse-tree:list) should-replace? replace)
+            parse-tree))))
