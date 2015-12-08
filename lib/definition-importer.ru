@@ -18,26 +18,36 @@
 (import stdlib/string.ru)
 (import ./lib/parse-tree.ru)
 
+(define underscore 95)
+
 (define export-form (string:push (string:push (string:push (string:push (string:push (string:push (string:new) 101) 120) 112) 111) 114) 116))
 (define import-form (string:push (string:push (string:push (string:push (string:push (string:push (string:new) 105) 109) 112) 111) 114) 116))
-
-(define new-define-from-import-atom (lambda (line column) (parse-tree:atom (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:new) 100) 101) 102) 105) 110) 101) 45) 102) 114) 111) 109) 45) 105) 109) 112) 111) 114) 116) line column)))
+(define define-form (string:push (string:push (string:push (string:push (string:push (string:push (string:new) 100) 101) 102) 105) 110) 101))
+(define define-from-import-form (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:push (string:new) 100) 101) 102) 105) 110) 101) 45) 102) 114) 111) 109) 45) 105) 109) 112) 111) 114) 116))
 
 (define form-from-statement (lambda (statement)
     (parse-tree:value (parse-tree:child statement 0))))
 
-(define module-already-imported? (lambda (module-name module-list)
-    (if (nil? module-list)
+(define string-exists-in-list? (lambda (string list)
+    (if (nil? list)
         false
-        (if (string:equal? module-name (first module-list))
+        (if (string:equal? string (first list))
             true
-            (recur module-name (rest module-list))))))
+            (recur string (rest list))))))
+
+(define module-already-imported? (lambda (module-name module-list)
+    (string-exists-in-list? module-name module-list)))
 
 (define is-statement-import-form? (lambda (statement)
     (string:equal? import-form (form-from-statement statement))))
 
 (define is-statement-export-form? (lambda (statement)
     (string:equal? export-form (form-from-statement statement))))
+
+(define is-statement-any-define-form? (lambda (statement)
+    (or
+        (string:equal? define-form (form-from-statement statement))
+        (string:equal? define-from-import-form (form-from-statement statement)))))
 
 (define module-name-from-statement (lambda (statement)
     (parse-tree:value
@@ -76,7 +86,7 @@
 
 (define redefine-export-statement (lambda (statement module-name module-prefix)
     (parse-tree:push (parse-tree:push (parse-tree:push (parse-tree:push (parse-tree:list)
-        (new-define-from-import-atom 0 0))
+        (parse-tree:atom define-from-import-form 0 0))
         (parse-tree:atom (string:concatenate module-prefix (parse-tree:value (parse-tree:child statement 1))) 0 0))
         (parse-tree:child statement 2))
         (parse-tree:atom module-name 0 0))))
@@ -104,6 +114,30 @@
                 module-prefix
                 (should-redefine-exports-from-state state)))
         (rest state))))))
+
+(export enumerate-defines (lambda (program)
+    (let (enumerate-defines-with-accumulator (lambda (statement-index list)
+        (if (< statement-index (parse-tree:count program))
+            (let (statement (parse-tree:child program statement-index))
+            (let (next-list (if (is-statement-any-define-form? statement)
+                (cons (parse-tree:value (parse-tree:child statement 1)) list)
+                list))
+            (recur (+ statement-index 1) next-list)))
+            list)))
+    (enumerate-defines-with-accumulator 0 nil))))
+
+(define scope-local-defines (lambda (program module-name)
+    (let (defines (enumerate-defines program))
+    (parse-tree:transform program
+        (lambda (expression)
+            (if (parse-tree:atom? expression)
+                (string-exists-in-list? (parse-tree:value expression) defines)
+                false))
+        (lambda (expression)
+            (parse-tree:atom
+                (string:concatenate (string:push module-name underscore) (parse-tree:value expression))
+                (parse-tree:line expression)
+                (parse-tree:column expression)))))))
 
 (define convert-module (lambda (program module-loader state new-program imported-modules)
     (if (nil? state)
@@ -148,7 +182,7 @@
         (let (next-state
             (if statement-is-module-import
                 (let (module-name (module-name-from-statement statement))
-                (let (loaded-module (module-loader module-name))
+                (let (loaded-module (scope-local-defines (module-loader module-name) module-name))
                 (if (> (parse-tree:count loaded-module) 0)
                     (state-with-imported-module module-prefix module-name loaded-module next-state)
                     next-state)))

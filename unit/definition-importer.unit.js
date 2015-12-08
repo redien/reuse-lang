@@ -179,4 +179,25 @@ describe('definition-importer', function () {
         ast.value(ast.expression(ast.expression(imported, 0), 1)).should.equal('some-name:abc');
         ast.value(ast.expression(ast.expression(imported, 0), 2)).should.equal('123');
     });
+
+    it('should prepend imported local symbols with the module path followed by an underscore', function () {
+        var original = ast([['import', 'module-name']]);
+        var imported = importer.import(original, function (moduleName) {
+            return ast([['define', 'abc', '123']]);
+        });
+
+        ast.value(ast.expression(ast.expression(imported, 0), 0)).should.equal('define');
+        ast.value(ast.expression(ast.expression(imported, 0), 1)).should.equal('module-name_abc');
+        ast.value(ast.expression(ast.expression(imported, 0), 2)).should.equal('123');
+    });
+
+    it('should handle empty argument lists', function () {
+        var original = ast([['import', 'module-name']]);
+        var imported = importer.import(original, function (moduleName) {
+            return ast([['define', 'abc', ['lambda', [], '1']]]);
+        });
+
+        ast.value(ast.expression(ast.expression(imported, 0), 0)).should.equal('define');
+        ast.value(ast.expression(ast.expression(imported, 0), 1)).should.equal('module-name_abc');
+    });
 });
