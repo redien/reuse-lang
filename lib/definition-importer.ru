@@ -19,6 +19,7 @@
 (import ./lib/parse-tree.ru)
 
 (define underscore 95)
+(define colon 58)
 
 (define export-form (string:push (string:push (string:push (string:push (string:push (string:push (string:new) 101) 120) 112) 111) 114) 116))
 (define import-form (string:push (string:push (string:push (string:push (string:push (string:push (string:new) 105) 109) 112) 111) 114) 116))
@@ -87,7 +88,7 @@
 (define redefine-export-statement (lambda (statement module-name module-prefix)
     (parse-tree:push (parse-tree:push (parse-tree:push (parse-tree:push (parse-tree:list)
         (parse-tree:atom define-from-import-form 0 0))
-        (parse-tree:atom (string:concatenate module-prefix (parse-tree:value (parse-tree:child statement 1))) 0 0))
+        (parse-tree:atom (parse-tree:value (parse-tree:child statement 1)) 0 0))
         (parse-tree:child statement 2))
         (parse-tree:atom module-name 0 0))))
 
@@ -115,29 +116,41 @@
                 (should-redefine-exports-from-state state)))
         (rest state))))))
 
-(export enumerate-defines (lambda (program)
-    (let (enumerate-defines-with-accumulator (lambda (statement-index list)
+(export enumerate-statements-matching-predicate (lambda (program predicate)
+    (let (enumerate-statements-with-accumulator (lambda (statement-index list)
         (if (< statement-index (parse-tree:count program))
             (let (statement (parse-tree:child program statement-index))
-            (let (next-list (if (is-statement-any-define-form? statement)
+            (let (next-list (if (predicate statement)
                 (cons (parse-tree:value (parse-tree:child statement 1)) list)
                 list))
             (recur (+ statement-index 1) next-list)))
             list)))
-    (enumerate-defines-with-accumulator 0 nil))))
+    (enumerate-statements-with-accumulator 0 nil))))
 
-(define scope-local-defines (lambda (program module-name)
-    (let (defines (enumerate-defines program))
+(export enumerate-defines (lambda (program)
+    (enumerate-statements-matching-predicate program is-statement-any-define-form?)))
+
+(export enumerate-exports (lambda (program)
+    (enumerate-statements-matching-predicate program is-statement-export-form?)))
+
+(define prefix-symbols (lambda (program prefix enumerator)
+    (let (symbols (enumerator program))
     (parse-tree:transform program
         (lambda (expression)
             (if (parse-tree:atom? expression)
-                (string-exists-in-list? (parse-tree:value expression) defines)
+                (string-exists-in-list? (parse-tree:value expression) symbols)
                 false))
         (lambda (expression)
             (parse-tree:atom
-                (string:concatenate (string:push module-name underscore) (parse-tree:value expression))
+                (string:concatenate prefix (parse-tree:value expression))
                 (parse-tree:line expression)
                 (parse-tree:column expression)))))))
+
+(define scope-local-defines (lambda (program module-name)
+    (prefix-symbols program (string:push module-name underscore) enumerate-defines)))
+
+(define prefix-exported-symbols (lambda (program module-prefix)
+    (prefix-symbols program module-prefix enumerate-exports)))
 
 (define convert-module (lambda (program module-loader state new-program imported-modules)
     (if (nil? state)
@@ -161,7 +174,7 @@
             (if (and
                     statement-is-module-import
                     (has-module-prefix statement))
-                (string:push (module-prefix-from-statement statement) 58)
+                (string:push (module-prefix-from-statement statement) colon)
                 module-prefix))
 
         (let (new-statement
@@ -182,7 +195,12 @@
         (let (next-state
             (if statement-is-module-import
                 (let (module-name (module-name-from-statement statement))
-                (let (loaded-module (scope-local-defines (module-loader module-name) module-name))
+                (let (loaded-module
+                    (scope-local-defines
+                        (prefix-exported-symbols
+                            (module-loader module-name)
+                            module-prefix)
+                        module-name))
                 (if (> (parse-tree:count loaded-module) 0)
                     (state-with-imported-module module-prefix module-name loaded-module next-state)
                     next-state)))
