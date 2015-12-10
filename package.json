@@ -13,7 +13,7 @@
     "unit-test": "npm run-script build && mocha \"**/*.unit.js\""
   },
   "author": "Jesper Oskarsson",
-  "license": "Public Domain",
+  "license": "CC0-1.0",
   "devDependencies": {
     "blanket": "1.2.1",
     "coveralls": "2.11.4",
