@@ -36,23 +36,20 @@
         (list:reverse list))))
 
 (export list:map (lambda (f list)
-    (list:transduce-right
-        (transducers:mapping f)
-        (swap cons)
+    (list:reduce-right
+        ((transducers:mapping f) (swap cons))
         nil
         list)))
 
 (export list:filter (lambda (predicate list)
-    (list:transduce-right
-        (transducers:filtering predicate)
-        (swap cons)
+    (list:reduce-right
+        ((transducers:filtering predicate) (swap cons))
         nil
         list)))
 
 (export list:count (lambda (list)
-    (list:transduce
-        (transducers:overriding 1)
-        +
+    (list:reduce
+        ((transducers:overriding 1) +)
         0
         list)))
 
@@ -80,11 +77,3 @@
             second-list
             (recur (rest first-list-reversed) (cons (first first-list-reversed) second-list)))))
         (concatenate (list:reverse first-list) second-list))))
-
-(export list:transduce (lambda (transducer step initial-value list)
-    (let (reducer (transducer step))
-    (list:reduce reducer initial-value list))))
-
-(export list:transduce-right (lambda (transducer step initial-value list)
-    (let (reducer (transducer step))
-    (list:reduce-right reducer initial-value list))))
