@@ -52,4 +52,20 @@ describe('stdlib/transducers.ru', function () {
             'should pass in the value to the predicate'
         );
     });
+
+    describe('transducers:overriding', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            12,
+            '(import stdlib/transducers.ru) (export value (lambda () (((transducers:overriding 7) +) 5 2)))',
+            'should override any value with the provided one'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'JSON.stringify(module.value())',
+            '[null,[5,null]]',
+            '(import stdlib/transducers.ru) (export value (lambda () (((transducers:overriding nil) (lambda (accumulator value) (cons value accumulator))) (cons 5 nil) 1)))',
+            'should override any value with the provided one'
+        );
+    });
 });

@@ -19,4 +19,27 @@ describe('Lambdas', function () {
         3,
         '(export identity (lambda (x) x))'
     );
+
+    describe('comp', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            42,
+            '(export value (lambda () ((comp (lambda (x) x) (lambda (x) x)) 42)))',
+            'should return the identity function given two identity functions'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            43,
+            '(export value (lambda () ((comp (lambda (x) x) (lambda (x) (+ x 1))) 42)))',
+            'should return the second function given one identity function and another function'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            86,
+            '(export value (lambda () ((comp (lambda (x) (* x 2)) (lambda (x) (+ x 1))) 42)))',
+            'should return the two functions combined as a(b(x)) given two functions other than the identity function'
+        );
+    });
 });

@@ -25,3 +25,8 @@
             (if (predicate value)
                 (step accumulator value)
                 accumulator)))))
+
+(export transducers:overriding (lambda (value)
+    (lambda (step)
+        (lambda (accumulator _)
+            (step accumulator value)))))

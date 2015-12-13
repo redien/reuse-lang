@@ -14,40 +14,49 @@
 
 )
 
-(export list:reduce (lambda (f initial-value list)
+(import stdlib/transducers.ru)
+
+(define swap (lambda (f) (lambda (a b) (f b a))))
+
+(export list:reduce (lambda (f accumulator list)
     (if (nil? list)
-        initial-value
-        (recur f (f initial-value (first list)) (rest list)))))
+        accumulator
+        (recur f (f accumulator (first list)) (rest list)))))
 
 (export list:foldl list:reduce)
 
 (export list:reverse (lambda (list)
     (list:reduce
-        (lambda (a b) (cons b a))
+        (swap cons)
         nil
         list)))
 
 (export list:foldr (lambda (f initial-value list)
     (list:reduce
-        (lambda (a b) (f b a))
+        f
         initial-value
         (list:reverse list))))
 
 (export list:map (lambda (f list)
-    (list:foldr
-        (lambda (first rest)
-            (cons
-                (f first)
-                rest))
+    (list:transduce-right
+        (transducers:mapping f)
+        (swap cons)
+        nil
+        list)))
+
+(export list:filter (lambda (predicate list)
+    (list:transduce-right
+        (transducers:filtering predicate)
+        (swap cons)
         nil
         list)))
 
 (export list:count (lambda (list)
-    (let (count-with-accumulator (lambda (list count)
-        (if (nil? list)
-            count
-            (recur (rest list) (+ count 1)))))
-        (count-with-accumulator list 0))))
+    (list:transduce
+        (transducers:overriding 1)
+        +
+        0
+        list)))
 
 (export list:take (lambda (list n)
     (let (take-with-accumulator (lambda (list n new-list)
@@ -73,3 +82,11 @@
             second-list
             (recur (rest first-list-reversed) (cons (first first-list-reversed) second-list)))))
         (concatenate (list:reverse first-list) second-list))))
+
+(export list:transduce (lambda (transducer step initial-value list)
+    (let (reducer (transducer step))
+    (list:foldl reducer initial-value list))))
+
+(export list:transduce-right (lambda (transducer step initial-value list)
+    (let (reducer (transducer step))
+    (list:foldr reducer initial-value list))))
