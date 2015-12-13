@@ -137,4 +137,80 @@ describe('stdlib/vector.ru', function () {
             'should be possible to pass as an argument'
         );
     });
+
+    describe('vector:reduce', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            42,
+            '(import stdlib/vector.ru) (export value (lambda () (vector:reduce (lambda () 0) 42 (vector:new))))',
+            'should return the initial value for an empty vector'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            50,
+            '(import stdlib/vector.ru) (export value (lambda () (vector:reduce / 100 (vector:push (vector:new) 2))))',
+            'should combine the first item and initial value using the provided function where the initial value is the first argument and the first item is the second'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            60,
+            '(import stdlib/vector.ru) (export value (lambda () (vector:reduce * 1 (vector:push (vector:push (vector:push (vector:new) 2) 3) 10))))',
+            'should recursively combine the first item of the vector with the result of itself applied on the rest of the vector'
+        );
+    });
+
+    describe('vector:map', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'JSON.stringify(module.value())',
+            '[]',
+            '(import stdlib/vector.ru) (export value (lambda () (vector:map (lambda (x) x) (vector:new))))',
+            'should return an empty vector given an empty vector'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'JSON.stringify(module.value())',
+            '[101]',
+            '(import stdlib/vector.ru) (export value (lambda () (vector:map (lambda (x) (+ 1 x)) (vector:push (vector:new) 100))))',
+            'should return a vector with the first item combined with the provided function given a vector with one item'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'JSON.stringify(module.value())',
+            '[100,101,102,103]',
+            '(import stdlib/vector.ru) (export value (lambda () (vector:map (lambda (x) (+ 3 x)) (vector:push (vector:push (vector:push (vector:push (vector:new) 97) 98) 99) 100))))',
+            'should return a vector with the function applied to all items in the provided vector if it has more than one item'
+        );
+    });
+
+    describe('vector:filter', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'JSON.stringify(module.value())',
+            '[]',
+            '(import stdlib/vector.ru) (export value (lambda () (vector:filter (lambda (x) true) (vector:new))))',
+            'should return an empty vector given an empty vector'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'JSON.stringify(module.value())',
+            '[100]',
+            '(import stdlib/vector.ru) (export value (lambda () (vector:filter (lambda (x) true) (vector:push (vector:new) 100))))',
+            'should given a vector with one item and the predicate returns true, return a vector with the single item'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'JSON.stringify(module.value())',
+            '[]',
+            '(import stdlib/vector.ru) (export value (lambda () (vector:filter (lambda (x) false) (vector:push (vector:new) 100))))',
+            'should given a vector with one item and the predicate returns false, return an empty vector'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'JSON.stringify(module.value())',
+            '[98,100]',
+            '(import stdlib/vector.ru) (export value (lambda () (vector:filter (lambda (x) (== (% x 2) 0)) (vector:push (vector:push (vector:push (vector:push (vector:new) 97) 98) 99) 100))))',
+            'should filter away items given a predicate that selects only a few items from the vector'
+        );
+    });
 });
