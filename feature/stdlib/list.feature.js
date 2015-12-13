@@ -14,32 +14,28 @@
 var it_should_evaluate_expression_to_value_given_program = require('../util/expect-value');
 
 describe('stdlib/list.ru', function () {
-    var describeAsReduce = function (reduce) {
-        describe(reduce, function () {
-            it_should_evaluate_expression_to_value_given_program(
-                'module.value(3) + module.value(39)',
-                42,
-                '(import stdlib/list.ru) (export value (lambda (initial-value) (' + reduce + ' (lambda () 0) initial-value nil)))',
-                'should return the initial value for an empty list'
-            );
+    describe('list:reduce', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value(3) + module.value(39)',
+            42,
+            '(import stdlib/list.ru) (export value (lambda (initial-value) (list:reduce (lambda () 0) initial-value nil)))',
+            'should return the initial value for an empty list'
+        );
 
-            it_should_evaluate_expression_to_value_given_program(
-                'module.value()',
-                50,
-                '(import stdlib/list.ru) (export value (lambda () (' + reduce + ' / 100 (cons 2 nil))))',
-                'should combine the first item and initial value using the provided function where the initial value is the first argument and the first item is the second'
-            );
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            50,
+            '(import stdlib/list.ru) (export value (lambda () (list:reduce / 100 (cons 2 nil))))',
+            'should combine the first item and initial value using the provided function where the initial value is the first argument and the first item is the second'
+        );
 
-            it_should_evaluate_expression_to_value_given_program(
-                'module.value()',
-                60,
-                '(import stdlib/list.ru) (export value (lambda () (' + reduce + ' * 1 (cons 2 (cons 3 (cons 10 nil))))))',
-                'should recursively combine the first item of the list with the result of itself applied on the rest of the list'
-            );
-        });
-    };
-    describeAsReduce('list:reduce');
-    describeAsReduce('list:foldl');
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            60,
+            '(import stdlib/list.ru) (export value (lambda () (list:reduce * 1 (cons 2 (cons 3 (cons 10 nil))))))',
+            'should recursively combine the first item of the list with the result of itself applied on the rest of the list'
+        );
+    });
 
     describe('list:reverse', function () {
         it_should_evaluate_expression_to_value_given_program(
@@ -71,25 +67,25 @@ describe('stdlib/list.ru', function () {
         );
     });
 
-    describe('list:foldr', function () {
+    describe('list:reduce-right', function () {
         it_should_evaluate_expression_to_value_given_program(
             'module.value(3) + module.value(39)',
             42,
-            '(import stdlib/list.ru) (export value (lambda (initial-value) (list:foldr + initial-value nil)))',
+            '(import stdlib/list.ru) (export value (lambda (initial-value) (list:reduce-right + initial-value nil)))',
             'should return the initial value for an empty list'
         );
 
         it_should_evaluate_expression_to_value_given_program(
             'module.value()',
             50,
-            '(import stdlib/list.ru) (export value (lambda () (list:foldr / 100 (cons 2 nil))))',
+            '(import stdlib/list.ru) (export value (lambda () (list:reduce-right / 100 (cons 2 nil))))',
             'should combine the first item and initial value using the provided function where the initial value is the first argument and the first item is the second'
         );
 
         it_should_evaluate_expression_to_value_given_program(
             'JSON.stringify(module.value())',
             '[1,[2,[3,[4,[5,null]]]]]',
-            '(import stdlib/list.ru) (export value (lambda () (list:foldr (lambda (accumulator value) (cons value accumulator)) nil (cons 1 (cons 2 (cons 3 (cons 4 (cons 5 nil))))))))',
+            '(import stdlib/list.ru) (export value (lambda () (list:reduce-right (lambda (accumulator value) (cons value accumulator)) nil (cons 1 (cons 2 (cons 3 (cons 4 (cons 5 nil))))))))',
             'should recursively combine the last item of the list with the result of itself applied on the rest of the list'
         );
     });

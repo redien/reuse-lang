@@ -23,15 +23,13 @@
         accumulator
         (recur f (f accumulator (first list)) (rest list)))))
 
-(export list:foldl list:reduce)
-
 (export list:reverse (lambda (list)
     (list:reduce
         (swap cons)
         nil
         list)))
 
-(export list:foldr (lambda (f initial-value list)
+(export list:reduce-right (lambda (f initial-value list)
     (list:reduce
         f
         initial-value
@@ -85,8 +83,8 @@
 
 (export list:transduce (lambda (transducer step initial-value list)
     (let (reducer (transducer step))
-    (list:foldl reducer initial-value list))))
+    (list:reduce reducer initial-value list))))
 
 (export list:transduce-right (lambda (transducer step initial-value list)
     (let (reducer (transducer step))
-    (list:foldr reducer initial-value list))))
+    (list:reduce-right reducer initial-value list))))
