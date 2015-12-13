@@ -16,7 +16,7 @@
 
 (import stdlib/transducers.ru)
 
-(define swap (lambda (f) (lambda (a b) (f b a))))
+(define list:add (lambda (a b) (cons b a)))
 
 (export list:reduce (lambda (f accumulator list)
     (if (nil? list)
@@ -25,7 +25,7 @@
 
 (export list:reverse (lambda (list)
     (list:reduce
-        (swap cons)
+        list:add
         nil
         list)))
 
@@ -37,13 +37,13 @@
 
 (export list:map (lambda (f list)
     (list:reduce-right
-        ((transducers:mapping f) (swap cons))
+        ((transducers:mapping f) list:add)
         nil
         list)))
 
 (export list:filter (lambda (predicate list)
     (list:reduce-right
-        ((transducers:filtering predicate) (swap cons))
+        ((transducers:filtering predicate) list:add)
         nil
         list)))
 

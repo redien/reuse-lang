@@ -113,6 +113,82 @@ describe('stdlib/string.ru', function () {
         );
     });
 
+    describe('string:reduce', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            42,
+            '(import stdlib/string.ru) (export value (lambda () (string:reduce (lambda () 0) 42 (string:new))))',
+            'should return the initial value for an empty string'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            50,
+            '(import stdlib/string.ru) (export value (lambda () (string:reduce / 100 (string:push (string:new) 2))))',
+            'should combine the first code point and initial value using the provided function where the initial value is the first argument and the first code point is the second'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            60,
+            '(import stdlib/string.ru) (export value (lambda () (string:reduce * 1 (string:push (string:push (string:push (string:new) 2) 3) 10))))',
+            'should recursively combine the first code point of the string with the result of itself applied on the rest of the string'
+        );
+    });
+
+    describe('string:map', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            '',
+            '(import stdlib/string.ru) (export value (lambda () (string:map (lambda (x) x) (string:new))))',
+            'should return an empty string given an empty string'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            'e',
+            '(import stdlib/string.ru) (export value (lambda () (string:map (lambda (x) (+ 1 x)) (string:push (string:new) 100))))',
+            'should return a string with the first code point combined with the provided function given a string with one code point'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            'defg',
+            '(import stdlib/string.ru) (export value (lambda () (string:map (lambda (x) (+ 3 x)) (string:push (string:push (string:push (string:push (string:new) 97) 98) 99) 100))))',
+            'should return a string with the function applied to all code points in the provided string if it has more than one code point'
+        );
+    });
+
+    describe('string:filter', function () {
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            '',
+            '(import stdlib/string.ru) (export value (lambda () (string:filter (lambda (x) true) (string:new))))',
+            'should return an empty string given an empty string'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            'd',
+            '(import stdlib/string.ru) (export value (lambda () (string:filter (lambda (x) true) (string:push (string:new) 100))))',
+            'should given a string with one code point and the predicate returns true, return a string with the single code point'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            '',
+            '(import stdlib/string.ru) (export value (lambda () (string:filter (lambda (x) false) (string:push (string:new) 100))))',
+            'should given a string with one code point and the predicate returns false, return an empty string'
+        );
+
+        it_should_evaluate_expression_to_value_given_program(
+            'module.value()',
+            'bd',
+            '(import stdlib/string.ru) (export value (lambda () (string:filter (lambda (x) (== (% x 2) 0)) (string:push (string:push (string:push (string:push (string:new) 97) 98) 99) 100))))',
+            'should filter away code points given a predicate that selects only a few code points from the string'
+        );
+    });
+
     describe('string:concatenate', function () {
         it_should_evaluate_expression_to_value_given_program(
             'module.value()',

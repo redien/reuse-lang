@@ -36,6 +36,39 @@
     as the host language's native data types.)
 
 (import stdlib/math.ru)
+(import stdlib/transducers.ru)
+
+(define iterator-new (lambda (string index)
+    (cons string index)))
+
+(define iterator-next (lambda (iterator)
+    (iterator-new (first iterator) (+ (rest iterator) 1))))
+
+(define iterator-has-next? (lambda (iterator)
+    (< (rest iterator) (string:length (first iterator)))))
+
+(define iterator-code-point (lambda (iterator)
+    (string:code-point-at-index (first iterator) (rest iterator))))
+
+(define reduce-iterator (lambda (f accumulator iterator)
+    (if (iterator-has-next? iterator)
+        (recur f (f accumulator (iterator-code-point iterator)) (iterator-next iterator))
+        accumulator)))
+
+(export string:reduce (lambda (f accumulator string)
+    (reduce-iterator f accumulator (iterator-new string 0))))
+
+(export string:map (lambda (f string)
+    (string:reduce
+        ((transducers:mapping f) string:push)
+        (string:new)
+        string)))
+
+(export string:filter (lambda (predicate string)
+    (string:reduce
+        ((transducers:filtering predicate) string:push)
+        (string:new)
+        string)))
 
 (export string:concatenate (lambda (first-string second-string)
     (let (concatenate-with-index (lambda (accumulator string index)
