@@ -17,17 +17,17 @@ var ast = require('../lib/ast-builder');
 describe('ast-builder', function () {
     describe('kind', function () {
         it('should return "atom" for an atom', function () {
-            ast.kind([1, ['abc', [0, [0, null]]]]).should.equal('atom');
+            ast.kind(ast('abc')).should.equal('atom');
         });
 
         it('should return "list" for a list', function () {
-            ast.kind([0, null]).should.equal('list');
+            ast.kind(ast([])).should.equal('list');
         });
     });
 
     describe('value', function () {
         it('should return the value of an atom', function () {
-            ast.value([1, ['abc', [0, [0, null]]]]).should.equal('abc');
+            ast.value(ast('abc')).should.equal('abc');
         });
     });
 
@@ -45,31 +45,23 @@ describe('ast-builder', function () {
 
     describe('expression', function () {
         it('should return the first expression of a list given an index of 0', function () {
-            ast.value(ast.expression([0, [[1, ['abc', [0, [0, null]]]], null]], 0)).should.equal('abc');
+            ast.value(ast.expression(ast(['abc']), 0)).should.equal('abc');
         });
 
         it('should return the n-th expression of a list given an index of n - 1', function () {
-            var expression = [0,
-                    [[1, ['abc', [0, [0, null]]]],
-                    [[1, ['def', [0, [0, null]]]],
-                    [[1, ['def', [0, [0, null]]]],
-                    null]]]];
+            var expression = ast(['abc', 'def', 'def']);
 
             ast.value(ast.expression(expression, 1)).should.equal('def');
         });
     });
 
     describe('count', function () {
-        it('should return 0 given nil', function () {
-            ast.count(null).should.equal(0);
+        it('should return 0 given an empty list', function () {
+            ast.count(ast([])).should.equal(0);
         });
 
         it('should return n given a list of n items', function () {
-            ast.count([0,
-                [[1, ['abc', [0, [0, null]]]],
-                [[1, ['abc', [0, [0, null]]]],
-                [[1, ['abc', [0, [0, null]]]],
-                null]]]]).should.equal(3);
+            ast.count(ast(['abc', 'abc', 'abc'])).should.equal(3);
         });
     });
 
