@@ -16,11 +16,11 @@
   "license": "CC0-1.0",
   "devDependencies": {
     "blanket": "1.2.1",
-    "coveralls": "2.11.4",
+    "coveralls": "2.11.6",
     "mocha": "2.3.4",
     "mocha-lcov-reporter": "1.0.0",
     "npm-check-updates": "2.5.4",
-    "should": "7.1.1",
+    "should": "8.0.1",
     "travis-cov": "0.2.5"
   },
   "config": {
