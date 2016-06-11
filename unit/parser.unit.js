@@ -62,7 +62,6 @@ describe('parser', function () {
     });
 
     it('should return an "unbalanced_parentheses" error given an unexpected closing brace', function () {
-        debugger;
         var result = parser.parse('((a) a))');
         parser.errorType(result).should.equal('unbalanced_parentheses');
 

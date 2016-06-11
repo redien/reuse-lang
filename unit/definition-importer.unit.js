@@ -83,7 +83,7 @@ describe('definition-importer', function () {
             ['import', 'module-name'],
             ['import', 'module2'],
         ]);
-        debugger;
+
         var imported = importer.import(original, function (moduleName) {
             if (moduleName === 'module-name') {
                 return ast([
