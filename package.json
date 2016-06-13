@@ -1,8 +1,38 @@
 {
   "name": "reuse-lang",
   "version": "0.1.0",
-  "description": "",
+  "description": "A simple lisp",
   "main": "reuse.js",
-  "author": "Jesper Oskarsson",
+  "dependencies": {},
+  "devDependencies": {
+    "cucumber": "^1.0.0",
+    "mocha": "^2.5.3",
+    "promise": "^7.1.1",
+    "should": "^9.0.2"
+  },
+  "scripts": {
+    "unit-test": "mocha \"**/*.unit.js\"",
+    "acceptance-test": "cucumberjs",
+    "test": "npm run-script unit-test && npm run-script acceptance-test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/redien/reuse-lang.git"
+  },
+  "keywords": [
+    "reuse",
+    "language",
+    "reuse-lang",
+    "lisp",
+    "scheme",
+    "lang",
+    "transpiler",
+    "compiler"
+  ],
+  "author": "Jesper Oskarsson <jesosk@gmail.com>",
   "license": "CC0-1.0",
+  "bugs": {
+    "url": "https://github.com/redien/reuse-lang/issues"
+  },
+  "homepage": "https://github.com/redien/reuse-lang#readme"
 }
