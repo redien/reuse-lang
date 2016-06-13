@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "description": "A simple lisp",
   "main": "reuse.js",
-  "dependencies": {},
+  "dependencies": {
+    "immutable": "^3.8.1"
+  },
   "devDependencies": {
     "cucumber": "^1.0.0",
     "mocha": "^2.5.3",

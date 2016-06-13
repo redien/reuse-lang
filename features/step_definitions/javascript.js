@@ -1,5 +1,6 @@
 
 var Promise = require('promise');
+var reuse = require('../../module/reuse');
 require('should');
 
 var evaluateExpression = function (expression) {
@@ -15,7 +16,7 @@ var evaluateExpression = function (expression) {
 
 module.exports = function () {
     this.Given(/^an expression "([^"]*)"$/, function (expression) {
-        this.expression = expression;
+        this.expression = reuse.translate('javascript', expression);
     });
 
     this.When(/^I evaluate it$/, function () {
@@ -23,6 +24,8 @@ module.exports = function () {
     });
 
     this.Then(/^I should get "([^"]*)"$/, function (expected) {
-        return this.result.should.eventually.equal(expected);
+        return this.result.then(function (result) {
+            result.toString().should.equal(expected);
+        });
     });
 };
