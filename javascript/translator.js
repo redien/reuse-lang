@@ -1,6 +1,6 @@
 
 var functionApplication = require('../translation/function-application');
-var operators = require('../translation/operator-matchers');
+var operators = require('../translation/operators');
 var match = require('../translation/match-ast');
 var list = match.list;
 var variable = match.variable;
@@ -11,16 +11,16 @@ var dropDecimals = function (translator) {
     };
 };
 
-module.exports.translate = function translate (parsedExpression) {
+module.exports.translate = function translateExpression (parsedExpression) {
     return match(parsedExpression, [
         // Overrides division operator to round off decimal points
-        list('/', variable('a', 'list'), variable('b', 'list')),    dropDecimals(operators.infixOperator('/', translate, true, true)),
-        list('/', variable('a'), variable('b', 'list')),            dropDecimals(operators.infixOperator('/', translate, false, true)),
-        list('/', variable('a', 'list'), variable('b')),            dropDecimals(operators.infixOperator('/', translate, true, false)),
-        list('/', variable('a'), variable('b')),                    dropDecimals(operators.infixOperator('/', translate)),
+        list('/', variable('a', 'list'), variable('b', 'list')),    dropDecimals(operators.infixOperator('/', translateExpression, true, true)),
+        list('/', variable('a'), variable('b', 'list')),            dropDecimals(operators.infixOperator('/', translateExpression, false, true)),
+        list('/', variable('a', 'list'), variable('b')),            dropDecimals(operators.infixOperator('/', translateExpression, true, false)),
+        list('/', variable('a'), variable('b')),                    dropDecimals(operators.infixOperator('/', translateExpression)),
     ].concat(
-        operators.infixOperatorMatchersForLanguageWithInt32(translate)
+        operators.infixOperatorMatchersForLanguageWithInt32(translateExpression)
     ).concat(
-        functionApplication(translate)
+        functionApplication(translateExpression)
     ));
 };
