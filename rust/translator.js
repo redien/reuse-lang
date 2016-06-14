@@ -1,9 +1,9 @@
 
-var common = require('../translation/common');
+var operators = require('../translation/operator-matchers');
 var match = require('../translation/match-ast');
 
 module.exports.translate = function translate (parsedExpression) {
     return match(parsedExpression,
-        common.infixOperatorMatchersForLanguageWithInt32(translate)
+        operators.infixOperatorMatchersForLanguageWithInt32(translate)
     );
 };
