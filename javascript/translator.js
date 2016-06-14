@@ -21,11 +21,19 @@ var match = function (parsedExpression, patterns) {
     return parsedExpression;
 };
 
+var transformerForOperator = function (operator) {
+    return (variables) => variables.get('a') + ' ' + operator + ' ' + variables.get('b');
+};
+
+var matcherForOperator = function (operator) {
+    return list(operator, variable('a'), variable('b'));
+};
+
 module.exports.translate = function (parsedExpression) {
     return match(parsedExpression, [
-        list('+', variable('a'), variable('b')), (variables) => variables.get('a') + ' + ' + variables.get('b'),
-        list('*', variable('a'), variable('b')), (variables) => variables.get('a') + ' * ' + variables.get('b'),
-        list('-', variable('a'), variable('b')), (variables) => variables.get('a') + ' - ' + variables.get('b'),
-        list('/', variable('a'), variable('b')), (variables) => variables.get('a') + ' / ' + variables.get('b'),
+        matcherForOperator('+'), transformerForOperator('+'),
+        matcherForOperator('*'), transformerForOperator('*'),
+        matcherForOperator('-'), transformerForOperator('-'),
+        matcherForOperator('/'), transformerForOperator('/'),
     ]);
 };
