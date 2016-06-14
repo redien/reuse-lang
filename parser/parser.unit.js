@@ -88,6 +88,21 @@ describe('parser', function () {
             result.get(1).should.equal('a');
         });
 
+        it('should parse two lists within a list', function () {
+            var input = '((a) (b))';
+
+            var result = parser.parse(input);
+
+            result.should.be.instanceOf(Immutable.List);
+            result.size.should.equal(2);
+            result.get(0).should.be.instanceOf(Immutable.List);
+            result.get(0).size.should.equal(1);
+            result.get(0).get(0).should.equal('a');
+            result.get(1).should.be.instanceOf(Immutable.List);
+            result.get(1).size.should.equal(1);
+            result.get(1).get(0).should.equal('b');
+        });
+
         it('should ignore extra leading whitespace', function () {
             var input = '   a';
 

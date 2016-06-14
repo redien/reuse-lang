@@ -189,4 +189,84 @@ describe('unifyAst', function () {
 
         should.throws(() => unifyAst(first, second));
     });
+
+    it('should unify with {a: ...} given a variable "a" with kind "atom" and an atom', function () {
+        var first = variable('a', 'atom');
+        var second = '_';
+
+        var output = unifyAst(first, second);
+
+        output.should.be.an.instanceOf(Immutable.Map);
+        output.size.should.equal(1);
+        output.get('a').should.equal('_');
+    });
+
+    it('should not unify given a variable "a" with kind "atom" and a list', function () {
+        var first = variable('a', 'atom');
+        var second = Immutable.List();
+
+        var output = unifyAst(first, second);
+
+        output.should.be.false();
+    });
+
+    it('should unify with {b: ...} given an atom and a variable "b" with kind "atom"', function () {
+        var first = '_';
+        var second = variable('a', 'atom');
+
+        var output = unifyAst(first, second);
+
+        output.should.be.an.instanceOf(Immutable.Map);
+        output.size.should.equal(1);
+        output.get('a').should.equal('_');
+    });
+
+    it('should not unify given a list and a variable "a" with kind "atom"', function () {
+        var first = Immutable.List();
+        var second = variable('a', 'atom');
+
+        var output = unifyAst(first, second);
+
+        output.should.be.false();
+    });
+
+    it('should unify with {a: ...} given a variable "a" with kind "list" and a list', function () {
+        var first = variable('a', 'list');
+        var second = Immutable.List();
+
+        var output = unifyAst(first, second);
+
+        output.should.be.an.instanceOf(Immutable.Map);
+        output.size.should.equal(1);
+        output.get('a').should.be.an.instanceOf(Immutable.List);
+    });
+
+    it('should not unify given a variable "a" with kind "list" and an atom', function () {
+        var first = variable('a', 'list');
+        var second = 'b';
+
+        var output = unifyAst(first, second);
+
+        output.should.be.false();
+    });
+
+    it('should unify with {a: ...} given a list and a variable "a" with kind "list"', function () {
+        var first = Immutable.List();
+        var second = variable('a', 'list');
+
+        var output = unifyAst(first, second);
+
+        output.should.be.an.instanceOf(Immutable.Map);
+        output.size.should.equal(1);
+        output.get('a').should.be.an.instanceOf(Immutable.List);
+    });
+
+    it('should not unify given an atom and a variable "a" with kind "list"', function () {
+        var first = 'b';
+        var second = variable('a', 'list');
+
+        var output = unifyAst(first, second);
+
+        output.should.be.false();
+    });
 });

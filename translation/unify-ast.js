@@ -22,14 +22,26 @@ var unifyList = function (first, second) {
     return substitutions;
 };
 
+var kindOf = function (ast) {
+    if (typeof ast === 'string') {
+        return 'atom';
+    } else {
+        return 'list';
+    }
+};
+
+var variableKindUnifies = function (variable, ast) {
+    return variable.kind === undefined || variable.kind === kindOf(ast);
+};
+
 var unifyAst = function (first, second) {
     if (areEqual(first, second)) {
         return Immutable.Map();
 
-    } else if (first.isVariable && !second.isVariable) {
+    } else if (first.isVariable && !second.isVariable && variableKindUnifies(first, second)) {
         return Immutable.Map.of(first.name, second);
 
-    } else if (second.isVariable && !first.isVariable) {
+    } else if (second.isVariable && !first.isVariable && variableKindUnifies(second, first)) {
         return Immutable.Map.of(second.name, first);
 
     } else if (Immutable.List.isList(first) && Immutable.List.isList(second) && first.size === second.size) {
@@ -40,10 +52,11 @@ var unifyAst = function (first, second) {
     }
 };
 
-unifyAst.variable = function (name) {
+unifyAst.variable = function (name, kind) {
     return {
         isVariable: true,
-        name: name
+        name: name,
+        kind: kind
     };
 }
 

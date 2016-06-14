@@ -23,3 +23,13 @@ Feature: Integer Arithmetic
             | /        |  1  |  2  | 0.5    |
             | /        |  3  |  1  | 3      |
             | /        |  32 |  10 | 3.2    |
+
+    Scenario: A nested expression
+        Given an expression "(+ 1 (* 2 3))"
+        When I evaluate it
+        Then I should get "7"
+
+    Scenario: A doubly nested expression
+        Given an expression "(+ (/ 1 2) (* 3 4))"
+        When I evaluate it
+        Then I should get "12.5"

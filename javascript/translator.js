@@ -21,19 +21,35 @@ var match = function (parsedExpression, patterns) {
     return parsedExpression;
 };
 
-var transformerForOperator = function (operator) {
-    return (variables) => variables.get('a') + ' ' + operator + ' ' + variables.get('b');
+var translatorForOperator = function (operator, translate, nestFirst, nestSecond) {
+    return (variables) => {
+        var first = translate(variables.get('a'));
+        var second = translate(variables.get('b'));
+
+        first = nestFirst ? '(' + first + ')' : first;
+        second = nestSecond ? '(' + second + ')' : second;
+
+        return first + ' ' + operator + ' ' + second;
+    };
 };
 
-var matcherForOperator = function (operator) {
-    return list(operator, variable('a'), variable('b'));
-};
-
-module.exports.translate = function (parsedExpression) {
+module.exports.translate = function translate (parsedExpression) {
     return match(parsedExpression, [
-        matcherForOperator('+'), transformerForOperator('+'),
-        matcherForOperator('*'), transformerForOperator('*'),
-        matcherForOperator('-'), transformerForOperator('-'),
-        matcherForOperator('/'), transformerForOperator('/'),
+        list('+', variable('a', 'list'), variable('b', 'list')), translatorForOperator('+', translate, true, true),
+        list('*', variable('a', 'list'), variable('b', 'list')), translatorForOperator('*', translate, true, true),
+        list('-', variable('a', 'list'), variable('b', 'list')), translatorForOperator('-', translate, true, true),
+        list('/', variable('a', 'list'), variable('b', 'list')), translatorForOperator('/', translate, true, true),
+        list('+', variable('a'), variable('b', 'list')), translatorForOperator('+', translate, false, true),
+        list('*', variable('a'), variable('b', 'list')), translatorForOperator('*', translate, false, true),
+        list('-', variable('a'), variable('b', 'list')), translatorForOperator('-', translate, false, true),
+        list('/', variable('a'), variable('b', 'list')), translatorForOperator('/', translate, false, true),
+        list('+', variable('a', 'list'), variable('b')), translatorForOperator('+', translate, true, false),
+        list('*', variable('a', 'list'), variable('b')), translatorForOperator('*', translate, true, false),
+        list('-', variable('a', 'list'), variable('b')), translatorForOperator('-', translate, true, false),
+        list('/', variable('a', 'list'), variable('b')), translatorForOperator('/', translate, true, false),
+        list('+', variable('a'), variable('b')), translatorForOperator('+', translate),
+        list('*', variable('a'), variable('b')), translatorForOperator('*', translate),
+        list('-', variable('a'), variable('b')), translatorForOperator('-', translate),
+        list('/', variable('a'), variable('b')), translatorForOperator('/', translate),
     ]);
 };

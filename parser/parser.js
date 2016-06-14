@@ -24,8 +24,7 @@ var parseList = function (input, index) {
     while (index < input.length && input[index] !== ')') {
         var expression = parseExpression(input, index);
         list = list.push(expression.ast);
-        index = expression.nextIndex + 1;
-        index = skipWhiteSpace(input, index);
+        index = skipWhiteSpace(input, expression.nextIndex);
     }
 
     return {ast: list, nextIndex: index + 1};

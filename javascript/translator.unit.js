@@ -30,5 +30,21 @@ describe('translator', function () {
 
             result.should.equal('1 * 2');
         });
+
+        it('should translate (* 1 (+ 2 3)) into 1 * (2 + 3)', function () {
+            input = Immutable.List.of('*', '1', Immutable.List.of('+', '2', '3'));
+
+            result = translator.translate(input);
+
+            result.should.equal('1 * (2 + 3)');
+        });
+
+        it('should translate (* (+ 1 2) (- 3 4)) into (1 + 2) * (3 - 4)', function () {
+            input = Immutable.List.of('*', Immutable.List.of('+', '1', '2'), Immutable.List.of('-', '3', '4'));
+
+            result = translator.translate(input);
+
+            result.should.equal('(1 + 2) * (3 - 4)');
+        });
     });
 });
