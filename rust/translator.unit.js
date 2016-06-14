@@ -7,7 +7,7 @@ var input, result;
 
 describe('rust translator', function () {
     describe('translate', function () {
-        describe('integer arithmetic', function () {
+        describe('Integer arithmetic', function () {
             it('should translate (+ a b) into a + b', function () {
                 input = Immutable.List(['+', 'a', 'b']);
 
