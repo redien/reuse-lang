@@ -5,7 +5,7 @@ var match = require('../translation/match-ast');
 
 module.exports.translate = function translateExpression (parsedExpression) {
     return match(parsedExpression,
-        operators.infixOperatorMatchersForLanguageWithInt32(translateExpression).concat(
+        operators.infixOperatorsForLanguageWithInt32(translateExpression).concat(
             functionApplication(translateExpression)
         )
     );

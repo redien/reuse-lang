@@ -17,7 +17,7 @@ operators.infixOperator = function (operator, translateExpression, nestFirst, ne
     };
 };
 
-operators.infixOperatorMatchersForLanguageWithInt32 = function (translateExpression) {
+operators.infixOperatorsForLanguageWithInt32 = function (translateExpression) {
     return [
         list('+', variable('a', 'list'), variable('b', 'list')),    operators.infixOperator('+', translateExpression, true, true),
         list('*', variable('a', 'list'), variable('b', 'list')),    operators.infixOperator('*', translateExpression, true, true),

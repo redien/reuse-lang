@@ -19,7 +19,7 @@ module.exports.translate = function translateExpression (parsedExpression) {
         list('/', variable('a', 'list'), variable('b')),            dropDecimals(operators.infixOperator('/', translateExpression, true, false)),
         list('/', variable('a'), variable('b')),                    dropDecimals(operators.infixOperator('/', translateExpression)),
     ].concat(
-        operators.infixOperatorMatchersForLanguageWithInt32(translateExpression)
+        operators.infixOperatorsForLanguageWithInt32(translateExpression)
     ).concat(
         functionApplication(translateExpression)
     ));
