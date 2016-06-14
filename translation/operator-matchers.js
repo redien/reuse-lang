@@ -1,11 +1,11 @@
 
-var common = module.exports;
+var operators = module.exports;
 
 var match = require('../translation/match-ast');
 var list = match.list;
 var variable = match.variable;
 
-common.infixOperator = function (operator, translate, nestFirst, nestSecond) {
+operators.infixOperator = function (operator, translate, nestFirst, nestSecond) {
     return (variables) => {
         var first = translate(variables.get('a'));
         var second = translate(variables.get('b'));
@@ -17,23 +17,23 @@ common.infixOperator = function (operator, translate, nestFirst, nestSecond) {
     };
 };
 
-common.infixOperatorMatchersForLanguageWithInt32 = function (translate) {
+operators.infixOperatorMatchersForLanguageWithInt32 = function (translate) {
     return [
-        list('+', variable('a', 'list'), variable('b', 'list')),    common.infixOperator('+', translate, true, true),
-        list('*', variable('a', 'list'), variable('b', 'list')),    common.infixOperator('*', translate, true, true),
-        list('-', variable('a', 'list'), variable('b', 'list')),    common.infixOperator('-', translate, true, true),
-        list('/', variable('a', 'list'), variable('b', 'list')),    common.infixOperator('/', translate, true, true),
-        list('+', variable('a'), variable('b', 'list')),            common.infixOperator('+', translate, false, true),
-        list('*', variable('a'), variable('b', 'list')),            common.infixOperator('*', translate, false, true),
-        list('-', variable('a'), variable('b', 'list')),            common.infixOperator('-', translate, false, true),
-        list('/', variable('a'), variable('b', 'list')),            common.infixOperator('/', translate, false, true),
-        list('+', variable('a', 'list'), variable('b')),            common.infixOperator('+', translate, true, false),
-        list('*', variable('a', 'list'), variable('b')),            common.infixOperator('*', translate, true, false),
-        list('-', variable('a', 'list'), variable('b')),            common.infixOperator('-', translate, true, false),
-        list('/', variable('a', 'list'), variable('b')),            common.infixOperator('/', translate, true, false),
-        list('+', variable('a'), variable('b')),                    common.infixOperator('+', translate),
-        list('*', variable('a'), variable('b')),                    common.infixOperator('*', translate),
-        list('-', variable('a'), variable('b')),                    common.infixOperator('-', translate),
-        list('/', variable('a'), variable('b')),                    common.infixOperator('/', translate),
+        list('+', variable('a', 'list'), variable('b', 'list')),    operators.infixOperator('+', translate, true, true),
+        list('*', variable('a', 'list'), variable('b', 'list')),    operators.infixOperator('*', translate, true, true),
+        list('-', variable('a', 'list'), variable('b', 'list')),    operators.infixOperator('-', translate, true, true),
+        list('/', variable('a', 'list'), variable('b', 'list')),    operators.infixOperator('/', translate, true, true),
+        list('+', variable('a'), variable('b', 'list')),            operators.infixOperator('+', translate, false, true),
+        list('*', variable('a'), variable('b', 'list')),            operators.infixOperator('*', translate, false, true),
+        list('-', variable('a'), variable('b', 'list')),            operators.infixOperator('-', translate, false, true),
+        list('/', variable('a'), variable('b', 'list')),            operators.infixOperator('/', translate, false, true),
+        list('+', variable('a', 'list'), variable('b')),            operators.infixOperator('+', translate, true, false),
+        list('*', variable('a', 'list'), variable('b')),            operators.infixOperator('*', translate, true, false),
+        list('-', variable('a', 'list'), variable('b')),            operators.infixOperator('-', translate, true, false),
+        list('/', variable('a', 'list'), variable('b')),            operators.infixOperator('/', translate, true, false),
+        list('+', variable('a'), variable('b')),                    operators.infixOperator('+', translate),
+        list('*', variable('a'), variable('b')),                    operators.infixOperator('*', translate),
+        list('-', variable('a'), variable('b')),                    operators.infixOperator('-', translate),
+        list('/', variable('a'), variable('b')),                    operators.infixOperator('/', translate),
     ];
 };
