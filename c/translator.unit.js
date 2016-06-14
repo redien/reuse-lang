@@ -5,7 +5,7 @@ var Immutable = require('immutable');
 
 var input, result;
 
-describe('javascript translator', function () {
+describe('rust translator', function () {
     describe('translate', function () {
         it('should translate (+ a b) into a + b', function () {
             input = Immutable.List(['+', 'a', 'b']);
@@ -45,14 +45,6 @@ describe('javascript translator', function () {
             result = translator.translate(input);
 
             result.should.equal('(1 + 2) * (3 - 4)');
-        });
-
-        it('should Math.floor division results', function () {
-            input = Immutable.List(['/', 'a', 'b']);
-
-            result = translator.translate(input);
-
-            result.should.equal('Math.floor(a / b)');
         });
     });
 });

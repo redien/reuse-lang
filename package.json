@@ -10,11 +10,12 @@
     "cucumber": "^1.0.0",
     "mocha": "^2.5.3",
     "promise": "^7.1.1",
-    "should": "^9.0.2"
+    "should": "^9.0.2",
+    "temp": "^0.8.3"
   },
   "scripts": {
     "unit-test": "mocha \"**/*.unit.js\"",
-    "acceptance-test": "cucumberjs",
+    "acceptance-test": "cucumberjs -r features/step_definitions/javascript.js && cucumberjs -r features/step_definitions/rust.js && cucumberjs -r features/step_definitions/c.js",
     "test": "npm run-script unit-test && npm run-script acceptance-test"
   },
   "repository": {
