@@ -10,17 +10,26 @@ require('should');
 module.exports.stepDefinitions = function (language, evaluateExpression) {
     return function () {
         this.Given(/^an expression "([^"]*)"$/, function (expression) {
-            this.expression = reuse.translate(language, expression);
+            var result = reuse.translate(language, expression);
+            this.translationError = result.error;
+            this.expression = result.source;
         });
 
         this.When(/^I evaluate it$/, function () {
-            this.result = evaluateExpression(this.expression);
+            if (!this.translationError) {
+                this.result = evaluateExpression(this.expression);
+            }
         });
 
         this.Then(/^I should get "([^"]*)"$/, function (expected) {
             return this.result.then(function (result) {
                 result.toString().should.equal(expected);
             });
+        });
+
+        this.Then(/^I should get a translation error "([^"]*)"$/, function (expected) {
+            this.translationError.should.be.instanceOf(Error);
+            this.translationError.message.should.equal(expected);
         });
     };
 };
