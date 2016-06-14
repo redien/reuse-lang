@@ -3,6 +3,9 @@ var common = require('./common');
 
 var programBuilder = function (translatedExpression) {
     return `
+    use std::cmp::max as max;
+    use std::cmp::min as min;
+
     fn main() {
         print!("{}", (${translatedExpression}));
     }
