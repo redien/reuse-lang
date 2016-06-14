@@ -27,7 +27,7 @@ var dropDecimals = function (translator) {
     };
 };
 
-var translatorForOperator = function (operator, translate, nestFirst, nestSecond) {
+var infixOperator = function (operator, translate, nestFirst, nestSecond) {
     return (variables) => {
         var first = translate(variables.get('a'));
         var second = translate(variables.get('b'));
@@ -41,21 +41,21 @@ var translatorForOperator = function (operator, translate, nestFirst, nestSecond
 
 module.exports.translate = function translate (parsedExpression) {
     return match(parsedExpression, [
-        list('+', variable('a', 'list'), variable('b', 'list')), translatorForOperator('+', translate, true, true),
-        list('*', variable('a', 'list'), variable('b', 'list')), translatorForOperator('*', translate, true, true),
-        list('-', variable('a', 'list'), variable('b', 'list')), translatorForOperator('-', translate, true, true),
-        list('/', variable('a', 'list'), variable('b', 'list')), dropDecimals(translatorForOperator('/', translate, true, true)),
-        list('+', variable('a'), variable('b', 'list')), translatorForOperator('+', translate, false, true),
-        list('*', variable('a'), variable('b', 'list')), translatorForOperator('*', translate, false, true),
-        list('-', variable('a'), variable('b', 'list')), translatorForOperator('-', translate, false, true),
-        list('/', variable('a'), variable('b', 'list')), dropDecimals(translatorForOperator('/', translate, false, true)),
-        list('+', variable('a', 'list'), variable('b')), translatorForOperator('+', translate, true, false),
-        list('*', variable('a', 'list'), variable('b')), translatorForOperator('*', translate, true, false),
-        list('-', variable('a', 'list'), variable('b')), translatorForOperator('-', translate, true, false),
-        list('/', variable('a', 'list'), variable('b')), dropDecimals(translatorForOperator('/', translate, true, false)),
-        list('+', variable('a'), variable('b')), translatorForOperator('+', translate),
-        list('*', variable('a'), variable('b')), translatorForOperator('*', translate),
-        list('-', variable('a'), variable('b')), translatorForOperator('-', translate),
-        list('/', variable('a'), variable('b')), dropDecimals(translatorForOperator('/', translate)),
+        list('+', variable('a', 'list'), variable('b', 'list')),    infixOperator('+', translate, true, true),
+        list('*', variable('a', 'list'), variable('b', 'list')),    infixOperator('*', translate, true, true),
+        list('-', variable('a', 'list'), variable('b', 'list')),    infixOperator('-', translate, true, true),
+        list('/', variable('a', 'list'), variable('b', 'list')),    dropDecimals(infixOperator('/', translate, true, true)),
+        list('+', variable('a'), variable('b', 'list')),            infixOperator('+', translate, false, true),
+        list('*', variable('a'), variable('b', 'list')),            infixOperator('*', translate, false, true),
+        list('-', variable('a'), variable('b', 'list')),            infixOperator('-', translate, false, true),
+        list('/', variable('a'), variable('b', 'list')),            dropDecimals(infixOperator('/', translate, false, true)),
+        list('+', variable('a', 'list'), variable('b')),            infixOperator('+', translate, true, false),
+        list('*', variable('a', 'list'), variable('b')),            infixOperator('*', translate, true, false),
+        list('-', variable('a', 'list'), variable('b')),            infixOperator('-', translate, true, false),
+        list('/', variable('a', 'list'), variable('b')),            dropDecimals(infixOperator('/', translate, true, false)),
+        list('+', variable('a'), variable('b')),                    infixOperator('+', translate),
+        list('*', variable('a'), variable('b')),                    infixOperator('*', translate),
+        list('-', variable('a'), variable('b')),                    infixOperator('-', translate),
+        list('/', variable('a'), variable('b')),                    dropDecimals(infixOperator('/', translate)),
     ]);
 };
