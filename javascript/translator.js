@@ -25,5 +25,7 @@ module.exports.translate = function (parsedExpression) {
     return match(parsedExpression, [
         list('+', variable('a'), variable('b')), (variables) => variables.get('a') + ' + ' + variables.get('b'),
         list('*', variable('a'), variable('b')), (variables) => variables.get('a') + ' * ' + variables.get('b'),
+        list('-', variable('a'), variable('b')), (variables) => variables.get('a') + ' - ' + variables.get('b'),
+        list('/', variable('a'), variable('b')), (variables) => variables.get('a') + ' / ' + variables.get('b'),
     ]);
 };
