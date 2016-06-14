@@ -46,5 +46,13 @@ describe('translator', function () {
 
             result.should.equal('(1 + 2) * (3 - 4)');
         });
+
+        it('should Math.floor division results', function () {
+            input = Immutable.List(['/', 'a', 'b']);
+
+            result = translator.translate(input);
+
+            result.should.equal('Math.floor(a / b)');
+        });
     });
 });

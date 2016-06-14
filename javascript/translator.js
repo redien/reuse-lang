@@ -21,6 +21,12 @@ var match = function (parsedExpression, patterns) {
     return parsedExpression;
 };
 
+var dropDecimals = function (translator) {
+    return (variables) => {
+        return 'Math.floor(' + translator(variables) + ')';
+    };
+};
+
 var translatorForOperator = function (operator, translate, nestFirst, nestSecond) {
     return (variables) => {
         var first = translate(variables.get('a'));
@@ -38,18 +44,18 @@ module.exports.translate = function translate (parsedExpression) {
         list('+', variable('a', 'list'), variable('b', 'list')), translatorForOperator('+', translate, true, true),
         list('*', variable('a', 'list'), variable('b', 'list')), translatorForOperator('*', translate, true, true),
         list('-', variable('a', 'list'), variable('b', 'list')), translatorForOperator('-', translate, true, true),
-        list('/', variable('a', 'list'), variable('b', 'list')), translatorForOperator('/', translate, true, true),
+        list('/', variable('a', 'list'), variable('b', 'list')), dropDecimals(translatorForOperator('/', translate, true, true)),
         list('+', variable('a'), variable('b', 'list')), translatorForOperator('+', translate, false, true),
         list('*', variable('a'), variable('b', 'list')), translatorForOperator('*', translate, false, true),
         list('-', variable('a'), variable('b', 'list')), translatorForOperator('-', translate, false, true),
-        list('/', variable('a'), variable('b', 'list')), translatorForOperator('/', translate, false, true),
+        list('/', variable('a'), variable('b', 'list')), dropDecimals(translatorForOperator('/', translate, false, true)),
         list('+', variable('a', 'list'), variable('b')), translatorForOperator('+', translate, true, false),
         list('*', variable('a', 'list'), variable('b')), translatorForOperator('*', translate, true, false),
         list('-', variable('a', 'list'), variable('b')), translatorForOperator('-', translate, true, false),
-        list('/', variable('a', 'list'), variable('b')), translatorForOperator('/', translate, true, false),
+        list('/', variable('a', 'list'), variable('b')), dropDecimals(translatorForOperator('/', translate, true, false)),
         list('+', variable('a'), variable('b')), translatorForOperator('+', translate),
         list('*', variable('a'), variable('b')), translatorForOperator('*', translate),
         list('-', variable('a'), variable('b')), translatorForOperator('-', translate),
-        list('/', variable('a'), variable('b')), translatorForOperator('/', translate),
+        list('/', variable('a'), variable('b')), dropDecimals(translatorForOperator('/', translate)),
     ]);
 };
