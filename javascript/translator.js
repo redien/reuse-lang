@@ -12,21 +12,12 @@ var dropDecimals = function (translator) {
 
 module.exports.translate = function translate (parsedExpression) {
     return match(parsedExpression, [
-        list('+', variable('a', 'list'), variable('b', 'list')),    common.infixOperator('+', translate, true, true),
-        list('*', variable('a', 'list'), variable('b', 'list')),    common.infixOperator('*', translate, true, true),
-        list('-', variable('a', 'list'), variable('b', 'list')),    common.infixOperator('-', translate, true, true),
+        // Overrides division operator to round off decimal points
         list('/', variable('a', 'list'), variable('b', 'list')),    dropDecimals(common.infixOperator('/', translate, true, true)),
-        list('+', variable('a'), variable('b', 'list')),            common.infixOperator('+', translate, false, true),
-        list('*', variable('a'), variable('b', 'list')),            common.infixOperator('*', translate, false, true),
-        list('-', variable('a'), variable('b', 'list')),            common.infixOperator('-', translate, false, true),
         list('/', variable('a'), variable('b', 'list')),            dropDecimals(common.infixOperator('/', translate, false, true)),
-        list('+', variable('a', 'list'), variable('b')),            common.infixOperator('+', translate, true, false),
-        list('*', variable('a', 'list'), variable('b')),            common.infixOperator('*', translate, true, false),
-        list('-', variable('a', 'list'), variable('b')),            common.infixOperator('-', translate, true, false),
         list('/', variable('a', 'list'), variable('b')),            dropDecimals(common.infixOperator('/', translate, true, false)),
-        list('+', variable('a'), variable('b')),                    common.infixOperator('+', translate),
-        list('*', variable('a'), variable('b')),                    common.infixOperator('*', translate),
-        list('-', variable('a'), variable('b')),                    common.infixOperator('-', translate),
         list('/', variable('a'), variable('b')),                    dropDecimals(common.infixOperator('/', translate)),
-    ]);
+    ].concat(
+        common.infixOperatorMatchersForLanguageWithInt32(translate)
+    ));
 };
