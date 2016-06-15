@@ -16,6 +16,4 @@ var commandBuilder = function (sourcePath, executablePath) {
     return 'rustc ' + sourcePath + ' -o ' + executablePath + ' && ' + executablePath;
 };
 
-var evaluateExpression = common.compileAndEvaluateExpression('.rs', programBuilder, commandBuilder);
-
-module.exports = common.stepDefinitions('rust', evaluateExpression);
+module.exports = common.stepDefinitions('rust', '.rs', programBuilder, commandBuilder);

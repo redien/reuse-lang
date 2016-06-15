@@ -13,6 +13,4 @@ var commandBuilder = function (sourcePath, executablePath) {
     return 'node ' + sourcePath;
 };
 
-var evaluateExpression = common.compileAndEvaluateExpression('.js', programBuilder, commandBuilder);
-
-module.exports = common.stepDefinitions('javascript', evaluateExpression);
+module.exports = common.stepDefinitions('javascript', '.js', programBuilder, commandBuilder);

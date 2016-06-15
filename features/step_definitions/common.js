@@ -7,7 +7,9 @@ var temp = require('temp').track();
 var fs = require('fs');
 require('should');
 
-module.exports.stepDefinitions = function (language, evaluateExpression) {
+module.exports.stepDefinitions = function (language, suffix, programBuilder, commandBuilder) {
+    var evaluateExpression = module.exports.compileAndEvaluateExpression(suffix, programBuilder, commandBuilder);
+
     return function () {
         this.Given(/^an expression "([^"]*)"$/, function (expression) {
             var result = reuse.translate(language, expression);

@@ -20,6 +20,4 @@ var commandBuilder = function (sourcePath, executablePath) {
     return 'CC ' + sourcePath + ' -o ' + executablePath + ' && ' + executablePath;
 };
 
-var evaluateExpression = common.compileAndEvaluateExpression('.c', programBuilder, commandBuilder);
-
-module.exports = common.stepDefinitions('c', evaluateExpression);
+module.exports = common.stepDefinitions('c', '.c', programBuilder, commandBuilder);
