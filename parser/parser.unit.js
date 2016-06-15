@@ -1,14 +1,14 @@
 
 var should = require('should');
-var Immutable = require('immutable');
+var ast = require('./ast');
 
 var parser = require('./parser');
 
 var parseSingleExpression = function (input) {
     var result = parser.parse(input);
-    result.ast.should.be.an.instanceOf(Immutable.List);
-    result.ast.size.should.equal(1);
-    return result.ast.get(0);
+    ast.isList(result.ast).should.be.true();
+    ast.listSize(result.ast).should.equal(1);
+    return ast.listChild(result.ast, 0);
 };
 
 var parseAndExpectError = function (input) {
@@ -23,7 +23,7 @@ describe('parser.parse', function () {
 
         var expression = parseSingleExpression(input);
 
-        expression.should.equal('1');
+        ast.atomValue(expression).should.equal('1');
     });
 
     it('should parse a multi-character atom', function () {
@@ -31,7 +31,7 @@ describe('parser.parse', function () {
 
         var expression = parseSingleExpression(input);
 
-        expression.should.equal('ab');
+        ast.atomValue(expression).should.equal('ab');
     });
 
     it('should parse several expressions', function () {
@@ -39,10 +39,10 @@ describe('parser.parse', function () {
 
         var result = parser.parse(input).ast;
 
-        result.should.be.an.instanceOf(Immutable.List);
-        result.size.should.equal(2);
-        result.get(0).should.equal('a');
-        result.get(1).should.equal('b');
+        ast.isList(result).should.be.true();
+        ast.listSize(result).should.equal(2);
+        ast.atomValue(ast.listChild(result, 0)).should.equal('a');
+        ast.atomValue(ast.listChild(result, 1)).should.equal('b');
     });
 
     it('should parse an empty list', function () {
@@ -50,8 +50,8 @@ describe('parser.parse', function () {
 
         var expression = parseSingleExpression(input);
 
-        expression.should.be.instanceOf(Immutable.List);
-        expression.size.should.equal(0);
+        ast.isList(expression).should.be.true();
+        ast.listSize(expression).should.equal(0);
     });
 
     it('should parse a list with a single atom', function () {
@@ -59,9 +59,9 @@ describe('parser.parse', function () {
 
         var expression = parseSingleExpression(input);
 
-        expression.should.be.instanceOf(Immutable.List);
-        expression.size.should.equal(1);
-        expression.get(0).should.equal('a');
+        ast.isList(expression).should.be.true();
+        ast.listSize(expression).should.equal(1);
+        ast.atomValue(ast.listChild(expression, 0)).should.equal('a');
     });
 
     it('should parse a list with a multiple atoms', function () {
@@ -69,10 +69,10 @@ describe('parser.parse', function () {
 
         var expression = parseSingleExpression(input);
 
-        expression.should.be.instanceOf(Immutable.List);
-        expression.size.should.equal(2);
-        expression.get(0).should.equal('a');
-        expression.get(1).should.equal('b');
+        ast.isList(expression).should.be.true();
+        ast.listSize(expression).should.equal(2);
+        ast.atomValue(ast.listChild(expression, 0)).should.equal('a');
+        ast.atomValue(ast.listChild(expression, 1)).should.equal('b');
     });
 
     it('should parse an empty list within a list', function () {
@@ -80,10 +80,10 @@ describe('parser.parse', function () {
 
         var expression = parseSingleExpression(input);
 
-        expression.should.be.instanceOf(Immutable.List);
-        expression.size.should.equal(1);
-        expression.get(0).should.be.instanceOf(Immutable.List);
-        expression.get(0).size.should.equal(0);
+        ast.isList(expression).should.be.true();
+        ast.listSize(expression).should.equal(1);
+        ast.isList(ast.listChild(expression, 0)).should.be.true();
+        ast.listSize(ast.listChild(expression, 0)).should.equal(0);
     });
 
     it('should parse a list with multiple atoms within a list', function () {
@@ -91,12 +91,12 @@ describe('parser.parse', function () {
 
         var expression = parseSingleExpression(input);
 
-        expression.should.be.instanceOf(Immutable.List);
-        expression.size.should.equal(1);
-        expression.get(0).should.be.instanceOf(Immutable.List);
-        expression.get(0).size.should.equal(2);
-        expression.get(0).get(0).should.equal('a');
-        expression.get(0).get(1).should.equal('b');
+        ast.isList(expression).should.be.true();
+        ast.listSize(expression).should.equal(1);
+        ast.isList(ast.listChild(expression, 0)).should.be.true();
+        ast.listSize(ast.listChild(expression, 0)).should.equal(2);
+        ast.atomValue(ast.listChild(ast.listChild(expression, 0), 0)).should.equal('a');
+        ast.atomValue(ast.listChild(ast.listChild(expression, 0), 1)).should.equal('b');
     });
 
     it('should parse an atom after a list', function () {
@@ -104,11 +104,11 @@ describe('parser.parse', function () {
 
         var expression = parseSingleExpression(input);
 
-        expression.should.be.instanceOf(Immutable.List);
-        expression.size.should.equal(2);
-        expression.get(0).should.be.instanceOf(Immutable.List);
-        expression.get(0).size.should.equal(0);
-        expression.get(1).should.equal('a');
+        ast.isList(expression).should.be.true();
+        ast.listSize(expression).should.equal(2);
+        ast.isList(ast.listChild(expression, 0)).should.be.true();
+        ast.listSize(ast.listChild(expression, 0)).should.equal(0);
+        ast.atomValue(ast.listChild(expression, 1)).should.equal('a');
     });
 
     it('should parse two lists within a list', function () {
@@ -116,14 +116,14 @@ describe('parser.parse', function () {
 
         var expression = parseSingleExpression(input);
 
-        expression.should.be.instanceOf(Immutable.List);
-        expression.size.should.equal(2);
-        expression.get(0).should.be.instanceOf(Immutable.List);
-        expression.get(0).size.should.equal(1);
-        expression.get(0).get(0).should.equal('a');
-        expression.get(1).should.be.instanceOf(Immutable.List);
-        expression.get(1).size.should.equal(1);
-        expression.get(1).get(0).should.equal('b');
+        ast.isList(expression).should.be.true();
+        ast.listSize(expression).should.equal(2);
+        ast.isList(ast.listChild(expression, 0)).should.be.true();
+        ast.listSize(ast.listChild(expression, 0)).should.equal(1);
+        ast.atomValue(ast.listChild(ast.listChild(expression, 0), 0)).should.equal('a');
+        ast.isList(ast.listChild(expression, 1)).should.be.true();
+        ast.listSize(ast.listChild(expression, 1)).should.equal(1);
+        ast.atomValue(ast.listChild(ast.listChild(expression, 1), 0)).should.equal('b');
     });
 
     it('should ignore extra leading whitespace', function () {
@@ -131,7 +131,7 @@ describe('parser.parse', function () {
 
         var expression = parseSingleExpression(input);
 
-        expression.should.equal('a');
+        ast.atomValue(expression).should.equal('a');
     });
 
     it('should ignore extra trailing whitespace', function () {
@@ -139,9 +139,9 @@ describe('parser.parse', function () {
 
         var expression = parseSingleExpression(input);
 
-        expression.should.be.instanceOf(Immutable.List);
-        expression.size.should.equal(1);
-        expression.get(0).should.equal('a');
+        ast.isList(expression).should.be.true();
+        ast.listSize(expression).should.equal(1);
+        ast.atomValue(ast.listChild(expression, 0)).should.equal('a');
     });
 
     it('should throw an "Unbalanced parenthesis" error given too few end parenthesis', function () {

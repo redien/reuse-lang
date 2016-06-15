@@ -1,6 +1,7 @@
 
 var Immutable = require('immutable');
 var unifyAst = require('./unify-ast');
+var ast = require('../parser/ast');
 
 module.exports = function (parsedExpression, patterns) {
     for (var index = 0; index < patterns.length; index += 2) {
@@ -16,8 +17,6 @@ module.exports = function (parsedExpression, patterns) {
     return parsedExpression;
 };
 
-module.exports.list = function () {
-    return Immutable.List.of.apply(Immutable.List, arguments);
-};
-
+module.exports.atom = ast.atom;
+module.exports.list = ast.list;
 module.exports.variable = unifyAst.variable;

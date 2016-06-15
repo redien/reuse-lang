@@ -1,5 +1,5 @@
 
-var Immutable = require('immutable');
+var ast = require('./ast');
 
 var SPACE_CHARACTER = ' ';
 var START_PARENTHESIS_CHARACTER = '(';
@@ -47,13 +47,13 @@ var parseList = function (input, index) {
 };
 
 var parseListBody = function (input, index) {
-    var list = Immutable.List();
+    var list = ast.list();
 
     while (index < input.length && !nextCharacterIs(END_PARENTHESIS_CHARACTER, input, index)) {
         var expression = parseExpression(input, index);
         if (expression.error) { return expression; }
 
-        list = list.push(expression.ast);
+        list = ast.listPush(list, expression.ast);
         index = skipWhitespace(input, expression.nextIndex);
     }
 
@@ -68,7 +68,7 @@ var parseAtom = function (input, index) {
         index += 1;
     }
 
-    return {ast: input.substring(start, index), nextIndex: index};
+    return {ast: ast.atom(input.substring(start, index)), nextIndex: index};
 };
 
 module.exports.parse = function (input) {

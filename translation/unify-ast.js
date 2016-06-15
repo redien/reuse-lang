@@ -1,15 +1,14 @@
 
 var Immutable = require('immutable');
-
-var areEqual = (first, second) => Immutable.is(first, second) || first === second;
+var ast = require('../parser/ast');
 
 var throwOverwriteError = (prev, next) => { throw new Error(next + ' overwrites ' + prev) };
 
 var unifyList = function (first, second) {
     var substitutions = Immutable.Map();
-    for (var index = 0; index < first.size; index++) {
-        var firstChild = first.get(index);
-        var secondChild = second.get(index);
+    for (var index = 0; index < ast.listSize(first); index++) {
+        var firstChild = ast.listChild(first, index);
+        var secondChild = ast.listChild(second, index);
 
         var unified = unifyAst(firstChild, secondChild);
         if (unified === false) {
@@ -22,20 +21,20 @@ var unifyList = function (first, second) {
     return substitutions;
 };
 
-var kindOf = function (ast) {
-    if (typeof ast === 'string') {
+var kindOf = function (expression) {
+    if (ast.isAtom(expression)) {
         return 'atom';
     } else {
         return 'list';
     }
 };
 
-var variableKindUnifies = function (variable, ast) {
-    return variable.kind === undefined || variable.kind === kindOf(ast);
+var variableKindUnifies = function (variable, expression) {
+    return variable.kind === undefined || variable.kind === kindOf(expression);
 };
 
 var unifyAst = function (first, second) {
-    if (areEqual(first, second)) {
+    if (ast.equal(first, second)) {
         return Immutable.Map();
 
     } else if (first.isVariable && !second.isVariable && variableKindUnifies(first, second)) {
@@ -44,7 +43,7 @@ var unifyAst = function (first, second) {
     } else if (second.isVariable && !first.isVariable && variableKindUnifies(second, first)) {
         return Immutable.Map.of(second.name, first);
 
-    } else if (Immutable.List.isList(first) && Immutable.List.isList(second) && first.size === second.size) {
+    } else if (ast.isList(first) && ast.isList(second) && ast.listSize(first) === ast.listSize(second)) {
         return unifyList(first, second);
 
     } else {
