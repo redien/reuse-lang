@@ -10,9 +10,9 @@ Feature: Mathematical functions
 
         Examples:
             | function |  a  |  b  | result |
-            | max      |  0  |  1  | 1      |
-            | max      |  1  |  0  | 1      |
-            | max      |  0  |  0  | 0      |
-            | min      |  0  |  1  | 0      |
-            | min      |  1  |  0  | 0      |
-            | min      |  0  |  0  | 0      |
+            |    max   |  0  |  1  |    1   |
+            |    max   |  1  |  0  |    1   |
+            |    max   |  0  |  0  |    0   |
+            |    min   |  0  |  1  |    0   |
+            |    min   |  1  |  0  |    0   |
+            |    min   |  0  |  0  |    0   |
