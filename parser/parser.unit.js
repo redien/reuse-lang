@@ -4,154 +4,163 @@ var Immutable = require('immutable');
 
 var parser = require('./parser');
 
-describe('parser', function () {
-    describe('parse', function () {
-        it('should parse a single-character atom', function () {
-            var input = '1';
+var parseSingleExpression = function (input) {
+    var result = parser.parse(input);
+    result.ast.should.be.an.instanceOf(Immutable.List);
+    result.ast.size.should.equal(1);
+    return result.ast.get(0);
+};
 
-            var result = parser.parse(input).ast.get(0);
+var parseAndExpectError = function (input) {
+    var result = parser.parse(input);
+    result.error.should.be.an.instanceOf(Error);
+    return result.error;
+};
 
-            result.should.equal('1');
-        });
+describe('parser.parse', function () {
+    it('should parse a single-character atom', function () {
+        var input = '1';
 
-        it('should parse a multi-character atom', function () {
-            var input = 'ab';
+        var expression = parseSingleExpression(input);
 
-            var result = parser.parse(input).ast.get(0);
+        expression.should.equal('1');
+    });
 
-            result.should.equal('ab');
-        });
+    it('should parse a multi-character atom', function () {
+        var input = 'ab';
 
-        it('should parse several expressions', function () {
-            var input = 'a b';
+        var expression = parseSingleExpression(input);
 
-            var result = parser.parse(input).ast;
+        expression.should.equal('ab');
+    });
 
-            result.should.be.an.instanceOf(Immutable.List);
-            result.size.should.equal(2);
-            result.get(0).should.equal('a');
-            result.get(1).should.equal('b');
-        });
+    it('should parse several expressions', function () {
+        var input = 'a b';
 
-        it('should parse an empty list', function () {
-            var input = '()';
+        var result = parser.parse(input).ast;
 
-            var result = parser.parse(input).ast.get(0);
+        result.should.be.an.instanceOf(Immutable.List);
+        result.size.should.equal(2);
+        result.get(0).should.equal('a');
+        result.get(1).should.equal('b');
+    });
 
-            result.should.be.instanceOf(Immutable.List);
-            result.size.should.equal(0);
-        });
+    it('should parse an empty list', function () {
+        var input = '()';
 
-        it('should parse a list with a single atom', function () {
-            var input = '(a)';
+        var expression = parseSingleExpression(input);
 
-            var result = parser.parse(input).ast.get(0);
+        expression.should.be.instanceOf(Immutable.List);
+        expression.size.should.equal(0);
+    });
 
-            result.should.be.instanceOf(Immutable.List);
-            result.size.should.equal(1);
-            result.get(0).should.equal('a');
-        });
+    it('should parse a list with a single atom', function () {
+        var input = '(a)';
 
-        it('should parse a list with a multiple atoms', function () {
-            var input = '(a b)';
+        var expression = parseSingleExpression(input);
 
-            var result = parser.parse(input).ast.get(0);
+        expression.should.be.instanceOf(Immutable.List);
+        expression.size.should.equal(1);
+        expression.get(0).should.equal('a');
+    });
 
-            result.should.be.instanceOf(Immutable.List);
-            result.size.should.equal(2);
-            result.get(0).should.equal('a');
-            result.get(1).should.equal('b');
-        });
+    it('should parse a list with a multiple atoms', function () {
+        var input = '(a b)';
 
-        it('should parse an empty list within a list', function () {
-            var input = '(())';
+        var expression = parseSingleExpression(input);
 
-            var result = parser.parse(input).ast.get(0);
+        expression.should.be.instanceOf(Immutable.List);
+        expression.size.should.equal(2);
+        expression.get(0).should.equal('a');
+        expression.get(1).should.equal('b');
+    });
 
-            result.should.be.instanceOf(Immutable.List);
-            result.size.should.equal(1);
-            result.get(0).should.be.instanceOf(Immutable.List);
-            result.get(0).size.should.equal(0);
-        });
+    it('should parse an empty list within a list', function () {
+        var input = '(())';
 
-        it('should parse a list with multiple atoms within a list', function () {
-            var input = '((a b))';
+        var expression = parseSingleExpression(input);
 
-            var result = parser.parse(input).ast.get(0);
+        expression.should.be.instanceOf(Immutable.List);
+        expression.size.should.equal(1);
+        expression.get(0).should.be.instanceOf(Immutable.List);
+        expression.get(0).size.should.equal(0);
+    });
 
-            result.should.be.instanceOf(Immutable.List);
-            result.size.should.equal(1);
-            result.get(0).should.be.instanceOf(Immutable.List);
-            result.get(0).size.should.equal(2);
-            result.get(0).get(0).should.equal('a');
-            result.get(0).get(1).should.equal('b');
-        });
+    it('should parse a list with multiple atoms within a list', function () {
+        var input = '((a b))';
 
-        it('should parse an atom after a list', function () {
-            var input = '(() a)';
+        var expression = parseSingleExpression(input);
 
-            var result = parser.parse(input).ast.get(0);
+        expression.should.be.instanceOf(Immutable.List);
+        expression.size.should.equal(1);
+        expression.get(0).should.be.instanceOf(Immutable.List);
+        expression.get(0).size.should.equal(2);
+        expression.get(0).get(0).should.equal('a');
+        expression.get(0).get(1).should.equal('b');
+    });
 
-            result.should.be.instanceOf(Immutable.List);
-            result.size.should.equal(2);
-            result.get(0).should.be.instanceOf(Immutable.List);
-            result.get(0).size.should.equal(0);
-            result.get(1).should.equal('a');
-        });
+    it('should parse an atom after a list', function () {
+        var input = '(() a)';
 
-        it('should parse two lists within a list', function () {
-            var input = '((a) (b))';
+        var expression = parseSingleExpression(input);
 
-            var result = parser.parse(input).ast.get(0);
+        expression.should.be.instanceOf(Immutable.List);
+        expression.size.should.equal(2);
+        expression.get(0).should.be.instanceOf(Immutable.List);
+        expression.get(0).size.should.equal(0);
+        expression.get(1).should.equal('a');
+    });
 
-            result.should.be.instanceOf(Immutable.List);
-            result.size.should.equal(2);
-            result.get(0).should.be.instanceOf(Immutable.List);
-            result.get(0).size.should.equal(1);
-            result.get(0).get(0).should.equal('a');
-            result.get(1).should.be.instanceOf(Immutable.List);
-            result.get(1).size.should.equal(1);
-            result.get(1).get(0).should.equal('b');
-        });
+    it('should parse two lists within a list', function () {
+        var input = '((a) (b))';
 
-        it('should ignore extra leading whitespace', function () {
-            var input = '   a';
+        var expression = parseSingleExpression(input);
 
-            var result = parser.parse(input).ast.get(0);
+        expression.should.be.instanceOf(Immutable.List);
+        expression.size.should.equal(2);
+        expression.get(0).should.be.instanceOf(Immutable.List);
+        expression.get(0).size.should.equal(1);
+        expression.get(0).get(0).should.equal('a');
+        expression.get(1).should.be.instanceOf(Immutable.List);
+        expression.get(1).size.should.equal(1);
+        expression.get(1).get(0).should.equal('b');
+    });
 
-            result.should.equal('a');
-        });
+    it('should ignore extra leading whitespace', function () {
+        var input = '   a';
 
-        it('should ignore extra trailing whitespace', function () {
-            var input = '(a  )';
+        var expression = parseSingleExpression(input);
 
-            var result = parser.parse(input).ast.get(0);
+        expression.should.equal('a');
+    });
 
-            result.should.be.instanceOf(Immutable.List);
-            result.size.should.equal(1);
-            result.get(0).should.equal('a');
-        });
+    it('should ignore extra trailing whitespace', function () {
+        var input = '(a  )';
 
-        it('should throw an "Unbalanced parenthesis" error given too few end parenthesis', function () {
-            var input = '(a b c';
+        var expression = parseSingleExpression(input);
 
-            var result = parser.parse(input).error;
+        expression.should.be.instanceOf(Immutable.List);
+        expression.size.should.equal(1);
+        expression.get(0).should.equal('a');
+    });
 
-            result.should.be.instanceOf(Error);
-            result.message.should.equal('Unbalanced parenthesis');
-            result.column.should.equal(6);
-            result.line.should.equal(0);
-        });
+    it('should throw an "Unbalanced parenthesis" error given too few end parenthesis', function () {
+        var input = '(a b c';
 
-        it('should throw an "Unbalanced parenthesis" error given too few start parenthesis', function () {
-            var input = 'a b c)';
+        var error = parseAndExpectError(input);
 
-            var result = parser.parse(input).error;
+        error.message.should.equal('Unbalanced parenthesis');
+        error.column.should.equal(6);
+        error.line.should.equal(0);
+    });
 
-            result.should.be.instanceOf(Error);
-            result.message.should.equal('Unbalanced parenthesis');
-            result.column.should.equal(5);
-            result.line.should.equal(0);
-        });
+    it('should throw an "Unbalanced parenthesis" error given too few start parenthesis', function () {
+        var input = 'a b c)';
+
+        var error = parseAndExpectError(input);
+
+        error.message.should.equal('Unbalanced parenthesis');
+        error.column.should.equal(5);
+        error.line.should.equal(0);
     });
 });
