@@ -6,7 +6,7 @@ var translate = function (language, expression) {
     if (result.error) {
         return {error: result.error};
     } else {
-        return {error: null, source: require('../' + language + '/translator').translate(result.ast)};
+        return {error: null, source: require('../' + language + '/translator').translate(result.ast.get(0))};
     }
 };
 module.exports.translate = translate;

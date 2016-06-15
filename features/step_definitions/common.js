@@ -12,6 +12,10 @@ module.exports.stepDefinitions = function (language, evaluateExpression) {
         this.Given(/^an expression "([^"]*)"$/, function (expression) {
             var result = reuse.translate(language, expression);
             this.translationError = result.error;
+            if (result.error) {
+                this.errorColumn = result.error.column;
+                this.errorLine = result.error.line;
+            }
             this.expression = result.source;
         });
 
@@ -30,6 +34,14 @@ module.exports.stepDefinitions = function (language, evaluateExpression) {
         this.Then(/^I should get a translation error "([^"]*)"$/, function (expected) {
             this.translationError.should.be.instanceOf(Error);
             this.translationError.message.should.equal(expected);
+        });
+
+        this.Then(/^the error column should say (\d+)$/, function (expected) {
+            this.errorColumn.should.equal(parseInt(expected, 10));
+        });
+
+        this.Then(/^the error line should say (\d+)$/, function (expected) {
+            this.errorLine.should.equal(parseInt(expected, 10));
         });
     };
 };
