@@ -1,60 +1,70 @@
 
 var Immutable = require('immutable');
 
-var space = ' ';
-var startParenthesis = '(';
-var endParenthesis = ')';
+var SPACE_CHARACTER = ' ';
+var START_PARENTHESIS_CHARACTER = '(';
+var END_PARENTHESIS_CHARACTER = ')';
 
-var errorAt = function (index) {
+var parenthesisErrorAt = function (index) {
     var error = new Error('Unbalanced parenthesis');
     error.column = index;
     error.line = 0;
     return {error: error};
 };
 
-var skipWhiteSpace = function (input, index) {
-    while (input[index] === space) {
+var nextCharacterIs = function (character, input, index) {
+    return index < input.length && character === input[index];
+};
+
+var skipWhitespace = function (input, index) {
+    while (nextCharacterIs(SPACE_CHARACTER, input, index)) {
         index += 1;
     }
     return index;
 };
 
-var parseExpression = function (input, index, openedLists) {
-    index = skipWhiteSpace(input, index);
+var parseExpression = function (input, index) {
+    index = skipWhitespace(input, index);
 
-    if (input[index] === startParenthesis) {
-        return parseList(input, index + 1, openedLists + 1);
+    if (nextCharacterIs(START_PARENTHESIS_CHARACTER, input, index)) {
+        return parseList(input, index + 1);
     } else {
-        return parseAtom(input, index, openedLists);
+        return parseAtom(input, index);
     }
 };
 
-var parseList = function (input, index, openedLists) {
+var parseList = function (input, index) {
+    var expression = parseListBody(input, index);
+    if (expression.error) { return expression; }
+
+    index = expression.nextIndex;
+
+    if (!nextCharacterIs(END_PARENTHESIS_CHARACTER, input, index)) {
+        return parenthesisErrorAt(index);
+    }
+
+    return {ast: expression.ast, nextIndex: index + 1};
+};
+
+var parseListBody = function (input, index) {
     var list = Immutable.List();
 
-    while (index < input.length && input[index] !== endParenthesis) {
-        var expression = parseExpression(input, index, openedLists);
-        if (expression.error) {
-            return expression;
+    while (index < input.length && !nextCharacterIs(END_PARENTHESIS_CHARACTER, input, index)) {
+        var expression = parseExpression(input, index);
+        if (expression.error) { return expression; }
 
-        } else {
-            list = list.push(expression.ast);
-            index = skipWhiteSpace(input, expression.nextIndex);
-        }
+        list = list.push(expression.ast);
+        index = skipWhitespace(input, expression.nextIndex);
     }
 
-    if (index === input.length) {
-        return errorAt(index);
-    }
-
-    return {ast: list, nextIndex: index + 1};
+    return {ast: list, nextIndex: index};
 };
 
-var parseAtom = function (input, index, openedLists) {
+var parseAtom = function (input, index) {
     var start = index;
     while (index < input.length
-        && input[index] !== space
-        && input[index] !== endParenthesis) {
+        && !nextCharacterIs(SPACE_CHARACTER, input, index)
+        && !nextCharacterIs(END_PARENTHESIS_CHARACTER, input, index)) {
         index += 1;
     }
 
@@ -62,19 +72,13 @@ var parseAtom = function (input, index, openedLists) {
 };
 
 module.exports.parse = function (input) {
-    var list = Immutable.List();
-    var index = 0;
+    var result = parseListBody(input, 0);
+    if (result.error) { return result; }
+    index = result.nextIndex;
 
-    while (index < input.length) {
-        if (input[index] === endParenthesis) {
-            return errorAt(index);
-        }
-        var result = parseExpression(input, index, 0);
-        if (result.error) { return result; }
-
-        index = skipWhiteSpace(input, result.nextIndex);
-        list = list.push(result.ast);
+    if (nextCharacterIs(END_PARENTHESIS_CHARACTER, input, index)) {
+        return parenthesisErrorAt(index);
     }
 
-    return {ast: list};
+    return result;
 };
