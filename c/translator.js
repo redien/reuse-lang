@@ -20,7 +20,7 @@ var translateExpression = function (parsedExpression) {
                     return state.new('lambda', state.definitions(expression) + 'int lambda(' + argumentList + ') { return ' + state.expression(expression) + '; }\n');
                 },
         ]
-        .concat(operators.infixOperatorsForLanguageWithInt32(translateExpression))
+        .concat(operators.infixOperators(translateExpression))
         .concat(functions.application(translateExpression))
         .concat(symbols.atom(translateExpression))
     );

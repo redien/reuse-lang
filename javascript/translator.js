@@ -31,7 +31,7 @@ var translateExpression = function (parsedExpression) {
             list(atom('/'), variable('a'), variable('b')),
                 dropDecimals(operators.infixOperator('/', translateExpression)),
         ]
-        .concat(operators.infixOperatorsForLanguageWithInt32(translateExpression))
+        .concat(operators.infixOperators(translateExpression))
         .concat(functions.application(translateExpression))
         .concat(symbols.atom(translateExpression))
     );

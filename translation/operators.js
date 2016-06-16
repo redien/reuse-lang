@@ -26,7 +26,7 @@ operators.infixOperator = function (operator, translateExpression) {
     };
 };
 
-operators.infixOperatorsForLanguageWithInt32 = function (translateExpression) {
+operators.infixOperators = function (translateExpression) {
     return [
         list(atom('+'), variable('a'), variable('b')),
             operators.infixOperator('+', translateExpression),
