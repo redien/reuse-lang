@@ -1,12 +1,14 @@
 
-var ast = require('../parser/ast');
 var state = require('./state');
+
+var ast = require('../parser/ast');
+var atom = ast.atom;
+var list = ast.list;
+
 var match = require('./match-ast');
-var atom = match.atom;
-var list = match.list;
 var variable = match.variable;
 
-module.exports = function (translate) {
+module.exports.application = function (translate) {
     return [
         variable('list', 'list'),
         (variables) => {

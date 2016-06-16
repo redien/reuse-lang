@@ -1,11 +1,13 @@
 
 var operators = module.exports;
 
-var ast = require('../parser/ast');
 var state = require('./state');
+
+var ast = require('../parser/ast');
+var atom = ast.atom;
+var list = ast.list;
+
 var match = require('./match-ast');
-var atom = match.atom;
-var list = match.list;
 var variable = match.variable;
 
 operators.infixOperator = function (operator, translateExpression, nestFirst, nestSecond) {

@@ -1,11 +1,13 @@
 
 var state = require('../translation/state');
-var functionApplication = require('../translation/function-application');
+var functions = require('../translation/functions');
 var operators = require('../translation/operators');
-var match = require('../translation/match-ast');
+
 var ast = require('../parser/ast');
-var atom = match.atom;
-var list = match.list;
+var atom = ast.atom;
+var list = ast.list;
+
+var match = require('../translation/match-ast');
 var variable = match.variable;
 
 var translateExpression = function translateExpression (parsedExpression) {
@@ -15,7 +17,7 @@ var translateExpression = function translateExpression (parsedExpression) {
         ].concat(
             operators.infixOperatorsForLanguageWithInt32(translateExpression)
         ).concat(
-            functionApplication(translateExpression)
+            functions.application(translateExpression)
         ).concat([
             variable('atom', 'atom'), (variables) => state.new(ast.atomValue(variables.get('atom')), '')
         ])
