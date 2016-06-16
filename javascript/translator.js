@@ -21,17 +21,15 @@ var dropDecimals = function (operatorTranslator) {
 var translateExpression = function (parsedExpression) {
     return match(parsedExpression, [
             list(atom('lambda'), variable('arguments', 'list'), variable('expression')),
-            (variables) => {
-                var argumentList = functions.argumentList(variables.get('arguments'));
-                var expression = translateExpression(variables.get('expression'));
-                return state.new('((' + argumentList + ') => ' + state.expression(expression) + ')', state.definitions(expression));
-            },
+                (variables) => {
+                    var argumentList = functions.argumentList(variables.get('arguments'));
+                    var expression = translateExpression(variables.get('expression'));
+                    return state.new('((' + argumentList + ') => ' + state.expression(expression) + ')', state.definitions(expression));
+                },
 
             // Overrides division operator to round off decimal points
-            list(atom('/'), variable('a', 'list'), variable('b', 'list')),    dropDecimals(operators.infixOperator('/', translateExpression, true, true)),
-            list(atom('/'), variable('a'), variable('b', 'list')),            dropDecimals(operators.infixOperator('/', translateExpression, false, true)),
-            list(atom('/'), variable('a', 'list'), variable('b')),            dropDecimals(operators.infixOperator('/', translateExpression, true, false)),
-            list(atom('/'), variable('a'), variable('b')),                    dropDecimals(operators.infixOperator('/', translateExpression)),
+            list(atom('/'), variable('a'), variable('b')),
+                dropDecimals(operators.infixOperator('/', translateExpression)),
         ]
         .concat(operators.infixOperatorsForLanguageWithInt32(translateExpression))
         .concat(functions.application(translateExpression))
