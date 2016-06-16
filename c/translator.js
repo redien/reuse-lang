@@ -10,7 +10,7 @@ var list = ast.list;
 var match = require('../translation/match-ast');
 var variable = match.variable;
 
-var translateExpression = function translateExpression (parsedExpression) {
+var translateExpression = function (parsedExpression) {
     return match(parsedExpression, [
             list(atom('lambda'), variable('arguments', 'list'), variable('expression')),
             (variables) => {
@@ -18,11 +18,10 @@ var translateExpression = function translateExpression (parsedExpression) {
                 var expression = translateExpression(variables.get('expression'));
                 return state.new('lambda', state.definitions(expression) + 'int lambda(' + argumentList + ') { return ' + state.expression(expression) + '; }\n');
             },
-        ].concat(
-            operators.infixOperatorsForLanguageWithInt32(translateExpression)
-        ).concat(
-            functions.application(translateExpression)
-        ).concat([
+        ]
+        .concat(operators.infixOperatorsForLanguageWithInt32(translateExpression))
+        .concat(functions.application(translateExpression))
+        .concat([
             variable('atom', 'atom'), (variables) => state.new(ast.atomValue(variables.get('atom')), '')
         ])
     );
