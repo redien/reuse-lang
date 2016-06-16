@@ -5,9 +5,24 @@ var atom = match.atom;
 var list = match.list;
 var variable = match.variable;
 
+var argumentListFromList = function (list, translate) {
+    var argumentList = '(';
+    for (var index = 1; index < ast.listSize(list); index += 1) {
+        if (index > 1) {
+            argumentList += ', ';
+        }
+        argumentList += translate(ast.listChild(list, index));
+    }
+    argumentList += ')';
+    return argumentList;
+};
+
 module.exports = function (translate) {
     return [
-        list(variable('f'), variable('a'), variable('b')),
-        (variables) => ast.atomValue(variables.get('f')) + '(' + ast.atomValue(variables.get('a')) + ', ' + ast.atomValue(variables.get('b')) + ')'
+        variable('list', 'list'),
+        (variables) => {
+            var list = variables.get('list');
+            return translate(ast.listChild(list, 0)) + argumentListFromList(list, translate);
+        },
     ];
 };

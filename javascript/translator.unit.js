@@ -59,13 +59,63 @@ describe('javascript translator', function () {
             });
         });
 
+        describe('Lambda expression', function () {
+            it('should translate (lambda () a) into () => a', function () {
+                input = list(atom('lambda'), list(), atom('a'));
+
+                result = translator.translate(input);
+
+                result.should.equal('(() => a)');
+            });
+        });
+
         describe('Function application', function () {
+            it('should translate (f) into f()', function () {
+                input = list(atom('f'));
+
+                result = translator.translate(input);
+
+                result.should.equal('f()');
+            });
+
+            it('should translate (f a) into f(a)', function () {
+                input = list(atom('f'), atom('a'));
+
+                result = translator.translate(input);
+
+                result.should.equal('f(a)');
+            });
+
             it('should translate (f a b) into f(a, b)', function () {
                 input = list(atom('f'), atom('a'), atom('b'));
 
                 result = translator.translate(input);
 
                 result.should.equal('f(a, b)');
+            });
+
+            it('should translate (f a b c) into f(a, b, c)', function () {
+                input = list(atom('f'), atom('a'), atom('b'), atom('c'));
+
+                result = translator.translate(input);
+
+                result.should.equal('f(a, b, c)');
+            });
+
+            it('should translate ((f)) into f()()', function () {
+                input = list(list(atom('f')));
+
+                result = translator.translate(input);
+
+                result.should.equal('f()()');
+            });
+
+            it('should translate (f (f)) into f(f())', function () {
+                input = list(atom('f'), list(atom('f')));
+
+                result = translator.translate(input);
+
+                result.should.equal('f(f())');
             });
         });
     });

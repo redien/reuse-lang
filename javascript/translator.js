@@ -15,6 +15,9 @@ var dropDecimals = function (translator) {
 
 module.exports.translate = function translateExpression (parsedExpression) {
     return match(parsedExpression, [
+            list(atom('lambda'), variable('arguments', 'list'), variable('expression')),
+            (variables) => '(() => ' + ast.atomValue(variables.get('expression')) + ')',
+
             // Overrides division operator to round off decimal points
             list(atom('/'), variable('a', 'list'), variable('b', 'list')),    dropDecimals(operators.infixOperator('/', translateExpression, true, true)),
             list(atom('/'), variable('a'), variable('b', 'list')),            dropDecimals(operators.infixOperator('/', translateExpression, false, true)),
