@@ -2,6 +2,7 @@
 var state = require('../translation/state');
 var functions = require('../translation/functions');
 var operators = require('../translation/operators');
+var symbols = require('../translation/symbols');
 
 var ast = require('../parser/ast');
 var atom = ast.atom;
@@ -10,10 +11,10 @@ var list = ast.list;
 var match = require('../translation/match-ast');
 var variable = match.variable;
 
-var dropDecimals = function (translate) {
+var dropDecimals = function (operatorTranslator) {
     return (variables) => {
-        var translatedExpression = translate(variables);
-        return state.new('Math.floor(' + state.expression(translatedExpression) + ')', '');
+        var expression = operatorTranslator(variables);
+        return state.new('Math.floor(' + state.expression(expression) + ')', '');
     };
 };
 
@@ -34,9 +35,7 @@ var translateExpression = function (parsedExpression) {
         ]
         .concat(operators.infixOperatorsForLanguageWithInt32(translateExpression))
         .concat(functions.application(translateExpression))
-        .concat([
-            variable('atom', 'atom'), (variables) => state.new(ast.atomValue(variables.get('atom')), '')
-        ])
+        .concat(symbols.atom(translateExpression))
     );
 };
 
