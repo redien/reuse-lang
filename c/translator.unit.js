@@ -71,6 +71,22 @@ describe('C translator', function () {
 
                 result.should.equal('int lambda(x) { return x; }\nint expression() { return lambda; }');
             });
+
+            it('should translate (lambda (x y) (+ x y)) into a C function', function () {
+                input = list(atom('lambda'), list(atom('x'), atom('y')), list(atom('+'), atom('x'), atom('y')));
+
+                result = translator.translate(input);
+
+                result.should.equal('int lambda(x, y) { return x + y; }\nint expression() { return lambda; }');
+            });
+
+            it('should translate (lambda () (+ 1 2)) into a C function', function () {
+                input = list(atom('lambda'), list(), list(atom('+'), atom('1'), atom('2')));
+
+                result = translator.translate(input);
+
+                result.should.equal('int lambda() { return 1 + 2; }\nint expression() { return lambda; }');
+            });
         });
 
         describe('Function application', function () {

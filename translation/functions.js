@@ -35,8 +35,9 @@ module.exports.application = function (translate) {
 
 module.exports.argumentList = function (list) {
     var argumentList = '';
-    if (list.size === 1) {
-        argumentList = ast.atomValue(list.get(0));
+    for (var index = 0; index < list.size; index += 1) {
+        if (index > 0) { argumentList += ', '; }
+        argumentList += ast.atomValue(list.get(index));
     }
     return argumentList;
 };

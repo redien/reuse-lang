@@ -20,7 +20,11 @@ var dropDecimals = function (translate) {
 var translateExpression = function translateExpression (parsedExpression) {
     return match(parsedExpression, [
             list(atom('lambda'), variable('arguments', 'list'), variable('expression')),
-            (variables) => state.new('((' + functions.argumentList(variables.get('arguments')) + ') => ' + ast.atomValue(variables.get('expression')) + ')', ''),
+            (variables) => {
+                var argumentList = functions.argumentList(variables.get('arguments'));
+                var expression = translateExpression(variables.get('expression'));
+                return state.new('((' + argumentList + ') => ' + state.expression(expression) + ')', state.definitions(expression));
+            },
 
             // Overrides division operator to round off decimal points
             list(atom('/'), variable('a', 'list'), variable('b', 'list')),    dropDecimals(operators.infixOperator('/', translateExpression, true, true)),
