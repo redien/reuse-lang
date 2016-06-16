@@ -2,7 +2,8 @@
 var operators = module.exports;
 
 var ast = require('../parser/ast');
-var match = require('../translation/match-ast');
+var state = require('./state');
+var match = require('./match-ast');
 var atom = match.atom;
 var list = match.list;
 var variable = match.variable;
@@ -12,10 +13,11 @@ operators.infixOperator = function (operator, translateExpression, nestFirst, ne
         var first = translateExpression(variables.get('a'));
         var second = translateExpression(variables.get('b'));
 
-        first = nestFirst ? '(' + first + ')' : first;
-        second = nestSecond ? '(' + second + ')' : second;
+        var expression = nestFirst ? '(' + state.expression(first) + ')' : state.expression(first);
+        expression += ' ' + operator + ' ';
+        expression += nestSecond ? '(' + state.expression(second) + ')' : state.expression(second);
 
-        return first + ' ' + operator + ' ' + second;
+        return state.new(expression, state.definitions(first) + state.definitions(second));
     };
 };
 

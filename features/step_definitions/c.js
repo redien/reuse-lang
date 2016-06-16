@@ -8,9 +8,11 @@ var programBuilder = function (translatedExpression) {
     int max(int a, int b) { return a < b ? b : a; }
     int min(int a, int b) { return a > b ? b : a; }
 
+    ${translatedExpression}
+
     int main(int argc, char** argv) {
-        int expression = ${translatedExpression};
-        printf("%d", expression);
+        int value = expression();
+        printf("%d", value);
         return 0;
     }
     `;

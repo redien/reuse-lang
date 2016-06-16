@@ -1,4 +1,5 @@
 
+var state = require('../translation/state');
 var functionApplication = require('../translation/function-application');
 var operators = require('../translation/operators');
 var match = require('../translation/match-ast');
@@ -7,16 +8,17 @@ var atom = match.atom;
 var list = match.list;
 var variable = match.variable;
 
-var dropDecimals = function (translator) {
+var dropDecimals = function (translate) {
     return (variables) => {
-        return 'Math.floor(' + translator(variables) + ')';
+        var translatedExpression = translate(variables);
+        return state.new('Math.floor(' + state.expression(translatedExpression) + ')', '');
     };
 };
 
-module.exports.translate = function translateExpression (parsedExpression) {
+var translateExpression = function translateExpression (parsedExpression) {
     return match(parsedExpression, [
             list(atom('lambda'), variable('arguments', 'list'), variable('expression')),
-            (variables) => '(() => ' + ast.atomValue(variables.get('expression')) + ')',
+            (variables) => state.new('(() => ' + ast.atomValue(variables.get('expression')) + ')', ''),
 
             // Overrides division operator to round off decimal points
             list(atom('/'), variable('a', 'list'), variable('b', 'list')),    dropDecimals(operators.infixOperator('/', translateExpression, true, true)),
@@ -28,7 +30,11 @@ module.exports.translate = function translateExpression (parsedExpression) {
         ).concat(
             functionApplication(translateExpression)
         ).concat([
-            variable('atom', 'atom'), (variables) => ast.atomValue(variables.get('atom'))
+            variable('atom', 'atom'), (variables) => state.new(ast.atomValue(variables.get('atom')), '')
         ])
     );
+};
+
+module.exports.translate = function (parsedExpression) {
+    return state.expression(translateExpression(parsedExpression));
 };
