@@ -32,3 +32,11 @@ module.exports.application = function (translate) {
         },
     ];
 };
+
+module.exports.argumentList = function (list) {
+    var argumentList = '';
+    if (list.size === 1) {
+        argumentList = ast.atomValue(list.get(0));
+    }
+    return argumentList;
+};

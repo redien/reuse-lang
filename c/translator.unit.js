@@ -63,6 +63,14 @@ describe('C translator', function () {
 
                 result.should.equal('int lambda() { return a; }\nint expression() { return lambda; }');
             });
+
+            it('should translate (lambda (x) x) into a C function', function () {
+                input = list(atom('lambda'), list(atom('x')), atom('x'));
+
+                result = translator.translate(input);
+
+                result.should.equal('int lambda(x) { return x; }\nint expression() { return lambda; }');
+            });
         });
 
         describe('Function application', function () {

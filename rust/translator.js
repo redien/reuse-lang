@@ -13,7 +13,7 @@ var variable = match.variable;
 var translateExpression = function translateExpression (parsedExpression) {
     return match(parsedExpression, [
             list(atom('lambda'), variable('arguments', 'list'), variable('expression')),
-            (variables) => state.new('(|| ' + ast.atomValue(variables.get('expression')) + ')', ''),
+            (variables) => state.new('(|' + functions.argumentList(variables.get('arguments')) + '| ' + ast.atomValue(variables.get('expression')) + ')', ''),
         ].concat(
             operators.infixOperatorsForLanguageWithInt32(translateExpression)
         ).concat(

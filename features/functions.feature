@@ -7,3 +7,8 @@ Feature: Functions
         Given an expression "((lambda () 1))"
         When I evaluate it
         Then I should get "1"
+
+    Scenario: Functions with one argument
+        Given an expression "((lambda (x) x) 1)"
+        When I evaluate it
+        Then I should get "1"

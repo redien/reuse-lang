@@ -52,12 +52,20 @@ describe('rust translator', function () {
         });
 
         describe('Lambda expression', function () {
-            it('should translate (lambda () a) into () => a', function () {
+            it('should translate (lambda () a) into (|| a)', function () {
                 input = list(atom('lambda'), list(), atom('a'));
 
                 result = translator.translate(input);
 
                 result.should.equal('(|| a)');
+            });
+
+            it('should translate (lambda (x) x) into (|x| x)', function () {
+                input = list(atom('lambda'), list(atom('x')), atom('x'));
+
+                result = translator.translate(input);
+
+                result.should.equal('(|x| x)');
             });
         });
 
