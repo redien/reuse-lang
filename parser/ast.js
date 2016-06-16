@@ -6,10 +6,8 @@ var ast = module.exports;
 ast.equal = function (a, b) {
     if (ast.isList(a) && ast.isList(b)) {
         return Immutable.is(a, b);
-    } else if (a === b) {
-        return true;
     } else {
-        return false;
+        return a === b;
     }
 };
 
@@ -26,7 +24,7 @@ ast.atomValue = function (atom) {
 };
 
 ast.list = function () {
-    return Immutable.List.of.apply(Immutable.List, arguments);
+    return Immutable.List(arguments);
 };
 
 ast.isList = function (list) {
