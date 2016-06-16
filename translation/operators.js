@@ -11,18 +11,19 @@ var match = require('./match-ast');
 var variable = match.variable;
 
 operators.infixOperator = function (operator, translateExpression) {
-    return (variables) => {
+    return (translationState, variables) => {
         var nestFirst = ast.isList(variables.get('a'));
         var nestSecond = ast.isList(variables.get('b'));
 
-        var first = translateExpression(variables.get('a'));
-        var second = translateExpression(variables.get('b'));
+        var first = translateExpression(translationState, variables.get('a'));
+        var second = translateExpression(first, variables.get('b'));
+        translationState = second;
 
         var expression = nestFirst ? '(' + state.expression(first) + ')' : state.expression(first);
         expression += ' ' + operator + ' ';
         expression += nestSecond ? '(' + state.expression(second) + ')' : state.expression(second);
 
-        return state.new(expression, state.definitions(first) + state.definitions(second));
+        return state.setExpression(translationState, expression);
     };
 };
 

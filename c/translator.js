@@ -11,13 +11,20 @@ var list = ast.list;
 var match = require('../translation/match-ast');
 var variable = match.variable;
 
-var translateExpression = function (parsedExpression) {
-    return match(parsedExpression, [
+var translateExpression = function (translationState, parsedExpression) {
+    return match(translationState, parsedExpression, [
             list(atom('lambda'), variable('arguments', 'list'), variable('expression')),
-                (variables) => {
+                (translationState, variables) => {
                     var argumentList = functions.argumentList(variables.get('arguments'));
-                    var expression = translateExpression(variables.get('expression'));
-                    return state.new('lambda', state.definitions(expression) + 'int lambda(' + argumentList + ') { return ' + state.expression(expression) + '; }\n');
+                    translationState = translateExpression(translationState, variables.get('expression'));
+
+                    var id = state.lambdaId(translationState);
+                    translationState = state.incrementLambdaId(translationState);
+
+                    var functionDefinition = 'int reuse_gen_lambda' + id + '(' + argumentList + ') { return ' + state.expression(translationState) + '; }\n';
+
+                    translationState = state.setExpression(translationState, 'reuse_gen_lambda' + id);
+                    return state.addDefinition(translationState, functionDefinition);
                 },
         ]
         .concat(operators.infixOperators(translateExpression))
@@ -27,6 +34,6 @@ var translateExpression = function (parsedExpression) {
 };
 
 module.exports.translate = function (parsedExpression) {
-    var translatedExpression = translateExpression(parsedExpression);
-    return state.definitions(translatedExpression) + 'int expression() { return ' + state.expression(translatedExpression) + '; }';
+    var translationState = translateExpression(state.new(), parsedExpression);
+    return state.definitions(translationState) + 'int expression() { return ' + state.expression(translationState) + '; }';
 };

@@ -17,3 +17,8 @@ Feature: Functions
         Given an expression "((lambda (x y z) (+ x (* y z))) 1 2 3)"
         When I evaluate it
         Then I should get "7"
+
+    Scenario: Should properly define several lambda expressions
+        Given an expression "(+ ((lambda () 1)) ((lambda () 2)))"
+        When I evaluate it
+        Then I should get "3"

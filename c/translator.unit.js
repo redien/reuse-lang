@@ -61,7 +61,7 @@ describe('C translator', function () {
 
                 result = translator.translate(input);
 
-                result.should.equal('int lambda() { return a; }\nint expression() { return lambda; }');
+                result.should.equal('int reuse_gen_lambda0() { return a; }\nint expression() { return reuse_gen_lambda0; }');
             });
 
             it('should translate (lambda (x) x) into a C function', function () {
@@ -69,7 +69,7 @@ describe('C translator', function () {
 
                 result = translator.translate(input);
 
-                result.should.equal('int lambda(x) { return x; }\nint expression() { return lambda; }');
+                result.should.equal('int reuse_gen_lambda0(x) { return x; }\nint expression() { return reuse_gen_lambda0; }');
             });
 
             it('should translate (lambda (x y) (+ x y)) into a C function', function () {
@@ -77,7 +77,7 @@ describe('C translator', function () {
 
                 result = translator.translate(input);
 
-                result.should.equal('int lambda(x, y) { return x + y; }\nint expression() { return lambda; }');
+                result.should.equal('int reuse_gen_lambda0(x, y) { return x + y; }\nint expression() { return reuse_gen_lambda0; }');
             });
 
             it('should translate (lambda () (+ 1 2)) into a C function', function () {
@@ -85,7 +85,15 @@ describe('C translator', function () {
 
                 result = translator.translate(input);
 
-                result.should.equal('int lambda() { return 1 + 2; }\nint expression() { return lambda; }');
+                result.should.equal('int reuse_gen_lambda0() { return 1 + 2; }\nint expression() { return reuse_gen_lambda0; }');
+            });
+
+            it('should translate (+ ((lambda () a)) ((lambda () b))) into two C functions', function () {
+                input = list(atom('+'), list(list(atom('lambda'), list(), atom('a'))), list(list(atom('lambda'), list(), atom('b'))));
+
+                result = translator.translate(input);
+
+                result.should.equal('int reuse_gen_lambda0() { return a; }\nint reuse_gen_lambda1() { return b; }\nint expression() { return (reuse_gen_lambda0()) + (reuse_gen_lambda1()); }');
             });
         });
 

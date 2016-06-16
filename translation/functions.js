@@ -11,7 +11,7 @@ var variable = match.variable;
 module.exports.application = function (translate) {
     return [
         variable('list', 'list'),
-            (variables) => {
+            (translationState, variables) => {
                 var list = variables.get('list');
                 var definitions = '';
 
@@ -20,15 +20,14 @@ module.exports.application = function (translate) {
                     if (index > 1) {
                         argumentList += ', ';
                     }
-                    var translatedExpression = translate(ast.listChild(list, index));
-                    argumentList += state.expression(translatedExpression);
-                    definitions += state.definitions(translatedExpression);
+                    translationState = translate(translationState, ast.listChild(list, index));
+                    argumentList += state.expression(translationState);
                 }
                 argumentList += ')';
 
-                var translatedFunction = translate(ast.listChild(list, 0));
+                translationState = translate(translationState, ast.listChild(list, 0));
 
-                return state.new(state.expression(translatedFunction) + argumentList, state.definitions(translatedFunction) + definitions);
+                return state.setExpression(translationState, state.expression(translationState) + argumentList);
             },
     ];
 };

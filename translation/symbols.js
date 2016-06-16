@@ -9,6 +9,6 @@ var variable = match.variable;
 symbols.atom = function (translateExpression) {
     return [
         variable('atom', 'atom'),
-            (variables) => state.new(ast.atomValue(variables.get('atom')), '')
+            (translationState, variables) => state.setExpression(translationState, ast.atomValue(variables.get('atom')))
     ];
 };

@@ -11,13 +11,13 @@ var list = ast.list;
 var match = require('../translation/match-ast');
 var variable = match.variable;
 
-var translateExpression = function (parsedExpression) {
-    return match(parsedExpression, [
+var translateExpression = function (translationState, parsedExpression) {
+    return match(translationState, parsedExpression, [
             list(atom('lambda'), variable('arguments', 'list'), variable('expression')),
-                (variables) => {
+                (translationState, variables) => {
                     var argumentList = functions.argumentList(variables.get('arguments'));
-                    var expression = translateExpression(variables.get('expression'));
-                    return state.new('(|' + argumentList + '| ' + state.expression(expression) + ')', state.definitions(expression));
+                    var expression = translateExpression(translationState, variables.get('expression'));
+                    return state.setExpression(expression, '(|' + argumentList + '| ' + state.expression(expression) + ')');
                 },
         ]
         .concat(operators.infixOperators(translateExpression))
@@ -27,5 +27,5 @@ var translateExpression = function (parsedExpression) {
 };
 
 module.exports.translate = function (parsedExpression) {
-    return state.expression(translateExpression(parsedExpression));
+    return state.expression(translateExpression(state.new(), parsedExpression));
 };
