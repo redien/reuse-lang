@@ -9,7 +9,7 @@ var list = ast.list;
 
 var input, result;
 
-var stubExpressionTranslator = function (translationState, parsedExpression) {
+var fakeExpressionTranslator = function (translationState, parsedExpression) {
     if (ast.isAtom(parsedExpression)) {
         return state.setExpression(translationState, ast.atomValue(parsedExpression));
     } else {
@@ -21,7 +21,7 @@ var stubExpressionTranslator = function (translationState, parsedExpression) {
 
 var translate = function (parsedExpression) {
     var translationState = match(state.new(), parsedExpression,
-        functions.application(stubExpressionTranslator)
+        functions.application(fakeExpressionTranslator)
     );
 
     return state.expression(translationState);
