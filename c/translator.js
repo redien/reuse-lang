@@ -8,11 +8,11 @@ var ast = require('../parser/ast');
 var atom = ast.atom;
 var list = ast.list;
 
-var match = require('../parser/match-ast');
-var variable = match.variable;
+var translateAst = require('../translation/translate-ast');
+var variable = translateAst.variable;
 
 var translateExpression = function (translationState, parsedExpression) {
-    return match(translationState, parsedExpression, [
+    return translateAst(translationState, parsedExpression, [
             list(atom('lambda'), variable('arguments', 'list'), variable('expression')),
                 (translationState, variables) => {
                     var argumentList = functions.argumentList(variables.get('arguments'));

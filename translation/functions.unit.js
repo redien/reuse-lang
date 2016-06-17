@@ -2,7 +2,7 @@
 var should = require('should');
 var functions = require('./functions');
 var state = require('./state');
-var match = require('../parser/match-ast');
+var translateAst = require('../translation/translate-ast');
 var ast = require('../parser/ast');
 var atom = ast.atom;
 var list = ast.list;
@@ -20,7 +20,7 @@ var fakeExpressionTranslator = function (translationState, parsedExpression) {
 };
 
 var translate = function (parsedExpression) {
-    var translationState = match(state.new(), parsedExpression,
+    var translationState = translateAst(state.new(), parsedExpression,
         functions.application(fakeExpressionTranslator)
     );
 
