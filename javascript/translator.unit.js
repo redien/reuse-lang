@@ -41,4 +41,14 @@ describe('javascript.translate', function () {
             result.should.equal('(() => 1 + 2)');
         });
     });
+
+    describe('Division operator', function () {
+        it('should Math.floor division results', function () {
+            input = list(atom('/'), atom('a'), atom('b'));
+
+            result = translator.translate(input);
+
+            result.should.equal('Math.floor(a / b)');
+        });
+    });
 });
