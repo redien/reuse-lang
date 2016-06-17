@@ -28,17 +28,12 @@ operators.infixOperator = function (operator, translateExpression) {
 };
 
 operators.infixOperators = function (translateExpression) {
+    var infixOperator = (operator) => operators.infixOperator(operator, translateExpression);
+
     return [
-        list(atom('+'), variable('a'), variable('b')),
-            operators.infixOperator('+', translateExpression),
-
-        list(atom('*'), variable('a'), variable('b')),
-            operators.infixOperator('*', translateExpression),
-
-        list(atom('-'), variable('a'), variable('b')),
-            operators.infixOperator('-', translateExpression),
-
-        list(atom('/'), variable('a'), variable('b')),
-            operators.infixOperator('/', translateExpression),
+        list(atom('+'), variable('a'), variable('b')), /* -> */ infixOperator('+'),
+        list(atom('*'), variable('a'), variable('b')), /* -> */ infixOperator('*'),
+        list(atom('-'), variable('a'), variable('b')), /* -> */ infixOperator('-'),
+        list(atom('/'), variable('a'), variable('b')), /* -> */ infixOperator('/'),
     ];
 };
