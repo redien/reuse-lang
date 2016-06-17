@@ -34,16 +34,21 @@ var infer = function (parsedExpression, scope) {
                 expressions = expressions.push(infer(expression, scope));
             }
 
-            return type.application(type.constant().type, expressions);
+            return type.application(type.expressionType(type.type(expressions.get(0))), expressions);
         }
     }
 };
 
-var builtins = Immutable.Map.of(
-    '+', type.lambda(Immutable.List.of(type.constant().type, type.constant().type), type.constant().type).type
-);
+var specialForms = Immutable.Map({
+    '+': type.lambda(Immutable.List.of(type.constant().type, type.constant().type), type.constant().type).type,
+    '-': type.lambda(Immutable.List.of(type.constant().type, type.constant().type), type.constant().type).type,
+    '*': type.lambda(Immutable.List.of(type.constant().type, type.constant().type), type.constant().type).type,
+    '/': type.lambda(Immutable.List.of(type.constant().type, type.constant().type), type.constant().type).type,
+    'max': type.lambda(Immutable.List.of(type.constant().type, type.constant().type), type.constant().type).type,
+    'min': type.lambda(Immutable.List.of(type.constant().type, type.constant().type), type.constant().type).type,
+});
 
 module.exports = function (parsedExpression, scope) {
-    scope = builtins.merge(scope);
+    scope = specialForms.merge(scope);
     return infer(parsedExpression, scope);
 };
