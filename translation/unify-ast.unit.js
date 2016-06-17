@@ -22,7 +22,7 @@ describe('unifyAst', function () {
 
         var output = unifyAst(first, second);
 
-        output.should.be.false();
+        output.should.equal(unifyAst.NOT_UNIFIED);
     });
 
     it('should unify with {a: ...} given a variable "a" and an AST', function () {
@@ -103,7 +103,7 @@ describe('unifyAst', function () {
 
         var output = unifyAst(first, second);
 
-        output.should.be.false();
+        output.should.equal(unifyAst.NOT_UNIFIED);
     });
 
     it('should unify with {} given two identical lists', function () {
@@ -122,7 +122,7 @@ describe('unifyAst', function () {
 
         var output = unifyAst(first, second);
 
-        output.should.be.false();
+        output.should.equal(unifyAst.NOT_UNIFIED);
     });
 
     it('should not unify given a list and an atom', function () {
@@ -131,7 +131,7 @@ describe('unifyAst', function () {
 
         var output = unifyAst(first, second);
 
-        output.should.be.false();
+        output.should.equal(unifyAst.NOT_UNIFIED);
     });
 
     it('should not unify given two lists of different sizes', function () {
@@ -140,7 +140,7 @@ describe('unifyAst', function () {
 
         var output = unifyAst(first, second);
 
-        output.should.be.false();
+        output.should.equal(unifyAst.NOT_UNIFIED);
     });
 
     it('should unify with {a: ...} given a list with a variable and a list with an AST', function () {
@@ -222,7 +222,7 @@ describe('unifyAst', function () {
 
         var output = unifyAst(first, second);
 
-        output.should.be.false();
+        output.should.equal(unifyAst.NOT_UNIFIED);
     });
 
     it('should unify with {b: ...} given an atom and a variable "b" with kind "atom"', function () {
@@ -243,7 +243,7 @@ describe('unifyAst', function () {
 
         var output = unifyAst(first, second);
 
-        output.should.be.false();
+        output.should.equal(unifyAst.NOT_UNIFIED);
     });
 
     it('should unify with {a: ...} given a variable "a" with kind "list" and a list', function () {
@@ -263,7 +263,7 @@ describe('unifyAst', function () {
 
         var output = unifyAst(first, second);
 
-        output.should.be.false();
+        output.should.equal(unifyAst.NOT_UNIFIED);
     });
 
     it('should unify with {a: ...} given a list and a variable "a" with kind "list"', function () {
@@ -283,6 +283,6 @@ describe('unifyAst', function () {
 
         var output = unifyAst(first, second);
 
-        output.should.be.false();
+        output.should.equal(unifyAst.NOT_UNIFIED);
     });
 });

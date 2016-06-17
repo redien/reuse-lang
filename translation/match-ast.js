@@ -7,7 +7,7 @@ module.exports = function (translationState, parsedExpression, patterns) {
         var transformer = patterns[index + 1];
 
         var result = unifyAst(pattern, parsedExpression);
-        if (result !== false) {
+        if (result !== unifyAst.NOT_UNIFIED) {
             return transformer(translationState, result);
         }
     }

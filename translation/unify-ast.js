@@ -2,6 +2,8 @@
 var Immutable = require('immutable');
 var ast = require('../parser/ast');
 
+var NOT_UNIFIED = false;
+
 var throwOverwriteError = (prev, next) => { throw new Error(next + ' overwrites ' + prev) };
 
 var unifyList = function (first, second) {
@@ -11,8 +13,8 @@ var unifyList = function (first, second) {
         var secondChild = ast.listChild(second, index);
 
         var unified = unifyAst(firstChild, secondChild);
-        if (unified === false) {
-            return false;
+        if (unified === NOT_UNIFIED) {
+            return NOT_UNIFIED;
         } else {
             substitutions = substitutions.mergeWith(throwOverwriteError, unified);
         }
@@ -47,7 +49,7 @@ var unifyAst = function (first, second) {
         return unifyList(first, second);
 
     } else {
-        return false;
+        return NOT_UNIFIED;
     }
 };
 
@@ -57,6 +59,8 @@ unifyAst.variable = function (name, kind) {
         name: name,
         kind: kind
     };
-}
+};
+
+unifyAst.NOT_UNIFIED = NOT_UNIFIED;
 
 module.exports = unifyAst;
