@@ -1,8 +1,8 @@
 
 var should = require('should');
 var functions = require('./functions');
-var match = require('./match-ast');
 var state = require('./state');
+var match = require('../parser/match-ast');
 var ast = require('../parser/ast');
 var atom = ast.atom;
 var list = ast.list;

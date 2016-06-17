@@ -3,7 +3,7 @@ var symbols = module.exports;
 
 var state = require('./state');
 var ast = require('../parser/ast');
-var match = require('./match-ast');
+var match = require('../parser/match-ast');
 var variable = match.variable;
 
 symbols.atom = function (translateExpression) {

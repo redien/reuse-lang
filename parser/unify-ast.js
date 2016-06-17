@@ -1,6 +1,6 @@
 
 var Immutable = require('immutable');
-var ast = require('../parser/ast');
+var ast = require('./ast');
 
 var NOT_UNIFIED = false;
 

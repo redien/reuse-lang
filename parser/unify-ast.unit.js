@@ -1,7 +1,7 @@
 
 var Immutable = require('immutable');
 var should = require('should');
-var ast = require('../parser/ast');
+var ast = require('./ast');
 var unifyAst = require('./unify-ast');
 var variable = unifyAst.variable;
 

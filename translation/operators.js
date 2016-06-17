@@ -7,7 +7,7 @@ var ast = require('../parser/ast');
 var atom = ast.atom;
 var list = ast.list;
 
-var match = require('./match-ast');
+var match = require('../parser/match-ast');
 var variable = match.variable;
 
 operators.infixOperator = function (operator, translateExpression) {
