@@ -11,13 +11,13 @@ var list = ast.list;
 var translateAst = require('../translation/translate-ast');
 var variable = translateAst.variable;
 
-var translateExpression = function (translationState, parsedExpression) {
-    return translateAst(translationState, parsedExpression, [
+var translateExpression = function (context, parsedExpression) {
+    return translateAst(context, parsedExpression, [
             list(atom('lambda'), variable('arguments', 'list'), variable('expression')),
-                (translationState, variables) => {
+                (context, variables) => {
                     var argumentList = functions.argumentList(variables.get('arguments'));
-                    translationState = translateExpression(translationState, variables.get('expression'));
-                    return state.setExpression(translationState, '(|' + argumentList + '| ' + state.expression(translationState) + ')');
+                    context = translateExpression(context, variables.get('expression'));
+                    return state.setExpression(context, '(|' + argumentList + '| ' + state.expression(context) + ')');
                 },
         ]
         .concat(operators.infixOperators(translateExpression))

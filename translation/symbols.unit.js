@@ -9,17 +9,17 @@ var list = ast.list;
 
 var input, result;
 
-var fakeExpressionTranslator = function (translationState, parsedExpression) {
+var fakeExpressionTranslator = function (context, parsedExpression) {
     // Do nothing.
     return parsedExpression;
 };
 
 var translate = function (parsedExpression) {
-    var translationState = translateAst(state.new(), parsedExpression,
+    var context = translateAst(state.new(), parsedExpression,
         symbols.atom(fakeExpressionTranslator)
     );
 
-    return state.expression(translationState);
+    return state.expression(context);
 };
 
 describe('Symbols', function () {

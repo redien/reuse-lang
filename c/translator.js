@@ -11,20 +11,20 @@ var list = ast.list;
 var translateAst = require('../translation/translate-ast');
 var variable = translateAst.variable;
 
-var translateExpression = function (translationState, parsedExpression) {
-    return translateAst(translationState, parsedExpression, [
+var translateExpression = function (context, parsedExpression) {
+    return translateAst(context, parsedExpression, [
             list(atom('lambda'), variable('arguments', 'list'), variable('expression')),
-                (translationState, variables) => {
+                (context, variables) => {
                     var argumentList = functions.argumentList(variables.get('arguments'));
-                    translationState = translateExpression(translationState, variables.get('expression'));
+                    context = translateExpression(context, variables.get('expression'));
 
-                    var id = state.lambdaId(translationState);
-                    translationState = state.incrementLambdaId(translationState);
+                    var id = state.lambdaId(context);
+                    context = state.incrementLambdaId(context);
 
-                    var functionDefinition = 'int reuse_gen_lambda' + id + '(' + argumentList + ') { return ' + state.expression(translationState) + '; }\n';
+                    var functionDefinition = 'int reuse_gen_lambda' + id + '(' + argumentList + ') { return ' + state.expression(context) + '; }\n';
 
-                    translationState = state.setExpression(translationState, 'reuse_gen_lambda' + id);
-                    return state.addDefinition(translationState, functionDefinition);
+                    context = state.setExpression(context, 'reuse_gen_lambda' + id);
+                    return state.addDefinition(context, functionDefinition);
                 },
         ]
         .concat(operators.infixOperators(translateExpression))
@@ -34,6 +34,6 @@ var translateExpression = function (translationState, parsedExpression) {
 };
 
 module.exports.translate = function (parsedExpression) {
-    var translationState = translateExpression(state.new(), parsedExpression);
-    return state.definitions(translationState) + 'int expression() { return ' + state.expression(translationState) + '; }';
+    var context = translateExpression(state.new(), parsedExpression);
+    return state.definitions(context) + 'int expression() { return ' + state.expression(context) + '; }';
 };

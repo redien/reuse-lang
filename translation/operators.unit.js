@@ -9,22 +9,22 @@ var list = ast.list;
 
 var input, result;
 
-var fakeExpressionTranslator = function (translationState, parsedExpression) {
+var fakeExpressionTranslator = function (context, parsedExpression) {
     if (ast.isAtom(parsedExpression)) {
-        return state.setExpression(translationState, ast.atomValue(parsedExpression));
+        return state.setExpression(context, ast.atomValue(parsedExpression));
     } else {
         // When we get something other than an atom, we assume it's an infix operator
         // This allows nested operators to be tested
-        return state.setExpression(translationState, translate(parsedExpression));
+        return state.setExpression(context, translate(parsedExpression));
     }
 };
 
 var translate = function (parsedExpression) {
-    var translationState = translateAst(state.new(), parsedExpression,
+    var context = translateAst(state.new(), parsedExpression,
         operators.infixOperators(fakeExpressionTranslator)
     );
 
-    return state.expression(translationState);
+    return state.expression(context);
 };
 
 describe('Integer arithmetic', function () {

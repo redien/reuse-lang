@@ -11,19 +11,19 @@ var translateAst = require('../translation/translate-ast');
 var variable = translateAst.variable;
 
 operators.infixOperator = function (operator, translateExpression) {
-    return (translationState, variables) => {
+    return (context, variables) => {
         var nestFirst = ast.isList(variables.get('a'));
         var nestSecond = ast.isList(variables.get('b'));
 
-        var first = translateExpression(translationState, variables.get('a'));
+        var first = translateExpression(context, variables.get('a'));
         var second = translateExpression(first, variables.get('b'));
-        translationState = second;
+        context = second;
 
         var expression = nestFirst ? '(' + state.expression(first) + ')' : state.expression(first);
         expression += ' ' + operator + ' ';
         expression += nestSecond ? '(' + state.expression(second) + ')' : state.expression(second);
 
-        return state.setExpression(translationState, expression);
+        return state.setExpression(context, expression);
     };
 };
 

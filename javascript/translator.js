@@ -12,19 +12,19 @@ var translateAst = require('../translation/translate-ast');
 var variable = translateAst.variable;
 
 var dropDecimals = function (operatorTranslator) {
-    return (translationState, variables) => {
-        translationState = operatorTranslator(translationState, variables);
-        return state.setExpression(translationState, 'Math.floor(' + state.expression(translationState) + ')');
+    return (context, variables) => {
+        context = operatorTranslator(context, variables);
+        return state.setExpression(context, 'Math.floor(' + state.expression(context) + ')');
     };
 };
 
-var translateExpression = function (translationState, parsedExpression) {
-    return translateAst(translationState, parsedExpression, [
+var translateExpression = function (context, parsedExpression) {
+    return translateAst(context, parsedExpression, [
             list(atom('lambda'), variable('arguments', 'list'), variable('expression')),
-                (translationState, variables) => {
+                (context, variables) => {
                     var argumentList = functions.argumentList(variables.get('arguments'));
-                    translationState = translateExpression(translationState, variables.get('expression'));
-                    return state.setExpression(translationState, '((' + argumentList + ') => ' + state.expression(translationState) + ')');
+                    context = translateExpression(context, variables.get('expression'));
+                    return state.setExpression(context, '((' + argumentList + ') => ' + state.expression(context) + ')');
                 },
 
             // Overrides division operator to round off decimal points
