@@ -14,6 +14,7 @@ var stubExpressionTranslator = function (translationState, parsedExpression) {
         return state.setExpression(translationState, ast.atomValue(parsedExpression));
     } else {
         // When we get something other than an atom, we assume it's a function application
+        // This allows nested function application to be tested
         return state.setExpression(translationState, translate(parsedExpression));
     }
 };
