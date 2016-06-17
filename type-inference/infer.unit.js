@@ -21,7 +21,7 @@ describe('Type inference', function () {
     it('should return the type of a symbol', function () {
         var input = atom('a');
         var scope = Immutable.Map();
-        scope = scope.set('a', {name: 'int'});
+        scope = scope.set('a', type.primitiveType('int'));
 
         var result = infer(input, scope);
 
