@@ -11,6 +11,10 @@ module.exports.stepDefinitions = function (language, suffix, programBuilder, com
     var evaluateExpression = module.exports.compileAndEvaluateExpression(suffix, programBuilder, commandBuilder);
 
     return function () {
+        this.Given(/^PENDING$/, function () {
+            return Promise.resolve('pending');
+        });
+
         this.Given(/^an expression "([^"]*)"$/, function (expression) {
             var result = reuse.translate(language, expression);
             this.translationError = result.error;
