@@ -23,7 +23,7 @@ state.incrementLambdaId = function (state) {
     var id = state.get('lambdaId');
     id += 1;
     return state.set('lambdaId', id);
-}
+};
 
 state.expression = function (state) {
     return state.get('expression');

@@ -5,24 +5,24 @@ Feature: Integer Arithmetic
     So that I can do basic arithmetic
 
     Scenario Outline: A simple expression
-        Given an expression "(<operator> <a> <b>)"
+        Given an expression "(<operator> <left-hand> <right-hand>)"
         When I evaluate it
         Then I should get "<result>"
 
         Examples:
-            | operator |  a  |  b  | result |
-            |    +     |  1  |  2  |    3   |
-            |    +     |  1  |  3  |    4   |
-            |    +     | 32  | 10  |   42   |
-            |    *     |  1  |  2  |    2   |
-            |    *     |  1  |  3  |    3   |
-            |    *     | 32  | 10  |  320   |
-            |    -     |  1  |  2  |   -1   |
-            |    -     |  1  |  3  |   -2   |
-            |    -     | 32  | 10  |   22   |
-            |    /     |  1  |  2  |    0   |
-            |    /     |  3  |  1  |    3   |
-            |    /     | 32  | 10  |    3   |
+            | operator | left-hand | right-hand | result |
+            |    +     |     1     |      2     |    3   |
+            |    +     |     1     |      3     |    4   |
+            |    +     |    32     |     10     |   42   |
+            |    *     |     1     |      2     |    2   |
+            |    *     |     1     |      3     |    3   |
+            |    *     |    32     |     10     |  320   |
+            |    -     |     1     |      2     |   -1   |
+            |    -     |     1     |      3     |   -2   |
+            |    -     |    32     |     10     |   22   |
+            |    /     |     1     |      2     |    0   |
+            |    /     |     3     |      1     |    3   |
+            |    /     |    32     |     10     |    3   |
 
     Scenario: A nested expression
         Given an expression "(+ 1 (* 2 3))"
