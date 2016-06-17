@@ -8,7 +8,7 @@ var list = ast.list;
 var match = require('./match-ast');
 var variable = match.variable;
 
-module.exports.application = function (translate) {
+module.exports.application = function (translateExpression) {
     return [
         variable('list', 'list'),
             (translationState, variables) => {
@@ -20,12 +20,12 @@ module.exports.application = function (translate) {
                     if (index > 1) {
                         argumentList += ', ';
                     }
-                    translationState = translate(translationState, ast.listChild(list, index));
+                    translationState = translateExpression(translationState, ast.listChild(list, index));
                     argumentList += state.expression(translationState);
                 }
                 argumentList += ')';
 
-                translationState = translate(translationState, ast.listChild(list, 0));
+                translationState = translateExpression(translationState, ast.listChild(list, 0));
 
                 return state.setExpression(translationState, state.expression(translationState) + argumentList);
             },

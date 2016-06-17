@@ -13,8 +13,8 @@ var variable = match.variable;
 
 var dropDecimals = function (operatorTranslator) {
     return (translationState, variables) => {
-        var expression = operatorTranslator(translationState, variables);
-        return state.setExpression(expression, 'Math.floor(' + state.expression(expression) + ')');
+        translationState = operatorTranslator(translationState, variables);
+        return state.setExpression(translationState, 'Math.floor(' + state.expression(translationState) + ')');
     };
 };
 
@@ -23,8 +23,8 @@ var translateExpression = function (translationState, parsedExpression) {
             list(atom('lambda'), variable('arguments', 'list'), variable('expression')),
                 (translationState, variables) => {
                     var argumentList = functions.argumentList(variables.get('arguments'));
-                    var expression = translateExpression(translationState, variables.get('expression'));
-                    return state.setExpression(expression, '((' + argumentList + ') => ' + state.expression(expression) + ')');
+                    translationState = translateExpression(translationState, variables.get('expression'));
+                    return state.setExpression(translationState, '((' + argumentList + ') => ' + state.expression(translationState) + ')');
                 },
 
             // Overrides division operator to round off decimal points

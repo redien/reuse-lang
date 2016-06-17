@@ -16,8 +16,8 @@ var translateExpression = function (translationState, parsedExpression) {
             list(atom('lambda'), variable('arguments', 'list'), variable('expression')),
                 (translationState, variables) => {
                     var argumentList = functions.argumentList(variables.get('arguments'));
-                    var expression = translateExpression(translationState, variables.get('expression'));
-                    return state.setExpression(expression, '(|' + argumentList + '| ' + state.expression(expression) + ')');
+                    translationState = translateExpression(translationState, variables.get('expression'));
+                    return state.setExpression(translationState, '(|' + argumentList + '| ' + state.expression(translationState) + ')');
                 },
         ]
         .concat(operators.infixOperators(translateExpression))
