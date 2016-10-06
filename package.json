@@ -15,7 +15,7 @@
   },
   "scripts": {
     "unit-test": "mocha \"**/*.unit.js\"",
-    "acceptance-test": "cucumberjs -r features/step_definitions/javascript.js && cucumberjs -r features/step_definitions/rust.js && cucumberjs -r features/step_definitions/c.js",
+    "acceptance-test": "echo && echo Language: Javascript && echo && cucumberjs -r features/step_definitions/javascript.js && echo && echo Language: Rust && echo && cucumberjs -r features/step_definitions/rust.js && echo && echo Language: C && echo && cucumberjs -r features/step_definitions/c.js",
     "test": "npm run-script unit-test && npm run-script acceptance-test"
   },
   "repository": {
