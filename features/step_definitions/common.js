@@ -60,7 +60,7 @@ module.exports.compileAndEvaluateExpression = function (suffix, programBuilder, 
         return new Promise(function (resolve, reject) {
             try {
                 var program = programBuilder(expression);
-                var sourcePath = temp.path({suffix: suffix});
+                var sourcePath = temp.path().replace('.', '_') + suffix;
                 var executablePath = temp.path();
 
                 fs.writeFileSync(sourcePath, program);
