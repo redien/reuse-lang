@@ -1,5 +1,6 @@
 
 var ast = require('./ast');
+var Immutable = require('immutable');
 
 var SPACE_CHARACTER = ' ';
 var START_PARENTHESIS_CHARACTER = '(';
@@ -43,21 +44,34 @@ var parseList = function (input, index) {
         return parenthesisErrorAt(index);
     }
 
-    return {ast: expression.ast, nextIndex: index + 1};
+    return {
+        ast: expression.ast,
+        nextIndex: index + 1,
+        locationInformation: expression.locationInformation
+    };
 };
 
 var parseListBody = function (input, index) {
     var list = ast.list();
+    var locationInformation = Immutable.List();
+    var expressionStartIndex = index - 1;
 
     while (index < input.length && !nextCharacterIs(END_PARENTHESIS_CHARACTER, input, index)) {
         var expression = parseExpression(input, index);
         if (expression.error) { return expression; }
 
         list = ast.listPush(list, expression.ast);
+        locationInformation = locationInformation.push(expression.locationInformation);
         index = skipWhitespace(input, expression.nextIndex);
     }
 
-    return {ast: list, nextIndex: index};
+    locationInformation.range = [expressionStartIndex, index - expressionStartIndex + 1];
+
+    return {
+        ast: list,
+        nextIndex: index,
+        locationInformation: locationInformation
+    };
 };
 
 var parseAtom = function (input, index) {
@@ -68,7 +82,11 @@ var parseAtom = function (input, index) {
         index += 1;
     }
 
-    return {ast: ast.atom(input.substring(start, index)), nextIndex: index};
+    return {
+        ast: ast.atom(input.substring(start, index)),
+        nextIndex: index,
+        locationInformation: {range: [start, index - start]}
+    };
 };
 
 module.exports.parse = function (input) {

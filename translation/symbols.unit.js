@@ -15,7 +15,7 @@ var fakeExpressionTranslator = function (context, parsedExpression) {
 };
 
 var translate = function (parsedExpression) {
-    var context = translateAst(state.new(), parsedExpression,
+    var context = translateAst(state.new(), parsedExpression, null,
         symbols.atom(fakeExpressionTranslator)
     );
 

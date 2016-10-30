@@ -10,12 +10,11 @@ var translate = function (language, expression) {
     }
 
     var expression = ast.listChild(parseResult.ast, 0);
-
-    var inferResult = infer(expression);
+    var locationInformation = parseResult.locationInformation.get(0);
 
     return {
         error: null,
-        source: require('../' + language + '/translator').translate(expression)
+        source: require('../' + language + '/translator').translate(expression, locationInformation)
     };
 };
 module.exports.translate = translate;

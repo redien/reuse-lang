@@ -6,8 +6,10 @@ var programBuilder = function (translatedExpression) {
     use std::cmp::max as max;
     use std::cmp::min as min;
 
+    ${translatedExpression}
+
     fn main() {
-        print!("{}", (${translatedExpression}));
+        print!("{}", expression());
     }
     `;
 };

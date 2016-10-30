@@ -11,6 +11,11 @@ var parseSingleExpression = function (input) {
     return ast.listChild(result.ast, 0);
 };
 
+var parseLocationInformation = function (input) {
+    var result = parser.parse(input);
+    return result.locationInformation.get(0);
+};
+
 var parseAndExpectError = function (input) {
     var result = parser.parse(input);
     result.error.should.be.an.instanceOf(Error);
@@ -144,23 +149,77 @@ describe('parser.parse', function () {
         ast.atomValue(ast.listChild(expression, 0)).should.equal('a');
     });
 
-    it('should throw an "Unbalanced parenthesis" error given too few end parenthesis', function () {
-        var input = '(a b c';
+    // TODO: Replace column/row information with index as column/row can be
+    // calculated given the input string and an index.
+    describe('Errors', function () {
+        it('should throw an "Unbalanced parenthesis" error given too few end parenthesis', function () {
+            var input = '(a b c';
 
-        var error = parseAndExpectError(input);
+            var error = parseAndExpectError(input);
 
-        error.message.should.equal('Unbalanced parenthesis');
-        error.column.should.equal(6);
-        error.line.should.equal(0);
+            error.message.should.equal('Unbalanced parenthesis');
+            error.column.should.equal(6);
+            error.line.should.equal(0);
+        });
+
+        it('should throw an "Unbalanced parenthesis" error given too few start parenthesis', function () {
+            var input = 'a b c)';
+
+            var error = parseAndExpectError(input);
+
+            error.message.should.equal('Unbalanced parenthesis');
+            error.column.should.equal(5);
+            error.line.should.equal(0);
+        });
     });
 
-    it('should throw an "Unbalanced parenthesis" error given too few start parenthesis', function () {
-        var input = 'a b c)';
+    describe('Location information', function () {
+        it('should return range for atom', function () {
+            var input = 'a';
 
-        var error = parseAndExpectError(input);
+            var context = parseLocationInformation(input);
 
-        error.message.should.equal('Unbalanced parenthesis');
-        error.column.should.equal(5);
-        error.line.should.equal(0);
+            context.range.should.deepEqual([0, 1]);
+        });
+
+        it('should return range for long atom', function () {
+            var input = 'abcdefg';
+
+            var context = parseLocationInformation(input);
+
+            context.range.should.deepEqual([0, 7]);
+        });
+
+        it('should return range for list', function () {
+            var input = '(a)';
+
+            var context = parseLocationInformation(input);
+
+            context.range.should.deepEqual([0, 3]);
+        });
+
+        it('should return range for atom in list', function () {
+            var input = '(a)';
+
+            var context = parseLocationInformation(input);
+
+            context.get(0).range.should.deepEqual([1, 1]);
+        });
+
+        it('should return range for deeply nested atom', function () {
+            var input = '(a (b ((c) d e)))';
+
+            var context = parseLocationInformation(input);
+
+            context.get(1).get(1).get(0).get(0).range.should.deepEqual([8, 1]);
+        });
+
+        it('should return range for deeply nested list', function () {
+            var input = '(a (b ((c) d e)))';
+
+            var context = parseLocationInformation(input);
+
+            context.get(1).get(1).range.should.deepEqual([6, 9]);
+        });
     });
 });

@@ -1,54 +1,206 @@
 
 var Immutable = require('immutable');
+
 var ast = require('../parser/ast');
-var type = require('./type');
+var Type = require('./type');
 
-var isInteger = function (atom) {
-    return !isNaN(ast.atomValue(atom));
+module.exports.type = function (expression, constraints) {
+    var constrainResult = module.exports.constraints(expression, constraints);
+    var substitutions = module.exports.unify(constrainResult.constraints);
+    return module.exports.substitute(constrainResult.type, substitutions);
 };
 
-var isLambdaExpression = function (expression) {
-    return ast.isAtom(expression) && ast.atomValue(expression) === 'lambda';
+var tryFindingTypeOfVariable = function (variable, constraints) {
+    for (var i = 0; i < constraints.size; ++i) {
+        var constraint = constraints.get(i);
+
+        if (constraint[0].isVariable && constraint[0].name === ast.atomValue(variable)) {
+            return constraint[1];
+        }
+    }
+
+    return Type.variable(ast.atomValue(variable));
 };
 
-var infer = function (parsedExpression, scope) {
-    if (ast.isAtom(parsedExpression) && isInteger(ast.atomValue(parsedExpression))) {
-        return type.constant();
+var isNumeric = function (name) {
+    return name.match(/^\d+$/) !== null;
+};
 
-    } else if (ast.isAtom(parsedExpression)) {
-        var typeFromScope = scope.get(ast.atomValue(parsedExpression));
-        return type.symbol(typeFromScope);
+var largestIdInType = function (largestId, type) {
+    if (type.isVariable && type.name.substr(0, 1) === ' ') {
+        var id = parseInt(type.name.substr(1), 10);
+        return id > largestId ? id : largestId;
+
+    } else if (type.isLambda) {
+        largestId = largestIdInType(largestId, type.returnType);
+        return type.parameterTypes.reduce(largestIdInType, largestId);
 
     } else {
-        var func = ast.listChild(parsedExpression, 0);
-
-        if (isLambdaExpression(func)) {
-            var expression = ast.listChild(parsedExpression, 2);
-            var expressionResult = infer(expression, scope);
-            return type.lambda(Immutable.List(), expressionResult.type, expressionResult);
-
-        } else {
-            var expressions = Immutable.List();
-            for (var i = 0; i < ast.listSize(parsedExpression); i++) {
-                var expression = ast.listChild(parsedExpression, i);
-                expressions = expressions.push(infer(expression, scope));
-            }
-
-            return type.application(type.expressionType(type.type(expressions.get(0))), expressions);
-        }
+        return largestId;
     }
 };
 
-var specialForms = Immutable.Map({
-    '+': type.lambda(Immutable.List.of(type.constant().type, type.constant().type), type.constant().type).type,
-    '-': type.lambda(Immutable.List.of(type.constant().type, type.constant().type), type.constant().type).type,
-    '*': type.lambda(Immutable.List.of(type.constant().type, type.constant().type), type.constant().type).type,
-    '/': type.lambda(Immutable.List.of(type.constant().type, type.constant().type), type.constant().type).type,
-    'max': type.lambda(Immutable.List.of(type.constant().type, type.constant().type), type.constant().type).type,
-    'min': type.lambda(Immutable.List.of(type.constant().type, type.constant().type), type.constant().type).type,
-});
+var findUnusedVariableId = function (constraints) {
+    return constraints.reduce(function (largestId, constraint) {
+        largestId = largestIdInType(largestId, constraint[0]);
+        return largestIdInType(largestId, constraint[1]);
+    }, 0) + 1;
+};
 
-module.exports = function (parsedExpression, scope) {
-    scope = specialForms.merge(scope);
-    return infer(parsedExpression, scope);
+var anonymousType = function (constraints) {
+    var id = findUnusedVariableId(constraints);
+    // User-defined types cannot contain spaces.
+    // Having space as the first character avoids name collisions.
+    return Type.variable(' ' + id);
+};
+
+var constraintsForLambda = function (expression, constraints) {
+    var parameters = ast.listChild(expression, 1);
+
+    var parameterTypes = Immutable.List();
+    for (var index = 0; index < ast.listSize(parameters); ++index) {
+        var parameterName = ast.atomValue(ast.listChild(parameters, index));
+        var parameterType = anonymousType(constraints);
+
+        constraints = constraints.push([Type.variable(parameterName), parameterType]);
+        parameterTypes = parameterTypes.push(parameterType);
+    }
+
+    var body = ast.listChild(expression, 2);
+    var result = _constraints(body, constraints);
+    var returnType = result.type;
+
+    return {
+        type: (returnType.isError) ? returnType : Type.lambda(parameterTypes, returnType),
+        constraints: result.constraints
+    };
+};
+
+var constraintsForApplication = function (expression, constraints) {
+    var resultConstraints = Immutable.List();
+
+    var lambda = ast.listChild(expression, 0);
+    var result = _constraints(lambda, constraints);
+    var lambdaType = result.type;
+    resultConstraints = resultConstraints.concat(result.constraints);
+
+    var argumentTypes = Immutable.List();
+    for (var index = 1; index < ast.listSize(expression); ++index) {
+        var argument = ast.listChild(expression, index);
+        var result = _constraints(argument, constraints);
+
+        var argumentType = result.type;
+        argumentTypes = argumentTypes.push(argumentType);
+        resultConstraints = resultConstraints.concat(result.constraints);
+    }
+
+    var returnType = anonymousType(constraints);
+
+    resultConstraints = resultConstraints.push([lambdaType, Type.lambda(argumentTypes, returnType)]);
+
+    return {
+        type: returnType,
+        constraints: resultConstraints
+    };
+};
+
+var _constraints = function _constraints (expression, constraints) {
+    if (ast.isList(expression)) {
+        var firstExpression = ast.listChild(expression, 0);
+
+        if (ast.isAtom(firstExpression) && ast.atomValue(firstExpression) === 'lambda') {
+            return constraintsForLambda(expression, constraints);
+        } else {
+            return constraintsForApplication(expression, constraints);
+        }
+
+    } else if (isNumeric(ast.atomValue(expression))) {
+        return {
+            type: Type.constant('integer'),
+            constraints: Immutable.List()
+        };
+
+    } else {
+        return {
+            type: tryFindingTypeOfVariable(expression, constraints),
+            constraints: Immutable.List()
+        };
+    }
+};
+
+module.exports.constraints = _constraints;
+
+var NOT_UNIFIED = 'not unified';
+module.exports.NOT_UNIFIED = NOT_UNIFIED;
+
+var unify = function (constraints, substitutions) {
+    while (constraints.size > 0) {
+        var constraint = constraints.get(0);
+        var first = constraint[0];
+        var second = constraint[1];
+        constraints = constraints.delete(0);
+
+        if (first.isVariable) {
+            if (!second.isVariable || first.name !== second.name) {
+                var constraintAsSubstitution = Immutable.List.of(constraint);
+
+                var substituteRightHand = function (substitution) {
+                    return [substitution[0], module.exports.substitute(substitution[1], constraintAsSubstitution)];
+                };
+                var substituteBoth = function (substitution) {
+                    return [module.exports.substitute(substitution[0], constraintAsSubstitution), module.exports.substitute(substitution[1], constraintAsSubstitution)];
+                };
+
+                constraints = constraints.map(substituteBoth);
+                substitutions = substitutions.map(substituteRightHand);
+                substitutions = substitutions.push(constraint);
+            }
+
+        } else if (second.isVariable) {
+            constraints = constraints.push([second, first]);
+
+        } else if (first.isLambda) {
+            constraints = constraints.push([first.returnType, second.returnType]);
+            for (var parameterIndex = 0; parameterIndex < first.parameterTypes.size; ++parameterIndex) {
+                constraints = constraints.push([
+                    first.parameterTypes.get(parameterIndex),
+                    second.parameterTypes.get(parameterIndex)
+                ]);
+            }
+        } else if (first.isConstant && second.isConstant) {
+            if (first.name !== second.name) {
+                return NOT_UNIFIED;
+            }
+        }
+    }
+
+    return substitutions;
+};
+
+module.exports.unify = function (constraints) {
+    return unify(constraints, Immutable.List());
+};
+
+module.exports.substitute = function substitute (type, substitutions) {
+    if (type.isVariable) {
+        var matchingSubstitutions = substitutions.filter(function (substitution) {
+            return type.name === substitution[0].name;
+        });
+
+        if (matchingSubstitutions.size > 0) {
+            return matchingSubstitutions.first()[1];
+        } else {
+            return type;
+        }
+
+    } else if (type.isLambda) {
+        var parameterTypes = type.parameterTypes.map(function (type) {
+            return substitute(type, substitutions);
+        });
+        var returnType = substitute(type.returnType, substitutions);
+        return Type.lambda(parameterTypes, returnType);
+
+    } else {
+        return type;
+    }
 };

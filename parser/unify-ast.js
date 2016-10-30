@@ -2,58 +2,179 @@
 var Immutable = require('immutable');
 var ast = require('./ast');
 
-var NOT_UNIFIED = false;
+var NOT_UNIFIED = 'not unified';
 
-var throwOverwriteError = (prev, next) => { throw new Error(next + ' overwrites ' + prev) };
+module.exports = function (first, second, occursCheck) {
+    var state = {
+        equations: Immutable.List.of({left: first, right: second}),
+        substitutions: Immutable.List()
+    };
 
-var unifyList = function (first, second) {
-    var substitutions = Immutable.Map();
-    for (var index = 0; index < ast.listSize(first); index++) {
-        var firstChild = ast.listChild(first, index);
-        var secondChild = ast.listChild(second, index);
-
-        var unified = unifyAst(firstChild, secondChild);
-        if (unified === NOT_UNIFIED) {
-            return NOT_UNIFIED;
-        } else {
-            substitutions = substitutions.mergeWith(throwOverwriteError, unified);
-        }
+    while (state.equations.size > 0) {
+        state = unificationStep(state, occursCheck);
+        if (state === NOT_UNIFIED) { return NOT_UNIFIED; }
     }
 
-    return substitutions;
+    return convertEquationsToMap(state.substitutions);
 };
 
-var kindOf = function (expression) {
-    if (ast.isAtom(expression)) {
-        return 'atom';
-    } else {
-        return 'list';
-    }
-};
+var unificationStep = function (state, occursCheck) {
+    for (var index = 0; index < state.equations.size; ++index) {
+        var equation = state.equations.get(index);
 
-var variableKindUnifies = function (variable, expression) {
-    return variable.kind === undefined || variable.kind === kindOf(expression);
-};
-
-var unifyAst = function (first, second) {
-    if (ast.equal(first, second)) {
-        return Immutable.Map();
-
-    } else if (first.isVariable && !second.isVariable && variableKindUnifies(first, second)) {
-        return Immutable.Map.of(first.name, second);
-
-    } else if (second.isVariable && !first.isVariable && variableKindUnifies(second, first)) {
-        return Immutable.Map.of(second.name, first);
-
-    } else if (ast.isList(first) && ast.isList(second) && ast.listSize(first) === ast.listSize(second)) {
-        return unifyList(first, second);
-
-    } else {
-        return NOT_UNIFIED;
+        if      (canDelete(equation))       { return _delete(state, index); }
+        else if (canDecompose(equation))    { return decompose(state, index); }
+        else if (canEliminate(equation,
+                              occursCheck)) { return eliminate(state, index); }
+        else if (canSwap(equation))         { return swap(state, index); }
+        else                                { return NOT_UNIFIED; }
     }
 };
 
-unifyAst.variable = function (name, kind) {
+
+var canDelete = function (equation) {
+    return areEqual(equation.left, equation.right);
+};
+
+var _delete = function (state, index) {
+    return stateSet(state, state.equations.delete(index));
+};
+
+var canDecompose = function (equation) {
+    return areLists(equation.left, equation.right) &&
+           equation.left.size === equation.right.size;
+};
+
+var decompose = function (state, index) {
+    var equation = state.equations.get(index);
+    var equations = state.equations.delete(index);
+    equations = equations.concat(decomposeLists(equation.left, equation.right))
+    return stateSet(state, equations);
+};
+
+var canEliminate = function (equation, occursCheck) {
+    return equation.left.isVariable &&
+           variableTypeMatches(equation.left, equation.right) &&
+           (occursCheck === false || !occursIn(equation.left, equation.right));
+};
+
+var variableTypeMatches = function (variable, expression) {
+    return variable.kind === undefined || // Any type matches
+           variable.kind === 'atom' && ast.isAtom(expression) ||
+           variable.kind === 'list' && ast.isList(expression);
+};
+
+var occursIn = function (variable, expression) {
+    if      (areEqual(variable, expression))      { return true; }
+    else if (occursInList(variable, expression))  { return true; }
+    else                                          { return false; }
+};
+
+var eliminate = function (state, index) {
+    var equation      = state.equations.get(index);
+    var equations     = eliminateInEquations(equation.left, equation.right, state.equations.delete(index));
+    var substitutions = eliminateInEquations(equation.left, equation.right, state.substitutions).push(equation);
+    return stateSet(state, equations, substitutions);
+};
+
+var canSwap = function (equation) {
+    return equation.right.isVariable;
+};
+
+var swap = function (state, index) {
+    var equation = state.equations.get(index);
+    return stateSet(state, state.equations.set(index, {
+        left: equation.right,
+        right: equation.left
+    }));
+};
+
+
+var atomsAreEqual = function (first, second) {
+    return ast.atomValue(first) === ast.atomValue(second);
+};
+
+var listsAreEqual = function (first, second) {
+    return (first.size === second.size) &&
+           first.every(function (item, index) { return item === second.get(index) });
+};
+
+var variablesAreEqual = function (first, second) {
+    return first.name === second.name;
+};
+
+var areAtoms = function (first, second) {
+    return ast.isAtom(first) && ast.isAtom(second);
+};
+
+var areLists = function (first, second) {
+    return ast.isList(first) && ast.isList(second);
+};
+
+var areVariables = function (first, second) {
+    return first.isVariable && second.isVariable;
+};
+
+var areEqual = function (first, second) {
+    return (areAtoms(first, second) && atomsAreEqual(first, second)) ||
+           (areLists(first, second) && listsAreEqual(first, second)) ||
+           (areVariables(first, second) && variablesAreEqual(first, second));
+};
+
+
+var occursInList = function (variable, list) {
+    var occursInExpression = function (expression) {
+        return occursIn(variable, expression);
+    };
+
+    return ast.isList(list) && list.some(occursInExpression);
+};
+
+var decomposeLists = function (first, second) {
+    return ast.listMap(first, function (item, index) {
+        return {
+            left: item,
+            right: second.get(index)
+        };
+    });
+};
+
+var stateSet = function (state, equations, substitutions) {
+    return {
+        equations: equations,
+        substitutions: substitutions || state.substitutions
+    };
+};
+
+var eliminateInList = function (variable, value, list) {
+    return ast.listMap(list, function (expression) {
+        return eliminateInExpression(variable, value, expression);
+    });
+};
+
+var eliminateInExpression = function (variable, value, expression) {
+    if      (ast.isList(expression))         { return eliminateInList(variable, value, expression); }
+    else if (areEqual(variable, expression)) { return value; }
+    else                                     { return expression; }
+};
+
+var eliminateInEquations = function (variable, value, equations) {
+    return equations.map(function (equation) {
+        return {
+            left:  eliminateInExpression(variable, value, equation.left),
+            right: eliminateInExpression(variable, value, equation.right)
+        };
+    });
+};
+
+var convertEquationsToMap = function (equations) {
+    return equations.reduce(function (map, equation) {
+        return map.set(equation.left.name, equation.right);
+    }, Immutable.Map());
+};
+
+
+module.exports.variable = function (name, kind) {
     return {
         isVariable: true,
         name: name,
@@ -61,6 +182,4 @@ unifyAst.variable = function (name, kind) {
     };
 };
 
-unifyAst.NOT_UNIFIED = NOT_UNIFIED;
-
-module.exports = unifyAst;
+module.exports.NOT_UNIFIED = NOT_UNIFIED;

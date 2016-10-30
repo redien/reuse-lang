@@ -1,6 +1,9 @@
 
+var Immutable = require('immutable');
+
 var state = require('../translation/state');
 var functions = require('../translation/functions');
+var math = require('../translation/math');
 var operators = require('../translation/operators');
 var symbols = require('../translation/symbols');
 
@@ -11,29 +14,88 @@ var list = ast.list;
 var translateAst = require('../translation/translate-ast');
 var variable = translateAst.variable;
 
-var translateExpression = function (context, parsedExpression) {
-    return translateAst(context, parsedExpression, [
-            list(atom('lambda'), variable('arguments', 'list'), variable('expression')),
-                (context, variables) => {
-                    var argumentList = functions.argumentList(variables.get('arguments'));
-                    context = translateExpression(context, variables.get('expression'));
+var infer = require('../type-inference/infer');
+var Type = require('../type-inference/type');
 
-                    var id = state.lambdaId(context);
-                    context = state.incrementLambdaId(context);
+var typeLookupTable = {
+    'integer': 'int'
+};
 
-                    var functionDefinition = 'int reuse_gen_lambda' + id + '(' + argumentList + ') { return ' + state.expression(context) + '; }\n';
+var translateType = function translateType (context, type) {
+    if (type.isLambda) {
+        var typedef = 'typedef ';
+        context = translateType(context, type.returnType);
+        typedef += state.expression(context) + ' ';
 
-                    context = state.setExpression(context, 'reuse_gen_lambda' + id);
-                    return state.addDefinition(context, functionDefinition);
-                },
-        ]
-        .concat(operators.infixOperators(translateExpression))
-        .concat(functions.application(translateExpression))
-        .concat(symbols.atom(translateExpression))
+        context = state.incrementUniqueId(context);
+        var name = 'reuse_gen_type' + state.uniqueId(context);
+
+        typedef += '(*' + name + ')(';
+        for (var index = 0; index < type.parameterTypes.size; ++index) {
+            context = translateType(context, type.parameterTypes.get(index));
+            if (index > 0) {
+                typedef += ', ';
+            }
+            typedef += state.expression(context);
+        }
+        typedef += ');\n';
+
+        context = state.addDefinition(context, Immutable.List.of(typedef));
+        return state.setExpression(context, name);
+    } else {
+        if (type.name.substr(0, 1) == ' ') {
+            return state.setExpression(context, 'anonymous_type_' + type.name.substr(1));
+        }
+        return state.setExpression(context, typeLookupTable[type.name]);
+    }
+};
+
+var specializeLambda = function (context, lambda, locationInformation, type, constraints) {
+    context = state.incrementUniqueId(context);
+    var id = 'reuse_gen_lambda' + state.uniqueId(context);
+
+    var arguments = ast.listChild(lambda, 1);
+    var body = ast.listChild(lambda, 2);
+
+    var parts = Immutable.List();
+
+    context = translateType(context, type.returnType);
+    parts = parts.push(state.expression(context));
+    parts = parts.push(' ' + id + '(');
+    for (var index = 0; index < ast.listSize(arguments); ++index) {
+        var argument = ast.listChild(arguments, index);
+        if (index > 0) {
+            parts = parts.push(', ');
+        }
+        context = translateType(context, type.parameterTypes.get(index));
+        parts = parts.push(state.expression(context));
+        parts = parts.push(' ');
+        parts = parts.push(ast.atomValue(argument));
+    }
+    parts = parts.push(') { return ');
+    context = translateExpression(context, body, locationInformation ? locationInformation.get(2) : null, type.returnType, constraints);
+    parts = parts.push(state.expression(context));
+    parts = parts.push('; }\n');
+
+    context = state.setExpression(context, id);
+    return state.addDefinition(context, parts);
+};
+
+var translateExpression = function (context, expression, locationInformation, type, constraints) {
+    var translateExpressionWithoutType = function (context, expression, locationInformation) {
+        return translateExpression(context, expression, locationInformation, type, constraints);
+    };
+    return translateAst(context, expression, locationInformation, []
+        .concat(operators.infixOperators(translateExpressionWithoutType))
+        .concat(math.functions(translateExpressionWithoutType))
+        .concat(functions.application(translateExpression, type, constraints, specializeLambda, true))
+        .concat(symbols.atom(translateExpressionWithoutType))
     );
 };
 
-module.exports.translate = function (parsedExpression) {
-    var context = translateExpression(state.new(), parsedExpression);
+module.exports.translate = function (expression, locationInformation) {
+    var expressionType = Type.constant('integer');
+    var context = translateExpression(state.new(), expression, locationInformation, expressionType, operators.constraints);
+
     return state.definitions(context) + 'int expression() { return ' + state.expression(context) + '; }';
 };

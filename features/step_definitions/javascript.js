@@ -5,7 +5,10 @@ var programBuilder = function (translatedExpression) {
     return `
     var max = Math.max;
     var min = Math.min;
-    process.stdout.write((${translatedExpression}).toString());
+
+    ${translatedExpression}
+
+    process.stdout.write(expression.toString());
     `;
 };
 

@@ -1,4 +1,7 @@
 
+var Immutable = require('immutable');
+var Type = require('../type-inference/type');
+
 var should = require('should');
 var functions = require('./functions');
 var state = require('./state');
@@ -11,17 +14,17 @@ var input, result;
 
 var fakeExpressionTranslator = function (context, parsedExpression) {
     if (ast.isAtom(parsedExpression)) {
-        return state.setExpression(context, ast.atomValue(parsedExpression));
+        return state.setExpression(context, Immutable.List.of(ast.atomValue(parsedExpression)));
     } else {
         // When we get something other than an atom, we assume it's a function application
         // This allows nested function application to be tested
-        return state.setExpression(context, translate(parsedExpression));
+        return state.setExpression(context, Immutable.List.of(translate(parsedExpression)));
     }
 };
 
-var translate = function (parsedExpression) {
-    var context = translateAst(state.new(), parsedExpression,
-        functions.application(fakeExpressionTranslator)
+var translate = function (parsedExpression, type, constraints) {
+    var context = translateAst(state.new(), parsedExpression, null,
+        functions.application(fakeExpressionTranslator, type, constraints, function (context) { return context; })
     );
 
     return state.expression(context);
@@ -31,7 +34,9 @@ describe('Function application', function () {
     it('should translate (f) into f()', function () {
         input = list(atom('f'));
 
-        result = translate(input);
+        result = translate(input, Type.constant('integer'), Immutable.List.of(
+            [Type.variable('f'), Type.lambda(Immutable.List(), Type.constant('integer'))]
+        ));
 
         result.should.equal('f()');
     });
@@ -39,7 +44,10 @@ describe('Function application', function () {
     it('should translate (f a) into f(a)', function () {
         input = list(atom('f'), atom('a'));
 
-        result = translate(input);
+        result = translate(input, Type.constant('integer'), Immutable.List.of(
+            [Type.variable('f'), Type.lambda(Immutable.List.of(Type.constant('integer')), Type.constant('integer'))],
+            [Type.variable('a'), Type.constant('integer')]
+        ));
 
         result.should.equal('f(a)');
     });
@@ -47,7 +55,14 @@ describe('Function application', function () {
     it('should translate (f a b) into f(a, b)', function () {
         input = list(atom('f'), atom('a'), atom('b'));
 
-        result = translate(input);
+        result = translate(input, Type.constant('integer'), Immutable.List.of(
+            [Type.variable('f'), Type.lambda(Immutable.List.of(
+                    Type.constant('integer'),
+                    Type.constant('integer')
+                ), Type.constant('integer'))],
+            [Type.variable('a'), Type.constant('integer')],
+            [Type.variable('b'), Type.constant('integer')]
+        ));
 
         result.should.equal('f(a, b)');
     });
@@ -55,24 +70,37 @@ describe('Function application', function () {
     it('should translate (f a b c) into f(a, b, c)', function () {
         input = list(atom('f'), atom('a'), atom('b'), atom('c'));
 
-        result = translate(input);
+        result = translate(input, Type.constant('integer'), Immutable.List.of(
+            [Type.variable('f'), Type.lambda(Immutable.List.of(
+                    Type.constant('integer'),
+                    Type.constant('integer'),
+                    Type.constant('integer')
+                ), Type.constant('integer'))],
+            [Type.variable('a'), Type.constant('integer')],
+            [Type.variable('b'), Type.constant('integer')],
+            [Type.variable('c'), Type.constant('integer')]
+        ));
 
         result.should.equal('f(a, b, c)');
     });
 
-    it('should translate ((f)) into f()()', function () {
+    xit('should translate ((f)) into f()()', function () {
         input = list(list(atom('f')));
 
-        result = translate(input);
+        result = translate(input, Type.constant('integer'), Immutable.List.of(
+            [Type.variable('f'), Type.lambda(Immutable.List(), Type.lambda(Immutable.List(), Type.constant('integer')))]
+        ));
 
         result.should.equal('f()()');
     });
 
-    it('should translate (f (f)) into f(f())', function () {
-        input = list(atom('f'), list(atom('f')));
+    xit('should translate (f (f 1)) into f(f(1))', function () {
+        input = list(atom('f'), list(atom('f'), atom('1')));
 
-        result = translate(input);
+        result = translate(input, Type.constant('integer'), Immutable.List.of(
+            [Type.variable('f'), Type.lambda(Immutable.List.of(Type.constant('integer')), Type.constant('integer'))]
+        ));
 
-        result.should.equal('f(f())');
+        result.should.equal('f(f(1))');
     });
 });

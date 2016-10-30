@@ -1,4 +1,6 @@
 
+var Immutable = require('immutable');
+
 var should = require('should');
 var operators = require('./operators');
 var state = require('./state');
@@ -11,16 +13,16 @@ var input, result;
 
 var fakeExpressionTranslator = function (context, parsedExpression) {
     if (ast.isAtom(parsedExpression)) {
-        return state.setExpression(context, ast.atomValue(parsedExpression));
+        return state.setExpression(context, Immutable.List.of(ast.atomValue(parsedExpression)));
     } else {
         // When we get something other than an atom, we assume it's an infix operator
         // This allows nested operators to be tested
-        return state.setExpression(context, translate(parsedExpression));
+        return state.setExpression(context, Immutable.List.of(translate(parsedExpression)));
     }
 };
 
 var translate = function (parsedExpression) {
-    var context = translateAst(state.new(), parsedExpression,
+    var context = translateAst(state.new(), parsedExpression, null,
         operators.infixOperators(fakeExpressionTranslator)
     );
 
