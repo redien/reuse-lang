@@ -11,9 +11,9 @@ var variable = translateAst.variable;
 symbols.atom = function (translateExpression) {
     return [
         variable('atom', 'atom'),
-            function (context, variables, locationInformation) {
+            function (context, variables) {
                 var parts = Immutable.List();
-                parts = parts.push(ast.atomValue(variables.get('atom')));
+                parts = parts.push(ast.value(variables.get('atom')));
                 return state.setExpression(context, parts);
             }
     ];

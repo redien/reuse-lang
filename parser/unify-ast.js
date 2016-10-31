@@ -42,7 +42,7 @@ var _delete = function (state, index) {
 
 var canDecompose = function (equation) {
     return areLists(equation.left, equation.right) &&
-           equation.left.size === equation.right.size;
+           ast.size(equation.left) === ast.size(equation.right);
 };
 
 var decompose = function (state, index) {
@@ -91,12 +91,12 @@ var swap = function (state, index) {
 
 
 var atomsAreEqual = function (first, second) {
-    return ast.atomValue(first) === ast.atomValue(second);
+    return ast.value(first) === ast.value(second);
 };
 
 var listsAreEqual = function (first, second) {
-    return (first.size === second.size) &&
-           first.every(function (item, index) { return item === second.get(index) });
+    return (ast.size(first) === ast.size(second)) &&
+           ast.every(first, function (item, index) { return areEqual(item, ast.child(second, index)); });
 };
 
 var variablesAreEqual = function (first, second) {
@@ -127,16 +127,18 @@ var occursInList = function (variable, list) {
         return occursIn(variable, expression);
     };
 
-    return ast.isList(list) && list.some(occursInExpression);
+    return ast.isList(list) && ast.some(list, occursInExpression);
 };
 
 var decomposeLists = function (first, second) {
-    return ast.listMap(first, function (item, index) {
-        return {
-            left: item,
-            right: second.get(index)
-        };
-    });
+    var list = Immutable.List();
+    for (var index = 0; index < ast.size(first); ++index) {
+        list = list.push({
+            left: ast.child(first, index),
+            right: ast.child(second, index)
+        });
+    }
+    return list;
 };
 
 var stateSet = function (state, equations, substitutions) {
@@ -147,7 +149,7 @@ var stateSet = function (state, equations, substitutions) {
 };
 
 var eliminateInList = function (variable, value, list) {
-    return ast.listMap(list, function (expression) {
+    return ast.map(list, function (expression) {
         return eliminateInExpression(variable, value, expression);
     });
 };

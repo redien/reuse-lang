@@ -9,12 +9,11 @@ var translate = function (language, expression) {
         return parseResult;
     }
 
-    var expression = ast.listChild(parseResult.ast, 0);
-    var locationInformation = parseResult.locationInformation.get(0);
+    var expression = ast.child(parseResult.ast, 0);
 
     return {
         error: null,
-        source: require('../' + language + '/translator').translate(expression, locationInformation)
+        source: require('../' + language + '/translator').translate(expression)
     };
 };
 module.exports.translate = translate;

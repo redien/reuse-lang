@@ -4,7 +4,7 @@ var unifyAst = require('../parser/unify-ast');
 var Immutable = require('immutable');
 var Type = require('../type-inference/type');
 
-module.exports = function (context, parsedExpression, locationInformation, patterns) {
+module.exports = function (context, parsedExpression, patterns) {
     var constraints = Immutable.List();
     for (var index = 0; index < patterns.length; index += 2) {
         var pattern = patterns[index];
@@ -12,7 +12,7 @@ module.exports = function (context, parsedExpression, locationInformation, patte
 
         var result = unifyAst(pattern, parsedExpression);
         if (result !== unifyAst.NOT_UNIFIED) {
-            return translater(context, result, parsedExpression, locationInformation);
+            return translater(context, result, parsedExpression);
         }
     }
 

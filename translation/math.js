@@ -12,10 +12,10 @@ var functions = require('./functions');
 
 module.exports.functions = function (translateExpression, type, constraints, specializeLambda) {
     var translater = function (name) {
-        return function (context, variables, expression, locationInformation) {
-            context = translateExpression(context, variables.get('first'), locationInformation ? locationInformation.get(1) : null);
+        return function (context, variables, expression) {
+            context = translateExpression(context, variables.get('first'));
             var first = state.expression(context);
-            context = translateExpression(context, variables.get('second'), locationInformation ? locationInformation.get(2) : null);
+            context = translateExpression(context, variables.get('second'));
             var second = state.expression(context);
 
             return state.setExpression(context, name + '(' + first + ', ' + second + ')');

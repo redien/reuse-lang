@@ -46,31 +46,27 @@ var parseList = function (input, index) {
 
     return {
         ast: expression.ast,
-        nextIndex: index + 1,
-        locationInformation: expression.locationInformation
+        nextIndex: index + 1
     };
 };
 
 var parseListBody = function (input, index) {
     var list = ast.list();
-    var locationInformation = Immutable.List();
     var expressionStartIndex = index - 1;
 
     while (index < input.length && !nextCharacterIs(END_PARENTHESIS_CHARACTER, input, index)) {
         var expression = parseExpression(input, index);
         if (expression.error) { return expression; }
 
-        list = ast.listPush(list, expression.ast);
-        locationInformation = locationInformation.push(expression.locationInformation);
+        list = ast.push(list, expression.ast);
         index = skipWhitespace(input, expression.nextIndex);
     }
 
-    locationInformation.range = [expressionStartIndex, index - expressionStartIndex + 1];
+    list = ast.setMeta(list, 'range', [expressionStartIndex, index - expressionStartIndex + 1]);
 
     return {
         ast: list,
-        nextIndex: index,
-        locationInformation: locationInformation
+        nextIndex: index
     };
 };
 
@@ -82,10 +78,12 @@ var parseAtom = function (input, index) {
         index += 1;
     }
 
+    var atom = ast.atom(input.substring(start, index));
+    atom = ast.setMeta(atom, 'range', [start, index - start]);
+
     return {
-        ast: ast.atom(input.substring(start, index)),
-        nextIndex: index,
-        locationInformation: {range: [start, index - start]}
+        ast: atom,
+        nextIndex: index
     };
 };
 

@@ -48,7 +48,7 @@ describe('unifyAst', function () {
             output.should.be.an.instanceOf(Immutable.Map);
             output.size.should.equal(1);
             ast.isAtom(output.get('X')).should.be.true();
-            ast.atomValue(output.get('X')).should.equal('b');
+            ast.value(output.get('X')).should.equal('b');
         });
 
         it('should unify with {Y: a} given a and Y', function () {
@@ -60,7 +60,7 @@ describe('unifyAst', function () {
             output.should.be.an.instanceOf(Immutable.Map);
             output.size.should.equal(1);
             ast.isAtom(output.get('Y')).should.be.true();
-            ast.atomValue(output.get('Y')).should.equal('a');
+            ast.value(output.get('Y')).should.equal('a');
         });
 
         it('should unify with {X: Y} given X and Y', function () {
@@ -84,11 +84,11 @@ describe('unifyAst', function () {
             output.should.be.an.instanceOf(Immutable.Map);
             output.size.should.equal(1);
             ast.isList(output.get('Y')).should.be.true();
-            ast.listSize(output.get('Y')).should.equal(2);
-            ast.isAtom(ast.listChild(output.get('Y'), 0)).should.be.true();
-            ast.atomValue(ast.listChild(output.get('Y'), 0)).should.equal('b');
-            ast.listChild(output.get('Y'), 1).isVariable.should.be.true();
-            ast.listChild(output.get('Y'), 1).name.should.equal('X');
+            ast.size(output.get('Y')).should.equal(2);
+            ast.isAtom(ast.child(output.get('Y'), 0)).should.be.true();
+            ast.value(ast.child(output.get('Y'), 0)).should.equal('b');
+            ast.child(output.get('Y'), 1).isVariable.should.be.true();
+            ast.child(output.get('Y'), 1).name.should.equal('X');
         });
 
         it('should unify with {X: 1, Y: (b 1)} given (a (b X) X) and (a Y 1)', function () {
@@ -101,14 +101,14 @@ describe('unifyAst', function () {
             output.size.should.equal(2);
 
             ast.isAtom(output.get('X')).should.be.true();
-            ast.atomValue(output.get('X')).should.equal('1');
+            ast.value(output.get('X')).should.equal('1');
 
             ast.isList(output.get('Y')).should.be.true();
-            ast.listSize(output.get('Y')).should.equal(2);
-            ast.isAtom(ast.listChild(output.get('Y'), 0)).should.be.true();
-            ast.atomValue(ast.listChild(output.get('Y'), 0)).should.equal('b');
-            ast.isAtom(ast.listChild(output.get('Y'), 1)).should.be.true();
-            ast.atomValue(ast.listChild(output.get('Y'), 1)).should.equal('1');
+            ast.size(output.get('Y')).should.equal(2);
+            ast.isAtom(ast.child(output.get('Y'), 0)).should.be.true();
+            ast.value(ast.child(output.get('Y'), 0)).should.equal('b');
+            ast.isAtom(ast.child(output.get('Y'), 1)).should.be.true();
+            ast.value(ast.child(output.get('Y'), 1)).should.equal('1');
         });
 
         it('should unify with {X: a, Y: a} given (X Y) and (Y a)', function () {
@@ -120,9 +120,9 @@ describe('unifyAst', function () {
             output.should.be.an.instanceOf(Immutable.Map);
             output.size.should.equal(2);
             ast.isAtom(output.get('X')).should.be.true();
-            ast.atomValue(output.get('X')).should.equal('a');
+            ast.value(output.get('X')).should.equal('a');
             ast.isAtom(output.get('Y')).should.be.true();
-            ast.atomValue(output.get('Y')).should.equal('a');
+            ast.value(output.get('Y')).should.equal('a');
         });
 
         it('should unify with {X: a, Y: a} given (a X) and (Y Y)', function () {
@@ -134,9 +134,9 @@ describe('unifyAst', function () {
             output.should.be.an.instanceOf(Immutable.Map);
             output.size.should.equal(2);
             ast.isAtom(output.get('X')).should.be.true();
-            ast.atomValue(output.get('X')).should.equal('a');
+            ast.value(output.get('X')).should.equal('a');
             ast.isAtom(output.get('Y')).should.be.true();
-            ast.atomValue(output.get('Y')).should.equal('a');
+            ast.value(output.get('Y')).should.equal('a');
         });
 
         it('should unify with {X: b} given (X) and (b)', function () {
@@ -148,7 +148,7 @@ describe('unifyAst', function () {
             output.should.be.an.instanceOf(Immutable.Map);
             output.size.should.equal(1);
             ast.isAtom(output.get('X')).should.be.true();
-            ast.atomValue(output.get('X')).should.equal('b');
+            ast.value(output.get('X')).should.equal('b');
         });
 
         it('should unify with {X: 1, Y: 2} given (X Y) and (1 2)', function () {
@@ -160,9 +160,9 @@ describe('unifyAst', function () {
             output.should.be.an.instanceOf(Immutable.Map);
             output.size.should.equal(2);
             ast.isAtom(output.get('X')).should.be.true();
-            ast.atomValue(output.get('X')).should.equal('1');
+            ast.value(output.get('X')).should.equal('1');
             ast.isAtom(output.get('Y')).should.be.true();
-            ast.atomValue(output.get('Y')).should.equal('2');
+            ast.value(output.get('Y')).should.equal('2');
         });
 
         it('should unify with {X: 1, Y: 2} given (a 2) and (1 b)', function () {
@@ -174,9 +174,9 @@ describe('unifyAst', function () {
             output.should.be.an.instanceOf(Immutable.Map);
             output.size.should.equal(2);
             ast.isAtom(output.get('X')).should.be.true();
-            ast.atomValue(output.get('X')).should.equal('1');
+            ast.value(output.get('X')).should.equal('1');
             ast.isAtom(output.get('Y')).should.be.true();
-            ast.atomValue(output.get('Y')).should.equal('2');
+            ast.value(output.get('Y')).should.equal('2');
         });
 
         it('should unify with {X: 1, Y: 3} given ((1 2) 3 ()) and ((X 2) Y ())', function () {
@@ -188,9 +188,9 @@ describe('unifyAst', function () {
             output.should.be.an.instanceOf(Immutable.Map);
             output.size.should.equal(2);
             ast.isAtom(output.get('X')).should.be.true();
-            ast.atomValue(output.get('X')).should.equal('1');
+            ast.value(output.get('X')).should.equal('1');
             ast.isAtom(output.get('Y')).should.be.true();
-            ast.atomValue(output.get('Y')).should.equal('3');
+            ast.value(output.get('Y')).should.equal('3');
         });
 
         it('should unify with {X: b} given X:atom and b', function () {
@@ -202,7 +202,7 @@ describe('unifyAst', function () {
             output.should.be.an.instanceOf(Immutable.Map);
             output.size.should.equal(1);
             ast.isAtom(output.get('X')).should.be.true();
-            ast.atomValue(output.get('X')).should.equal('b');
+            ast.value(output.get('X')).should.equal('b');
         });
 
         it('should unify with {Y: a} given a and Y:atom', function () {
@@ -214,7 +214,7 @@ describe('unifyAst', function () {
             output.should.be.an.instanceOf(Immutable.Map);
             output.size.should.equal(1);
             ast.isAtom(output.get('Y')).should.be.true();
-            ast.atomValue(output.get('Y')).should.equal('a');
+            ast.value(output.get('Y')).should.equal('a');
         });
 
         it('should unify with {X: ()} given X:list and ()', function () {
@@ -226,7 +226,7 @@ describe('unifyAst', function () {
             output.should.be.an.instanceOf(Immutable.Map);
             output.size.should.equal(1);
             ast.isList(output.get('X')).should.be.true();
-            ast.listSize(output.get('X')).should.equal(0);
+            ast.size(output.get('X')).should.equal(0);
         });
 
         it('should unify with {X: ()} given () and X:list', function () {
@@ -238,7 +238,7 @@ describe('unifyAst', function () {
             output.should.be.an.instanceOf(Immutable.Map);
             output.size.should.equal(1);
             ast.isList(output.get('X')).should.be.true();
-            ast.listSize(output.get('X')).should.equal(0);
+            ast.size(output.get('X')).should.equal(0);
         });
     });
 
@@ -380,9 +380,9 @@ describe('unifyAst', function () {
             output.should.be.an.instanceOf(Immutable.Map);
             output.size.should.equal(1);
             ast.isList(output.get('X')).should.be.true();
-            ast.listSize(output.get('X')).should.equal(1);
-            ast.listChild(output.get('X'), 0).isVariable.should.be.true();
-            ast.listChild(output.get('X'), 0).name.should.equal('X');
+            ast.size(output.get('X')).should.equal(1);
+            ast.child(output.get('X'), 0).isVariable.should.be.true();
+            ast.child(output.get('X'), 0).name.should.equal('X');
         });
     });
 });

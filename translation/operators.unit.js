@@ -13,7 +13,7 @@ var input, result;
 
 var fakeExpressionTranslator = function (context, parsedExpression) {
     if (ast.isAtom(parsedExpression)) {
-        return state.setExpression(context, Immutable.List.of(ast.atomValue(parsedExpression)));
+        return state.setExpression(context, Immutable.List.of(ast.value(parsedExpression)));
     } else {
         // When we get something other than an atom, we assume it's an infix operator
         // This allows nested operators to be tested
@@ -22,7 +22,7 @@ var fakeExpressionTranslator = function (context, parsedExpression) {
 };
 
 var translate = function (parsedExpression) {
-    var context = translateAst(state.new(), parsedExpression, null,
+    var context = translateAst(state.new(), parsedExpression,
         operators.infixOperators(fakeExpressionTranslator)
     );
 

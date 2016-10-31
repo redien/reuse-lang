@@ -14,12 +14,12 @@ var tryFindingTypeOfVariable = function (variable, constraints) {
     for (var i = 0; i < constraints.size; ++i) {
         var constraint = constraints.get(i);
 
-        if (constraint[0].isVariable && constraint[0].name === ast.atomValue(variable)) {
+        if (constraint[0].isVariable && constraint[0].name === ast.value(variable)) {
             return constraint[1];
         }
     }
 
-    return Type.variable(ast.atomValue(variable));
+    return Type.variable(ast.value(variable));
 };
 
 var isNumeric = function (name) {
@@ -55,18 +55,18 @@ var anonymousType = function (constraints) {
 };
 
 var constraintsForLambda = function (expression, constraints) {
-    var parameters = ast.listChild(expression, 1);
+    var parameters = ast.child(expression, 1);
 
     var parameterTypes = Immutable.List();
-    for (var index = 0; index < ast.listSize(parameters); ++index) {
-        var parameterName = ast.atomValue(ast.listChild(parameters, index));
+    for (var index = 0; index < ast.size(parameters); ++index) {
+        var parameterName = ast.value(ast.child(parameters, index));
         var parameterType = anonymousType(constraints);
 
         constraints = constraints.push([Type.variable(parameterName), parameterType]);
         parameterTypes = parameterTypes.push(parameterType);
     }
 
-    var body = ast.listChild(expression, 2);
+    var body = ast.child(expression, 2);
     var result = _constraints(body, constraints);
     var returnType = result.type;
 
@@ -79,14 +79,14 @@ var constraintsForLambda = function (expression, constraints) {
 var constraintsForApplication = function (expression, constraints) {
     var resultConstraints = Immutable.List();
 
-    var lambda = ast.listChild(expression, 0);
+    var lambda = ast.child(expression, 0);
     var result = _constraints(lambda, constraints);
     var lambdaType = result.type;
     resultConstraints = resultConstraints.concat(result.constraints);
 
     var argumentTypes = Immutable.List();
-    for (var index = 1; index < ast.listSize(expression); ++index) {
-        var argument = ast.listChild(expression, index);
+    for (var index = 1; index < ast.size(expression); ++index) {
+        var argument = ast.child(expression, index);
         var result = _constraints(argument, constraints);
 
         var argumentType = result.type;
@@ -106,15 +106,15 @@ var constraintsForApplication = function (expression, constraints) {
 
 var _constraints = function _constraints (expression, constraints) {
     if (ast.isList(expression)) {
-        var firstExpression = ast.listChild(expression, 0);
+        var firstExpression = ast.child(expression, 0);
 
-        if (ast.isAtom(firstExpression) && ast.atomValue(firstExpression) === 'lambda') {
+        if (ast.isAtom(firstExpression) && ast.value(firstExpression) === 'lambda') {
             return constraintsForLambda(expression, constraints);
         } else {
             return constraintsForApplication(expression, constraints);
         }
 
-    } else if (isNumeric(ast.atomValue(expression))) {
+    } else if (isNumeric(ast.value(expression))) {
         return {
             type: Type.constant('integer'),
             constraints: Immutable.List()

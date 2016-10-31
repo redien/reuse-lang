@@ -19,28 +19,28 @@ module.exports.application = function (translateExpression,
                                        ampersantBeforeLambdaArgument) {
     return [
         list(atom('lambda'), variable('arguments', 'list'), variable('body')),
-            function (context, variables, lambda, locationInformation) {
-                var arguments = ast.listChild(lambda, 1);
-                for (var index = 0; index < ast.listSize(arguments); ++index) {
-                    var argument = ast.listChild(arguments, index);
+            function (context, variables, lambda) {
+                var arguments = ast.child(lambda, 1);
+                for (var index = 0; index < ast.size(arguments); ++index) {
+                    var argument = ast.child(arguments, index);
                     constraints = constraints.push([
-                        Type.variable(ast.atomValue(argument)), type.parameterTypes.get(index)
+                        Type.variable(ast.value(argument)), type.parameterTypes.get(index)
                     ]);
                 }
 
-                return specializeLambda(context, lambda, locationInformation, type, constraints);
+                return specializeLambda(context, lambda, type, constraints);
             },
 
         variable('_', 'list'),
-            function (context, variables, expression, locationInformation) {
-                var lambda = ast.listChild(expression, 0);
+            function (context, variables, expression) {
+                var lambda = ast.child(expression, 0);
                 var result = infer.constraints(lambda, constraints);
                 var lambdaType = result.type;
                 constraints = constraints.concat(result.constraints);
                 var argumentTypes = Immutable.List();
 
-                for (var index = 1; index < ast.listSize(expression); ++index) {
-                    var argument = ast.listChild(expression, index);
+                for (var index = 1; index < ast.size(expression); ++index) {
+                    var argument = ast.child(expression, index);
                     result = infer.constraints(argument, constraints);
                     var argumentType = result.type;
                     constraints = constraints.concat(result.constraints);
@@ -59,15 +59,15 @@ module.exports.application = function (translateExpression,
                     return infer.substitute(type, substitutions);
                 });
 
-                context = translateExpression(context, lambda, locationInformation ? locationInformation.get(0) : null, lambdaType, constraints);
+                context = translateExpression(context, lambda, lambdaType, constraints);
 
                 var parts = Immutable.List();
                 parts = parts.push(state.expression(context));
                 parts = parts.push('(');
-                for (var index = 1; index < ast.listSize(expression); ++index) {
-                    var argument = ast.listChild(expression, index);
+                for (var index = 1; index < ast.size(expression); ++index) {
+                    var argument = ast.child(expression, index);
                     var argumentType = argumentTypes.get(index - 1);
-                    context = translateExpression(context, argument, locationInformation ? locationInformation.get(index) : null, argumentType, constraints);
+                    context = translateExpression(context, argument, argumentType, constraints);
 
                     if (index > 1) { parts = parts.push(', '); }
 

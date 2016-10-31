@@ -14,12 +14,12 @@ var translateAst = require('../translation/translate-ast');
 var variable = translateAst.variable;
 
 operators.infixOperator = function (operator, translateExpression) {
-    return function (context, variables, expression, locationInformation) {
+    return function (context, variables, expression) {
         var nestFirst = ast.isList(variables.get('a'));
         var nestSecond = ast.isList(variables.get('b'));
 
-        var first = translateExpression(context, variables.get('a'), locationInformation ? locationInformation.get(1) : null);
-        var second = translateExpression(first, variables.get('b'), locationInformation ? locationInformation.get(2) : null);
+        var first = translateExpression(context, variables.get('a'));
+        var second = translateExpression(first, variables.get('b'));
         context = second;
 
         var parts = Immutable.List();

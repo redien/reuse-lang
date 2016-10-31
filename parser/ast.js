@@ -3,58 +3,78 @@ var Immutable = require('immutable');
 
 var ast = module.exports;
 
-ast.equal = function (a, b) {
+ast.equal = function equal (a, b) {
     if (ast.isList(a) && ast.isList(b)) {
-        return Immutable.is(a, b);
+        return ast.every(a, function (item, index) { return equal(item, b.child(index)); });
     } else {
-        return a === b;
+        return a.get('value') === b.get('value');
     }
 };
 
 ast.atom = function (value) {
-    return value;
+    return Immutable.Map.of('type', 'atom', 'value', value);
 };
 
 ast.isAtom = function (atom) {
-    return typeof atom === 'string';
+    return Immutable.Map.isMap(atom) && atom.get('type') === 'atom';
 };
 
-ast.atomValue = function (atom) {
-    return atom;
+ast.value = function (atom) {
+    return atom.get('value');
 };
 
 ast.list = function () {
-    return Immutable.List(arguments);
+    return Immutable.Map.of('type', 'list', 'value', Immutable.List(arguments));
 };
 
 ast.isList = function (list) {
-    return list.constructor === Immutable.List;
+    return Immutable.Map.isMap(list) && list.get('type') === 'list';
 };
 
-ast.listPush = function (list, value) {
-    return list.push(value);
+ast.push = function (list, value) {
+    return list.set('value', list.get('value').push(value));
 };
 
-ast.listSlice = function (list, start, end) {
-    return list.slice(start, end);
+ast.slice = function (list, start, end) {
+    return list.set('value', list.get('value').slice(start, end));
 };
 
-ast.listSize = function (list) {
-    return list.size;
+ast.size = function (list) {
+    return list.get('value').size;
 };
 
-ast.listChild = function (list, index) {
-    return list.get(index);
+ast.child = function (list, index) {
+    return list.get('value').get(index);
 };
 
-ast.listMap = function (list, func) {
-    return list.map(func);
+ast.map = function (list, f) {
+    return list.set('value', list.get('value').map(f));
+};
+
+ast.join = function (list, separator) {
+    return list.get('value').join(separator);
+};
+
+ast.some = function (list, f) {
+    return list.get('value').some(f);
+};
+
+ast.every = function (list, f) {
+    return list.get('value').every(f);
 };
 
 ast.toString = function toString (expression) {
-    if (Immutable.List.isList(expression)) {
-        return '(' + expression.map(toString).join(' ') + ')';
+    if (ast.isList(expression)) {
+        return '(' + ast.join(ast.map(expression, toString), ' ') + ')';
     } else {
-        return expression;
+        return ast.value(expression);
     }
-}
+};
+
+ast.getMeta = function (ast, key) {
+    return ast.get(key);
+};
+
+ast.setMeta = function (ast, key, value) {
+    return ast.set(key, value);
+};

@@ -32,28 +32,28 @@ var translateType = function translateType (type) {
     }
 };
 
-var specializeLambda = function (context, lambda, locationInformation, type, constraints) {
+var specializeLambda = function (context, lambda, type, constraints) {
     context = state.incrementUniqueId(context);
     var id = 'reuse_gen_lambda' + state.uniqueId(context);
 
-    var arguments = ast.listChild(lambda, 1);
-    var body = ast.listChild(lambda, 2);
+    var arguments = ast.child(lambda, 1);
+    var body = ast.child(lambda, 2);
 
     var parts = Immutable.List();
     parts = parts.push('fn ' + id + '(');
-    for (var index = 0; index < ast.listSize(arguments); ++index) {
-        var argument = ast.listChild(arguments, index);
+    for (var index = 0; index < ast.size(arguments); ++index) {
+        var argument = ast.child(arguments, index);
         if (index > 0) {
             parts = parts.push(', ');
         }
-        parts = parts.push(ast.atomValue(argument));
+        parts = parts.push(ast.value(argument));
         parts = parts.push(': ');
         parts = parts.push(translateType(type.parameterTypes.get(index)));
     }
     parts = parts.push(') -> ');
     parts = parts.push(translateType(type.returnType));
     parts = parts.push(' { return ');
-    context = translateExpression(context, body, locationInformation ? locationInformation.get(2) : null, type.returnType, constraints);
+    context = translateExpression(context, body, type.returnType, constraints);
     parts = parts.push(state.expression(context));
     parts = parts.push('; }\n');
 
@@ -61,11 +61,11 @@ var specializeLambda = function (context, lambda, locationInformation, type, con
     return state.addDefinition(context, parts);
 };
 
-var translateExpression = function (context, expression, locationInformation, type, constraints) {
-    var translateExpressionWithoutType = function (context, expression, locationInformation) {
-        return translateExpression(context, expression, locationInformation, type, constraints);
+var translateExpression = function (context, expression, type, constraints) {
+    var translateExpressionWithoutType = function (context, expression) {
+        return translateExpression(context, expression, type, constraints);
     };
-    return translateAst(context, expression, locationInformation, []
+    return translateAst(context, expression, []
         .concat(operators.infixOperators(translateExpressionWithoutType))
         .concat(math.functions(translateExpressionWithoutType))
         .concat(functions.application(translateExpression, type, constraints, specializeLambda, true))
@@ -73,9 +73,9 @@ var translateExpression = function (context, expression, locationInformation, ty
     );
 };
 
-module.exports.translate = function (expression, locationInformation) {
+module.exports.translate = function (expression) {
     var expressionType = Type.constant('integer');
-    var context = translateExpression(state.new(), expression, locationInformation, expressionType, operators.constraints);
+    var context = translateExpression(state.new(), expression, expressionType, operators.constraints);
 
     return state.definitions(context) + 'fn expression() -> i32 { return ' + state.expression(context) + '; }';
 };
