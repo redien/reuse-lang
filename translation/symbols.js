@@ -5,8 +5,8 @@ var Immutable = require('immutable');
 
 var state = require('./state');
 var ast = require('../parser/ast');
-var translateAst = require('../translation/translate-ast');
-var variable = translateAst.variable;
+var matchAst = require('../parser/match-ast');
+var variable = matchAst.variable;
 
 symbols.atom = function (translateExpression) {
     return [

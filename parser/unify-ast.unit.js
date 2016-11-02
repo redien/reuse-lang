@@ -193,6 +193,10 @@ describe('unifyAst', function () {
             ast.value(output.get('Y')).should.equal('3');
         });
 
+        // TODO: Implement meta-data predicates
+        // X:{type=integer}
+        // X:{symbol_id=123}
+
         it('should unify with {X: b} given X:atom and b', function () {
             var first = variable('X', 'atom');
             var second = ast.atom('b');

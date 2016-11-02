@@ -11,8 +11,8 @@ var ast = require('../parser/ast');
 var atom = ast.atom;
 var list = ast.list;
 
-var translateAst = require('../translation/translate-ast');
-var variable = translateAst.variable;
+var matchAst = require('../parser/match-ast');
+var variable = matchAst.variable;
 
 var infer = require('../type-inference/infer');
 var Type = require('../type-inference/type');
@@ -85,7 +85,7 @@ var translateExpression = function (context, expression, type, constraints) {
     var translateExpressionWithoutType = function (context, expression) {
         return translateExpression(context, expression, type, constraints);
     };
-    return translateAst(context, expression, []
+    return matchAst(context, expression, []
         .concat(operators.infixOperators(translateExpressionWithoutType))
         .concat(math.functions(translateExpressionWithoutType))
         .concat(functions.application(translateExpression, type, constraints, specializeLambda, true))

@@ -4,7 +4,7 @@ var Immutable = require('immutable');
 var should = require('should');
 var operators = require('./operators');
 var state = require('./state');
-var translateAst = require('../translation/translate-ast');
+var matchAst = require('../parser/match-ast');
 var ast = require('../parser/ast');
 var atom = ast.atom;
 var list = ast.list;
@@ -22,7 +22,7 @@ var fakeExpressionTranslator = function (context, parsedExpression) {
 };
 
 var translate = function (parsedExpression) {
-    var context = translateAst(state.new(), parsedExpression,
+    var context = matchAst(state.new(), parsedExpression,
         operators.infixOperators(fakeExpressionTranslator)
     );
 

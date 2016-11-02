@@ -9,8 +9,8 @@ var ast = require('../parser/ast');
 var atom = ast.atom;
 var list = ast.list;
 
-var translateAst = require('../translation/translate-ast');
-var variable = translateAst.variable;
+var matchAst = require('../parser/match-ast');
+var variable = matchAst.variable;
 
 module.exports.application = function (translateExpression,
                                        type,
