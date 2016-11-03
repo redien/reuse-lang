@@ -11,22 +11,26 @@ var list = ast.list;
 
 var input, result;
 
-var fakeExpressionTranslator = function (context, parsedExpression) {
-    if (ast.isAtom(parsedExpression)) {
-        return state.setExpression(context, Immutable.List.of(ast.value(parsedExpression)));
+var fakeExpressionTranslator = function (context, expression) {
+    if (ast.isAtom(expression)) {
+        return state.setExpression(context, Immutable.List.of(ast.value(expression)));
     } else {
         // When we get something other than an atom, we assume it's an infix operator
         // This allows nested operators to be tested
-        return state.setExpression(context, Immutable.List.of(translate(parsedExpression)));
+        return state.setExpression(context, Immutable.List.of(_translate(context, expression)));
     }
 };
 
-var translate = function (parsedExpression) {
-    var context = matchAst(state.new(), parsedExpression,
+var _translate = function (context, expression) {
+    var context = matchAst(context, expression,
         operators.infixOperators(fakeExpressionTranslator)
     );
 
     return state.expression(context);
+};
+
+var translate = function (expression) {
+    return _translate(state.new(), expression);
 };
 
 describe('Integer arithmetic', function () {

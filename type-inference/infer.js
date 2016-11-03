@@ -104,7 +104,7 @@ var constraintsForApplication = function (expression, constraints) {
     };
 };
 
-var _constraints = function _constraints (expression, constraints) {
+var _constraints = function (expression, constraints) {
     if (ast.isList(expression)) {
         var firstExpression = ast.child(expression, 0);
 

@@ -12,22 +12,26 @@ var list = ast.list;
 
 var input, result;
 
-var fakeExpressionTranslator = function (context, parsedExpression) {
-    if (ast.isAtom(parsedExpression)) {
-        return state.setExpression(context, Immutable.List.of(ast.value(parsedExpression)));
+var fakeExpressionTranslator = function (context, expression, type, constraints) {
+    if (ast.isAtom(expression)) {
+        return state.setExpression(context, Immutable.List.of(ast.value(expression)));
     } else {
         // When we get something other than an atom, we assume it's a function application
         // This allows nested function application to be tested
-        return state.setExpression(context, Immutable.List.of(translate(parsedExpression)));
+        return state.setExpression(context, Immutable.List.of(_translate(context, expression, type, constraints)));
     }
 };
 
-var translate = function (parsedExpression, type, constraints) {
-    var context = matchAst(state.new(), parsedExpression,
+var _translate = function (context, expression, type, constraints) {
+    var context = matchAst(context, expression,
         functions.application(fakeExpressionTranslator, type, constraints, function (context) { return context; })
     );
 
     return state.expression(context);
+};
+
+var translate = function (expression, type, constraints) {
+    return _translate(state.new(), expression, type, constraints);
 };
 
 describe('Function application', function () {
@@ -84,7 +88,7 @@ describe('Function application', function () {
         result.should.equal('f(a, b, c)');
     });
 
-    xit('should translate ((f)) into f()()', function () {
+    it('should translate ((f)) into f()()', function () {
         input = list(list(atom('f')));
 
         result = translate(input, Type.constant('integer'), Immutable.List.of(
@@ -94,7 +98,7 @@ describe('Function application', function () {
         result.should.equal('f()()');
     });
 
-    xit('should translate (f (f 1)) into f(f(1))', function () {
+    it('should translate (f (f 1)) into f(f(1))', function () {
         input = list(atom('f'), list(atom('f'), atom('1')));
 
         result = translate(input, Type.constant('integer'), Immutable.List.of(

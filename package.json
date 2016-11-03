@@ -16,6 +16,7 @@
   "scripts": {
     "loc": "find . -name '*.js' | grep -v \"./node_modules\" | xargs wc -l",
     "unit-test": "mocha \"**/*.unit.js\"",
+    "debug-unit-test": "mocha debug \"**/*.unit.js\"",
     "acceptance-test": "echo && echo Language: Javascript && echo && cucumberjs -r features/step_definitions/javascript.js && echo && echo Language: Rust && echo && cucumberjs -r features/step_definitions/rust.js && echo && echo Language: C && echo && cucumberjs -r features/step_definitions/c.js",
     "test": "npm run-script unit-test && npm run-script acceptance-test"
   },
