@@ -33,7 +33,7 @@ A list implementation can be written using the type system.
 (function map (list List
                f (function (integer) integer))
               List
-    (foldl list (bind _map f) Empty))
+    (foldl list (lambda (v integer a List) (_map v a f)) Empty))
 
 (function add_5 (x integer) integer
     (+ x 5))
