@@ -13,8 +13,8 @@ readline.prompt();
 readline.on('line', function (expression) {
     try {
         var result = Reuse.translate('javascript', expression);
-        if (result.error) {
-            console.error(result.error);
+        if (result.errors.length > 0) {
+            console.error(result.errors.toArray());
         } else {
             console.log(result.source);
             eval(`

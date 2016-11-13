@@ -1,5 +1,6 @@
 
 var reuse = require('../../module/reuse');
+var ast = require('../../parser/ast');
 
 var Promise = require('promise');
 var exec = require('child_process').exec;
@@ -17,11 +18,7 @@ module.exports.stepDefinitions = function (language, suffix, programBuilder, com
 
         this.Given(/^an expression "([^"]*)"$/, function (expression) {
             var result = reuse.translate(language, expression);
-            this.translationError = result.error;
-            if (result.error) {
-                this.errorColumn = result.error.column;
-                this.errorLine = result.error.line;
-            }
+            this.translationError = (result.errors.size > 0) ? result.errors.get(0) : null;
             this.expression = result.source;
         });
 
@@ -54,27 +51,23 @@ module.exports.stepDefinitions = function (language, suffix, programBuilder, com
         });
 
         this.Then(/^the error expression should be "([^"]*)"$/, function (expected) {
-            var range = this.translationError.expressionRange;
-            should(range).not.be.null();
-            var errorExpression = this.expression.substr(range[0], range[1]);
-            errorExpression.should.equal(expected);
+            should(this.translationError.expression).not.be.null();
+            ast.toString(this.translationError.expression).should.equal(expected);
         });
 
         this.Then(/^the error context should be "([^"]*)"$/, function (expected) {
-            var range = this.translationError.contextRange;
-            should(range).not.be.null();
-            var errorContext = this.expression.substr(range[0], range[1]);
-            errorContext.should.equal(expected);
+            should(this.translationError.context).not.be.null();
+            ast.toString(this.translationError.context).should.equal(expected);
         });
 
         this.Then(/^the error column should say (\d+)$/, function (expected) {
-            should(this.errorColumn).not.be.null();
-            this.errorColumn.should.equal(parseInt(expected, 10));
+            should(this.translationError.column).not.be.null();
+            this.translationError.column.should.equal(parseInt(expected, 10));
         });
 
         this.Then(/^the error line should say (\d+)$/, function (expected) {
-            should(this.errorLine).not.be.null();
-            this.errorLine.should.equal(parseInt(expected, 10));
+            should(this.translationError.line).not.be.null();
+            this.translationError.line.should.equal(parseInt(expected, 10));
         });
     };
 };

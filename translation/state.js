@@ -38,6 +38,12 @@ state.addLambda = function (state, expression) {
     return state.set('expression', id);
 };
 
+state.addArtifact = function (state, artifact) {
+    var artifacts = state.get('artifacts');
+    artifacts = artifacts.push(artifact);
+    return state.set('artifacts', artifacts);
+};
+
 state.findLambda = function (state, id) {
     var artifacts = state.get('artifacts');
     for (var index = artifacts.size - 1; index >= 0; --index) {
@@ -47,6 +53,10 @@ state.findLambda = function (state, id) {
         }
     }
     return null;
+};
+
+state.artifacts = function (state) {
+    return state.get('artifacts');
 };
 
 state.incrementUniqueId = function (state) {

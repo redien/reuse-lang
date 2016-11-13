@@ -14,6 +14,7 @@
     "temp": "^0.8.3"
   },
   "scripts": {
+    "repl": "node repl/main.js",
     "loc": "find . -name '*.js' | grep -v \"./node_modules\" | xargs wc -l",
     "unit-test": "mocha \"**/*.unit.js\"",
     "debug-unit-test": "mocha debug \"**/*.unit.js\"",

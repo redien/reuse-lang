@@ -97,5 +97,11 @@ module.exports.translate = function (expression) {
     var expressionType = Type.constant('integer');
     var context = translateExpression(state.new(), expression, expressionType, operators.constraints);
 
-    return state.definitions(context) + 'int expression() { return ' + state.expression(context) + '; }';
+    var artifacts = state.artifacts(context);
+    return {
+        source: state.definitions(context) + 'int expression() { return ' + state.expression(context) + '; }',
+        errors: artifacts.filter(function (artifact) {
+            return artifact.type === 'error';
+        })
+    };
 };

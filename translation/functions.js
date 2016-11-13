@@ -51,6 +51,17 @@ module.exports.application = function (translateExpression,
                         argumentType,
                         lambdaType.parameterTypes.get(index - 1)
                     ]);
+
+                    if (infer.unify(constraints) === infer.NOT_UNIFIED) {
+                        return state.addArtifact(context, Object.assign(new Error(), {
+                            type: 'error',
+                            message: 'Type mismatch',
+                            expectedType: lambdaType.parameterTypes.get(index - 1),
+                            foundType: argumentType,
+                            expression: argument,
+                            context: expression
+                        }));
+                    }
                 }
 
                 var substitutions = infer.unify(constraints);

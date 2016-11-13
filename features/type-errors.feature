@@ -5,7 +5,7 @@ Feature: Type errors
 
     Scenario: Adding a function with an integer
         Given PENDING
-        Given an expression "((lambda () (+ (lambda () 1) 2)))"
+        Given an expression "(+ (lambda () 1) 2)"
         When I evaluate it
         Then I should get a translation error "Type mismatch"
         And the expected type should be "integer"
