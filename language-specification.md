@@ -31,30 +31,30 @@
 (sum (list a) (cons a list)
               empty)
 
-(define reverse (lambda (list)
-    (_reverse list (empty))))
+(defun reverse (list)
+    (_reverse list (empty)))
 
-(define _reverse (lambda (list accumulator)
+(defun _reverse (list accumulator)
     (match list
         empty (empty)
-        (cons head tail) (_reverse tail (cons head accumulator)))))
+        (cons head tail) (_reverse tail (cons head accumulator))))
 
-(define map (lambda (function list)
-    (reverse (_map function list (empty)))))
+(defun map (function list)
+    (reverse (_map function list (empty))))
 
-(define _map (lambda (function list accumulator)
+(defun _map (function list accumulator)
     (match list
         empty (empty)
-        (cons head tail) (_map function tail (cons (function head) accumulator)))))
+        (cons head tail) (_map function tail (cons (function head) accumulator))))
 
 (product (token) string integer)
 (alias (token-list) (list token))
 (sum (result) (error string)
               (value token-list))
 
-(define stringify-token-list (lambda (tokens)
+(defun stringify-token-list (tokens)
     (map (lambda (token)
         (match token
             (token value line-number) (concat value (integer-to-string line-number))))
-    tokens)))
+    tokens))
 ```
