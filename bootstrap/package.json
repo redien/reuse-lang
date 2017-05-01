@@ -1,0 +1,15 @@
+{
+  "name": "bootstrap",
+  "version": "1.0.0",
+  "description": "",
+  "main": "reuse.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node reuse.js ; cd ../generated/bootstrap ; npm install ; npm run build"
+  },
+  "author": "",
+  "license": "CC0-1.0",
+  "dependencies": {
+    "immutable": "^3.8.1"
+  }
+}
