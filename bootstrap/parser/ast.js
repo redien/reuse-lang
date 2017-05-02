@@ -59,6 +59,12 @@ ast.some = function (list, f) {
     return list.get('value').some(f);
 };
 
+ast.contains = function (list, v) {
+    return list.get('value').some(function (o) {
+        return o === v;
+    });
+};
+
 ast.every = function (list, f) {
     return list.get('value').every(f);
 };
