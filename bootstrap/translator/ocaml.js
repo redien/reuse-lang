@@ -49,7 +49,7 @@ var translateDefinition = function (definition) {
         parameterString = ast.join(ast.map(parameters, ast.value), ' ');
     }
 
-    return 'let ' + name + ' = fun ' + parameterString + ' -> ' + expression + ';;';
+    return 'let rec ' + name + ' = fun ' + parameterString + ' -> ' + expression + ';;';
 };
 
 var typeTranslator = function (typeParameters) {
