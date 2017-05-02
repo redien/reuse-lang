@@ -1,0 +1,23 @@
+{
+  "name": "reuse-lang",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "tap-spec": "^4.1.1"
+  },
+  "scripts": {
+    "test-bootstrap": "./spec-runner.sh minimal-specification bootstrap/eval.sh | ./node_modules/.bin/tap-spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/redien/reuse-lang.git"
+  },
+  "author": "",
+  "license": "CC0-1.0",
+  "bugs": {
+    "url": "https://github.com/redien/reuse-lang/issues"
+  },
+  "homepage": "https://github.com/redien/reuse-lang#readme"
+}

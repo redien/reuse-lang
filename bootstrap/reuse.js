@@ -21,16 +21,16 @@ if (!fs.existsSync(__dirname + '/../generated')) {
     fs.mkdirSync(__dirname + '/../generated');
 }
 
-if (!fs.existsSync(__dirname + '/../generated/bootstrap')) {
-    fs.mkdirSync(__dirname + '/../generated/bootstrap');
+if (!fs.existsSync(__dirname + '/../generated/' + process.argv[3] + '')) {
+    fs.mkdirSync(__dirname + '/../generated/' + process.argv[3] + '');
 }
 
-if (!fs.existsSync(__dirname + '/../generated/bootstrap/src')) {
-    fs.mkdirSync(__dirname + '/../generated/bootstrap/src');
+if (!fs.existsSync(__dirname + '/../generated/' + process.argv[3] + '/src')) {
+    fs.mkdirSync(__dirname + '/../generated/' + process.argv[3] + '/src');
 }
 
-var source = fs.readFileSync(__dirname + '/../minimal-interpreter/source.lisp', 'utf8');
+var source = fs.readFileSync(process.argv[2], 'utf8');
 var compiled = translate(source);
 compiled.forEach(function (entry) {
-    fs.writeFileSync(__dirname + '/../generated/bootstrap/' + entry.filename, entry.contents, 'utf8');
+    fs.writeFileSync(__dirname + '/../generated/' + process.argv[3] + '/' + entry.filename, entry.contents, 'utf8');
 });
