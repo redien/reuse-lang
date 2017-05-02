@@ -12,9 +12,7 @@ var translate = function (expression) {
         };
     }
 
-    var expression = ast.child(parseResult.ast, 0);
-
-    return require(__dirname + '/translator/ocaml').translate(expression);
+    return require(__dirname + '/translator/ocaml').translate(parseResult.ast);
 };
 
 if (!fs.existsSync(__dirname + '/../generated')) {

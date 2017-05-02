@@ -8,17 +8,17 @@ passing=0
 failing=0
 
 function testLine {
-    result=$($eval_command ${1:2})
+    result=$($eval_command "${2}" "${1:2}")
 
     tests=$((tests+1))
 
-    if [ "$result" == "${2:2}" ]; then
+    if [ "$result" == "${3:2}" ]; then
         echo ok $tests - ${1:2}
         passing=$((passing+1))
     else
-        echo not ok $tests - ${1:2}
+        echo not ok $tests - expected \"${3:2}\" but got \"$result\"
         echo  ---
-        echo    expected: \'${2:2}\'
+        echo    expected: \'${3:2}\'
         echo    actual:   \'$result\'
         echo  ...
         failing=$((failing+1))
@@ -27,13 +27,18 @@ function testLine {
 
 echo TAP version 13
 
+program=""
+
 for f in $spec/*
 do
     while read line; do
         firstChar=${line:0:1}
         if [ "$firstChar" == ">" ]; then
             read expected
-            testLine "$line" "$expected"
+            testLine "$line" "$program" "$expected"
+            program=""
+        elif [ "$firstChar" == "|" ]; then
+            program=$program${line:2}
         else
             if [ "$line" != "" ]; then
                 echo \# $line
