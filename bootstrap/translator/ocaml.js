@@ -2,12 +2,33 @@
 var ast = require('../parser/ast');
 
 var constructorNames = ast.list();
+var mangledNames = {};
+
+var escapeNonAscii = function (name) {
+    var newName = '';
+    for (var i = 0; i < name.length; ++i) {
+        var char = name.charCodeAt(i);
+
+        if ((char >= 65 && char <= 90) || (char >= 97 && char <= 122))  {
+            newName += String.fromCharCode(char);
+        } else {
+            newName += '_' + char;
+        }
+    }
+    return newName;
+};
+
+var mangle = function (prefix, name) {
+    var newName = prefix + '_' + escapeNonAscii(name);
+    mangledNames[name] = newName;
+    return newName;
+};
 
 var translateConstructor = function (expression) {
     if (ast.isList(expression)) {
-        return ast.value(ast.child(expression, 0)) + ' (' + ast.join(ast.map(ast.slice(expression, 1), translateExpression), ', ') + ')';
+        return translateExpression(ast.child(expression, 0)) + ' (' + ast.join(ast.map(ast.slice(expression, 1), translateExpression), ', ') + ')';
     } else {
-        return ast.value(expression);
+        return translateExpression(expression);
     }
 };
 
@@ -48,18 +69,28 @@ var translateExpression = function (expression) {
             return ast.join(ast.map(expression, translateExpressionWithParen), ' ');
         }
     } else {
-        return ast.value(expression);
+        var name = ast.value(expression);
+        if (mangledNames[name]) {
+            return mangledNames[name];
+        } else {
+            return name;
+        }
     }
 };
 
-var translateDefinition = function (definition) {
+var translateDefinition = function (definition, mangleName) {
     var name = ast.value(ast.child(definition, 1));
+
+    if (mangleName) {
+        name = mangle('fn', name);
+    }
+
     var parameters = ast.child(definition, 2);
     var expression = translateExpression(ast.child(definition, 3));
 
     var parameterString = '_';
     if (ast.size(parameters) > 0) {
-        parameterString = ast.join(ast.map(parameters, ast.value), ' ');
+        parameterString = ast.join(ast.map(parameters, translateExpression), ' ');
     }
 
     return 'let rec ' + name + ' = fun ' + parameterString + ' -> ' + expression + ';;';
@@ -68,7 +99,7 @@ var translateDefinition = function (definition) {
 var typeTranslator = function (typeParameters) {
     return function (type) {
         if (ast.isList(type)) {
-            var parameters = ast.map(ast.slice(type, 1), ast.value);
+            var parameters = ast.map(ast.slice(type, 1), translateExpression);
 
             parameters = ast.map(parameters, function (parameter) {
                 if (ast.contains(typeParameters, parameter)) {
@@ -78,9 +109,9 @@ var typeTranslator = function (typeParameters) {
                 }
             });
 
-            return ast.join(parameters, ' ') + ' ' + ast.value(ast.child(type, 0));
+            return ast.join(parameters, ' ') + ' ' + translateExpression(ast.child(type, 0));
         } else {
-            return ast.value(type);
+            return translateExpression(type, 0);
         }
     };
 };
@@ -97,12 +128,12 @@ var constructorTranslator = function (typeParameters) {
                 }
             });
 
-            constructorNames = ast.push(constructorNames, ast.value(ast.child(expression, 0)));
+            constructorNames = ast.push(constructorNames, translateExpression(ast.child(expression, 0)));
 
-            return ast.value(ast.child(expression, 0)) + ' of ' + ast.join(parameters, ' * ');
+            return translateExpression(ast.child(expression, 0)) + ' of ' + ast.join(parameters, ' * ');
         } else {
-            constructorNames = ast.push(constructorNames, ast.value(expression));
-            return ast.value(expression);
+            constructorNames = ast.push(constructorNames, translateExpression(expression));
+            return translateExpression(expression);
         }
     };
 };
@@ -113,12 +144,14 @@ var translateData = function (definition) {
 
     if (ast.isList(ast.child(definition, 1))) {
         var list = ast.child(definition, 1);
-        var translations = ast.map(list, translateExpression);
 
-        parameters = ast.slice(translations, 1);
-        name = ast.child(translations, 0);
+        name = ast.value(ast.child(list, 0));
+        name = mangle('type', name);
+
+        parameters = ast.map(ast.slice(list, 1), translateExpression);
     } else {
-        name = ast.value(ast.child(definition, 1));
+        name = translateExpression(ast.child(definition, 1));
+        name = mangle('type', name);
     }
 
     var constructors = ast.join(ast.map(ast.slice(definition, 2), constructorTranslator(parameters)), ' | ');
@@ -126,10 +159,16 @@ var translateData = function (definition) {
     return 'type ' + parameters + ' ' + name + ' = ' + constructors + ';;';
 };
 
+var translateExport = function (definition) {
+    return translateDefinition(definition, false);
+};
+
 var translateModuleEntry = function (definition) {
     if (ast.isList(definition)) {
         if (ast.value(ast.child(definition, 0)) === 'define') {
-            return translateDefinition(definition);
+            return translateDefinition(definition, true);
+        } else if (ast.value(ast.child(definition, 0)) === 'export') {
+            return translateExport(definition);
         } else {
             return translateData(definition);
         }
