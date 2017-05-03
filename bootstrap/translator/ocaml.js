@@ -31,6 +31,15 @@ var translateExpression = function (expression) {
     if (ast.isList(expression)) {
         if (ast.value(ast.child(expression, 0)) === 'match') {
             return translateMatch(expression);
+        } else if (ast.value(ast.child(expression, 0)) === '+'
+                || ast.value(ast.child(expression, 0)) === '-'
+                || ast.value(ast.child(expression, 0)) === '*'
+                || ast.value(ast.child(expression, 0)) === '/') {
+            return translateExpressionWithParen(ast.child(expression, 1)) + ' ' + ast.value(ast.child(expression, 0)) + ' ' + translateExpressionWithParen(ast.child(expression, 2));
+        } else if (ast.value(ast.child(expression, 0)) === '%') {
+            return translateExpressionWithParen(ast.child(expression, 1)) + ' mod ' + translateExpressionWithParen(ast.child(expression, 2));
+        } else if (ast.value(ast.child(expression, 0)) === 'int32-compare') {
+            return 'if ' + translateExpressionWithParen(ast.child(expression, 1)) + ' < ' + translateExpressionWithParen(ast.child(expression, 3)) + ' then ' + translateExpressionWithParen(ast.child(expression, 2)) + ' else ' + translateExpressionWithParen(ast.child(expression, 4));
         } else {
             return ast.join(ast.map(expression, translateExpressionWithParen), ' ');
         }

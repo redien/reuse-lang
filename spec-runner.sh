@@ -18,6 +18,8 @@ function testLine {
     else
         echo not ok $tests - expected \"${3:2}\" but got \"$result\"
         echo  ---
+        echo    expression: \'${1:2}\'
+        echo    program: \'${2}\'
         echo    expected: \'${3:2}\'
         echo    actual:   \'$result\'
         echo  ...
