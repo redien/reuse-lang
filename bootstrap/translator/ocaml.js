@@ -1,9 +1,11 @@
 
 var ast = require('../parser/ast');
 
+var constructorNames = ast.list();
+
 var translateConstructor = function (expression) {
     if (ast.isList(expression)) {
-        return ast.value(ast.child(expression, 0)) + ' (' + ast.join(ast.map(ast.slice(expression, 1), ast.value), ', ') + ')';
+        return ast.value(ast.child(expression, 0)) + ' (' + ast.join(ast.map(ast.slice(expression, 1), translateExpression), ', ') + ')';
     } else {
         return ast.value(expression);
     }
@@ -13,10 +15,10 @@ var translateMatch = function (match) {
     var cases = [];
 
     for (var i = 2; i < ast.size(match); i += 2) {
-        cases.push(translateConstructor(ast.child(match, i)) + ' -> ' + translateExpression(ast.child(match, i + 1)));
+        cases.push(translateExpression(ast.child(match, i)) + ' -> ' + translateExpression(ast.child(match, i + 1)));
     }
 
-    return 'match ' + translateConstructor(ast.child(match, 1)) + ' with ' + cases.join(' | ');
+    return 'match ' + translateExpression(ast.child(match, 1)) + ' with ' + cases.join(' | ');
 };
 
 var translateExpressionWithParen = function (expression) {
@@ -40,6 +42,8 @@ var translateExpression = function (expression) {
             return translateExpressionWithParen(ast.child(expression, 1)) + ' mod ' + translateExpressionWithParen(ast.child(expression, 2));
         } else if (ast.value(ast.child(expression, 0)) === 'int32-compare') {
             return 'if ' + translateExpressionWithParen(ast.child(expression, 1)) + ' < ' + translateExpressionWithParen(ast.child(expression, 3)) + ' then ' + translateExpressionWithParen(ast.child(expression, 2)) + ' else ' + translateExpressionWithParen(ast.child(expression, 4));
+        } else if (ast.contains(constructorNames, ast.value(ast.child(expression, 0)))) {
+            return translateConstructor(expression);
         } else {
             return ast.join(ast.map(expression, translateExpressionWithParen), ' ');
         }
@@ -92,8 +96,12 @@ var constructorTranslator = function (typeParameters) {
                     return parameter;
                 }
             });
+
+            constructorNames = ast.push(constructorNames, ast.value(ast.child(expression, 0)));
+
             return ast.value(ast.child(expression, 0)) + ' of ' + ast.join(parameters, ' * ');
         } else {
+            constructorNames = ast.push(constructorNames, ast.value(expression));
             return ast.value(expression);
         }
     };
