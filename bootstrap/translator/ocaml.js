@@ -3,6 +3,7 @@ var ast = require('../parser/ast');
 
 var constructorNames = ast.list();
 var mangledNames = {};
+var noArgumentFunctions = ast.list();
 
 var escapeNonAscii = function (name) {
     var newName = '';
@@ -66,7 +67,11 @@ var translateExpression = function (expression) {
         } else if (ast.contains(constructorNames, ast.value(ast.child(expression, 0)))) {
             return translateConstructor(expression);
         } else {
-            return ast.join(ast.map(expression, translateExpressionWithParen), ' ');
+            var extraArgument = '';
+            if (ast.contains(noArgumentFunctions, ast.value(ast.child(expression, 0)))) {
+                extraArgument = ' ()';
+            }
+            return ast.join(ast.map(expression, translateExpressionWithParen), ' ') + extraArgument;
         }
     } else {
         var name = ast.value(expression);
@@ -81,11 +86,15 @@ var translateExpression = function (expression) {
 var translateDefinition = function (definition, mangleName) {
     var name = ast.value(ast.child(definition, 1));
 
+    var parameters = ast.child(definition, 2);
+    if (ast.size(parameters) === 0) {
+        noArgumentFunctions = ast.push(noArgumentFunctions, name);
+    }
+
     if (mangleName) {
         name = mangle('fn', name);
     }
 
-    var parameters = ast.child(definition, 2);
     var expression = translateExpression(ast.child(definition, 3));
 
     var parameterString = '_';

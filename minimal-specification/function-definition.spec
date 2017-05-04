@@ -13,3 +13,8 @@ Recursive function
 | (define bar (a) (match a MyZero 0 (MyNext n) (bar n)))
 > (bar (MyNext (MyNext MyZero)))
 = 0
+
+Function with no arguments
+| (define constant () 22)
+> (constant)
+= 22
