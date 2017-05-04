@@ -174,7 +174,7 @@ var translateExport = function (definition) {
 
 var translateModuleEntry = function (definition) {
     if (ast.isList(definition)) {
-        if (ast.value(ast.child(definition, 0)) === 'define') {
+        if (ast.value(ast.child(definition, 0)) === 'def') {
             return translateDefinition(definition, true);
         } else if (ast.value(ast.child(definition, 0)) === 'export') {
             return translateExport(definition);

@@ -22,7 +22,7 @@ Written to be as easy as possible to implement in a wide range of languages and 
 **Language constructs:**
 * `1` (Int32 constants)
 * `(f 1)` (function application)
-* `(define sum (x y) (+ x y))` (define functions)
+* `(def sum (x y) (+ x y))` (define functions)
 * `(export sum (x y) (+ x y))` (define exported function with non-mangled name)
 * `(data (list a) Empty (Pair a (list a)))` (define type and constructors)
 * `True` (type construction)

@@ -19,10 +19,10 @@ Should allow defining maybe type
 = 1
 
 Should allow defining functions with non-latin characters
-| (define < (a b) a)
+| (def < (a b) a)
 > (< 3 2)
 = 3
 
-| (define 日本語 (a) a)
+| (def 日本語 (a) a)
 > (日本語 42)
 = 42

@@ -1,20 +1,20 @@
 Identity function
-| (define identity (a) a)
+| (def identity (a) a)
 > (identity 42)
 = 42
 
 Function with multiple arguments
-| (define foo (a b) b)
+| (def foo (a b) b)
 > (foo 42 33)
 = 33
 
 Recursive function
 | (data myCounter MyZero (MyNext myCounter))
-| (define bar (a) (match a MyZero 0 (MyNext n) (bar n)))
+| (def bar (a) (match a MyZero 0 (MyNext n) (bar n)))
 > (bar (MyNext (MyNext MyZero)))
 = 0
 
 Function with no arguments
-| (define constant () 22)
+| (def constant () 22)
 > (constant)
 = 22
