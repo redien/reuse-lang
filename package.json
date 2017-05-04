@@ -8,7 +8,8 @@
     "tap-spec": "^4.1.1"
   },
   "scripts": {
-    "test-bootstrap": "./spec-runner.sh minimal-specification bootstrap/eval.sh | ./node_modules/.bin/tap-spec"
+    "test-bootstrap": "./spec-runner.sh minimal-specification bootstrap/eval.sh | ./node_modules/.bin/tap-spec",
+    "test-minimal-interpreter": "./spec-runner.sh minimal-specification minimal-interpreter/eval.sh | ./node_modules/.bin/tap-spec"
   },
   "repository": {
     "type": "git",
