@@ -13,7 +13,7 @@ function testLine {
     tests=$((tests+1))
 
     if [ "$result" == "${3:2}" ]; then
-        echo ok $tests - ${1:2}
+        echo ok $tests - ${1:2} = $result
         passing=$((passing+1))
     else
         echo not ok $tests - expected \"${3:2}\" but got \"$result\"
