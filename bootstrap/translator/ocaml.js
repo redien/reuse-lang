@@ -164,8 +164,8 @@ var translateData = function (definition) {
     }
 
     var constructors = ast.join(ast.map(ast.slice(definition, 2), constructorTranslator(parameters)), ' | ');
-    parameters = ast.join(ast.map(parameters, function (p) { return '\'' + p; }), ' ');
-    return 'type ' + parameters + ' ' + name + ' = ' + constructors + ';;';
+    parameters = ast.join(ast.map(parameters, function (p) { return '\'' + p; }), ', ');
+    return 'type ' + (parameters.length > 0 ? '(' + parameters + ')' : '') + ' ' + name + ' = ' + constructors + ';;';
 };
 
 var translateExport = function (definition) {
