@@ -1,14 +1,9 @@
 #!/bin/bash
 
-current_path=$(pwd)
-cd $(dirname "$0")
+script_path=$(dirname "$0")
 
-build_output=$(./compile.sh "$1" "$2" "test")
-node -e "console.log(require('../generated/test/lib/js/src/source.js').execute())"
-
-if [ "$?" != "0" ]; then
-    echo Build output: >&2
-    echo $build_output >&2
-fi
-
-cd $current_path
+mkdir -p $script_path/../generated/
+lisp_source=$script_path/../generated/boostrap-eval.lisp
+echo "$1 (export execute () $2)" > $lisp_source
+$script_path/compile-library.sh $lisp_source $script_path/../generated/boostrap-eval.js
+node -e "console.log(require('$script_path/../generated/boostrap-eval.js').execute())"

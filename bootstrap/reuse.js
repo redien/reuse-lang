@@ -26,9 +26,19 @@ if (!fs.existsSync(__dirname + '/../generated/' + process.argv[3] + '')) {
 if (!fs.existsSync(__dirname + '/../generated/' + process.argv[3] + '/src')) {
     fs.mkdirSync(__dirname + '/../generated/' + process.argv[3] + '/src');
 }
-
 var source = fs.readFileSync(process.argv[2], 'utf8');
 var compiled = translate(source);
+
+if (compiled.errors) {
+    compiled.errors.forEach(function (error) {
+        console.error(error.message);
+        console.error('at line', error.line, 'and column', error.column);
+    });
+    process.exit(1);
+}
+
 compiled.forEach(function (entry) {
-    fs.writeFileSync(__dirname + '/../generated/' + process.argv[3] + '/' + entry.filename, entry.contents, 'utf8');
+    var path = __dirname + '/../generated/' + process.argv[3] + '/' + entry.filename;
+    console.error('writing file', path);
+    fs.writeFileSync(path, entry.contents, 'utf8');
 });

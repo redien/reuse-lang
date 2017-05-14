@@ -127,6 +127,14 @@ describe('parser.parse', function () {
     });
 
     it('should ignore extra leading whitespace', function () {
+        var input = '\na';
+
+        var expression = parseSingleExpression(input);
+
+        ast.value(expression).should.equal('a');
+    });
+
+    it('should ignore extra leading whitespace', function () {
         var input = '   a';
 
         var expression = parseSingleExpression(input);

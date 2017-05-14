@@ -54,3 +54,7 @@ echo 1..$tests
 echo \# tests $tests
 echo \# pass  $passing
 echo \# fail  $failing
+
+if [ "$failing" != "0" ]; then
+    exit 1
+fi

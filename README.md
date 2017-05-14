@@ -1,6 +1,7 @@
 
 # Reuse
 * Purely Functional
+* Eagerly Evaluated
 * Immutable Datastructures
 * Strong Static Typing
 * Algebraic Data Types
@@ -13,11 +14,12 @@ Written to be as easy as possible to implement in a wide range of languages and 
 * Garbage Collection
 * No closures
 * Immutable data
-* Strong dynamic typing
 * Algebraic Data Types
-* Int32 is the only primitive type.
+* Int32 is the only primitive type
 * Tail-call optimization
-* Language is a subset of Reuse-2 and Reuse-3
+* Function declaration order is significant
+* Proper subset of the extended language
+* Target language for the extended language which compiles easily to many host languages
 
 **Language constructs:**
 * `1` (Int32 constants)
@@ -43,7 +45,6 @@ Adds additional language features.
 * Macros
 * Pattern matching
 * Standard library
-* Language is a subset of Reuse-3
 
 **Language constructs:**
 * `(let (x 1 y 2) (+ x y))` (lexical bind)
@@ -51,8 +52,18 @@ Adds additional language features.
 * `(if True 1 2)` (if-expression)
 
 # Bootstrapping
-1. Transpiler of minimal reuse to host language
-2. Interpreter of minimal reuse implemented in itself
-3. Transpiler for extended reuse to and in minimal
-4. Transpiler of extended reuse to minimal in extended.
-5. Interpreter of extended reuse implemented in itself
+1. Compiler of minimal reuse to bootstrap language (OCaml on top of Javascript)
+2. Reader/Printer
+3. Rewriter for full pattern matching
+4. Unification
+5. Inference
+6. Closure rewriter for minimal reuse (makes implementing an interpreter easier.)
+7. Some way of extending the compiler, either through macros or some API.
+8. Write compiler with several backends
+
+```
+        ??? (reuse)   Reuse (mini-reuse)     Bootstrap (js)  Buckescript           Node.js
+Macros??    ->    Reuse    ->    Minimal-Reuse    ->    Ocaml    ->    Javascript    ->    *
+
+\* is evaluation
+```

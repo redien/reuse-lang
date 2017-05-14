@@ -3,6 +3,7 @@ var ast = require('./ast');
 var Immutable = require('immutable');
 
 var SPACE_CHARACTER = ' ';
+var NEWLINE_CHARACTER = '\n';
 var START_PARENTHESIS_CHARACTER = '(';
 var END_PARENTHESIS_CHARACTER = ')';
 
@@ -18,7 +19,8 @@ var nextCharacterIs = function (character, input, index) {
 };
 
 var skipWhitespace = function (input, index) {
-    while (nextCharacterIs(SPACE_CHARACTER, input, index)) {
+    while (nextCharacterIs(SPACE_CHARACTER, input, index)
+        || nextCharacterIs(NEWLINE_CHARACTER, input, index)) {
         index += 1;
     }
     return index;
