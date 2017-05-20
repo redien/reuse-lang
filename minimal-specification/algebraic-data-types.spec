@@ -13,3 +13,9 @@ Multiple type parameters
 | (data (myType a b) (MyConstructor a b))
 > (match (MyConstructor 2 Singleton) (MyConstructor i s) i)
 = 2
+
+Nested types
+| (data (myList a) MyEmpty (MyPair a (myList a)))
+| (data (myType a) (MyConstructor (myList (myType a))) (MyValue a))
+> (match (MyConstructor (MyPair (MyValue 2) MyEmpty)) (MyConstructor l) (match l MyEmpty 0 (MyPair f r) (match f (MyValue a) a (MyConstructor ignored) 0)))
+= 2

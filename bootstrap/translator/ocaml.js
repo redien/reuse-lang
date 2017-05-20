@@ -106,9 +106,9 @@ var translateDefinition = function (definition, mangleName) {
 };
 
 var typeTranslator = function (typeParameters) {
-    return function (type) {
+    var self = function (type) {
         if (ast.isList(type)) {
-            var parameters = ast.map(ast.slice(type, 1), translateExpression);
+            var parameters = ast.map(ast.slice(type, 1), self);
 
             parameters = ast.map(parameters, function (parameter) {
                 if (ast.contains(typeParameters, parameter)) {
@@ -120,9 +120,11 @@ var typeTranslator = function (typeParameters) {
 
             return ast.join(parameters, ' ') + ' ' + translateExpression(ast.child(type, 0));
         } else {
-            return translateExpression(type, 0);
+            return translateExpression(type);
         }
     };
+
+    return self;
 };
 
 var constructorTranslator = function (typeParameters) {
