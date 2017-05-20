@@ -118,7 +118,7 @@ var typeTranslator = function (typeParameters) {
                 }
             });
 
-            return ast.join(parameters, ' ') + ' ' + translateExpression(ast.child(type, 0));
+            return '(' + ast.join(parameters, ', ') + ')' + ' ' + translateExpression(ast.child(type, 0));
         } else {
             return translateExpression(type);
         }
