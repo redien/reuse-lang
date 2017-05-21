@@ -152,6 +152,14 @@ describe('parser.parse', function () {
         ast.value(ast.child(expression, 0)).should.equal('a');
     });
 
+    it('should ignore extra trailing whitespace', function () {
+        var input = 'a\n';
+
+        var expression = parseSingleExpression(input);
+
+        ast.value(expression).should.equal('a');
+    });
+
     // TODO: Replace column/row information with index as column/row can be
     // calculated given the input string and an index.
     describe('Errors', function () {

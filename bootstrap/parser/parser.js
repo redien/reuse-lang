@@ -18,9 +18,13 @@ var nextCharacterIs = function (character, input, index) {
     return index < input.length && character === input[index];
 };
 
+var nextCharacterIsWhitespace = function (input, index) {
+    return nextCharacterIs(SPACE_CHARACTER, input, index)
+        || nextCharacterIs(NEWLINE_CHARACTER, input, index);
+};
+
 var skipWhitespace = function (input, index) {
-    while (nextCharacterIs(SPACE_CHARACTER, input, index)
-        || nextCharacterIs(NEWLINE_CHARACTER, input, index)) {
+    while (nextCharacterIsWhitespace(input, index)) {
         index += 1;
     }
     return index;
@@ -75,7 +79,7 @@ var parseListBody = function (input, index) {
 var parseAtom = function (input, index) {
     var start = index;
     while (index < input.length
-        && !nextCharacterIs(SPACE_CHARACTER, input, index)
+        && !nextCharacterIsWhitespace(input, index)
         && !nextCharacterIs(END_PARENTHESIS_CHARACTER, input, index)) {
         index += 1;
     }
