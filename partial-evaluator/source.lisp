@@ -150,7 +150,7 @@
                                                                (Pair tokens subExpression) (ParseNext tokens (Cons (Expression subExpression) expression))))))
 
 (def parse (tokens)
-    (Expression (second (parsing-reduce tokens Empty parse-next))))
+    (second (parsing-reduce tokens Empty parse-next)))
 
 (def stringify-list (asts string stringify)
     (match asts
@@ -165,4 +165,4 @@
         ParseError (Cons 63 string)))
 
 (export main (source)
-        (stringify (parse (reverse (tokenize source))) Empty))
+        (stringify-list (parse (reverse (tokenize source))) Empty stringify))
