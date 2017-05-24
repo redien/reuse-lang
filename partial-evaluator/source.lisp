@@ -35,10 +35,13 @@
 (def reverse (list)
    (reverse' list Empty))
 
-(def concat (first second)
+(def concat' (first second)
     (match first
         Empty second
-        (Cons char rest) (concat rest (Cons char second))))
+        (Cons char rest) (concat' rest (Cons char second))))
+
+(def concat (first second)
+    (concat' (reverse first) second))
 
 (def consuming-reduce (source collector reducer)
     (match source
@@ -116,7 +119,7 @@
            Empty (Pair Empty tokens))))))))
 
 (def tokenize (source)
-    (second (consuming-reduce source Empty tokenize-next)))
+    (reverse (second (consuming-reduce source Empty tokenize-next))))
 
 (data (ast name value) (Expression (list (ast name value)))
                        (Symbol name)
@@ -152,17 +155,25 @@
 (def parse (tokens)
     (second (parsing-reduce tokens Empty parse-next)))
 
+(def stringify-list-insert-space (asts string stringify)
+    (match asts
+           Empty string
+           (Cons expression rest) (stringify-list-insert-space rest (stringify expression (Cons 32 string)) stringify)))
+
 (def stringify-list (asts string stringify)
     (match asts
            Empty string
-           (Cons expression rest) (stringify expression (stringify-list rest string stringify))))
+           (Cons expression rest) (stringify-list-insert-space rest (stringify expression string) stringify)))
 
-(def stringify (ast string)
+(def stringify' (ast string)
     (match ast
-        (Expression asts) (Cons 40 (stringify-list asts (Cons 41 string) stringify))
-        (Symbol name) (Cons 32 (concat (reverse name) string))
-        (Int32 name) (Cons 32 (concat (reverse name) string))
+        (Expression asts) (Cons 40 (stringify-list (reverse asts) (Cons 41 string) stringify'))
+        (Symbol name) (concat name string)
+        (Int32 name) (concat name string)
         ParseError (Cons 63 string)))
 
+(def stringify (asts)
+    (stringify-list asts Empty stringify'))
+
 (export main (source)
-        (stringify-list (parse (reverse (tokenize source))) Empty stringify))
+        (stringify (parse (tokenize source))))
