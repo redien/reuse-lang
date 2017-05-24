@@ -40,7 +40,7 @@ var translateMatch = function (match) {
         cases.push(translateExpression(ast.child(match, i)) + ' -> ' + translateExpression(ast.child(match, i + 1)));
     }
 
-    return 'match ' + translateExpression(ast.child(match, 1)) + ' with ' + cases.join(' | ');
+    return '(match ' + translateExpression(ast.child(match, 1)) + ' with ' + cases.join(' | ') + ')';
 };
 
 var translateExpressionWithParen = function (expression) {

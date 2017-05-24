@@ -24,3 +24,9 @@ Nested types with multiple type parameters
 | (data (myType a b) (MyOne (myType a b)) MyNone)
 > (match (MyOne (MyOne MyNone)) (MyOne o) 5 MyNone 0)
 = 5
+
+Nested match expressions
+| (data (first a) (First a))
+| (data (second a b) (Second a) (Third b))
+> (match (Second (First 6)) (Second a) (match a (First a) a) (Third b) 0)
+= 6
