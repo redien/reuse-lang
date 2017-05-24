@@ -123,20 +123,6 @@
                        (Int32 value)
                        ParseError)
 
-(def add-to-expression (expression item)
-    (match expression
-        (Expression list) (Expression (Cons item list))
-        (Symbol _) expression
-        (Int32 _) expression
-        ParseError expression))
-
-(def reverse-expression (expression)
-    (match expression
-        (Expression list) (Expression (reverse list))
-        (Symbol _) expression
-        (Int32 _) expression
-        ParseError expression))
-
 (data (parse-result a b) (ParseNext a b)
                          (ParseStop a b))
 
@@ -154,17 +140,17 @@
 
 (def parse-next (tokens expression)
      (match tokens
-            Empty (ParseStop Empty expression)
+            Empty (ParseStop Empty (reverse expression))
             (Cons token rest) (match token
-                                     CloseBracketToken  (ParseStop rest expression)
-                                     (SymbolToken name) (ParseNext rest (add-to-expression expression (Symbol name)))
-                                     (Int32Token value) (ParseNext rest (add-to-expression expression (Int32 value)))
-                                     ErrorToken         (ParseStop rest (add-to-expression expression ParseError))
-                                     OpenBracketToken   (match (parsing-reduce rest (Expression Empty) parse-next)
-                                                               (Pair tokens subExpression) (ParseNext tokens (add-to-expression expression (reverse-expression subExpression)))))))
+                                     CloseBracketToken  (ParseStop rest (reverse expression))
+                                     (SymbolToken name) (ParseNext rest (Cons (Symbol name) expression))
+                                     (Int32Token value) (ParseNext rest (Cons (Int32 value) expression))
+                                     ErrorToken         (ParseStop rest (Cons ParseError expression))
+                                     OpenBracketToken   (match (parsing-reduce rest Empty parse-next)
+                                                               (Pair tokens subExpression) (ParseNext tokens (Cons (Expression subExpression) expression))))))
 
 (def parse (tokens)
-    (second (parsing-reduce tokens (Expression Empty) parse-next)))
+    (Expression (second (parsing-reduce tokens Empty parse-next))))
 
 (def stringify-list (asts string stringify)
     (match asts
