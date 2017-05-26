@@ -23,13 +23,13 @@ function unicodePointsFromString(str) {
 }
 
 function stringToList(str) {
-    var list = 0;
+    var list = Empty;
     var points = unicodePointsFromString(str);
 
     for (var i = points.length - 1; i >= 0; --i) {
         var point = points[i];
         if (point !== undefined) {
-            list = [point, list];
+            list = {type: Cons, values:[point, list]};
         }
     }
 
@@ -39,9 +39,9 @@ function stringToList(str) {
 function listToString(list) {
     var str = '';
 
-    while (list !== 0) {
-        str += String.fromCodePoint(list[0]);
-        list = list[1];
+    while (list !== Empty) {
+        str += String.fromCodePoint(list.values[0]);
+        list = list.values[1];
     }
 
     return str;
