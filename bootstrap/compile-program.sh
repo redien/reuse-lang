@@ -29,7 +29,7 @@ function stringToList(str) {
     for (var i = points.length - 1; i >= 0; --i) {
         var point = points[i];
         if (point !== undefined) {
-            list = {type: Cons, values:[point, list]};
+            list = Cons(point, list);
         }
     }
 
@@ -39,7 +39,7 @@ function stringToList(str) {
 function listToString(list) {
     var str = '';
 
-    while (list !== Empty) {
+    while (list.type !== 'Empty') {
         str += String.fromCodePoint(list.values[0]);
         list = list.values[1];
     }

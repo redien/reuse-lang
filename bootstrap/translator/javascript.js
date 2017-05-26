@@ -20,13 +20,7 @@ var escapeNonAscii = function (name) {
 };
 
 var translateConstructorVariables = function (variables) {
-    var result = '';
-
-    for (var i = 0; i < ast.size(variables); ++i) {
-        result += 'var ' + escapeNonAscii(ast.value(ast.child(variables, i))) + '=$.values[' + i + '];';
-    }
-
-    return result;
+    return ast.join(ast.map(variables, translateExpression));
 };
 
 var translateMatch = function (match) {
@@ -35,13 +29,13 @@ var translateMatch = function (match) {
     for (var i = 2; i < ast.size(match); i += 2) {
         var _constructor = ast.child(match, i);
         if (ast.isList(_constructor)) {
-            cases.push('case ' + escapeNonAscii(ast.value(ast.child(_constructor, 0))) + ':' + translateConstructorVariables(ast.slice(_constructor, 1)) + 'return ' + translateExpression(ast.child(match, i + 1)) + ';');
+            cases.push(escapeNonAscii(ast.value(ast.child(_constructor, 0))) + ':function(' + translateConstructorVariables(ast.slice(_constructor, 1)) + '){return ' + translateExpression(ast.child(match, i + 1)) + ';}');
         } else {
-            cases.push('case ' + escapeNonAscii(ast.value(_constructor)) + ':return ' + translateExpression(ast.child(match, i + 1)) + ';');
+            cases.push(escapeNonAscii(ast.value(_constructor)) + ':function(){return ' + translateExpression(ast.child(match, i + 1)) + ';}');
         }
     }
 
-    return '(function($){switch($.type){' + cases.join('') + '}})(' + translateExpression(ast.child(match, 1)) + ')';
+    return 'match(' + translateExpression(ast.child(match, 1)) + ',{' + cases.join(',') + '})';
 };
 
 var translateExpression = function (expression) {
@@ -87,9 +81,11 @@ var translateDefinition = function (definition, exportStatement) {
 
 var translateDataConstructor = function (expression) {
     if (ast.isList(expression)) {
-        return 'var ' + escapeNonAscii(ast.value(ast.child(expression, 0))) + '=function _self(){return {type:_self,values:arguments}};';
+        var name = escapeNonAscii(ast.value(ast.child(expression, 0)));
+        return 'var ' + name + '=function(){return {type:"' + name + '",values:arguments}};';
     } else {
-        return 'var ' + escapeNonAscii(ast.value(expression)) + '={};' + escapeNonAscii(ast.value(expression)) + '.type=' + escapeNonAscii(ast.value(expression)) + ';';
+        var name = escapeNonAscii(ast.value(expression));
+        return 'var ' + name + '={};' + name + '.type="' + name + '";';
     }
 };
 
@@ -115,8 +111,10 @@ var translateModule = function (definitions) {
     return ast.join(ast.map(definitions, translateModuleEntry), '\n');
 };
 
+var runtime = 'function match(expression, cases) {return cases[expression.type].apply(null,expression.values);}\n';
+
 module.exports.translate = function (expression) {
     return [
-        {filename: 'src/source.js', contents: translateModule(expression)}
+        {filename: 'src/source.js', contents: runtime + translateModule(expression)}
     ];
 };
