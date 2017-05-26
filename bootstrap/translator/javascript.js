@@ -10,7 +10,7 @@ var escapeNonAscii = function (name) {
     for (var i = 0; i < name.length; ++i) {
         var char = name.charCodeAt(i);
 
-        if ((char >= 65 && char <= 90) || (char >= 97 && char <= 122))  {
+        if ((char >= 65 && char <= 90) || (char >= 97 && char <= 122) || (char >= 48 && char <= 57))  {
             newName += String.fromCharCode(char);
         } else {
             newName += '_' + char;
