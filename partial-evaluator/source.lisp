@@ -49,6 +49,16 @@
         (Cons _ __) (match (reducer source collector)
                            (Pair source collector) (consuming-reduce source collector reducer))))
 
+(data (haltable-consuming-reduce a b) (Next a b)
+                                      (Halt a b))
+
+(def haltable-consuming-reduce (source collector reducer)
+   (match source
+       Empty (Pair source collector)
+       (Cons _ __) (match (reducer source collector)
+                          (Next source collector) (haltable-consuming-reduce source collector reducer)
+                          (Halt source collector) (Pair source collector))))
+
 (data (token a b) (SymbolToken (list a))
                   (Int32Token b)
                   OpenBracketToken
@@ -126,34 +136,19 @@
                        (Int32 value)
                        ParseError)
 
-(data (parse-result a b) (ParseNext a b)
-                         (ParseStop a b))
-
-(def parse-result-expression (result)
-    (match result
-        (ParseNext _ expression) expression
-        (ParseStop _ expression) expression))
-
-(def parsing-reduce (source collector reducer)
-    (match source
-        Empty (Pair source collector)
-        (Cons _ __) (match (reducer source collector)
-                           (ParseNext source collector) (parsing-reduce source collector reducer)
-                           (ParseStop source collector) (Pair source collector))))
-
 (def parse-next (tokens expression)
      (match tokens
-            Empty (ParseStop Empty (reverse expression))
+            Empty (Halt Empty (reverse expression))
             (Cons token rest) (match token
-                                     CloseBracketToken  (ParseStop rest (reverse expression))
-                                     (SymbolToken name) (ParseNext rest (Cons (Symbol name) expression))
-                                     (Int32Token value) (ParseNext rest (Cons (Int32 value) expression))
-                                     ErrorToken         (ParseStop rest (Cons ParseError expression))
-                                     OpenBracketToken   (match (parsing-reduce rest Empty parse-next)
-                                                               (Pair tokens subExpression) (ParseNext tokens (Cons (Expression subExpression) expression))))))
+                                     CloseBracketToken  (Halt rest (reverse expression))
+                                     (SymbolToken name) (Next rest (Cons (Symbol name) expression))
+                                     (Int32Token value) (Next rest (Cons (Int32 value) expression))
+                                     ErrorToken         (Halt rest (Cons ParseError expression))
+                                     OpenBracketToken   (match (haltable-consuming-reduce rest Empty parse-next)
+                                                               (Pair tokens subExpression) (Next tokens (Cons (Expression subExpression) expression))))))
 
 (def parse (tokens)
-    (second (parsing-reduce tokens Empty parse-next)))
+    (second (haltable-consuming-reduce tokens Empty parse-next)))
 
 (def stringify-list-insert-space (asts string stringify)
     (match asts
@@ -176,4 +171,4 @@
     (stringify-list asts Empty stringify'))
 
 (export main (source)
-        (stringify (parse (tokenize source))))
+    (stringify (parse (tokenize source))))
