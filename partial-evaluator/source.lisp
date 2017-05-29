@@ -5,6 +5,8 @@
 (data (pair a b) (Pair a b))
 (def first (pair) (match pair (Pair a b) a))
 (def second (pair) (match pair (Pair a b) b))
+(def on-first (f pair) (match pair (Pair a b) (Pair (f a) b)))
+(def on-second (f pair) (match pair (Pair a b) (Pair a (f b))))
 
 (data boolean True False)
 
@@ -29,7 +31,7 @@
 
 (def reverse' (list newlist)
     (match list
-           Empty newlist
+           Empty             newlist
            (Cons first rest) (reverse' rest (Cons first newlist))))
 
 (def reverse (list)
@@ -37,15 +39,31 @@
 
 (def concat' (first second)
     (match first
-        Empty second
+        Empty            second
         (Cons char rest) (concat' rest (Cons char second))))
 
 (def concat (first second)
     (concat' (reverse first) second))
 
+(data (closure f s) (Closure f s))
+(def apply1 (closure x) (match closure (Closure f s) (f s x)))
+(def apply2 (closure x y) (match closure (Closure f s) (f s x y)))
+
+(def map (closure list)
+    (match list
+           Empty             Empty
+           (Cons first rest) (Cons (apply1 closure first) (map closure rest))))
+
+(def map-with-state (closure collection state)
+   (match collection
+          Empty           (Pair Empty state)
+          (Cons ast rest) (match (apply2 closure ast state)
+                                 (Pair ast state) (match (map-with-state closure rest state)
+                                                         (Pair rest state) (Pair (Cons ast rest) state)))))
+
 (def consuming-reduce (source collector reducer)
     (match source
-        Empty (Pair source collector)
+        Empty       (Pair source collector)
         (Cons _ __) (match (reducer source collector)
                            (Pair source collector) (consuming-reduce source collector reducer))))
 
@@ -54,7 +72,7 @@
 
 (def haltable-consuming-reduce (source collector reducer)
    (match source
-       Empty (Pair source collector)
+       Empty       (Pair source collector)
        (Cons _ __) (match (reducer source collector)
                           (Next source collector) (haltable-consuming-reduce source collector reducer)
                           (Halt source collector) (Pair source collector))))
@@ -77,19 +95,19 @@
 
 (def is-first-char-of (source predicate)
      (match source
-            Empty False
+            Empty         False
             (Cons char _) (predicate char)))
 
 (def read-while' (source accumulator predicate)
     (match source
-           Empty (Pair source accumulator)
+           Empty            (Pair source accumulator)
            (Cons char rest) (match (predicate char)
-                                   True (read-while' rest (Cons char accumulator) predicate)
+                                   True  (read-while' rest (Cons char accumulator) predicate)
                                    False (Pair source accumulator))))
 
 (def read-while (source accumulator predicate)
     (match (read-while' source accumulator predicate)
-        (Pair source string) (Pair source (reverse string))))
+           (Pair source string) (Pair source (reverse string))))
 
 (def read-symbol-token (source tokens)
     (match (read-while source Empty symbol-character?)
@@ -105,7 +123,7 @@
 
 (def read-char-token (source tokens token)
     (match source
-           Empty (Pair Empty tokens)
+           Empty         (Pair Empty tokens)
            (Cons _ rest) (Pair rest (Cons token tokens))))
 
 (def tokenize-next (source tokens)
@@ -126,7 +144,7 @@
            False
     (match source
            (Cons _ __) (Pair source (Cons ErrorToken tokens))
-           Empty (Pair Empty tokens))))))))
+           Empty       (Pair Empty tokens))))))))
 
 (def tokenize (source)
     (reverse (second (consuming-reduce source Empty tokenize-next))))
@@ -152,23 +170,52 @@
 
 (def stringify-list-insert-space (asts string stringify)
     (match asts
-           Empty string
+           Empty                  string
            (Cons expression rest) (stringify-list-insert-space rest (stringify expression (Cons 32 string)) stringify)))
 
 (def stringify-list (asts string stringify)
     (match asts
-           Empty string
+           Empty                  string
            (Cons expression rest) (stringify-list-insert-space rest (stringify expression string) stringify)))
 
 (def stringify' (ast string)
     (match ast
         (Expression asts) (Cons 40 (stringify-list (reverse asts) (Cons 41 string) stringify'))
-        (Symbol name) (concat name string)
-        (Int32 name) (concat name string)
-        ParseError (Cons 63 string)))
+        (Symbol name)     (concat name string)
+        (Int32 name)      (concat name string)
+        ParseError        (Cons 63 string)))
 
 (def stringify (asts)
     (stringify-list asts Empty stringify'))
 
+(data (transform-state a) (TransformState (list a)))
+(def push-parent (state parent)
+    (match state
+           (TransformState heritage)
+           (TransformState (Cons parent heritage))))
+(def pop-parent (state)
+   (match state
+          (TransformState heritage)
+          (TransformState (match heritage
+                                 (Cons first rest) rest
+                                 Empty             Empty))))
+
+(def wrap-with-expression (pair)
+    (match pair
+           (Pair asts state) (Pair (Expression asts) state)))
+
+(def transform (transformer ast state)
+    (match ast
+           (Expression children) (on-second pop-parent (wrap-with-expression (map-with-state (Closure transform transformer) children (push-parent state ast))))
+           (Symbol _)            (transformer ast state)
+           (Int32 _)             (transformer ast state)
+           ParseError            (Pair ParseError state)))
+
+(def identity (ast state) (Pair ast state))
+
+(def partial-eval (asts)
+    (match (map-with-state (Closure transform identity) asts (TransformState Empty))
+           (Pair asts state) asts))
+
 (export main (source)
-    (stringify (parse (tokenize source))))
+    (stringify (partial-eval (parse (tokenize source)))))
