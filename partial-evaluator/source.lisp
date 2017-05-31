@@ -205,13 +205,20 @@
            (Pair asts state) (Pair (Expression asts) state)))
 
 (def transform (transformer ast state)
-    (match ast
-           (Expression children) (on-second pop-parent (wrap-with-expression (map-with-state (Closure transform transformer) children (push-parent state ast))))
-           (Symbol _)            (transformer ast state)
-           (Int32 _)             (transformer ast state)
-           ParseError            (Pair ParseError state)))
+     (match (transformer ast state)
+            (Some pair) pair
+            None        (match ast
+                               (Expression children) (on-second pop-parent (wrap-with-expression (map-with-state (Closure transform transformer) children (push-parent state ast))))
+                               (Symbol _)            (Pair ast state)
+                               (Int32 _)             (Pair ast state)
+                               ParseError            (Pair ast state))))
 
-(def identity (ast state) (Pair ast state))
+(def identity (ast state)
+     (match ast
+            (Symbol _)     None
+            (Int32 _)      None
+            (Expression _) None
+            ParseError     None))
 
 (def partial-eval (asts)
     (match (map-with-state (Closure transform identity) asts (TransformState Empty))
