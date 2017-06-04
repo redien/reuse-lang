@@ -12,7 +12,7 @@
   },
   "scripts": {
     "test-bootstrap": "./spec-runner.sh minimal-specification \"./eval.sh bootstrap\" | tap-spec",
-    "test-partial-evaluator": "./spec-runner.sh partial-evaluator-specification \"./eval.sh partial-evaluator\" | tap-spec && ./spec-runner.sh minimal-specification \"./eval.sh partial-evaluator\" | tap-spec"
+    "test-closure-rewriter": "./spec-runner.sh closure-rewriter \"./eval.sh closure-rewriter\" | tap-spec && ./spec-runner.sh minimal-specification \"./eval.sh closure-rewriter\" | tap-spec"
   },
   "repository": {
     "type": "git",

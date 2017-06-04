@@ -213,15 +213,15 @@
                                (Int32 _)             (Pair ast state)
                                ParseError            (Pair ast state))))
 
-(def identity (ast state)
+(def rewrite-anonymous-functions (ast state)
      (match ast
-            (Symbol _)     None
-            (Int32 _)      None
-            (Expression _) None
-            ParseError     None))
+            (Symbol _)            None
+            (Int32 _)             None
+            (Expression children) None
+            ParseError            None))
 
 (def partial-eval (asts)
-    (match (map-with-state (Closure transform identity) asts (TransformState Empty))
+    (match (map-with-state (Closure transform rewrite-anonymous-functions) asts (TransformState Empty))
            (Pair asts state) asts))
 
 (export main (source)
