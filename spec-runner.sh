@@ -31,7 +31,7 @@ echo TAP version 13
 
 program=""
 
-for f in $spec/*
+for f in $spec/*.spec
 do
     while read line; do
         firstChar=${line:0:1}
