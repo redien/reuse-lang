@@ -14,7 +14,7 @@ $script_path/../node_modules/.bin/prettier --single-quote --no-semi --print-widt
 current_path=$(pwd)
 cd $script_path/../generated/bootstrap-ocaml
 npm install >&2
-npm run compile >&2
+node_modules/.bin/bsb >&2 || exit 1
 cd $current_path
 
 cp $script_path/../generated/bootstrap-javascript/src/source.js $2
