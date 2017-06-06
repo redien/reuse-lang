@@ -26,3 +26,8 @@ Should allow defining functions with non-latin characters
 | (def 日本語 (a) a)
 > (日本語 42)
 = 42
+
+Should allow defining variables with non-latin characters
+| (data (myType a) (MyPair a))
+> (match (MyPair 10) (MyPair 日本語) 日本語)
+= 10

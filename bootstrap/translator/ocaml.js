@@ -26,11 +26,7 @@ var mangle = function (prefix, name) {
 };
 
 var translateConstructor = function (expression) {
-    if (ast.isList(expression)) {
-        return translateExpression(ast.child(expression, 0)) + ' (' + ast.join(ast.map(ast.slice(expression, 1), translateExpression), ', ') + ')';
-    } else {
-        return translateExpression(expression);
-    }
+    return translateExpression(ast.child(expression, 0)) + ' (' + ast.join(ast.map(ast.slice(expression, 1), translateExpression), ', ') + ')';
 };
 
 var translateMatch = function (match) {
@@ -77,8 +73,10 @@ var translateExpression = function (expression) {
         var name = ast.value(expression);
         if (mangledNames[name]) {
             return mangledNames[name];
-        } else {
+        } else if (Number.isInteger(parseFloat(name))) {
             return name;
+        } else {
+            return escapeNonAscii(name);
         }
     }
 };
