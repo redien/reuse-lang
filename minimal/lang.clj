@@ -1,59 +1,4 @@
 
-(data (maybe a) None
-                (Some a))
-
-(data (pair a b) (Pair a b))
-(def first (pair) (match pair (Pair a b) a))
-(def second (pair) (match pair (Pair a b) b))
-(def on-first (f pair) (match pair (Pair a b) (Pair (f a) b)))
-(def on-second (f pair) (match pair (Pair a b) (Pair a (f b))))
-
-(data boolean True False)
-
-(def not (a) (match a
-                    True False
-                    False True))
-
-(def and (a b) (match a
-                      True b
-                      False False))
-
-(def or (a b) (match a
-                     True True
-                     False b))
-
-(def < (a b) (int32-compare a True b False))
-(def > (a b) (< b a))
-(def = (a b) (not (or (< a b) (> a b))))
-
-(data (list a) Empty
-               (Cons a (list a)))
-
-(def reverse' (list newlist)
-    (match list
-           Empty             newlist
-           (Cons first rest) (reverse' rest (Cons first newlist))))
-
-(def reverse (list)
-   (reverse' list Empty))
-
-(def concat' (first second)
-    (match first
-        Empty            second
-        (Cons char rest) (concat' rest (Cons char second))))
-
-(def concat (first second)
-    (concat' (reverse first) second))
-
-(data (closure f s) (Closure f s))
-(def apply1 (closure x) (match closure (Closure f s) (f s x)))
-(def apply2 (closure x y) (match closure (Closure f s) (f s x y)))
-
-(def map (closure list)
-    (match list
-           Empty             Empty
-           (Cons first rest) (Cons (apply1 closure first) (map closure rest))))
-
 (def map-with-state (closure collection state)
    (match collection
           Empty           (Pair Empty state)
@@ -188,64 +133,18 @@
 (def stringify (asts)
     (stringify-list asts Empty stringify'))
 
-(data (transform-state a) (TransformState (list a)))
-
-(def add-definition (state definition)
-     (match state
-            (TransformState definitions) (TransformState (Cons definition definitions))))
-
 (def wrap-with-expression (pair)
     (match pair
            (Pair asts state) (Pair (Expression asts) state)))
 
-(def transform (transformer ast state)
-     (match (transformer ast state)
-            (Some pair) pair
-            None        (match ast
-                               (Expression children) (wrap-with-expression (map-with-state (Closure transform transformer) children state))
-                               (Symbol _)            (Pair ast state)
-                               (Int32 _)             (Pair ast state)
-                               ParseError            (Pair ast state))))
-
-(def string-equal (a b)
-     (match a
-            (Cons a-char a-rest) (match b
-                                        (Cons b-char b-rest) (and (= a-char b-char) (string-equal a-rest b-rest))
-                                        Empty                False)
-            Empty                (match b
-                                        (Cons _ __) False
-                                        Empty       True)))
-
 (def symbol-name-is (symbol name)
-     (match symbol
-            (Symbol symbol-name) (string-equal symbol-name name)
-            (Int32 _)            False
-            (Expression _)       False
-            ParseError           False))
+    (match symbol
+           (Symbol symbol-name) (string-equal symbol-name name)
+           (Int32 _)            False
+           (Expression _)       False
+           ParseError           False))
 
 (def first-symbol-name-is (symbols name)
-     (match symbols
-            (Cons first rest) (symbol-name-is first name)
-            Empty             False))
-
-(def fun-string ()
-     (Cons 102 (Cons 117 (Cons 110 Empty))))
-
-(def transform-single-anonymous-function (ast state)
-     (Pair (Symbol (Cons 55 Empty)) (add-definition state ast)))
-
-(def transform-anonymous-functions (ast state)
-     (match ast
-            (Symbol _)            None
-            (Int32 _)             None
-            (Expression children) (match (first-symbol-name-is children (fun-string))
-                                         True  (Some (transform-single-anonymous-function ast state))
-                                         False None)
-            ParseError            None))
-
-(def partial-eval (asts)
-    (match (map-with-state (Closure transform transform-anonymous-functions) asts (TransformState Empty))
-           (Pair asts state) asts))
-
-(export main (source)
-    (stringify (partial-eval (parse (tokenize source)))))
+    (match symbols
+           (Cons first rest) (symbol-name-is first name)
+           Empty             False))
