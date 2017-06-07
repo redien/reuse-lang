@@ -32,11 +32,15 @@
 (def open-bracket? (char) (= char 40))
 (def close-bracket? (char) (= char 41))
 (def int32-character? (char) (and (> char 47) (< char 58)))
+(def initial-symbol-character? (char)
+    (and (not (close-bracket? char))
+    (and (not (open-bracket? char))
+    (and (not (int32-character? char))
+         (not (whitespace? char))))))
 (def symbol-character? (char)
-  (and (not (close-bracket? char))
-  (and (not (open-bracket? char))
-  (and (not (int32-character? char))
-       (not (whitespace? char))))))
+    (and (not (close-bracket? char))
+    (and (not (open-bracket? char))
+         (not (whitespace? char)))))
 
 (def is-first-char-of (source predicate)
      (match source
@@ -84,7 +88,7 @@
     (match (is-first-char-of source int32-character?)
            True (read-int32-token source tokens)
            False
-    (match (is-first-char-of source symbol-character?)
+    (match (is-first-char-of source initial-symbol-character?)
            True (read-symbol-token source tokens)
            False
     (match source
