@@ -29,9 +29,9 @@ var translateMatch = function (match) {
     for (var i = 2; i < ast.size(match); i += 2) {
         var _constructor = ast.child(match, i);
         if (ast.isList(_constructor)) {
-            cases.push(escapeNonAscii(ast.value(ast.child(_constructor, 0))) + ':function(' + translateConstructorVariables(ast.slice(_constructor, 1)) + '){return ' + translateExpression(ast.child(match, i + 1)) + ';}');
+            cases.push(escapeNonAscii(ast.value(ast.child(_constructor, 0))) + ':(' + translateConstructorVariables(ast.slice(_constructor, 1)) + ') => ' + translateExpression(ast.child(match, i + 1)));
         } else {
-            cases.push(escapeNonAscii(ast.value(_constructor)) + ':function(){return ' + translateExpression(ast.child(match, i + 1)) + ';}');
+            cases.push(escapeNonAscii(ast.value(_constructor)) + ':() => ' + translateExpression(ast.child(match, i + 1)));
         }
     }
 
