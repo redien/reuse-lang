@@ -1,13 +1,4 @@
 
-(def transform (transformer ast state)
-     (match (transformer ast state)
-            (Some pair) pair
-            None        (match ast
-                               (Expression children) (wrap-with-expression (map-with-state (Closure transform transformer) children state))
-                               (Symbol _)            (Pair ast state)
-                               (Int32 _)             (Pair ast state)
-                               ParseError            (Pair ast state))))
-
 (data (transform-state a) (TransformState (list a)))
 
 (def add-definition (state definition)
