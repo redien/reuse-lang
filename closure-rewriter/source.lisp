@@ -189,16 +189,10 @@
     (stringify-list asts Empty stringify'))
 
 (data (transform-state a) (TransformState (list a)))
-(def push-parent (state parent)
-    (match state
-           (TransformState heritage)
-           (TransformState (Cons parent heritage))))
-(def pop-parent (state)
-   (match state
-          (TransformState heritage)
-          (TransformState (match heritage
-                                 (Cons first rest) rest
-                                 Empty             Empty))))
+
+(def add-definition (state definition)
+     (match state
+            (TransformState definitions) (TransformState (Cons definition definitions))))
 
 (def wrap-with-expression (pair)
     (match pair
@@ -208,20 +202,49 @@
      (match (transformer ast state)
             (Some pair) pair
             None        (match ast
-                               (Expression children) (on-second pop-parent (wrap-with-expression (map-with-state (Closure transform transformer) children (push-parent state ast))))
+                               (Expression children) (wrap-with-expression (map-with-state (Closure transform transformer) children state))
                                (Symbol _)            (Pair ast state)
                                (Int32 _)             (Pair ast state)
                                ParseError            (Pair ast state))))
 
-(def rewrite-anonymous-functions (ast state)
+(def string-equal (a b)
+     (match a
+            (Cons a-char a-rest) (match b
+                                        (Cons b-char b-rest) (and (= a-char b-char) (string-equal a-rest b-rest))
+                                        Empty                False)
+            Empty                (match b
+                                        (Cons _ __) False
+                                        Empty       True)))
+
+(def symbol-name-is (symbol name)
+     (match symbol
+            (Symbol symbol-name) (string-equal symbol-name name)
+            (Int32 _)            False
+            (Expression _)       False
+            ParseError           False))
+
+(def first-symbol-name-is (symbols name)
+     (match symbols
+            (Cons first rest) (symbol-name-is first name)
+            Empty             False))
+
+(def fun-string ()
+     (Cons 102 (Cons 117 (Cons 110 Empty))))
+
+(def transform-single-anonymous-function (ast state)
+     (Pair (Symbol (Cons 55 Empty)) (add-definition state ast)))
+
+(def transform-anonymous-functions (ast state)
      (match ast
             (Symbol _)            None
             (Int32 _)             None
-            (Expression children) None
+            (Expression children) (match (first-symbol-name-is children (fun-string))
+                                         True  (Some (transform-single-anonymous-function ast state))
+                                         False None)
             ParseError            None))
 
 (def partial-eval (asts)
-    (match (map-with-state (Closure transform rewrite-anonymous-functions) asts (TransformState Empty))
+    (match (map-with-state (Closure transform transform-anonymous-functions) asts (TransformState Empty))
            (Pair asts state) asts))
 
 (export main (source)
