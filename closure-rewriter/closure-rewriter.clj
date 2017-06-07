@@ -30,8 +30,8 @@
             ParseError            None))
 
 (def partial-eval (asts)
-    (match (map-with-state (Closure transform transform-anonymous-functions) asts (TransformState Empty))
-           (Pair asts state) asts))
+     (match (map-with-state (Closure transform transform-anonymous-functions) asts (TransformState Empty))
+            (Pair asts state) asts))
 
 (export main (source)
-    (stringify (partial-eval (parse (tokenize source)))))
+        (stringify (partial-eval (parse (tokenize source)))))
