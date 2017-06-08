@@ -13,9 +13,9 @@
      (match state
             (TransformState definitions _) definitions))
 
-(def add-definition (state definition)
+(def add-definitions (state new-definitions)
      (match state
-            (TransformState definitions counter) (TransformState (Cons definition definitions) counter)))
+            (TransformState definitions counter) (TransformState (concat new-definitions definitions) counter)))
 
 (def fun-string ()
      (Cons 102 (Cons 117 (Cons 110 Empty))))
@@ -34,7 +34,7 @@
 
 (def transform-single-anonymous-function (children state)
      (Pair (construct-new-symbol state)
-           (add-definition (inc-counter state) (rewrite-as-definition children state))))
+           (add-definitions (inc-counter state) (Cons (rewrite-as-definition children state) Empty))))
 
 (def transform-anonymous-functions (ast state)
      (match ast
