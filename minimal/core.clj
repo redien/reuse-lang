@@ -37,6 +37,16 @@
 (data (list a) Empty
                (Cons a (list a)))
 
+(def first (list)
+     (match list
+            (Cons x _) (Some x)
+            Empty      None))
+
+(def rest (list)
+     (match list
+            (Cons _ xs) xs
+            Empty       Empty))
+
 (def reverse' (list newlist)
      (match list
             Empty             newlist
