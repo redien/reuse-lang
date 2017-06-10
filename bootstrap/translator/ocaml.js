@@ -137,7 +137,7 @@ var constructorTranslator = function (typeParameters) {
                 }
             });
 
-            constructorNames = ast.push(constructorNames, translateExpression(ast.child(expression, 0)));
+            constructorNames = ast.push(constructorNames, ast.value(ast.child(expression, 0)));
 
             return translateExpression(ast.child(expression, 0)) + ' of ' + ast.join(parameters, ' * ');
         } else {

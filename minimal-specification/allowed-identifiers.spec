@@ -31,3 +31,8 @@ Should allow defining variables with non-latin characters
 | (data (myType a) (MyPair a))
 > (match (MyPair 10) (MyPair 日本語) 日本語)
 = 10
+
+Should allow defining constructors with non-latin characters
+| (data (myType a) (日本語 a))
+> (match (日本語 11) (日本語 x) x)
+= 11
