@@ -7,8 +7,8 @@ rm -R $script_path/../generated/bootstrap-ocaml/lib >/dev/null >&2
 rm -R $script_path/../generated/bootstrap-javascript >/dev/null >&2
 rm -R $2 >/dev/null >&2
 
-node $script_path/reuse.js $1 bootstrap-javascript javascript >&2
-node $script_path/reuse.js $1 bootstrap-ocaml ocaml >&2
+node $script_path/reuse.js $1 bootstrap-javascript javascript >&2 || exit 1
+node $script_path/reuse.js $1 bootstrap-ocaml ocaml >&2 || exit 1
 
 cat $script_path/../generated/bootstrap-ocaml/src/source.ml >&2
 echo >&2
