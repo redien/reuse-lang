@@ -2,8 +2,9 @@
 
 script_path=$(dirname "$0")
 
-rm -R $script_path/../generated/bootstrap-library/src >/dev/null >&2
-rm -R $script_path/../generated/bootstrap-library/lib >/dev/null >&2
+rm -R $script_path/../generated/bootstrap-ocaml/src >/dev/null >&2
+rm -R $script_path/../generated/bootstrap-ocaml/lib >/dev/null >&2
+rm -R $script_path/../generated/bootstrap-javascript >/dev/null >&2
 rm -R $2 >/dev/null >&2
 
 node $script_path/reuse.js $1 bootstrap-javascript javascript >&2
