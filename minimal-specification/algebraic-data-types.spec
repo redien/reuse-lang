@@ -49,7 +49,7 @@ Restricting constructor parameters to function types
 = 9
 
 Existential type parameters
-| (data (closure (E s) a) (Closure (fun (s) a) s))
+| (data (closure (exists s) a) (Closure (fun (s) a) s))
 | (data (pair a) (Pair a a))
 | (def apply (c) (match c (Closure f s) (f s)))
 | (def identity (x) x)
