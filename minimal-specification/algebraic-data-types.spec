@@ -30,3 +30,20 @@ Nested match expressions
 | (data (second a b) (Second a) (Third b))
 > (match (Second (First 6)) (Second a) (match a (First a) a) (Third b) 0)
 = 6
+
+Restricting constructor parameters to integers
+| (data intType (IntCons int32))
+> (match (IntCons 7) (IntCons x) x)
+= 7
+
+Restricting constructor parameters to user defined type
+| (data userDefined TypeConstant)
+| (data otherType (TypeCons userDefined))
+> (match (TypeCons TypeConstant) (TypeCons x) (match x TypeConstant 8))
+= 8
+
+Restricting constructor parameters to function types
+| (data (otherType a) (TypeCons (fun (a) a)))
+| (def identity (x) x)
+> (match (TypeCons identity) (TypeCons f) (f 9))
+= 9

@@ -112,19 +112,24 @@ var translateDefinition = function (definition, mangleName) {
 var typeTranslator = function (typeParameters) {
     var self = function (type) {
         if (ast.isList(type)) {
-            var parameters = ast.map(ast.slice(type, 1), self);
-
-            parameters = ast.map(parameters, function (parameter) {
-                if (ast.contains(typeParameters, parameter)) {
-                    return '\'' + parameter;
-                } else {
-                    return parameter;
-                }
-            });
-
-            return '(' + ast.join(parameters, ', ') + ')' + ' ' + translateExpression(ast.child(type, 0));
+            if (ast.value(ast.child(type, 0)) === 'fun') {
+                return '(' + ast.join(ast.map(ast.child(type, 1), self), ' -> ') + ' -> ' + self(ast.child(type, 2)) + ')';
+            } else {
+                var parameters = ast.map(ast.slice(type, 1), self);
+                return '(' + ast.join(parameters, ', ') + ')' + ' ' + translateExpression(ast.child(type, 0));
+            }
         } else {
-            return translateExpression(type);
+            var value = ast.value(type);
+
+            if (value === 'int32') {
+                return 'int';
+            } else {
+                if (ast.contains(typeParameters, value)) {
+                    return '\'' + value;
+                } else {
+                    return translateExpression(type);
+                }
+            }
         }
     };
 
