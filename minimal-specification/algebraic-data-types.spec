@@ -47,3 +47,12 @@ Restricting constructor parameters to function types
 | (def identity (x) x)
 > (match (TypeCons identity) (TypeCons f) (f 9))
 = 9
+
+Existential type parameters
+| (data (closure (E s) a) (Closure (fun (s) a) s))
+| (data (pair a) (Pair a a))
+| (def apply (c) (match c (Closure f s) (f s)))
+| (def identity (x) x)
+| (def first (p) (match p (Pair x y) x))
+> (apply (first (Pair (Closure identity 6) (Closure first (Pair 1 2)))))
+= 6

@@ -68,7 +68,7 @@ var translateExpression = function (expression) {
             return translateConstructor(expression);
         } else {
             var extraArgument = '';
-            if (ast.contains(noArgumentFunctions, ast.value(ast.child(expression, 0)))) {
+            if (ast.size(expression) === 1) {
                 extraArgument = ' ()';
             }
             return ast.join(ast.map(expression, translateExpressionWithParen), ' ') + extraArgument;
@@ -113,7 +113,8 @@ var typeTranslator = function (typeParameters) {
     var self = function (type) {
         if (ast.isList(type)) {
             if (ast.value(ast.child(type, 0)) === 'fun') {
-                return '(' + ast.join(ast.map(ast.child(type, 1), self), ' -> ') + ' -> ' + self(ast.child(type, 2)) + ')';
+                var parameterString = ast.join(ast.map(ast.child(type, 1), self), ' -> ');
+                return '(' + (parameterString.length > 0 ? parameterString : 'unit') + ' -> ' + self(ast.child(type, 2)) + ')';
             } else {
                 var parameters = ast.map(ast.slice(type, 1), self);
                 return '(' + ast.join(parameters, ', ') + ')' + ' ' + translateExpression(ast.child(type, 0));
@@ -158,6 +159,18 @@ var constructorTranslator = function (typeParameters) {
     };
 };
 
+var translateDataParameter = function (parameter) {
+    if (ast.isList(parameter)) {
+        return ast.value(ast.child(parameter, 1));
+    } else {
+        return ast.value(parameter);
+    }
+};
+
+var addSingleQuote = function (parameter) {
+    return '\'' + parameter;
+};
+
 var translateData = function (definition) {
     var name;
     var parameters = ast.list();
@@ -168,15 +181,17 @@ var translateData = function (definition) {
         name = ast.value(ast.child(list, 0));
         name = mangle('type', name);
 
-        parameters = ast.map(ast.slice(list, 1), translateExpression);
+        parameters = ast.slice(list, 1);
     } else {
         name = translateExpression(ast.child(definition, 1));
         name = mangle('type', name);
     }
 
+    parameters = ast.map(parameters, translateDataParameter);
+
     var constructors = ast.join(ast.map(ast.slice(definition, 2), constructorTranslator(parameters)), ' | ');
-    parameters = ast.join(ast.map(parameters, function (p) { return '\'' + p; }), ', ');
-    return 'type ' + (parameters.length > 0 ? '(' + parameters + ')' : '') + ' ' + name + ' = ' + constructors + ';;';
+    var parameterString = ast.join(ast.map(parameters, addSingleQuote), ', ');
+    return 'type' + (parameterString.length > 0 ? ' (' + parameterString + ')' : '') + ' ' + name + ' = ' + constructors + ';;';
 };
 
 var translateExport = function (definition) {

@@ -24,10 +24,3 @@ Calling functions passed as arguments
 | (def other (x) x)
 > (caller other 5)
 = 5
-
-Should be able to implement closures
-| (data (closure f s) (Closure f s))
-| (def apply (closure) (match closure (Closure f s) (f s)))
-| (def identity (x) x)
-> (apply (Closure identity 6))
-= 6
