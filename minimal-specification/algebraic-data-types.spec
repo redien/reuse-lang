@@ -54,5 +54,5 @@ Existential type parameters
 | (def apply (c) (match c (Closure f s) (f s)))
 | (def identity (x) x)
 | (def first (p) (match p (Pair x y) x))
-> (apply (first (Pair (Closure identity 6) (Closure first (Pair 1 2)))))
-= 6
+> (apply (first (Pair (Closure identity 10) (Closure first (Pair 1 2)))))
+= 10
