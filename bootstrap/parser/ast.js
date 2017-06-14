@@ -51,6 +51,10 @@ ast.map = function (list, f) {
     return list.set('value', list.get('value').map(f));
 };
 
+ast.filter = function (list, f) {
+    return list.set('value', list.get('value').filter(f));
+};
+
 ast.join = function (list, separator) {
     return list.get('value').join(separator);
 };

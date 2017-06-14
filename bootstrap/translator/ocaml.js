@@ -137,7 +137,7 @@ var typeTranslator = function (typeParameters) {
     return self;
 };
 
-var constructorTranslator = function (typeParameters) {
+var constructorTranslator = function (typeParameters, typeString) {
     return function (expression) {
         if (ast.isList(expression)) {
             var parameters = ast.map(ast.slice(expression, 1), typeTranslator(typeParameters));
@@ -151,7 +151,7 @@ var constructorTranslator = function (typeParameters) {
 
             constructorNames = ast.push(constructorNames, ast.value(ast.child(expression, 0)));
 
-            return translateExpression(ast.child(expression, 0)) + ' of ' + ast.join(parameters, ' * ');
+            return translateExpression(ast.child(expression, 0)) + ' : ' + ast.join(parameters, ' * ') + ' -> ' + typeString;
         } else {
             constructorNames = ast.push(constructorNames, translateExpression(expression));
             return translateExpression(expression);
@@ -187,11 +187,16 @@ var translateData = function (definition) {
         name = mangle('type', name);
     }
 
-    parameters = ast.map(parameters, translateDataParameter);
+    var parameterNames = ast.map(parameters, translateDataParameter);
+    var finalParameters = ast.map(ast.filter(parameters, function (parameter) {
+        return ast.isAtom(parameter);
+    }), translateDataParameter);
 
-    var constructors = ast.join(ast.map(ast.slice(definition, 2), constructorTranslator(parameters)), ' | ');
-    var parameterString = ast.join(ast.map(parameters, addSingleQuote), ', ');
-    return 'type' + (parameterString.length > 0 ? ' (' + parameterString + ')' : '') + ' ' + name + ' = ' + constructors + ';;';
+    var parameterString = ast.join(ast.map(finalParameters, addSingleQuote), ', ');
+    var typeString = (parameterString.length > 0 ? ' (' + parameterString + ')' : '') + ' ' + name;
+
+    var constructors = ast.join(ast.map(ast.slice(definition, 2), constructorTranslator(parameterNames, typeString)), ' | ');
+    return 'type' + typeString + ' = ' + constructors + ';;';
 };
 
 var translateExport = function (definition) {
