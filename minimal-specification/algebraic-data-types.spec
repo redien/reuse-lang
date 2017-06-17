@@ -56,3 +56,9 @@ Existential type parameters
 | (def first (p) (match p (Pair x y) x))
 > (apply (first (Pair (Closure identity 10) (Closure first (Pair 1 2)))))
 = 10
+
+Universal type parameters
+| (data (universal a) (Universal a))
+| (def destruct (u) (match u (Universal a) a))
+> (destruct (destruct (Universal (Universal 11))))
+= 11
