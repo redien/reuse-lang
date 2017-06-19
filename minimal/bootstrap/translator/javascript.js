@@ -1,5 +1,5 @@
 
-var ast = require('../parser/ast');
+var ast = require(__dirname + '/../../../parser/ast');
 
 var counter = 0;
 

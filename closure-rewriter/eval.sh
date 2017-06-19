@@ -2,9 +2,12 @@
 
 script_path=$(dirname "$0")
 
-mkdir -p $script_path/../generated/
-echo "$1 (def execute' () $2)" > $script_path/../generated/program-with-closures.lisp
+project_root=$script_path/..
+generated_folder=$project_root/generated
 
-$script_path/rewrite-closures.sh $script_path/../generated/program-with-closures.lisp $script_path/../generated/program-without-closures.lisp
+mkdir -p $generated_folder
+echo "$1 (def execute' () $2)" > $generated_folder/program-with-closures.lisp
 
-$script_path/../bootstrap/eval.sh "$(cat $script_path/../generated/program-without-closures.lisp)" "(execute')"
+$script_path/rewrite-closures.sh $generated_folder/program-with-closures.lisp $generated_folder/program-without-closures.lisp
+
+$project_root/minimal/bootstrap/eval.sh "$(cat $generated_folder/program-without-closures.lisp)" "(execute')"

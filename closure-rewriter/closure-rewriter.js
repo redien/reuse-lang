@@ -1,7 +1,7 @@
 
 var fs = require('fs');
-var ast = require(__dirname + '/../bootstrap/parser/ast');
-var parser = require(__dirname + '/../bootstrap/parser/parser');
+var ast = require(__dirname + '/../parser/ast');
+var parser = require(__dirname + '/../parser/parser');
 
 function translateDefinition(definition) {
     return definition;

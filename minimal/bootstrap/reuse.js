@@ -1,8 +1,12 @@
 
-var parser = require(__dirname + '/parser/parser');
-var ast = require(__dirname + '/parser/ast');
+var projectRoot = __dirname + '/../../';
+
+var parser = require(projectRoot + 'parser/parser');
+var ast = require(projectRoot + 'parser/ast');
 var Immutable = require('immutable');
 var fs = require('fs');
+
+var generatedFolder = projectRoot + 'generated/';
 
 var translate = function (expression) {
     var parseResult = parser.parse(expression);
@@ -15,16 +19,16 @@ var translate = function (expression) {
     return require(__dirname + '/translator/' + (process.argv[4] || 'ocaml')).translate(parseResult.ast);
 };
 
-if (!fs.existsSync(__dirname + '/../generated')) {
-    fs.mkdirSync(__dirname + '/../generated');
+if (!fs.existsSync(generatedFolder)) {
+    fs.mkdirSync(generatedFolder);
 }
 
-if (!fs.existsSync(__dirname + '/../generated/' + process.argv[3] + '')) {
-    fs.mkdirSync(__dirname + '/../generated/' + process.argv[3] + '');
+if (!fs.existsSync(generatedFolder + process.argv[3] + '')) {
+    fs.mkdirSync(generatedFolder + process.argv[3] + '');
 }
 
-if (!fs.existsSync(__dirname + '/../generated/' + process.argv[3] + '/src')) {
-    fs.mkdirSync(__dirname + '/../generated/' + process.argv[3] + '/src');
+if (!fs.existsSync(generatedFolder + process.argv[3] + '/src')) {
+    fs.mkdirSync(generatedFolder + process.argv[3] + '/src');
 }
 var source = fs.readFileSync(process.argv[2], 'utf8');
 var compiled = translate(source);
@@ -38,7 +42,7 @@ if (compiled.errors) {
 }
 
 compiled.forEach(function (entry) {
-    var path = __dirname + '/../generated/' + process.argv[3] + '/' + entry.filename;
+    var path = generatedFolder + process.argv[3] + '/' + entry.filename;
     console.error('writing file', path);
     fs.writeFileSync(path, entry.contents, 'utf8');
 });
