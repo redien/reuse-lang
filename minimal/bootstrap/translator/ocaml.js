@@ -1,16 +1,15 @@
-
 var ast = require(__dirname + '/../../../parser/ast');
 
 var constructorNames = ast.list();
 var mangledNames = {};
 var noArgumentFunctions = ast.list();
 
-var escapeNonAscii = function (name) {
+var escapeNonAscii = function(name) {
     var newName = '';
     for (var i = 0; i < name.length; ++i) {
         var char = name.charCodeAt(i);
 
-        if ((char >= 65 && char <= 90) || (char >= 97 && char <= 122))  {
+        if ((char >= 65 && char <= 90) || (char >= 97 && char <= 122)) {
             newName += String.fromCharCode(char);
         } else {
             newName += '_' + char;
@@ -19,13 +18,13 @@ var escapeNonAscii = function (name) {
     return newName;
 };
 
-var mangle = function (prefix, name) {
+var mangle = function(prefix, name) {
     var newName = prefix + '_' + escapeNonAscii(name);
     mangledNames[name] = newName;
     return newName;
 };
 
-var translateConstructor = function (expression) {
+var translateConstructor = function(expression) {
     if (ast.isList(expression)) {
         return 'C' + escapeNonAscii(ast.value(ast.child(expression, 0))) + ' (' + ast.join(ast.map(ast.slice(expression, 1), translateExpression), ', ') + ')';
     } else {
@@ -33,7 +32,7 @@ var translateConstructor = function (expression) {
     }
 };
 
-var translateMatch = function (match) {
+var translateMatch = function(match) {
     var cases = [];
 
     for (var i = 2; i < ast.size(match); i += 2) {
@@ -43,27 +42,38 @@ var translateMatch = function (match) {
     return '(match ' + translateExpression(ast.child(match, 1)) + ' with ' + cases.join(' | ') + ')';
 };
 
-var translateExpressionWithParen = function (expression) {
+var translateExpressionWithParen = function(expression) {
     if (ast.isList(expression)) {
         return '(' + translateExpression(expression) + ')';
     } else {
         return translateExpression(expression);
     }
-}
+};
 
-var translateExpression = function (expression) {
+var translateExpression = function(expression) {
     if (ast.isList(expression)) {
         if (ast.value(ast.child(expression, 0)) === 'match') {
             return translateMatch(expression);
-        } else if (ast.value(ast.child(expression, 0)) === '+'
-                || ast.value(ast.child(expression, 0)) === '-'
-                || ast.value(ast.child(expression, 0)) === '*'
-                || ast.value(ast.child(expression, 0)) === '/') {
+        } else if (
+            ast.value(ast.child(expression, 0)) === '+' ||
+            ast.value(ast.child(expression, 0)) === '-' ||
+            ast.value(ast.child(expression, 0)) === '*' ||
+            ast.value(ast.child(expression, 0)) === '/'
+        ) {
             return translateExpressionWithParen(ast.child(expression, 1)) + ' ' + ast.value(ast.child(expression, 0)) + ' ' + translateExpressionWithParen(ast.child(expression, 2));
         } else if (ast.value(ast.child(expression, 0)) === '%') {
             return translateExpressionWithParen(ast.child(expression, 1)) + ' mod ' + translateExpressionWithParen(ast.child(expression, 2));
         } else if (ast.value(ast.child(expression, 0)) === 'int32-compare') {
-            return 'if ' + translateExpressionWithParen(ast.child(expression, 1)) + ' < ' + translateExpressionWithParen(ast.child(expression, 3)) + ' then ' + translateExpressionWithParen(ast.child(expression, 2)) + ' else ' + translateExpressionWithParen(ast.child(expression, 4));
+            return (
+                'if ' +
+                translateExpressionWithParen(ast.child(expression, 1)) +
+                ' < ' +
+                translateExpressionWithParen(ast.child(expression, 3)) +
+                ' then ' +
+                translateExpressionWithParen(ast.child(expression, 2)) +
+                ' else ' +
+                translateExpressionWithParen(ast.child(expression, 4))
+            );
         } else if (ast.contains(constructorNames, ast.value(ast.child(expression, 0)))) {
             return translateConstructor(expression);
         } else {
@@ -87,7 +97,7 @@ var translateExpression = function (expression) {
     }
 };
 
-var translateDefinition = function (definition, mangleName) {
+var translateDefinition = function(definition, mangleName) {
     var name = ast.value(ast.child(definition, 1));
 
     var parameters = ast.child(definition, 2);
@@ -109,8 +119,8 @@ var translateDefinition = function (definition, mangleName) {
     return 'let rec ' + name + ' = fun ' + parameterString + ' -> ' + expression + ';;';
 };
 
-var typeTranslator = function (typeParameters) {
-    var self = function (type) {
+var typeTranslator = function(typeParameters) {
+    var self = function(type) {
         if (ast.isList(type)) {
             if (ast.value(ast.child(type, 0)) === 'fun') {
                 var parameterString = ast.join(ast.map(ast.child(type, 1), self), ' -> ');
@@ -126,7 +136,7 @@ var typeTranslator = function (typeParameters) {
                 return 'int';
             } else {
                 if (ast.contains(typeParameters, value)) {
-                    return '\'' + value;
+                    return "'" + value;
                 } else {
                     return translateExpression(type);
                 }
@@ -137,13 +147,13 @@ var typeTranslator = function (typeParameters) {
     return self;
 };
 
-var constructorTranslator = function (typeParameters, typeString) {
-    return function (expression) {
+var constructorTranslator = function(typeParameters, typeString) {
+    return function(expression) {
         if (ast.isList(expression)) {
             var parameters = ast.map(ast.slice(expression, 1), typeTranslator(typeParameters));
-            parameters = ast.map(parameters, function (parameter) {
+            parameters = ast.map(parameters, function(parameter) {
                 if (ast.contains(typeParameters, parameter)) {
-                    return '\'' + parameter;
+                    return "'" + parameter;
                 } else {
                     return parameter;
                 }
@@ -159,7 +169,7 @@ var constructorTranslator = function (typeParameters, typeString) {
     };
 };
 
-var translateDataParameter = function (parameter) {
+var translateDataParameter = function(parameter) {
     if (ast.isList(parameter)) {
         return ast.value(ast.child(parameter, 1));
     } else {
@@ -167,11 +177,11 @@ var translateDataParameter = function (parameter) {
     }
 };
 
-var addSingleQuote = function (parameter) {
-    return '\'' + parameter;
+var addSingleQuote = function(parameter) {
+    return "'" + parameter;
 };
 
-var translateData = function (definition) {
+var translateData = function(definition) {
     var name;
     var parameters = ast.list();
 
@@ -188,9 +198,12 @@ var translateData = function (definition) {
     }
 
     var parameterNames = ast.map(parameters, translateDataParameter);
-    var finalParameters = ast.map(ast.filter(parameters, function (parameter) {
-        return ast.isAtom(parameter);
-    }), translateDataParameter);
+    var finalParameters = ast.map(
+        ast.filter(parameters, function(parameter) {
+            return ast.isAtom(parameter);
+        }),
+        translateDataParameter
+    );
 
     var parameterString = ast.join(ast.map(finalParameters, addSingleQuote), ', ');
     var typeString = (parameterString.length > 0 ? ' (' + parameterString + ')' : '') + ' ' + name;
@@ -199,11 +212,11 @@ var translateData = function (definition) {
     return 'type' + typeString + ' = ' + constructors + ';;';
 };
 
-var translateExport = function (definition) {
+var translateExport = function(definition) {
     return translateDefinition(definition, false);
 };
 
-var translateModuleEntry = function (definition) {
+var translateModuleEntry = function(definition) {
     if (ast.isList(definition)) {
         if (ast.value(ast.child(definition, 0)) === 'def') {
             return translateDefinition(definition, true);
@@ -217,14 +230,20 @@ var translateModuleEntry = function (definition) {
     }
 };
 
-var translateModule = function (definitions) {
+var translateModule = function(definitions) {
     return ast.join(ast.map(definitions, translateModuleEntry), '\n');
 };
 
-module.exports.translate = function (expression) {
+module.exports.translate = function(expression) {
     return [
-        {filename: 'src/source.ml', contents: translateModule(expression)},
-        {filename: 'bsconfig.json', contents: '{"name" : "hello", "sources" : { "dir" : "src" }}'},
-        {filename: 'package.json', contents: '{ "dependencies": { "bs-platform": "1.7.0" }, "scripts" : { "compile" : "bsb", "watch" : "bsb -w" } }'}
+        { filename: 'src/source.ml', contents: translateModule(expression) },
+        {
+            filename: 'bsconfig.json',
+            contents: '{"name" : "hello", "sources" : { "dir" : "src" }}'
+        },
+        {
+            filename: 'package.json',
+            contents: '{ "dependencies": { "bs-platform": "1.7.0" }, "scripts" : { "compile" : "bsb", "watch" : "bsb -w" } }'
+        }
     ];
 };

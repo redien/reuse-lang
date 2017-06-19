@@ -1,4 +1,3 @@
-
 var projectRoot = __dirname + '/../../';
 
 var parser = require(projectRoot + 'parser/parser');
@@ -8,7 +7,7 @@ var fs = require('fs');
 
 var generatedFolder = projectRoot + 'generated/';
 
-var translate = function (expression) {
+var translate = function(expression) {
     var parseResult = parser.parse(expression);
     if (parseResult.error) {
         return {
@@ -34,14 +33,14 @@ var source = fs.readFileSync(process.argv[2], 'utf8');
 var compiled = translate(source);
 
 if (compiled.errors) {
-    compiled.errors.forEach(function (error) {
+    compiled.errors.forEach(function(error) {
         console.error(error.message);
         console.error('at line', error.line, 'and column', error.column);
     });
     process.exit(1);
 }
 
-compiled.forEach(function (entry) {
+compiled.forEach(function(entry) {
     var path = generatedFolder + process.argv[3] + '/' + entry.filename;
     console.error('writing file', path);
     fs.writeFileSync(path, entry.contents, 'utf8');

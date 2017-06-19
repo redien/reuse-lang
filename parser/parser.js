@@ -1,4 +1,3 @@
-
 var ast = require('./ast');
 var Immutable = require('immutable');
 
@@ -7,30 +6,29 @@ var NEWLINE_CHARACTER = '\n';
 var START_PARENTHESIS_CHARACTER = '(';
 var END_PARENTHESIS_CHARACTER = ')';
 
-var parenthesisErrorAt = function (index) {
+var parenthesisErrorAt = function(index) {
     var error = new Error('Unbalanced parenthesis');
     error.column = index;
     error.line = 0;
-    return {error: error};
+    return { error: error };
 };
 
-var nextCharacterIs = function (character, input, index) {
+var nextCharacterIs = function(character, input, index) {
     return index < input.length && character === input[index];
 };
 
-var nextCharacterIsWhitespace = function (input, index) {
-    return nextCharacterIs(SPACE_CHARACTER, input, index)
-        || nextCharacterIs(NEWLINE_CHARACTER, input, index);
+var nextCharacterIsWhitespace = function(input, index) {
+    return nextCharacterIs(SPACE_CHARACTER, input, index) || nextCharacterIs(NEWLINE_CHARACTER, input, index);
 };
 
-var skipWhitespace = function (input, index) {
+var skipWhitespace = function(input, index) {
     while (nextCharacterIsWhitespace(input, index)) {
         index += 1;
     }
     return index;
 };
 
-var parseExpression = function (input, index) {
+var parseExpression = function(input, index) {
     index = skipWhitespace(input, index);
 
     if (nextCharacterIs(START_PARENTHESIS_CHARACTER, input, index)) {
@@ -40,9 +38,11 @@ var parseExpression = function (input, index) {
     }
 };
 
-var parseList = function (input, index) {
+var parseList = function(input, index) {
     var expression = parseListBody(input, index);
-    if (expression.error) { return expression; }
+    if (expression.error) {
+        return expression;
+    }
 
     index = expression.nextIndex;
 
@@ -56,13 +56,15 @@ var parseList = function (input, index) {
     };
 };
 
-var parseListBody = function (input, index) {
+var parseListBody = function(input, index) {
     var list = ast.list();
     var expressionStartIndex = index - 1;
 
     while (index < input.length && !nextCharacterIs(END_PARENTHESIS_CHARACTER, input, index)) {
         var expression = parseExpression(input, index);
-        if (expression.error) { return expression; }
+        if (expression.error) {
+            return expression;
+        }
 
         list = ast.push(list, expression.ast);
         index = skipWhitespace(input, expression.nextIndex);
@@ -76,11 +78,9 @@ var parseListBody = function (input, index) {
     };
 };
 
-var parseAtom = function (input, index) {
+var parseAtom = function(input, index) {
     var start = index;
-    while (index < input.length
-        && !nextCharacterIsWhitespace(input, index)
-        && !nextCharacterIs(END_PARENTHESIS_CHARACTER, input, index)) {
+    while (index < input.length && !nextCharacterIsWhitespace(input, index) && !nextCharacterIs(END_PARENTHESIS_CHARACTER, input, index)) {
         index += 1;
     }
 
@@ -93,9 +93,11 @@ var parseAtom = function (input, index) {
     };
 };
 
-module.exports.parse = function (input) {
+module.exports.parse = function(input) {
     var result = parseListBody(input, 0);
-    if (result.error) { return result; }
+    if (result.error) {
+        return result;
+    }
     index = result.nextIndex;
 
     if (nextCharacterIs(END_PARENTHESIS_CHARACTER, input, index)) {

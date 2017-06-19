@@ -1,4 +1,3 @@
-
 var fs = require('fs');
 var ast = require(__dirname + '/../parser/ast');
 var parser = require(__dirname + '/../parser/parser');
@@ -7,11 +6,11 @@ function translateDefinition(definition) {
     return definition;
 }
 
-function rewriteModule (definitions) {
+function rewriteModule(definitions) {
     return ast.map(definitions, translateDefinition);
 }
 
-function parse (source) {
+function parse(source) {
     var result = parser.parse(source);
     return result.ast;
 }
