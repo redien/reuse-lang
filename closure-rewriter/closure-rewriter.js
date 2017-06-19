@@ -2,12 +2,12 @@ var fs = require('fs');
 var ast = require(__dirname + '/../parser/ast');
 var parser = require(__dirname + '/../parser/parser');
 
-function translateDefinition(definition) {
+function translateDefinition(state, definition) {
     return definition;
 }
 
-function rewriteModule(definitions) {
-    return ast.map(definitions, translateDefinition);
+function rewriteModule(state, definitions) {
+    return ast.map(definitions, translateDefinition.bind(null, state));
 }
 
 function parse(source) {
@@ -17,6 +17,6 @@ function parse(source) {
 
 var input = fs.readFileSync(process.argv[2], 'utf8');
 var expressions = parse(input);
-var rewrittenExpression = rewriteModule(expressions);
+var rewrittenExpression = rewriteModule({}, expressions);
 var output = ast.join(ast.map(rewrittenExpression, ast.toString), ' ');
 fs.writeFileSync(process.argv[3], output, 'utf8');
