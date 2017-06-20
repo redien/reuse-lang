@@ -9,6 +9,8 @@ mkdir -p $generated_folder
 rm $generated_folder/program-without-closures.lisp
 echo "$1 (def execute' () $2)" > $generated_folder/program-with-closures.lisp
 
+$project_root/node_modules/.bin/babel extended -d generated >&2
+
 $script_path/closure-rewriter/rewrite-closures.sh $generated_folder/program-with-closures.lisp $generated_folder/program-without-closures.lisp
 
 $project_root/minimal/bootstrap/eval.sh "$(cat $generated_folder/program-without-closures.lisp)" "(execute')"

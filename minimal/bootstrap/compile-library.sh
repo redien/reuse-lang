@@ -10,8 +10,10 @@ rm -R $generated_path/bootstrap-ocaml/lib >/dev/null >&2
 rm -R $generated_path/bootstrap-javascript >/dev/null >&2
 rm -R $2 >/dev/null >&2
 
-node $script_path/reuse.js $1 bootstrap-javascript javascript >&2 || exit 1
-node $script_path/reuse.js $1 bootstrap-ocaml ocaml >&2 || exit 1
+$project_root/node_modules/.bin/babel minimal -d generated >&2
+
+node $generated_path/bootstrap/reuse.js $1 bootstrap-javascript javascript >&2 || exit 1
+node $generated_path/bootstrap/reuse.js $1 bootstrap-ocaml ocaml >&2 || exit 1
 
 cat $generated_path/bootstrap-ocaml/src/source.ml >&2
 echo >&2
