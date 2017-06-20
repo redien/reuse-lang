@@ -6,6 +6,7 @@ project_root=$script_path/..
 generated_folder=$project_root/generated
 
 mkdir -p $generated_folder
+rm $generated_folder/program-without-closures.lisp
 echo "$1 (def execute' () $2)" > $generated_folder/program-with-closures.lisp
 
 $script_path/closure-rewriter/rewrite-closures.sh $generated_folder/program-with-closures.lisp $generated_folder/program-without-closures.lisp
