@@ -28,12 +28,28 @@ ast.list = function() {
     return Immutable.Map.of('type', 'list', 'value', Immutable.List(arguments));
 };
 
+ast.listFrom = function(array) {
+    return Immutable.Map.of('type', 'list', 'value', Immutable.List(array));
+};
+
 ast.isList = function(list) {
     return Immutable.Map.isMap(list) && list.get('type') === 'list';
 };
 
 ast.push = function(list, value) {
     return list.set('value', list.get('value').push(value));
+};
+
+ast.setIn = function(list, keyPath, value) {
+    return list.set('value', list.get('value').setIn(keyPath, value));
+};
+
+ast.updateIn = function(list, keyPath, updater) {
+    return list.set('value', list.get('value').updateIn(keyPath, updater));
+};
+
+ast.insert = function(list, index, value) {
+    return list.set('value', list.get('value').insert(index, value));
 };
 
 ast.slice = function(list, start, end) {
