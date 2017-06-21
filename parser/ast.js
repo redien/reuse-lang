@@ -40,6 +40,10 @@ ast.push = function(list, value) {
     return list.set('value', list.get('value').push(value));
 };
 
+ast.concat = function(list, otherList) {
+    return list.set('value', list.get('value').concat(otherList.get('value')));
+};
+
 ast.setIn = function(list, keyPath, value) {
     return list.set('value', list.get('value').setIn(keyPath, value));
 };
