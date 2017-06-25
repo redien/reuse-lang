@@ -19,7 +19,11 @@ Should rewrite functions with free variables
 > (f 5)
 = 5
 
+| (def f (x y) ((fun () (+ x y))))
+> (f 5 1)
+= 6
+
 Should be able to apply returned functions with free variables
 | (def f (x) (fun () x))
-> ((f 6))
-= 6
+> ((f 7))
+= 7
