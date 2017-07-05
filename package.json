@@ -14,6 +14,7 @@
     "tap-spec": "^4.1.1"
   },
   "scripts": {
+    "test": "npm run test-minimal && npm run test-extended",
     "test-minimal": "./spec-runner.sh minimal-specification \"./eval.sh minimal/bootstrap\" | tap-spec",
     "test-extended": "./spec-runner.sh extended-specification \"./eval.sh extended\" | tap-spec && ./spec-runner.sh minimal-specification \"./eval.sh extended\" | tap-spec"
   },
