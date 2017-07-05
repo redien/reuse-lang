@@ -1,12 +1,14 @@
 #!/bin/bash
 
+set -e
+
 script_path=$(dirname "$0")
 
 project_root=$script_path/..
 generated_folder=$project_root/generated
 
 mkdir -p $generated_folder
-rm $generated_folder/program-without-closures.lisp
+rm -f $generated_folder/program-without-closures.lisp
 echo "$1 (def execute' () $2)" > $generated_folder/program-with-closures.lisp
 
 $project_root/node_modules/.bin/babel extended -d generated >&2

@@ -1,8 +1,10 @@
 #!/bin/bash
 
+set -e
+
 script_path=$(dirname "$0")
 
-$script_path/compile-library.sh $1 $2 || exit 1
+$script_path/compile-library.sh $1 $2
 
 cat >> $2 << EOM
 process.stdin.resume();
