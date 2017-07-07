@@ -1,14 +1,18 @@
 #!/bin/bash
 
-set -e
-
 script_path=$(dirname "$0")
 
-project_root=$script_path/../..
-generated_folder=$project_root/generated
+random_name=$(node -e "console.log(crypto.randomBytes(Math.ceil(12)).toString('hex').slice(0,12))")
+generated_folder=$script_path/../../generated/$random_name
+mkdir -p $generated_folder
 
-mkdir -p $generated_folder/
-lisp_source=$generated_folder/bootstrap-eval.lisp
-echo "$1 (export execute () $2)" > $lisp_source
-$script_path/compile-library.sh $lisp_source $generated_folder/bootstrap-eval.js
-node -e "console.log(require('./$generated_folder/bootstrap-eval.js').execute());"
+program_source=$generated_folder/program_source.lisp
+echo "$1 (export execute () $2)" > $program_source
+
+$script_path/compile-library.sh $program_source $generated_folder
+node -e "console.log(require('./$generated_folder/javascript/index.js').execute());"
+result=$?
+
+rm -R $generated_folder
+
+exit $result

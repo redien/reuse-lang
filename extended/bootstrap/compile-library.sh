@@ -3,29 +3,24 @@
 set -e
 
 script_path=$(dirname "$0")
-
 project_root=$script_path/../..
-generated_path=$project_root/generated
+node_bin=$project_root/node_modules/.bin
+reuse_script=$project_root/generated/extended/bootstrap/reuse.js
 
-rm -fR $generated_path/bootstrap-ocaml/src >/dev/null >&2
-rm -fR $generated_path/bootstrap-ocaml/lib >/dev/null >&2
-rm -fR $generated_path/bootstrap-javascript >/dev/null >&2
-rm -fR $2 >/dev/null >&2
-
-$project_root/node_modules/.bin/babel minimal -d generated >&2
-
-node $generated_path/bootstrap/reuse.js $1 bootstrap-javascript javascript >&2
-node $generated_path/bootstrap/reuse.js $1 bootstrap-ocaml ocaml >&2
-
-cat $generated_path/bootstrap-ocaml/src/source.ml >&2
 echo >&2
 
-$project_root/node_modules/.bin/prettier --single-quote --no-semi --print-width 80 --tab-width 4 --write $generated_path/bootstrap-javascript/src/source.js >&2
+echo OCaml: >&2
+mkdir -p $2/ocaml
+node $reuse_script $1 $2/ocaml ocaml >&2
+cat $2/ocaml/source.ml >&2
+echo >&2
+echo >&2
+docker run --rm -v $PWD/$2/ocaml:/home/ocaml ocaml/opam:alpine-3.6_ocaml-4.06.0 ocamlc ../ocaml/source.ml >&2
 
-current_path=$(pwd)
-cd $generated_path/bootstrap-ocaml
-npm install >&2
-node_modules/.bin/bsb >&2
-cd $current_path
-
-cp $generated_path/bootstrap-javascript/src/source.js $2
+echo Javascript: >&2
+mkdir -p $2/javascript
+node $reuse_script $1 $2/javascript javascript >&2
+$node_bin/prettier --single-quote --no-semi --print-width 80 --tab-width 4 --write $2/javascript/index.js >&2
+cat $2/javascript/index.js >&2
+echo >&2
+echo >&2

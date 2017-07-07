@@ -16,7 +16,7 @@
   "scripts": {
     "test": "npm run test-minimal && npm run test-extended",
     "test-minimal": "./minimal/bootstrap/build.sh && ./spec-runner.sh minimal-specification ./minimal/bootstrap/eval.sh | tap-spec",
-    "test-extended": "./spec-runner.sh extended-specification \"./eval.sh extended\" | tap-spec && ./spec-runner.sh minimal-specification \"./eval.sh extended\" | tap-spec"
+    "test-extended": "./extended/bootstrap/build.sh && ./spec-runner.sh extended-specification ./extended/bootstrap/eval.sh | tap-spec && ./spec-runner.sh minimal-specification ./extended/bootstrap/eval.sh | tap-spec"
   },
   "repository": {
     "type": "git",
