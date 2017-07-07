@@ -1,4 +1,4 @@
-var ast = require(__dirname + '/../../../parser/ast');
+var ast = require('../../../parser/ast');
 
 var counter = 0;
 
@@ -129,7 +129,7 @@ var runtime = 'function match(expression, cases) {return cases[expression.type].
 module.exports.translate = function(expression) {
     return [
         {
-            filename: 'src/source.js',
+            filename: 'index.js',
             contents: runtime + translateModule(expression)
         }
     ];

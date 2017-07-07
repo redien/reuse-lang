@@ -1,4 +1,4 @@
-var ast = require(__dirname + '/../../../parser/ast');
+var ast = require('../../../parser/ast');
 
 var constructorNames = ast.list();
 var mangledNames = {};

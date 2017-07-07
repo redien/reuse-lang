@@ -3,10 +3,9 @@
 set -e
 
 script_path=$(dirname "$0")
-
 $script_path/compile-library.sh $1 $2
 
-cat >> $2 << EOM
+cat >> $2/javascript/index.js << EOM
 process.stdin.resume();
 
 var input = Buffer.from([]);

@@ -10,7 +10,11 @@ failing=0
 rm build.log > /dev/null 2>&1
 
 function testLine {
-    result=$($eval_command "${2}" "${1:2}")
+    result=$($eval_command "${2}" "${1:2}" 2>> build.log)
+
+    if [ "$?" != "0" ]; then
+        result="Build error"
+    fi
 
     tests=$((tests+1))
 
