@@ -9,6 +9,11 @@ reuse_script=$project_root/generated/minimal/bootstrap/reuse.js
 
 echo >&2
 
+echo Source: >&2
+cat $1 >&2
+echo >&2
+echo >&2
+
 echo OCaml: >&2
 mkdir -p $2/ocaml
 node $reuse_script $1 $2/ocaml ocaml >&2
