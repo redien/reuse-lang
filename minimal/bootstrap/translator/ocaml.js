@@ -235,15 +235,5 @@ var translateModule = function(definitions) {
 };
 
 module.exports.translate = function(expression) {
-    return [
-        { filename: 'src/source.ml', contents: translateModule(expression) },
-        {
-            filename: 'bsconfig.json',
-            contents: '{"name" : "hello", "sources" : { "dir" : "src" }}'
-        },
-        {
-            filename: 'package.json',
-            contents: '{ "dependencies": { "bs-platform": "1.7.0" }, "scripts" : { "compile" : "bsb", "watch" : "bsb -w" } }'
-        }
-    ];
+    return [{ filename: 'source.ml', contents: translateModule(expression) }];
 };
