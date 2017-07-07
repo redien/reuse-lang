@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 script_path=$(dirname "$0")
 
 random_name=$(node -e "console.log(crypto.randomBytes(Math.ceil(12)).toString('hex').slice(0,12))")
@@ -13,5 +11,8 @@ echo "$1 (export execute () $2)" > $program_source
 
 $script_path/compile-library.sh $program_source $generated_folder
 node -e "console.log(require('./$generated_folder/javascript/index.js').execute());"
+result=$?
 
 rm -R $generated_folder
+
+exit $result
