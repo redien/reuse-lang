@@ -98,10 +98,9 @@ module.exports.parse = function(input) {
     if (result.error) {
         return result;
     }
-    index = result.nextIndex;
 
-    if (nextCharacterIs(END_PARENTHESIS_CHARACTER, input, index)) {
-        return parenthesisErrorAt(index);
+    if (nextCharacterIs(END_PARENTHESIS_CHARACTER, input, result.nextIndex)) {
+        return parenthesisErrorAt(result.nextIndex);
     }
 
     return result;
