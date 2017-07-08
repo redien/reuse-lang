@@ -63,6 +63,11 @@ var translateExpression = function(expression) {
                 translateExpression(ast.child(expression, 4)) +
                 ')'
             );
+        } else if (ast.value(ast.child(expression, 0)) === 'fun') {
+            const args = ast.child(expression, 1);
+            const body = ast.child(expression, 2);
+            const argString = ast.join(ast.map(args, ast.value), ', ');
+            return '((' + argString + ') => ' + translateExpression(body) + ')';
         } else {
             return translateExpression(ast.child(expression, 0)) + '(' + ast.join(ast.map(ast.slice(expression, 1), translateExpression), ',') + ')';
         }

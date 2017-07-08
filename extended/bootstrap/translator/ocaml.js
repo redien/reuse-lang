@@ -74,6 +74,11 @@ var translateExpression = function(expression) {
                 ' else ' +
                 translateExpressionWithParen(ast.child(expression, 4))
             );
+        } else if (ast.value(ast.child(expression, 0)) === 'fun') {
+            const args = ast.child(expression, 1);
+            const body = ast.child(expression, 2);
+            const argString = ast.size(args) > 0 ? ast.join(ast.map(args, ast.value), ' ') : '_';
+            return 'fun ' + argString + ' -> ' + translateExpression(body);
         } else if (ast.contains(constructorNames, ast.value(ast.child(expression, 0)))) {
             return translateConstructor(expression);
         } else {
