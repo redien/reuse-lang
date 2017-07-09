@@ -50,6 +50,14 @@ var translateExpressionWithParen = function(expression) {
     }
 };
 
+const operatorMap = {
+    '+': 'Int32.add',
+    '-': 'Int32.sub',
+    '*': 'Int32.mul',
+    '/': 'Int32.div',
+    '%': 'Int32.rem'
+};
+
 var translateExpression = function(expression) {
     if (ast.isList(expression)) {
         if (ast.value(ast.child(expression, 0)) === 'match') {
@@ -58,11 +66,10 @@ var translateExpression = function(expression) {
             ast.value(ast.child(expression, 0)) === '+' ||
             ast.value(ast.child(expression, 0)) === '-' ||
             ast.value(ast.child(expression, 0)) === '*' ||
-            ast.value(ast.child(expression, 0)) === '/'
+            ast.value(ast.child(expression, 0)) === '/' ||
+            ast.value(ast.child(expression, 0)) === '%'
         ) {
-            return translateExpressionWithParen(ast.child(expression, 1)) + ' ' + ast.value(ast.child(expression, 0)) + ' ' + translateExpressionWithParen(ast.child(expression, 2));
-        } else if (ast.value(ast.child(expression, 0)) === '%') {
-            return translateExpressionWithParen(ast.child(expression, 1)) + ' mod ' + translateExpressionWithParen(ast.child(expression, 2));
+            return operatorMap[ast.value(ast.child(expression, 0))] + ' ' + translateExpressionWithParen(ast.child(expression, 1)) + ' ' + translateExpressionWithParen(ast.child(expression, 2));
         } else if (ast.value(ast.child(expression, 0)) === 'int32-compare') {
             return (
                 'if ' +
@@ -95,7 +102,7 @@ var translateExpression = function(expression) {
         } else if (mangledNames[name]) {
             return mangledNames[name];
         } else if (Number.isInteger(parseFloat(name))) {
-            return name;
+            return '(Int32.of_int (' + name + '))';
         } else {
             return escapeNonAscii(name);
         }
@@ -138,7 +145,7 @@ var typeTranslator = function(typeParameters) {
             var value = ast.value(type);
 
             if (value === 'int32') {
-                return 'int';
+                return value;
             } else {
                 if (ast.contains(typeParameters, value)) {
                     return "'" + value;
