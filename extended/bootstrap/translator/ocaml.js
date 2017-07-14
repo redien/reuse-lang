@@ -58,6 +58,15 @@ const operatorMap = {
     '%': 'Int32.rem'
 };
 
+var nestFunctionApplications = function(functions, argument) {
+    if (ast.size(functions) === 0) {
+        return argument;
+    } else {
+        var f = ast.child(functions, 0);
+        return '(' + translateExpressionWithParen(f) + ' ' + nestFunctionApplications(ast.slice(functions, 1), argument) + ')';
+    }
+};
+
 var translateExpression = function(expression) {
     if (ast.isList(expression)) {
         if (ast.value(ast.child(expression, 0)) === 'match') {
@@ -86,6 +95,9 @@ var translateExpression = function(expression) {
             const body = ast.child(expression, 2);
             const argString = ast.size(args) > 0 ? ast.join(ast.map(args, ast.value), ' ') : '_';
             return 'fun ' + argString + ' -> ' + translateExpression(body);
+        } else if (ast.value(ast.child(expression, 0)) === 'pipe') {
+            const args = ast.reverse(ast.slice(expression, 1));
+            return 'fun _x1 -> ' + nestFunctionApplications(args, '_x1');
         } else if (ast.contains(constructorNames, ast.value(ast.child(expression, 0)))) {
             return translateConstructor(expression);
         } else {

@@ -60,6 +60,10 @@ ast.slice = function(list, start, end) {
     return list.set('value', list.get('value').slice(start, end));
 };
 
+ast.reverse = function(list) {
+    return list.set('value', list.get('value').reverse());
+};
+
 ast.size = function(list) {
     return list.get('value').size;
 };
