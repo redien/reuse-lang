@@ -17,3 +17,8 @@ Should compose closures together
 Should compose nested closures
 > ((pipe (fun (x) ((pipe (fun (x) x) (fun (x) x)) x)) (fun (x) (* x 4))) 1)
 = 4
+
+Should compose two partially applied functions together
+| (def add (x y) (+ x y))
+> ((pipe (add 2) (add 4)) -1)
+= 5
