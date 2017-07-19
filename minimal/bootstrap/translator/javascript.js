@@ -1,4 +1,4 @@
-var ast = require('../../../parser/ast');
+var ast = require('../../../parser/bootstrap/ast');
 
 var counter = 0;
 

@@ -1,5 +1,5 @@
-var parser = require('../../parser/parser');
-var ast = require('../../parser/ast');
+var parser = require('../../parser/bootstrap/parser');
+var ast = require('../../parser/bootstrap/ast');
 var Immutable = require('immutable');
 var fs = require('fs');
 
