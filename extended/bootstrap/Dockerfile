@@ -1,2 +1,0 @@
-FROM ocaml/opam:alpine-3.5_ocaml-4.04.2
-RUN opam depext -i core

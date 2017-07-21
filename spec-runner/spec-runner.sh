@@ -7,10 +7,11 @@ tests=0
 passing=0
 failing=0
 
-rm build.log > /dev/null 2>&1
+mkdir -p generated
+rm generated/build.log > /dev/null 2>&1
 
 function testLine {
-    result=$($eval_command "${2}" "${1:2}" 2>> build.log)
+    result=$($eval_command "${2}" "${1:2}" 2>> generated/build.log)
 
     if [ "$?" != "0" ]; then
         result="Build error"
