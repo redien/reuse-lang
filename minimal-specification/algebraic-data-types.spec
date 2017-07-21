@@ -43,13 +43,13 @@ Restricting constructor parameters to user defined type
 = 8
 
 Restricting constructor parameters to function types
-| (data (otherType a) (TypeCons (fun (a) a)))
+| (data (otherType a) (TypeCons (fn (a) a)))
 | (def identity (x) x)
 > (match (TypeCons identity) (TypeCons f) (f 9))
 = 9
 
 Existential type parameters
-| (data (closure (exists s) a) (Closure (fun (s) a) s))
+| (data (closure (exists s) a) (Closure (fn (s) a) s))
 | (data (pair a) (Pair a a))
 | (def apply (c) (match c (Closure f s) (f s)))
 | (def identity (x) x)

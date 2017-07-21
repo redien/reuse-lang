@@ -10,5 +10,5 @@ Should partially apply a ternary function
 = 2
 
 Should partially apply closures
-> (((fun (a b) (+ a b)) 2) 1)
+> (((fn (a b) (+ a b)) 2) 1)
 = 3

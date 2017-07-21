@@ -11,11 +11,11 @@ Should compose several functions together
 = 2
 
 Should compose closures together
-> ((pipe (fun (x) (+ x 1)) (fun (x) (* x 3))) 0)
+> ((pipe (fn (x) (+ x 1)) (fn (x) (* x 3))) 0)
 = 3
 
 Should compose nested closures
-> ((pipe (fun (x) ((pipe (fun (x) x) (fun (x) x)) x)) (fun (x) (* x 4))) 1)
+> ((pipe (fn (x) ((pipe (fn (x) x) (fn (x) x)) x)) (fn (x) (* x 4))) 1)
 = 4
 
 Should compose two partially applied functions together

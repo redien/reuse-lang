@@ -90,7 +90,7 @@ var translateExpression = function(expression) {
                 ' else ' +
                 translateExpressionWithParen(ast.child(expression, 4))
             );
-        } else if (ast.value(ast.child(expression, 0)) === 'fun') {
+        } else if (ast.value(ast.child(expression, 0)) === 'fn') {
             const args = ast.child(expression, 1);
             const body = ast.child(expression, 2);
             const argString = ast.size(args) > 0 ? ast.join(ast.map(args, ast.value), ' ') : '_';
@@ -146,7 +146,7 @@ var translateDefinition = function(definition, mangleName) {
 var typeTranslator = function(typeParameters) {
     var self = function(type) {
         if (ast.isList(type)) {
-            if (ast.value(ast.child(type, 0)) === 'fun') {
+            if (ast.value(ast.child(type, 0)) === 'fn') {
                 var parameterString = ast.join(ast.map(ast.child(type, 1), self), ' -> ');
                 return '(' + (parameterString.length > 0 ? parameterString : 'unit') + ' -> ' + self(ast.child(type, 2)) + ')';
             } else {
