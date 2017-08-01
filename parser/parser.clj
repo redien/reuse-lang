@@ -70,20 +70,31 @@
 (data expression (Symbol (list int32))
                  (List (list expression)))
 
-(def read-symbol (input)
-     (match (read-while not-whitespace? input)
-            (Pair input name) (Pair input (Symbol name))))
+(def push-expression (parent expression)
+     (match parent
+            (List list) (List (Cons expression list))
+            (Symbol _)  parent))
 
-(def parse' (input)
+(def parse-symbol (input list parse')
+     (match (read-while not-whitespace? input)
+            (Pair input name) (Pair input (push-expression list (Symbol name)))))
+
+(def parse-list (input list parse')
+     (match (parse' input (List Empty))
+            (Pair input new-list) (Pair input (push-expression list new-list))))
+
+(def parse' (input list)
      (match input
-            Empty       (Pair input (List Empty))
+            Empty       (Pair input list)
             (Cons x xs) (match (= x 40)
-                               True (Pair input (List Empty))
-                               False (read-symbol input))))
+                               True (parse-list xs list parse')
+                  False (match (= x 41)
+                               True (Pair xs list)
+                  False (parse-symbol input list parse')))))
 
 (def parse (input)
-     (match (parse' (skip-while whitespace? input))
-            (Pair _ expression) expression))
+     (match (parse' (skip-while whitespace? input) (List Empty))
+            (Pair _ (List (Cons expression __))) expression))
 
 (def str (character)
      (Cons character Empty))
@@ -95,7 +106,9 @@
 
 (def join (separator list)
      (foldr (fn (x xs)
-                (concat-strings x (concat-strings separator xs)))
+                (match xs
+                       Empty       (concat-strings x xs)
+                       (Cons _ __) (concat-strings x (concat-strings separator xs))))
             Empty
             list))
 
