@@ -1,22 +1,22 @@
 
-(def reverse' (list new-list)
+(def list-reverse' (list new-list)
      (match list
             Empty       new-list
-            (Cons x xs) (reverse' xs (Cons x new-list))))
+            (Cons x xs) (list-reverse' xs (Cons x new-list))))
 
-(def reverse (list)
-     (reverse' list Empty))
+(def list-reverse (list)
+     (list-reverse' list Empty))
 
-(def foldr (f initial list)
+(def list-foldr (f initial list)
      (match list
             Empty       initial
-            (Cons x xs) (f x (foldr f initial xs))))
+            (Cons x xs) (f x (list-foldr f initial xs))))
 
-(def map (f list)
-     (foldr (fn (x xs)
-                (Cons (f x) xs))
-            Empty
-            list))
+(def list-map (f list)
+     (list-foldr (fn (x xs)
+                     (Cons (f x) xs))
+                 Empty
+                 list))
 
 (data boolean True False)
 (data (pair a b) (Pair a b))
@@ -55,7 +55,7 @@
 (def read-while (predicate input)
      (match (read-while' predicate input Empty)
             (Pair input Empty)  (Pair input Empty)
-            (Pair input string) (Pair input (reverse string))))
+            (Pair input string) (Pair input (list-reverse string))))
 
 (def skip-while (predicate input)
      (match (read-while' predicate input Empty)
@@ -96,23 +96,27 @@
      (match (parse' (skip-while whitespace? input) (List Empty))
             (Pair _ (List (Cons expression __))) expression))
 
-(def str (character)
+(def string-of-char (character)
      (Cons character Empty))
 
-(def concat-strings (a b)
+(def string-concat (a b)
      (match a
             Empty       b
-            (Cons x xs) (concat-strings xs (Cons x b))))
+            (Cons x xs) (string-concat xs (Cons x b))))
 
-(def join (separator list)
-     (foldr (fn (x xs)
-                (match xs
-                       Empty       (concat-strings x xs)
-                       (Cons _ __) (concat-strings x (concat-strings separator xs))))
-            Empty
-            list))
+(def string-join (separator list)
+     (list-foldr (fn (x xs)
+                     (match xs
+                            Empty       (string-concat x xs)
+                            (Cons _ __) (string-concat x (string-concat separator xs))))
+                 Empty
+                 list))
+
+(def wrap-in-brackets (string)
+     (string-concat (string-of-char 40) (string-concat string (string-of-char 41))))
 
 (def stringify (input)
      (match input
             (Symbol name)      name
-            (List expressions) (concat-strings (str 40) (concat-strings (join (str 32) (map stringify expressions)) (str 41)))))
+            (List expressions) (wrap-in-brackets (string-join (string-of-char 32)
+                                                              (list-map stringify expressions)))))
