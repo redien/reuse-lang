@@ -70,18 +70,18 @@
 (data expression (Symbol (list int32))
                  (List (list expression)))
 
-(def push-expression (parent expression)
+(def epush (parent expression)
      (match parent
             (List list) (List (Cons expression list))
             (Symbol _)  parent))
 
 (def parse-symbol (input list parse')
      (match (read-while not-whitespace? input)
-            (Pair input name) (Pair input (push-expression list (Symbol name)))))
+            (Pair input name) (Pair input (epush list (Symbol name)))))
 
 (def parse-list (input list parse')
      (match (parse' input (List Empty))
-            (Pair input new-list) (Pair input (push-expression list new-list))))
+            (Pair input new-list) (Pair input (epush list new-list))))
 
 (def parse' (input list)
      (match input
@@ -94,7 +94,8 @@
 
 (def parse (input)
      (match (parse' (skip-while whitespace? input) (List Empty))
-            (Pair _ (List (Cons expression __))) expression))
+            (Pair _ (List (Cons expression __))) expression
+            (Pair _ __)                          (List Empty)))
 
 (def string-of-char (character)
      (Cons character Empty))
@@ -115,8 +116,10 @@
 (def wrap-in-brackets (string)
      (string-concat (string-of-char 40) (string-concat string (string-of-char 41))))
 
+(def sexpr-from-string-list (strings)
+     (wrap-in-brackets (string-join (string-of-char 32) strings)))
+
 (def stringify (input)
      (match input
             (Symbol name)      name
-            (List expressions) (wrap-in-brackets (string-join (string-of-char 32)
-                                                              (list-map stringify expressions)))))
+            (List expressions) (sexpr-from-string-list (list-map stringify expressions))))
