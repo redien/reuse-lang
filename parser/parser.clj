@@ -57,45 +57,46 @@
             (Pair input Empty)  (Pair input Empty)
             (Pair input string) (Pair input (list-reverse string))))
 
-(def skip-while (predicate input)
-     (match (read-while' predicate input Empty)
-            (Pair input _) input))
-
 (def whitespace? (character)
-     (= character 32))
+     (or (= character 32)
+     (or (= character 13)
+         (= character 10))))
 
-(def not-whitespace? (character)
-     (not (whitespace? character)))
+(def atom-character? (character)
+     (and (not (= character 40))
+     (and (not (= character 41))
+          (not (whitespace? character)))))
 
 (data expression (Symbol (list int32))
                  (List (list expression)))
 
-(def epush (parent expression)
-     (match parent
-            (List list) (List (Cons expression list))
-            (Symbol _)  parent))
+(data (parse-result i e) (ParseNext i e)
+                         (ParseOut i)
+                         ParseEnd)
 
-(def parse-symbol (input list parse')
-     (match (read-while not-whitespace? input)
-            (Pair input name) (Pair input (epush list (Symbol name)))))
-
-(def parse-list (input list parse')
-     (match (parse' input (List Empty))
-            (Pair input new-list) (Pair input (epush list new-list))))
-
-(def parse' (input list)
+(def parse-expression (input parse-expressions)
      (match input
-            Empty       (Pair input list)
-            (Cons x xs) (match (= x 40)
-                               True (parse-list xs list parse')
+            Empty       ParseEnd
+            (Cons x xs) (match (whitespace? x)
+                               True (parse-expression xs parse-expressions)
+                  False (match (= x 40)
+                               True (match (parse-expressions xs Empty)
+                                           (Pair input expressions) (ParseNext input (List expressions)))
                   False (match (= x 41)
-                               True (Pair xs list)
-                  False (parse-symbol input list parse')))))
+                               True (ParseOut xs)
+                  False (match (read-while atom-character? input)
+                               (Pair input Empty) (ParseOut input)
+                               (Pair input name)  (ParseNext input (Symbol name))))))))
+
+(def parse-expressions (input expressions)
+     (match (parse-expression input parse-expressions)
+            ParseEnd                 (Pair Empty expressions)
+            (ParseOut input)         (Pair input expressions)
+            (ParseNext input result) (parse-expressions input (Cons result expressions))))
 
 (def parse (input)
-     (match (parse' (skip-while whitespace? input) (List Empty))
-            (Pair _ (List (Cons expression __))) expression
-            (Pair _ __)                          (List Empty)))
+     (match (parse-expressions input Empty)
+            (Pair _ expressions) expressions))
 
 (def string-of-char (character)
      (Cons character Empty))
@@ -103,13 +104,13 @@
 (def string-concat (a b)
      (match a
             Empty       b
-            (Cons x xs) (string-concat xs (Cons x b))))
+            (Cons x xs) (Cons x (string-concat xs b))))
 
 (def string-join (separator list)
      (list-foldr (fn (x xs)
                      (match xs
-                            Empty       (string-concat x xs)
-                            (Cons _ __) (string-concat x (string-concat separator xs))))
+                            Empty       x
+                            (Cons _ __) (string-concat (string-concat xs separator) x)))
                  Empty
                  list))
 
@@ -119,7 +120,10 @@
 (def sexpr-from-string-list (strings)
      (wrap-in-brackets (string-join (string-of-char 32) strings)))
 
-(def stringify (input)
-     (match input
+(def stringify-expression (expression)
+     (match expression
             (Symbol name)      name
-            (List expressions) (sexpr-from-string-list (list-map stringify expressions))))
+            (List expressions) (sexpr-from-string-list (list-map stringify-expression expressions))))
+
+(def stringify (expressions)
+     (string-join (string-of-char 32) (list-map stringify-expression expressions)))
