@@ -123,13 +123,10 @@
 (def wrap-in-brackets (string)
      (string-concat (string-of-char 40) (string-concat string (string-of-char 41))))
 
-(def sexpr-from-string-list (strings)
-     (wrap-in-brackets (string-join (string-of-char 32) strings)))
-
-(def stringify-expression (expression)
+(def stringify-expression (stringify expression)
      (match expression
             (Symbol name)      name
-            (List expressions) (sexpr-from-string-list (list-map stringify-expression expressions))))
+            (List expressions) (wrap-in-brackets (stringify expressions))))
 
 (def stringify (expressions)
-     (string-join (string-of-char 32) (list-map stringify-expression expressions)))
+     (string-join (string-of-char 32) (list-map (stringify-expression stringify) expressions)))
