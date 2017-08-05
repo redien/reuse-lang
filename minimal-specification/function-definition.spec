@@ -24,3 +24,10 @@ Calling functions passed as arguments
 | (def other (x) x)
 > (caller other 5)
 = 5
+
+Functions are polymorphic
+| (def left (x y) x)
+| (def f (x) x)
+| (def g (x) (left (f x) (f left)))
+> (g 6)
+= 6
