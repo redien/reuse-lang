@@ -26,13 +26,14 @@
             Empty       b
             (Cons x xs) (Cons x (string-concat xs b))))
 
+(def 'string-join-reducer (separator)
+     (fn (x xs)
+         (match xs
+                Empty x
+                _     (string-concat (string-concat xs separator) x))))
+
 (def string-join (separator list)
-     (list-foldr (fn (x xs)
-                     (match xs
-                            Empty       x
-                            (Cons _ __) (string-concat (string-concat xs separator) x)))
-                 Empty
-                 list))
+     (list-foldr ('string-join-reducer separator) Empty list))
 
 (data boolean True False)
 (data (pair a b) (Pair a b))
