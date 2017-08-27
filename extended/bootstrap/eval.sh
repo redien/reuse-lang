@@ -10,7 +10,7 @@ program_source=$generated_folder/program_source.lisp
 
 if [ "$3" == "--stdin" ]
 then
-    echo "(data (list a) (Cons a (list a)) Empty) $1 (export main_$random_name (stdin) $2)" > $program_source
+    echo "(typ (list a) (Cons a (list a)) Empty) $1 (export main_$random_name (stdin) $2)" > $program_source
     $script_path/compile-library.sh $program_source $generated_folder
     printf "\n$(cat $script_path/stdin_wrapper.ml)\nPrintf.printf \"%%s\" (_list_to_string (main_$random_name _stdin_list))\n" >> $generated_folder/ocaml/source.ml
     opam config exec -- ocamlfind ocamlc -linkpkg -thread -package core $generated_folder/ocaml/source.ml -o $generated_folder/ocaml/out

@@ -9,7 +9,7 @@ Function with multiple arguments
 = 2
 
 Recursive function
-| (data myCounter MyZero (MyNext myCounter))
+| (typ myCounter MyZero (MyNext myCounter))
 | (def bar (a) (match a MyZero 3 (MyNext n) (bar n)))
 > (bar (MyNext (MyNext MyZero)))
 = 3

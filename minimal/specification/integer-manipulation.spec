@@ -29,7 +29,7 @@ Comparison
 = 0
 
 Factorial function
-| (data myBool MyTrue MyFalse)
+| (typ myBool MyTrue MyFalse)
 | (def lessThan (a b) (int32-compare a MyTrue b MyFalse))
 | (def factorial2 (n product) (match (lessThan n 2) MyTrue product MyFalse (factorial2 (- n 1) (* product n))))
 | (def factorial (n) (factorial2 n 1))
