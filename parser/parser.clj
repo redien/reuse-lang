@@ -1,5 +1,5 @@
 
-(data (pair a b) (Pair a b))
+(typ (pair a b) (Pair a b))
 
 (def read-while' (predicate input string)
      (match input
@@ -23,12 +23,12 @@
      (and (not (= character 41))
           (not (whitespace? character)))))
 
-(data expression (Symbol (list int32))
-                 (List (list expression)))
+(typ expression (Symbol (list int32))
+                (List (list expression)))
 
-(data (parse-result i e) (ParseNext i e)
-                         (ParseOut i)
-                         ParseEnd)
+(typ (parse-result i e) (ParseNext i e)
+                        (ParseOut i)
+                        ParseEnd)
 
 (def parse-symbol (input)
      (match (read-while atom-character? input)

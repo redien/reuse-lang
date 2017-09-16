@@ -1,5 +1,5 @@
 
-(data boolean True False)
+(typ boolean True False)
 
 (def not (a)
      (match a
