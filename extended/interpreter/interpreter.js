@@ -9,8 +9,8 @@ var stdin = fs.readFileSync(process.argv[4], 'utf8');
 
 function jsToImmutableString(stdin) {
    return stdin.split('').reduce(function (list, character) {
-       return list.unshift(character.codePointAt(0));
-   }, Immutable.List());
+       return [...list, character.codePointAt(0)];
+   }, []);
 }
 
 console.log(interpret(source, expression, [{name: 'stdin', value: jsToImmutableString(stdin)}]));

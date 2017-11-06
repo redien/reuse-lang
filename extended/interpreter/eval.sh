@@ -17,7 +17,7 @@ else
     touch $generated_folder/input
 fi
 
-node $script_path/interpreter.js "$program_source" "(main_$random_name stdin)" "$generated_folder/input"
+node $script_path/../../generated/extended/interpreter/interpreter.js "$program_source" "(main_$random_name stdin)" "$generated_folder/input"
 
 result=$?
 
