@@ -26,14 +26,14 @@ const contextFromArgsAndParams = (argumentList, parameterList) =>
             }));
 
 const evalApplication = (context, expression) => {
-    const evaluated = map(expression, evalExpression.bind(null, context));
+    const evaluated = map(expression, e.bind(null, context));
     
     if (child(evaluated, 0).type === 'constructor') {
         return evaluated;
     }
 
-    if (typeof child(evaluated, 0) === 'function') {
-        return child(evaluated, 0).apply(null, toArray(evaluated).slice(1));
+    if (child(evaluated, 0).type === 'function') {
+        return child(evaluated, 0).value.apply(null, toArray(evaluated).slice(1));
     }
 
     const lambda = child(evaluated, 0);
@@ -43,11 +43,11 @@ const evalApplication = (context, expression) => {
 
     const argumentContext = contextFromArgsAndParams(argumentList, slice(evaluated, 1));
     const body = child(lambda, 2);
-    return evalExpression(context.concat(argumentContext), body);
+    return evalExpression.bind(null, context.concat(argumentContext), body);
 };
 
 const evalMatch = (context, expression) => {
-    const input = evalExpression(context, child(expression, 1));
+    const input = e(context, child(expression, 1));
     const cases = slice(expression, 2);
 
     for (let i = 0; i < size(cases); i += 2) {
@@ -55,11 +55,12 @@ const evalMatch = (context, expression) => {
         const result = child(cases, i + 1);
 
         if (isAtom(pattern) && value(pattern) === input.name) {
-            return evalExpression(context, result);
+            return evalExpression.bind(null, context, result);
         }
 
         if (isList(pattern) && firstAtomValue(pattern) === child(input, 0).name) {
-            return evalExpression(
+            return evalExpression.bind(
+                null,
                 context.concat(
                     contextFromArgsAndParams(
                         slice(pattern, 1),
@@ -79,8 +80,15 @@ const nameOfDefinition = (definition) => {
     }
 };
 
-const findInContext = (context, name) => 
-    (context.filter((pair) => pair.name === name)[0] || {}).value;
+const findInContext = (context, name) => {
+    for (let i = context.length - 1; i >= 0; --i) {
+        if (context[i].name === name) {
+            return context[i].value;
+        }
+    }
+
+    return null;
+};
 
 const evalExpression = (context, expression) => {
     if (isAtom(expression)) {
@@ -107,6 +115,14 @@ const evalExpression = (context, expression) => {
     }
 };
 
+const e = (context, expression) => {
+    let result = evalExpression.bind(null, context, expression);
+    while (typeof result === 'function') {
+        result = result();
+    }
+    return result;
+};
+
 const definitionToLambda = (definition) => concat(list(atom('fn')), slice(definition, 2));
 
 const constructorsFromType = (definition) => {
@@ -122,12 +138,12 @@ const constructorsFromType = (definition) => {
 
 module.exports.interpret = (program, expression, context) => {
     context = context.concat([
-        {name: '+', value: (a, b) => a + b | 0},
-        {name: '-', value: (a, b) => a - b | 0},
-        {name: '*', value: (a, b) => a * b | 0},
-        {name: '/', value: (a, b) => a / b | 0},
-        {name: '%', value: (a, b) => a % b | 0},
-        {name: 'int32-compare', value: (a, x, b, y) => a < b ? x : y},
+        {name: '+', value: {type: 'function', value: (a, b) => a + b | 0}},
+        {name: '-', value: {type: 'function', value: (a, b) => a - b | 0}},
+        {name: '*', value: {type: 'function', value: (a, b) => a * b | 0}},
+        {name: '/', value: {type: 'function', value: (a, b) => a / b | 0}},
+        {name: '%', value: {type: 'function', value: (a, b) => a % b | 0}},
+        {name: 'int32-compare', value: {type: 'function', value: (a, x, b, y) => a < b ? x : y}},
     ]);
 
     const parsedExpression = child(parse(expression).ast, 0);
@@ -155,7 +171,7 @@ module.exports.interpret = (program, expression, context) => {
         constructorsFromType
     );
    
-    return evalApplication(
+    return e(
         context
             .concat(toArray(contextWithFunctions))
             .concat(toArray(contextWithTypes))
