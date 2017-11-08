@@ -37,18 +37,29 @@ const evalApplication = (context, expression) => {
     }
 
     assert(child(evaluated, 0).type === 'lambda', `${toString(child(expression, 0))} is not a lambda expression`);
-
-    const lambda = child(evaluated, 0).value;
-    const argumentList = child(lambda, 0);
     
-    assert(size(evaluated) === size(argumentList) + 1, `Function expects ${size(argumentList)} arguments but got ${size(evaluated) - 1} in ${toString(expression)}.`);
+    const parameters = slice(evaluated, 1);
+
+    const lambda = child(evaluated, 0);
+    const lambdaExpression = lambda.value;
+    const argumentList = child(lambdaExpression, 0);
+    const body = child(lambdaExpression, 1);
+
+    if (size(parameters) < size(argumentList)) {
+       return {
+           type: 'lambda',
+           value: list(slice(argumentList, size(parameters)), body),
+           context: lambda.context.concat(contextFromArgsAndParams(slice(argumentList, 0, size(parameters)), parameters))
+       };
+    }
+
+    assert(size(parameters) <= size(argumentList), `Function expects ${size(argumentList)} arguments but got ${size(parameters)} in ${toString(expression)}.`);
 
     const argumentContext = contextFromArgsAndParams(argumentList, slice(evaluated, 1));
-    const body = child(lambda, 1);
 
     let newContext = [];
-    if (child(evaluated, 0).context) {
-        newContext = newContext.concat(child(evaluated, 0).context);
+    if (lambda.context) {
+        newContext = newContext.concat(lambda.context);
     }
 
     return evalExpression.bind(null, newContext.concat(argumentContext), body);
@@ -104,7 +115,7 @@ const evalExpression = (context, expression) => {
             return parseInt(value(expression), 10) | 0;
         } else {
             const foundValue = findInContext(context, value(expression));
-            if (!foundValue) {
+            if (foundValue === null) {
                 throw Error(`Could not find symbol ${value(expression)}`);
             }
             return foundValue;
