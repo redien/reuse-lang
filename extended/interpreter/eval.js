@@ -36,14 +36,22 @@ const evalApplication = (context, expression) => {
         return child(evaluated, 0).value.apply(null, toArray(evaluated).slice(1));
     }
 
-    const lambda = child(evaluated, 0);
-    const argumentList = child(lambda, 1);
+    assert(child(evaluated, 0).type === 'lambda', `${toString(child(expression, 0))} is not a lambda expression`);
+
+    const lambda = child(evaluated, 0).value;
+    const argumentList = child(lambda, 0);
     
     assert(size(evaluated) === size(argumentList) + 1, `Function expects ${size(argumentList)} arguments but got ${size(evaluated) - 1} in ${toString(expression)}.`);
 
     const argumentContext = contextFromArgsAndParams(argumentList, slice(evaluated, 1));
-    const body = child(lambda, 2);
-    return evalExpression.bind(null, context.concat(argumentContext), body);
+    const body = child(lambda, 1);
+
+    let newContext = [];
+    if (child(evaluated, 0).context) {
+        newContext = newContext.concat(child(evaluated, 0).context);
+    }
+
+    return evalExpression.bind(null, newContext.concat(argumentContext), body);
 };
 
 const evalMatch = (context, expression) => {
@@ -105,7 +113,7 @@ const evalExpression = (context, expression) => {
         if (isAtom(child(expression, 0))) {
             const first = value(child(expression, 0));  
             if (first === 'fn') {
-                return expression;
+                return {type: 'lambda', value: slice(expression, 1), context};
             } else if (first === 'match') {
                 return evalMatch(context, expression);
             }
@@ -123,7 +131,7 @@ const e = (context, expression) => {
     return result;
 };
 
-const definitionToLambda = (definition) => concat(list(atom('fn')), slice(definition, 2));
+const definitionToLambda = (definition) => ({type: 'lambda', value: slice(definition, 2)});
 
 const constructorsFromType = (definition) => {
     const constructors = slice(definition, 2);
@@ -137,29 +145,29 @@ const constructorsFromType = (definition) => {
 };
 
 module.exports.interpret = (program, expression, context) => {
-    context = context.concat([
-        {name: '+', value: {type: 'function', value: (a, b) => a + b | 0}},
-        {name: '-', value: {type: 'function', value: (a, b) => a - b | 0}},
-        {name: '*', value: {type: 'function', value: (a, b) => a * b | 0}},
-        {name: '/', value: {type: 'function', value: (a, b) => a / b | 0}},
-        {name: '%', value: {type: 'function', value: (a, b) => a % b | 0}},
-        {name: 'int32-compare', value: {type: 'function', value: (a, x, b, y) => a < b ? x : y}},
-    ]);
-
     const parsedExpression = child(parse(expression).ast, 0);
     const parsedProgram = parse(program).ast;
 
     const functionDefinitions = filter(parsedProgram, isFunctionDefinition);
     const typeDefinitions = filter(parsedProgram, isTypeDefinition);
 
-    const contextWithFunctions = map(
+    const contextWithFunctions = toArray(map(
         functionDefinitions,
         (definition) => 
             ({
                 name: nameOfDefinition(definition), 
                 value: definitionToLambda(definition)
-            }));
-    const contextWithTypes = map(
+            })))
+            .concat([
+                {name: '+', value: {type: 'function', value: (a, b) => a + b | 0}},
+                {name: '-', value: {type: 'function', value: (a, b) => a - b | 0}},
+                {name: '*', value: {type: 'function', value: (a, b) => a * b | 0}},
+                {name: '/', value: {type: 'function', value: (a, b) => a / b | 0}},
+                {name: '%', value: {type: 'function', value: (a, b) => a % b | 0}},
+                {name: 'int32-compare', value: {type: 'function', value: (a, x, b, y) => a < b ? x : y}},
+            ]);
+
+   const contextWithTypes = map(
         typeDefinitions,
         (definition) =>
             ({
@@ -170,12 +178,16 @@ module.exports.interpret = (program, expression, context) => {
         typeDefinitions,
         constructorsFromType
     );
-   
-    return e(
-        context
-            .concat(toArray(contextWithFunctions))
+    
+    context = context
+            .concat(contextWithFunctions)
             .concat(toArray(contextWithTypes))
-            .concat(toArray(contextWithConstructors)),
-        parsedExpression);
+            .concat(toArray(contextWithConstructors)); 
+
+    contextWithFunctions.forEach((entry) => {
+        entry.value.context = context;
+    });
+
+    return e(context, parsedExpression);
 };
 
