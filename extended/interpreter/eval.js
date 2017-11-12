@@ -58,7 +58,7 @@ const apply = (lambda, parameters) => {
 };
 
 const evalApplication = (context, expression) => {
-    const evaluated = map(expression, e.bind(null, context));
+    const evaluated = map(expression, _eval.bind(null, context));
  
     const parameters = slice(evaluated, 1);
     const lambda = child(evaluated, 0);
@@ -78,7 +78,7 @@ const evalApplication = (context, expression) => {
 };
 
 const evalMatch = (context, expression) => {
-    const input = e(context, child(expression, 1));
+    const input = _eval(context, child(expression, 1));
     const cases = slice(expression, 2);
 
     for (let i = 0; i < size(cases); i += 2) {
@@ -146,7 +146,7 @@ const evalExpression = (context, expression) => {
     }
 };
 
-const e = (context, expression) => {
+const _eval = (context, expression) => {
     let result = evalExpression.bind(null, context, expression);
     while (typeof result === 'function') {
         result = result();
@@ -179,51 +179,58 @@ const pipe = (...fs) => {
     };
 };
 
-module.exports.interpret = (program, expression, context) => {
-    const parsedExpression = child(parse(expression).ast, 0);
-    const parsedProgram = parse(program).ast;
-
+const createGlobalContext = (parsedProgram) => {
     const functionDefinitions = filter(parsedProgram, isFunctionDefinition);
     const typeDefinitions = filter(parsedProgram, isTypeDefinition);
 
-    const contextWithFunctions = toArray(map(
+    const contextWithBuiltIns = [
+        {name: '+', value: {type: 'function', value: (a, b) => a + b | 0}},
+        {name: '-', value: {type: 'function', value: (a, b) => a - b | 0}},
+        {name: '*', value: {type: 'function', value: (a, b) => a * b | 0}},
+        {name: '/', value: {type: 'function', value: (a, b) => a / b | 0}},
+        {name: '%', value: {type: 'function', value: (a, b) => a % b | 0}},
+        {name: 'int32-compare', value: {type: 'function', value: (a, x, b, y) => a < b ? x : y}},
+        {name: 'pipe', value: {type: 'function', value: pipe}},
+    ];
+
+    const contextWithFunctions = map(
         functionDefinitions,
         (definition) => 
             ({
                 name: nameOfDefinition(definition), 
                 value: definitionToLambda(definition)
-            })))
-            .concat([
-                {name: '+', value: {type: 'function', value: (a, b) => a + b | 0}},
-                {name: '-', value: {type: 'function', value: (a, b) => a - b | 0}},
-                {name: '*', value: {type: 'function', value: (a, b) => a * b | 0}},
-                {name: '/', value: {type: 'function', value: (a, b) => a / b | 0}},
-                {name: '%', value: {type: 'function', value: (a, b) => a % b | 0}},
-                {name: 'int32-compare', value: {type: 'function', value: (a, x, b, y) => a < b ? x : y}},
-                {name: 'pipe', value: {type: 'function', value: pipe}},
-            ]);
+            }));
 
-   const contextWithTypes = map(
+    const contextWithTypes = map(
         typeDefinitions,
         (definition) =>
             ({
                 name: nameOfDefinition(definition),
                 value: definition
             }));
+
     const contextWithConstructors = flatMap(
         typeDefinitions,
         constructorsFromType
     );
     
-    context = context
-            .concat(contextWithFunctions)
+    const context = contextWithBuiltIns
+            .concat(toArray(contextWithFunctions))
             .concat(toArray(contextWithTypes))
             .concat(toArray(contextWithConstructors)); 
 
-    contextWithFunctions.forEach((entry) => {
+    map(contextWithFunctions, (entry) => {
         entry.value.context = context;
     });
 
-    return e(context, parsedExpression);
+    return context;
+};
+
+module.exports.interpret = (program, expression, context) => {
+    const parsedProgram = parse(program).ast;
+    const globalContext = createGlobalContext(parsedProgram);
+    
+    const parsedExpression = child(parse(expression).ast, 0);
+    return _eval(context.concat(globalContext), parsedExpression);
 };
 
