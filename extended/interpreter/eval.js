@@ -7,12 +7,6 @@ const util = require('util');
 const firstAtomValue = (expression) => value(child(expression, 0));
 const secondAtomValue = (expression) => value(child(expression, 1));
 
-const isTypeDefinition = (definition) => 
-    firstAtomValue(definition) === 'typ';
-
-const isFunctionDefinition = (definition) => 
-    firstAtomValue(definition) === 'def' || firstAtomValue(definition) === 'export';
-
 const zip = (first, second) =>
     first.map((value, index) => [value, second[index]]);
 
@@ -103,25 +97,17 @@ const evalMatch = (context, expression) => {
     throw new Error(`No case matching ${toString(expression)}`);
 };
 
-const nameOfDefinition = (definition) => {
-    if (isAtom(child(definition, 1))) {
-        return value(child(definition, 1));
-    } else {
-        return value(child(child(definition, 1), 0));
-    }
-};
-
-const findInContext = (context, name) => {
-    for (let i = context.length - 1; i >= 0; --i) {
-        if (context[i].name === name) {
-            return context[i].value;
-        }
-    }
-
-    return null;
-};
-
 const evalExpression = (context, expression) => {
+    const findInContext = (context, name) => {
+        for (let i = context.length - 1; i >= 0; --i) {
+            if (context[i].name === name) {
+                return context[i].value;
+            }
+        }
+
+        return null;
+    };
+
     if (isAtom(expression)) {
         if (!isNaN(value(expression))) {
             return parseInt(value(expression), 10) | 0;
@@ -154,32 +140,46 @@ const _eval = (context, expression) => {
     return result;
 };
 
-const definitionToLambda = (definition) => ({type: 'lambda', value: slice(definition, 2)});
+const createGlobalContext = (parsedProgram) => {
+    const isTypeDefinition = (definition) => 
+        firstAtomValue(definition) === 'typ';
 
-const constructorsFromType = (definition) => {
-    const constructors = slice(definition, 2);
-    return map(constructors, (constructor) => {
-        const name = isAtom(constructor) ? value(constructor) : value(child(constructor, 0)); 
-        return {
-            name,
-            value: {type: 'constructor', name}
-        };
-    });
-};
+    const isFunctionDefinition = (definition) => 
+        firstAtomValue(definition) === 'def' || firstAtomValue(definition) === 'export';
 
-const pipe = (...fs) => {
-    return {
-        type: 'function',
-        value: (x) => {
-            fs.forEach(f => {
-                x = apply(f, list(x));
-            });
-            return x;
+    const nameOfDefinition = (definition) => {
+        if (isAtom(child(definition, 1))) {
+            return value(child(definition, 1));
+        } else {
+            return value(child(child(definition, 1), 0));
         }
     };
-};
 
-const createGlobalContext = (parsedProgram) => {
+    const pipe = (...fs) => {
+        return {
+            type: 'function',
+            value: (x) => {
+                fs.forEach(f => {
+                    x = apply(f, list(x));
+                });
+                return x;
+            }
+        };
+    };
+
+    const definitionToLambda = (definition) => ({type: 'lambda', value: slice(definition, 2)});
+
+    const constructorsFromType = (definition) => {
+        const constructors = slice(definition, 2);
+        return map(constructors, (constructor) => {
+            const name = isAtom(constructor) ? value(constructor) : value(child(constructor, 0)); 
+            return {
+                name,
+                value: {type: 'constructor', name}
+            };
+        });
+    };
+
     const functionDefinitions = filter(parsedProgram, isFunctionDefinition);
     const typeDefinitions = filter(parsedProgram, isTypeDefinition);
 
