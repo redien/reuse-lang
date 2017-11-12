@@ -25,22 +25,11 @@ const contextFromArgsAndParams = (argumentList, parameterList) =>
                 value: pair[1]
             }));
 
-const evalApplication = (context, expression) => {
-    const evaluated = map(expression, e.bind(null, context));
-    
-    if (child(evaluated, 0).type === 'constructor') {
-        return evaluated;
+const apply = (lambda, parameters) => {
+    if (lambda.type === 'function') {
+        return lambda.value.apply(null, toArray(parameters));
     }
-
-    if (child(evaluated, 0).type === 'function') {
-        return child(evaluated, 0).value.apply(null, toArray(evaluated).slice(1));
-    }
-
-    assert(child(evaluated, 0).type === 'lambda', `${toString(child(expression, 0))} is not a lambda expression`);
-    
-    const parameters = slice(evaluated, 1);
-
-    const lambda = child(evaluated, 0);
+   
     const lambdaExpression = lambda.value;
     const argumentList = child(lambdaExpression, 0);
     const body = child(lambdaExpression, 1);
@@ -53,9 +42,11 @@ const evalApplication = (context, expression) => {
        };
     }
 
-    assert(size(parameters) <= size(argumentList), `Function expects ${size(argumentList)} arguments but got ${size(parameters)} in ${toString(expression)}.`);
+    if (size(parameters) > size(argumentList)) {
+        return {type: 'error', message: `Function expects ${size(argumentList)} arguments but got ${size(parameters)}`}; 
+    }
 
-    const argumentContext = contextFromArgsAndParams(argumentList, slice(evaluated, 1));
+    const argumentContext = contextFromArgsAndParams(argumentList, parameters);
 
     let newContext = [];
     if (lambda.context) {
@@ -63,6 +54,27 @@ const evalApplication = (context, expression) => {
     }
 
     return evalExpression.bind(null, newContext.concat(argumentContext), body);
+
+};
+
+const evalApplication = (context, expression) => {
+    const evaluated = map(expression, e.bind(null, context));
+ 
+    const parameters = slice(evaluated, 1);
+    const lambda = child(evaluated, 0);
+
+    if (lambda.type === 'constructor') {
+        return evaluated;
+    }
+    
+    assert(lambda.type === 'lambda' || lambda.type === 'function', `${toString(child(expression, 0))} is not a lambda expression`);
+     
+    const result = apply(lambda, parameters);
+    if (result.type === 'error') {
+        throw new Error(`${result.message} in ${toString(expression)}`);
+    } else {
+        return result;
+    }
 };
 
 const evalMatch = (context, expression) => {
@@ -155,6 +167,18 @@ const constructorsFromType = (definition) => {
     });
 };
 
+const pipe = (...fs) => {
+    return {
+        type: 'function',
+        value: (x) => {
+            fs.forEach(f => {
+                x = apply(f, list(x));
+            });
+            return x;
+        }
+    };
+};
+
 module.exports.interpret = (program, expression, context) => {
     const parsedExpression = child(parse(expression).ast, 0);
     const parsedProgram = parse(program).ast;
@@ -176,6 +200,7 @@ module.exports.interpret = (program, expression, context) => {
                 {name: '/', value: {type: 'function', value: (a, b) => a / b | 0}},
                 {name: '%', value: {type: 'function', value: (a, b) => a % b | 0}},
                 {name: 'int32-compare', value: {type: 'function', value: (a, x, b, y) => a < b ? x : y}},
+                {name: 'pipe', value: {type: 'function', value: pipe}},
             ]);
 
    const contextWithTypes = map(
