@@ -67,19 +67,23 @@ var nestFunctionApplications = function(functions, argument) {
     }
 };
 
+var isSpecialForm = function(expression, name) {
+    return ast.size(expression) > 0 && ast.isAtom(ast.child(expression, 0)) && ast.value(ast.child(expression, 0)) === name;
+};
+
 var translateExpression = function(expression) {
     if (ast.isList(expression)) {
-        if (ast.value(ast.child(expression, 0)) === 'match') {
+        if (isSpecialForm(expression, 'match')) {
             return translateMatch(expression);
         } else if (
-            ast.value(ast.child(expression, 0)) === '+' ||
-            ast.value(ast.child(expression, 0)) === '-' ||
-            ast.value(ast.child(expression, 0)) === '*' ||
-            ast.value(ast.child(expression, 0)) === '/' ||
-            ast.value(ast.child(expression, 0)) === '%'
+            isSpecialForm(expression, '+') ||
+            isSpecialForm(expression, '-') ||
+            isSpecialForm(expression, '*') ||
+            isSpecialForm(expression, '/') ||
+            isSpecialForm(expression, '%')
         ) {
             return operatorMap[ast.value(ast.child(expression, 0))] + ' ' + translateExpressionWithParen(ast.child(expression, 1)) + ' ' + translateExpressionWithParen(ast.child(expression, 2));
-        } else if (ast.value(ast.child(expression, 0)) === 'int32-compare') {
+        } else if (isSpecialForm(expression, 'int32-compare')) {
             return (
                 'if ' +
                 translateExpressionWithParen(ast.child(expression, 1)) +
@@ -90,15 +94,15 @@ var translateExpression = function(expression) {
                 ' else ' +
                 translateExpressionWithParen(ast.child(expression, 4))
             );
-        } else if (ast.value(ast.child(expression, 0)) === 'fn') {
+        } else if (isSpecialForm(expression, 'fn')) {
             const args = ast.child(expression, 1);
             const body = ast.child(expression, 2);
             const argString = ast.size(args) > 0 ? ast.join(ast.map(args, ast.value), ' ') : '_';
             return 'fun ' + argString + ' -> ' + translateExpression(body);
-        } else if (ast.value(ast.child(expression, 0)) === 'pipe') {
+        } else if (isSpecialForm(expression, 'pipe')) {
             const args = ast.reverse(ast.slice(expression, 1));
             return 'fun _x1 -> ' + nestFunctionApplications(args, '_x1');
-        } else if (ast.contains(constructorNames, ast.value(ast.child(expression, 0)))) {
+        } else if (ast.isAtom(ast.child(expression, 0)) && ast.contains(constructorNames, ast.value(ast.child(expression, 0)))) {
             return translateConstructor(expression);
         } else {
             var extraArgument = '';
