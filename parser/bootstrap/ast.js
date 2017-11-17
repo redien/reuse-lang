@@ -46,7 +46,6 @@ ast.isExpression = function(expression) {
 
 ast.push = function(list, value) {
     assert(ast.isList(list), 'Expected list');
-    assert(ast.isExpression(value), 'Expected an expression');
     return list.set('value', list.get('value').push(value));
 };
 
