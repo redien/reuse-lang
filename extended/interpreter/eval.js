@@ -71,6 +71,72 @@ const evalApplication = (context, expression) => {
     }
 };
 
+const findInContext = (context, name) => {
+    for (let i = context.length - 1; i >= 0; --i) {
+        if (context[i].name === name) {
+            return context[i].value;
+        }
+    }
+
+    return null;
+};
+
+const atomIsConstructor = (context, atom) => {
+    const found = findInContext(context, value(atom));
+    return found !== null && found.type === 'constructor';
+};
+
+const match = (context, pattern, input) => {
+    if (isAtom(pattern)) {
+        return !atomIsConstructor(context, pattern) || (input.type === 'constructor' && input.name === value(pattern));
+    } else {
+        assert(size(pattern) > 0, 'expected size of list to be > 0');
+        assert(atomIsConstructor(context, child(pattern, 0)), `Expected constructor in pattern ${toString(pattern)}`);
+        assert(isList(input), `Expected ${input} to be list`);
+        if (firstAtomValue(pattern) === child(input, 0).name) {
+            const patterns = slice(pattern, 1);
+            const inputs = slice(input, 1);
+            for (let i = 0; i < size(patterns); ++i) {
+                if (!match(context, child(patterns, i), child(inputs, i))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+};
+
+const c = (name) => ({name, value: {name, type: 'constructor'}}); 
+
+assert.deepEqual(true, match([], atom('x'), 42), "matches variable with value");
+assert.deepEqual(true, match([c('C')], list(atom('C'), atom('a')), list({type: 'constructor', name: 'C'}, 42)), "matches constructor with value");
+assert.deepEqual(true, match([c('C'), c('D')], list(atom('C'), atom('D')), list({type: 'constructor', name: 'C'}, {type: 'constructor', name: "D"})), "matches no-args constructors");
+assert.deepEqual(true, match([c('C')], list(atom('C'), atom('b')), list({type: 'constructor', name: 'C'}, {type: 'constructor', name: "D"})), "matches no-args constructors");
+
+const matchContext = (context, pattern, input) => {
+    if (isAtom(pattern)) {
+        if (atomIsConstructor(context, pattern)) {
+            return [];
+        } else {
+            return [{name: value(pattern), value: input}];
+        }
+    } else {
+        if (firstAtomValue(pattern) === child(input, 0).name) {
+            let context = [];
+            const patterns = slice(pattern, 1);
+            const inputs = slice(input, 1);
+            for (let i = 0; i < size(patterns); ++i) {
+                context = context.concat(matchContext(context, child(patterns, i), child(inputs, i)));
+            }
+            return context;
+        }
+
+        return [{name: value(pattern), value: input}];
+    }
+};
+
+assert.deepEqual([{name: 'a', value: 42}], matchContext([c('C')], list(atom('C'), atom('a')), list({name: 'C', type: 'constructor'}, 42)));
+
 const evalMatch = (context, expression) => {
     const input = _eval(context, child(expression, 1));
     const cases = slice(expression, 2);
@@ -78,19 +144,9 @@ const evalMatch = (context, expression) => {
     for (let i = 0; i < size(cases); i += 2) {
         const pattern = child(cases, i);
         const result = child(cases, i + 1);
-
-        if (isAtom(pattern) && value(pattern) === input.name) {
-            return evalExpression.bind(null, context, result);
-        }
-
-        if (isList(pattern) && firstAtomValue(pattern) === child(input, 0).name) {
-            return evalExpression.bind(
-                null,
-                context.concat(
-                    contextFromArgsAndParams(
-                        slice(pattern, 1),
-                        slice(input, 1))),
-                result);
+        
+        if (match(context, pattern, input)) {
+            return evalExpression.bind(null, context.concat(matchContext(context, pattern, input)), result);
         }
     }
 
@@ -98,16 +154,6 @@ const evalMatch = (context, expression) => {
 };
 
 const evalExpression = (context, expression) => {
-    const findInContext = (context, name) => {
-        for (let i = context.length - 1; i >= 0; --i) {
-            if (context[i].name === name) {
-                return context[i].value;
-            }
-        }
-
-        return null;
-    };
-
     if (isAtom(expression)) {
         if (!isNaN(value(expression))) {
             return parseInt(value(expression), 10) | 0;
