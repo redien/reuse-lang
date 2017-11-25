@@ -19,18 +19,18 @@ Remainder
 = 1
 
 Comparison
-> (int32-compare 3 1 4 0)
+> (int32-less-than 3 4 1 0)
 = 1
 
-> (int32-compare 4 1 2 0)
+> (int32-less-than 4 2 1 0)
 = 0
 
-> (int32-compare 1 1 1 0)
+> (int32-less-than 1 1 1 0)
 = 0
 
 Factorial function
 | (typ myBool MyTrue MyFalse)
-| (def lessThan (a b) (int32-compare a MyTrue b MyFalse))
+| (def lessThan (a b) (int32-less-than a b MyTrue MyFalse))
 | (def factorial2 (n product) (match (lessThan n 2) MyTrue product MyFalse (factorial2 (- n 1) (* product n))))
 | (def factorial (n) (factorial2 n 1))
 > (factorial 5)

@@ -16,12 +16,10 @@ So what does Reuse code look like?
 
 ```
 (def factorial (n)
-    (int32-compare
-        n 1
-        2 (* n (factorial (- n 1)))))
+    (int32-less-than n 2
+        1
+        (* n (factorial (- n 1)))))
 ```
 
 You might recognize this as the factorial function. (Or not, depending on what you think of parentheses.)
-
-
 

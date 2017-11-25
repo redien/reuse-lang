@@ -17,7 +17,7 @@
             False b))
 
 (def < (a b)
-     (int32-compare a True b False))
+     (int32-less-than a b True False))
 
 (def > (a b)
      (< b a))

@@ -235,7 +235,7 @@ const createGlobalContext = (parsedProgram) => {
         {name: '*', value: {type: 'function', value: (a, b) => a * b | 0}},
         {name: '/', value: {type: 'function', value: (a, b) => a / b | 0}},
         {name: '%', value: {type: 'function', value: (a, b) => a % b | 0}},
-        {name: 'int32-compare', value: {type: 'function', value: (a, x, b, y) => a < b ? x : y}},
+        {name: 'int32-less-than', value: {type: 'function', value: (a, b, x, y) => a < b ? x : y}},
         {name: 'pipe', value: {type: 'function', value: pipe}},
     ];
 

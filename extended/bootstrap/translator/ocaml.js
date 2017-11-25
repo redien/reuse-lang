@@ -83,14 +83,14 @@ var translateExpression = function(expression) {
             isSpecialForm(expression, '%')
         ) {
             return operatorMap[ast.value(ast.child(expression, 0))] + ' ' + translateExpressionWithParen(ast.child(expression, 1)) + ' ' + translateExpressionWithParen(ast.child(expression, 2));
-        } else if (isSpecialForm(expression, 'int32-compare')) {
+        } else if (isSpecialForm(expression, 'int32-less-than')) {
             return (
                 'if ' +
                 translateExpressionWithParen(ast.child(expression, 1)) +
                 ' < ' +
-                translateExpressionWithParen(ast.child(expression, 3)) +
-                ' then ' +
                 translateExpressionWithParen(ast.child(expression, 2)) +
+                ' then ' +
+                translateExpressionWithParen(ast.child(expression, 3)) +
                 ' else ' +
                 translateExpressionWithParen(ast.child(expression, 4))
             );
