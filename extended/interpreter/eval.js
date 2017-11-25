@@ -51,11 +51,20 @@ const apply = (lambda, parameters) => {
 
 };
 
+const evalReaderMacro = (lambda, expression) => {
+    return atom('1');
+};
+
 const evalApplication = (context, expression) => {
+    const lambda = _eval(context, child(expression, 0));
+
+    if (lambda.type === 'reader-macro') {
+        const newExpression = evalReaderMacro(lambda, expression);
+        return _eval(context, newExpression);
+    }
+
     const evaluated = map(expression, _eval.bind(null, context));
- 
     const parameters = slice(evaluated, 1);
-    const lambda = child(evaluated, 0);
 
     if (lambda.type === 'constructor') {
         return evaluated;
@@ -193,6 +202,10 @@ const createGlobalContext = (parsedProgram) => {
     const isFunctionDefinition = (definition) => 
         firstAtomValue(definition) === 'def' || firstAtomValue(definition) === 'export';
 
+    const isReaderMacroDefinition = (definition) => 
+        firstAtomValue(definition) === 'reader-macro';
+
+
     const nameOfDefinition = (definition) => {
         if (isAtom(child(definition, 1))) {
             return value(child(definition, 1));
@@ -214,6 +227,7 @@ const createGlobalContext = (parsedProgram) => {
     };
 
     const definitionToLambda = (definition) => ({type: 'lambda', value: slice(definition, 2)});
+    const definitionToReaderMacro = (definition) => ({type: 'reader-macro', value: slice(definition, 2)});
 
     const constructorsFromType = (definition) => {
         const constructors = slice(definition, 2);
@@ -228,6 +242,7 @@ const createGlobalContext = (parsedProgram) => {
 
     const functionDefinitions = filter(parsedProgram, isFunctionDefinition);
     const typeDefinitions = filter(parsedProgram, isTypeDefinition);
+    const readerMacroDefinitions = filter(parsedProgram, isReaderMacroDefinition);
 
     const contextWithBuiltIns = [
         {name: '+', value: {type: 'function', value: (a, b) => a + b | 0}},
@@ -247,6 +262,14 @@ const createGlobalContext = (parsedProgram) => {
                 value: definitionToLambda(definition)
             }));
 
+    const contextWithReaderMacros = map(
+        readerMacroDefinitions,
+        (definition) =>
+            ({
+                name: nameOfDefinition(definition),
+                value: definitionToReaderMacro(definition)
+            }));
+
     const contextWithTypes = map(
         typeDefinitions,
         (definition) =>
@@ -262,6 +285,7 @@ const createGlobalContext = (parsedProgram) => {
     
     const context = contextWithBuiltIns
             .concat(toArray(contextWithFunctions))
+            .concat(toArray(contextWithReaderMacros))
             .concat(toArray(contextWithTypes))
             .concat(toArray(contextWithConstructors)); 
 
