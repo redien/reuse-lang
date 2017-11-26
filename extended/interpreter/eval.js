@@ -1,6 +1,6 @@
 
 import { parse } from '../../parser/bootstrap/parser';
-import { isList, reduce, flatMap, some, concat, atom, list, filter, slice, child, size, isAtom, value, map, toString, toArray } from '../../parser/bootstrap/ast';
+import { reverse, isList, reduce, flatMap, some, concat, atom, list, filter, slice, child, size, isAtom, value, map, toString, toArray } from '../../parser/bootstrap/ast';
 const assert = require('assert');
 const util = require('util');
 
@@ -168,7 +168,7 @@ const quoteAtom = (atom) => {
 };
 
 const quoteList = (list) => {
-    return _list(reduce(list, (xs, x) => _cons(quote(x), xs), _empty));
+    return _list(reduce(reverse(list), (xs, x) => _cons(quote(x), xs), _empty));
 };
 
 var quote = (quoted) => {

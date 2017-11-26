@@ -11,7 +11,16 @@ Should quote an empty list
 > (match (quote ()) (List Empty) 1 else 0)
 = 1
 
-Should quote a list with one entry
-> (match (quote (a)) (List (Cons (Atom (Cons x Empty)) Empty)) x else 0)
-= 97 
+Should quote a list with one atom
+> (match (quote (c)) (List (Cons (Atom (Cons x Empty)) Empty)) x else 0)
+= 99 
+
+Should quote a nested list
+> (match (quote ((d))) (List (Cons (List (Cons (Atom (Cons x Empty)) Empty)) Empty)) x else 0)
+= 100
+
+Should quote a list with several atoms
+> (match (quote (d e)) (List (Cons _ (Cons (Atom (Cons x Empty)) Empty))) x else 0)
+= 101
+
 
