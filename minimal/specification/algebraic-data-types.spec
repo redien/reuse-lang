@@ -62,3 +62,9 @@ Universal type parameters
 | (def destruct (u) (match u (Universal a) a))
 > (destruct (destruct (Universal (Universal 11))))
 = 11
+
+Pattern is parameterised constructor but not value
+| (typ (list a) (Cons a) Empty)
+> (match Empty (Cons x) x Empty 12)
+= 12
+
