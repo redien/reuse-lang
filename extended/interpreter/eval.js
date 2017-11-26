@@ -23,7 +23,7 @@ const apply = (lambda, parameters) => {
     if (lambda.type === 'function') {
         return lambda.value.apply(null, toArray(parameters));
     }
-   
+ 
     const lambdaExpression = lambda.value;
     const argumentList = child(lambdaExpression, 0);
     const body = child(lambdaExpression, 1);
@@ -48,14 +48,22 @@ const apply = (lambda, parameters) => {
     }
 
     return evalExpression.bind(null, newContext.concat(argumentContext), body);
+};
 
+const evalMacro = (lambda, parameters) => {
+    const quoted = quote(parameters);
+    return apply(lambda, list(quoted));
 };
 
 const evalApplication = (context, expression) => {
+    const lambda = _eval(context, child(expression, 0));
+   
+    if (lambda.type === 'macro') {
+        return evalMacro(lambda, slice(expression, 1));
+    }
+
     const evaluated = map(expression, _eval.bind(null, context));
- 
     const parameters = slice(evaluated, 1);
-    const lambda = child(evaluated, 0);
 
     if (lambda.type === 'constructor') {
         return evaluated;
@@ -221,6 +229,10 @@ const createGlobalContext = (parsedProgram) => {
     const isFunctionDefinition = (definition) => 
         firstAtomValue(definition) === 'def' || firstAtomValue(definition) === 'export';
 
+    const isMacroDefinition = (definition) => 
+        firstAtomValue(definition) === 'macro';
+
+
     const nameOfDefinition = (definition) => {
         if (isAtom(child(definition, 1))) {
             return value(child(definition, 1));
@@ -243,6 +255,8 @@ const createGlobalContext = (parsedProgram) => {
 
     const definitionToLambda = (definition) => ({type: 'lambda', value: slice(definition, 2)});
 
+    const definitionToMacro = (definition) => ({type: 'macro', value: slice(definition, 2)});
+
     const constructorsFromType = (definition) => {
         const constructors = slice(definition, 2);
         return map(constructors, (constructor) => {
@@ -256,6 +270,7 @@ const createGlobalContext = (parsedProgram) => {
 
     const functionDefinitions = filter(parsedProgram, isFunctionDefinition);
     const typeDefinitions = filter(parsedProgram, isTypeDefinition);
+    const macroDefinitions = filter(parsedProgram, isMacroDefinition);
 
     const contextWithBuiltIns = [
         {name: '+', value: {type: 'function', value: (a, b) => a + b | 0}},
@@ -275,6 +290,15 @@ const createGlobalContext = (parsedProgram) => {
                 value: definitionToLambda(definition)
             }));
 
+    const contextWithMacros = map(
+        macroDefinitions,
+        (definition) =>
+            ({
+                name: nameOfDefinition(definition),
+                value: definitionToMacro(definition)
+            }));
+
+
     const contextWithTypes = map(
         typeDefinitions,
         (definition) =>
@@ -291,9 +315,14 @@ const createGlobalContext = (parsedProgram) => {
     const context = contextWithBuiltIns
             .concat(toArray(contextWithFunctions))
             .concat(toArray(contextWithTypes))
+            .concat(toArray(contextWithMacros))
             .concat(toArray(contextWithConstructors)); 
 
     map(contextWithFunctions, (entry) => {
+        entry.value.context = context;
+    });
+
+    map(contextWithMacros, (entry) => {
         entry.value.context = context;
     });
 
