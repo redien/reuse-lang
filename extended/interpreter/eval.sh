@@ -8,7 +8,7 @@ mkdir -p $generated_folder
 
 program_source=$generated_folder/program_source.lisp
 
-echo "(typ (list a) (Cons a (list a)) Empty) $1 (export main_$random_name (stdin) $2)" > $program_source
+echo "(typ (list a) (Cons a (list a)) Empty) (typ expression (Atom (list int32)) (List (list expression))) $1 (export main_$random_name (stdin) $2)" > $program_source
 
 if [ "$3" == "--stdin" ]
 then

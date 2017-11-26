@@ -1,6 +1,6 @@
 
 import { parse } from '../../parser/bootstrap/parser';
-import { isList, flatMap, some, concat, atom, list, filter, slice, child, size, isAtom, value, map, toString, toArray } from '../../parser/bootstrap/ast';
+import { isList, reduce, flatMap, some, concat, atom, list, filter, slice, child, size, isAtom, value, map, toString, toArray } from '../../parser/bootstrap/ast';
 const assert = require('assert');
 const util = require('util');
 
@@ -92,7 +92,11 @@ const match = (context, pattern, input) => {
     } else {
         assert(size(pattern) > 0, 'expected size of list to be > 0');
         assert(atomIsConstructor(context, child(pattern, 0)), `Expected constructor in pattern ${toString(pattern)}`);
-        assert(isList(input), `Expected ${input} to be list`);
+
+        if (!isList(input)) {
+            return false;
+        }
+        
         if (firstAtomValue(pattern) === child(input, 0).name) {
             const patterns = slice(pattern, 1);
             const inputs = slice(input, 1);
@@ -153,6 +157,28 @@ const evalMatch = (context, expression) => {
     throw new Error(`No case matching ${toString(expression)}`);
 };
 
+const _atom = (name) => list({type: 'constructor', name: 'Atom'}, name);
+const _list = (items) => list({type: 'constructor', name: 'List'}, items);
+const _cons = (x, xs) => list({type: 'constructor', name: 'Cons'}, x, xs);
+const _empty = {type: 'constructor', name: 'Empty'};
+
+const quoteAtom = (atom) => {
+    const name = value(atom);
+    return _atom(name.split('').reduce((xs, x) => _cons(x.charCodeAt(0), xs), _empty));
+};
+
+const quoteList = (list) => {
+    return _list(reduce(list, (xs, x) => _cons(quote(x), xs), _empty));
+};
+
+var quote = (quoted) => {
+    if (isList(quoted)) {
+        return quoteList(quoted);
+    } else {
+        return quoteAtom(quoted);
+    }
+};
+
 const evalExpression = (context, expression) => {
     if (isAtom(expression)) {
         if (!isNaN(value(expression))) {
@@ -171,6 +197,8 @@ const evalExpression = (context, expression) => {
                 return {type: 'lambda', value: slice(expression, 1), context};
             } else if (first === 'match') {
                 return evalMatch(context, expression);
+            } else if (first === 'quote') {
+                return quote(child(expression, 1));
             }
         }
 
