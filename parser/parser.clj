@@ -3,10 +3,11 @@
 
 (def read-while' (predicate input string)
      (match input
-            Empty       (Pair input string)
-            (Cons x xs) (match (predicate x)
-                               True  (read-while' predicate xs (Cons x string))
-                               False (Pair input string))))
+            (Pair Empty _)       (Pair input string)
+            (Pair (Cons x xs) offset)
+                  (match (predicate x)
+                           True  (read-while' predicate (Pair xs (+ 1 offset)) (Cons x string))
+                           False (Pair input string))))
 
 (def read-while (predicate input)
      (match (read-while' predicate input Empty)
@@ -23,41 +24,51 @@
      (and (not (= character 41))
           (not (whitespace? character)))))
 
-(typ expression (Symbol (list int32))
-                (List (list expression)))
+(typ range (Range int32 int32))
+
+(typ expression (Symbol (list int32)      range)
+                (List   (list expression) range))
 
 (typ (parse-result i e) (ParseNext i e)
                         (ParseOut i)
                         ParseEnd)
 
-(def parse-symbol (input)
-     (match (read-while atom-character? input)
-            (Pair input Empty) (ParseOut input)
-            (Pair input name)  (ParseNext input (Symbol name))))
+(def offset-of (input)
+     (match input
+            (Pair _ offset) offset))
 
-(def parse-list (input parse-expressions)
-     (match (parse-expressions input Empty)
-            (Pair input expressions) (ParseNext input (List expressions))))
+(def range-between (start end)
+     (Range (offset-of start) (offset-of end)))
+
+(def parse-symbol (original-input)
+     (match (read-while atom-character? original-input)
+            (Pair input Empty) (ParseOut input)
+            (Pair input name)  (ParseNext input (Symbol name (range-between original-input input)))))
+
+(def parse-list (original-input parse-expressions)
+     (match (parse-expressions original-input Empty)
+            (Pair input expressions) (ParseNext input (List expressions (range-between original-input input)))))
 
 (def parse-expression (input parse-expressions)
      (match input
-            Empty       ParseEnd
-            (Cons x xs) (match (whitespace? x)
-                               True (parse-expression xs parse-expressions)
-                  False (match (= x 40)
-                               True (parse-list xs parse-expressions)
-                  False (match (= x 41)
-                               True (ParseOut xs)
-                  False (parse-symbol input))))))
+            (Pair Empty _)   ParseEnd
+            (Pair (Cons x xs) offset)
+                      (match (whitespace? x)
+                             True (parse-expression (Pair xs (+ 1 offset)) parse-expressions)
+                False (match (= x 40)
+                             True (parse-list (Pair xs (+ 1 offset)) parse-expressions)
+                False (match (= x 41)
+                             True (ParseOut (Pair xs (+ 1 offset)))
+                False (parse-symbol input))))))
 
 (def parse-expressions (input expressions)
      (match (parse-expression input parse-expressions)
-            ParseEnd                 (Pair Empty expressions)
+            ParseEnd                 (Pair input expressions)
             (ParseOut input)         (Pair input expressions)
             (ParseNext input result) (parse-expressions input (Cons result expressions))))
 
-(def parse (input)
-     (match (parse-expressions input Empty)
+(export parse (input)
+     (match (parse-expressions (Pair input 0) Empty)
             (Pair _ expressions) expressions))
 
 (def wrap-in-brackets (string)
@@ -65,8 +76,9 @@
 
 (def stringify-expression (stringify expression)
      (match expression
-            (Symbol name)      name
-            (List expressions) (wrap-in-brackets (stringify expressions))))
+            (Symbol name _)      name
+            (List expressions _) (wrap-in-brackets (stringify expressions))))
 
-(def stringify (expressions)
+(export stringify (expressions)
      (string-join (string-of-char 32) (list-map (stringify-expression stringify) expressions)))
+
