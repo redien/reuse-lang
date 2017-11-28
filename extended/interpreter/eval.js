@@ -1,339 +1,69 @@
 
-import { parse } from '../../parser/bootstrap/parser';
-import { reverse, isList, reduce, flatMap, some, concat, atom, list, filter, slice, child, size, isAtom, value, map, toString, toArray } from '../../parser/bootstrap/ast';
-const assert = require('assert');
-const util = require('util');
+const first = (list) => list[1];
+const rest = (list) => list[2];
 
-const firstAtomValue = (expression) => value(child(expression, 0));
-const secondAtomValue = (expression) => value(child(expression, 1));
-
-const zip = (first, second) =>
-    first.map((value, index) => [value, second[index]]);
-
-const contextFromArgsAndParams = (argumentList, parameterList) =>
-    zip(toArray(argumentList), 
-        toArray(parameterList))
-        .map((pair) => 
-            ({
-                name: value(pair[0]), 
-                value: pair[1]
-            }));
-
-const apply = (lambda, parameters) => {
-    if (lambda.type === 'function') {
-        return lambda.value.apply(null, toArray(parameters));
-    }
- 
-    const lambdaExpression = lambda.value;
-    const argumentList = child(lambdaExpression, 0);
-    const body = child(lambdaExpression, 1);
-
-    if (size(parameters) < size(argumentList)) {
-       return {
-           type: 'lambda',
-           value: list(slice(argumentList, size(parameters)), body),
-           context: lambda.context.concat(contextFromArgsAndParams(slice(argumentList, 0, size(parameters)), parameters))
-       };
-    }
-
-    if (size(parameters) > size(argumentList)) {
-        return {type: 'error', message: `Function expects ${size(argumentList)} arguments but got ${size(parameters)}`}; 
-    }
-
-    const argumentContext = contextFromArgsAndParams(argumentList, parameters);
-
-    let newContext = [];
-    if (lambda.context) {
-        newContext = newContext.concat(lambda.context);
-    }
-
-    return evalExpression.bind(null, newContext.concat(argumentContext), body);
-};
-
-const evalMacro = (lambda, parameters) => {
-    const quoted = quote(parameters);
-    return apply(lambda, list(quoted));
-};
-
-const evalApplication = (context, expression) => {
-    const lambda = _eval(context, child(expression, 0));
-   
-    if (lambda.type === 'macro') {
-        return evalMacro(lambda, slice(expression, 1));
-    }
-
-    const evaluated = map(expression, _eval.bind(null, context));
-    const parameters = slice(evaluated, 1);
-
-    if (lambda.type === 'constructor') {
-        return evaluated;
-    }
-    
-    assert(lambda.type === 'lambda' || lambda.type === 'function', `${toString(child(expression, 0))} is not a lambda expression`);
-     
-    const result = apply(lambda, parameters);
-    if (result.type === 'error') {
-        throw new Error(`${result.message} in ${toString(expression)}`);
+function reduce (reducer, initial, list) {
+    if (list === 'Empty') {
+        return initial;
     } else {
-        return result;
+        return reducer(first(list), reduce(reducer, initial, rest(list)));
     }
+}
+
+
+const map = f => reduce.bind(null, (x, xs) => ['Cons', f(x), xs], 'Empty');
+
+const toJsString = reduce.bind(null, (x, xs) => String.fromCharCode(x) + xs, '');
+
+const equalToJsString = (expression, string) => {
+    return string === toJsString(expression);
 };
 
-const findInContext = (context, name) => {
-    for (let i = context.length - 1; i >= 0; --i) {
-        if (context[i].name === name) {
-            return context[i].value;
-        }
-    }
+const apply = (lambda, _arguments) => {
+    const parameters = first(lambda);
+    const body = first(rest(lambda));
 
-    return null;
 };
 
-const atomIsConstructor = (context, atom) => {
-    const found = findInContext(context, value(atom));
-    return found !== null && found.type === 'constructor';
-};
-
-const match = (context, pattern, input) => {
-    if (isAtom(pattern)) {
-        return !atomIsConstructor(context, pattern) || (input.type === 'constructor' && input.name === value(pattern));
+function _eval (expression, context) {
+    if (expression[0] === 'List') {
+        const evaluated = map(_eval, expression[1]);
+        const lambda = first(evaluated);
+        const _arguments = rest(evaluated);
+        return apply(lambda, _arguments);
+    } else if (expression[0] === 'Atom') {
+        return { value: context(expression[1]), context };
     } else {
-        assert(size(pattern) > 0, 'expected size of list to be > 0');
-        assert(atomIsConstructor(context, child(pattern, 0)), `Expected constructor in pattern ${toString(pattern)}`);
-
-        if (!isList(input)) {
-            return false;
-        }
-        
-        if (firstAtomValue(pattern) === child(input, 0).name) {
-            const patterns = slice(pattern, 1);
-            const inputs = slice(input, 1);
-            for (let i = 0; i < size(patterns); ++i) {
-                if (!match(context, child(patterns, i), child(inputs, i))) {
-                    return false;
-                }
-            }
-            return true;
-        }
+        throw new Error('Expected List or Atom but got ' + expression[0]);
     }
 };
 
-const c = (name) => ({name, value: {name, type: 'constructor'}}); 
+module.exports.interpret = (programSource, expressionSource, initialContext) => {
+    const parser = require('../../parser/bootstrap/parser');
+    const ast = require('../../parser/bootstrap/ast');
 
-assert.deepEqual(true, match([], atom('x'), 42), "matches variable with value");
-assert.deepEqual(true, match([c('C')], list(atom('C'), atom('a')), list({type: 'constructor', name: 'C'}, 42)), "matches constructor with value");
-assert.deepEqual(true, match([c('C'), c('D')], list(atom('C'), atom('D')), list({type: 'constructor', name: 'C'}, {type: 'constructor', name: "D"})), "matches no-args constructors");
-assert.deepEqual(true, match([c('C')], list(atom('C'), atom('b')), list({type: 'constructor', name: 'C'}, {type: 'constructor', name: "D"})), "matches no-args constructors");
+    const parsedProgram = parser.parse(programSource).ast;
+    const parsedExpression = ast.child(parser.parse(expressionSource).ast, 0);
 
-const matchContext = (context, pattern, input) => {
-    if (isAtom(pattern)) {
-        if (atomIsConstructor(context, pattern)) {
-            return [];
+    function toList(expression) {
+        const reducer = (xs, x) => ['Cons', toList(x), xs];
+        const empty = 'Empty';
+        if (ast.isList(expression)) {
+            return ['List', ast.reduce(ast.reverse(expression), reducer, empty)];
+        } else if (Array.isArray(expression)) {
+            return expression.reverse().reduce(reducer, empty);
+        } else if (ast.isAtom(expression)) {
+            return ['Atom', toList(ast.value(expression).split('').map(s => s.charCodeAt(0)))];
         } else {
-            return [{name: value(pattern), value: input}];
-        }
-    } else {
-        if (firstAtomValue(pattern) === child(input, 0).name) {
-            let context = [];
-            const patterns = slice(pattern, 1);
-            const inputs = slice(input, 1);
-            for (let i = 0; i < size(patterns); ++i) {
-                context = context.concat(matchContext(context, child(patterns, i), child(inputs, i)));
-            }
-            return context;
-        }
-
-        return [{name: value(pattern), value: input}];
-    }
-};
-
-assert.deepEqual([{name: 'a', value: 42}], matchContext([c('C')], list(atom('C'), atom('a')), list({name: 'C', type: 'constructor'}, 42)));
-
-const evalMatch = (context, expression) => {
-    const input = _eval(context, child(expression, 1));
-    const cases = slice(expression, 2);
-
-    for (let i = 0; i < size(cases); i += 2) {
-        const pattern = child(cases, i);
-        const result = child(cases, i + 1);
-        
-        if (match(context, pattern, input)) {
-            return evalExpression.bind(null, context.concat(matchContext(context, pattern, input)), result);
+            return expression;
         }
     }
 
-    throw new Error(`No case matching ${toString(expression)}`);
-};
+    const program = toList(parsedProgram);
+    const expression = toList(parsedExpression);
 
-const _atom = (name) => list({type: 'constructor', name: 'Atom'}, name);
-const _list = (items) => list({type: 'constructor', name: 'List'}, items);
-const _cons = (x, xs) => list({type: 'constructor', name: 'Cons'}, x, xs);
-const _empty = {type: 'constructor', name: 'Empty'};
-
-const quoteAtom = (atom) => {
-    const name = value(atom);
-    return _atom(name.split('').reduce((xs, x) => _cons(x.charCodeAt(0), xs), _empty));
-};
-
-const quoteList = (list) => {
-    return _list(reduce(reverse(list), (xs, x) => _cons(quote(x), xs), _empty));
-};
-
-var quote = (quoted) => {
-    if (isList(quoted)) {
-        return quoteList(quoted);
-    } else {
-        return quoteAtom(quoted);
-    }
-};
-
-const evalExpression = (context, expression) => {
-    if (isAtom(expression)) {
-        if (!isNaN(value(expression))) {
-            return parseInt(value(expression), 10) | 0;
-        } else {
-            const foundValue = findInContext(context, value(expression));
-            if (foundValue === null) {
-                throw Error(`Could not find symbol ${value(expression)}`);
-            }
-            return foundValue;
-        }
-    } else {
-        if (isAtom(child(expression, 0))) {
-            const first = value(child(expression, 0));  
-            if (first === 'fn') {
-                return {type: 'lambda', value: slice(expression, 1), context};
-            } else if (first === 'match') {
-                return evalMatch(context, expression);
-            } else if (first === 'quote') {
-                return quote(child(expression, 1));
-            }
-        }
-
-        return evalApplication(context, expression);
-    }
-};
-
-const _eval = (context, expression) => {
-    let result = evalExpression.bind(null, context, expression);
-    while (typeof result === 'function') {
-        result = result();
-    }
-    return result;
-};
-
-const createGlobalContext = (parsedProgram) => {
-    const isTypeDefinition = (definition) => 
-        firstAtomValue(definition) === 'typ';
-
-    const isFunctionDefinition = (definition) => 
-        firstAtomValue(definition) === 'def' || firstAtomValue(definition) === 'export';
-
-    const isMacroDefinition = (definition) => 
-        firstAtomValue(definition) === 'macro';
-
-
-    const nameOfDefinition = (definition) => {
-        if (isAtom(child(definition, 1))) {
-            return value(child(definition, 1));
-        } else {
-            return value(child(child(definition, 1), 0));
-        }
-    };
-
-    const pipe = (...fs) => {
-        return {
-            type: 'function',
-            value: (x) => {
-                fs.forEach(f => {
-                    x = apply(f, list(x));
-                });
-                return x;
-            }
-        };
-    };
-
-    const definitionToLambda = (definition) => ({type: 'lambda', value: slice(definition, 2)});
-
-    const definitionToMacro = (definition) => ({type: 'macro', value: slice(definition, 2)});
-
-    const constructorsFromType = (definition) => {
-        const constructors = slice(definition, 2);
-        return map(constructors, (constructor) => {
-            const name = isAtom(constructor) ? value(constructor) : value(child(constructor, 0)); 
-            return {
-                name,
-                value: {type: 'constructor', name}
-            };
-        });
-    };
-
-    const functionDefinitions = filter(parsedProgram, isFunctionDefinition);
-    const typeDefinitions = filter(parsedProgram, isTypeDefinition);
-    const macroDefinitions = filter(parsedProgram, isMacroDefinition);
-
-    const contextWithBuiltIns = [
-        {name: '+', value: {type: 'function', value: (a, b) => a + b | 0}},
-        {name: '-', value: {type: 'function', value: (a, b) => a - b | 0}},
-        {name: '*', value: {type: 'function', value: (a, b) => a * b | 0}},
-        {name: '/', value: {type: 'function', value: (a, b) => a / b | 0}},
-        {name: '%', value: {type: 'function', value: (a, b) => a % b | 0}},
-        {name: 'int32-less-than', value: {type: 'function', value: (a, b, x, y) => a < b ? x : y}},
-        {name: 'pipe', value: {type: 'function', value: pipe}},
-    ];
-
-    const contextWithFunctions = map(
-        functionDefinitions,
-        (definition) => 
-            ({
-                name: nameOfDefinition(definition), 
-                value: definitionToLambda(definition)
-            }));
-
-    const contextWithMacros = map(
-        macroDefinitions,
-        (definition) =>
-            ({
-                name: nameOfDefinition(definition),
-                value: definitionToMacro(definition)
-            }));
-
-
-    const contextWithTypes = map(
-        typeDefinitions,
-        (definition) =>
-            ({
-                name: nameOfDefinition(definition),
-                value: definition
-            }));
-
-    const contextWithConstructors = flatMap(
-        typeDefinitions,
-        constructorsFromType
-    );
-    
-    const context = contextWithBuiltIns
-            .concat(toArray(contextWithFunctions))
-            .concat(toArray(contextWithTypes))
-            .concat(toArray(contextWithMacros))
-            .concat(toArray(contextWithConstructors)); 
-
-    map(contextWithFunctions, (entry) => {
-        entry.value.context = context;
-    });
-
-    map(contextWithMacros, (entry) => {
-        entry.value.context = context;
-    });
-
-    return context;
-};
-
-module.exports.interpret = (program, expression, context) => {
-    const parsedProgram = parse(program).ast;
-    const globalContext = createGlobalContext(parsedProgram);
-    
-    const parsedExpression = child(parse(expression).ast, 0);
-    return _eval(context.concat(globalContext), parsedExpression);
+    const { context } = _eval(program, (symbol) => initialContext(toJsString(symbol)));
+    const { value } = _eval(expression, context);
+    return value;
 };
 
