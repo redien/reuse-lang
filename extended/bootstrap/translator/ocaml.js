@@ -5,6 +5,7 @@ var mangledNames = {};
 var noArgumentFunctions = ast.list();
 
 var escapeNonAscii = function(name) {
+    if (name === 'end') { return '_end'; }
     var newName = '';
     for (var i = 0; i < name.length; ++i) {
         var char = name.charCodeAt(i);
