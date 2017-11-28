@@ -17,7 +17,7 @@
     "test": "npm run test-extended && npm run test-parser && npm run test-interpreter",
     "test-extended": "./extended/bootstrap/build.sh && ./spec-runner/run.sh extended/specification ./extended/bootstrap/eval.sh | tap-spec && ./spec-runner/run.sh minimal/specification ./extended/bootstrap/eval.sh | tap-spec",
     "test-interpreter": "./extended/interpreter/build.sh && ./spec-runner/run.sh extended/specification ./extended/interpreter/eval.sh | tap-spec && ./spec-runner/run.sh minimal/specification ./extended/interpreter/eval.sh | tap-spec",
-    "test-parser": "./extended/bootstrap/build.sh && ./spec-runner/run.sh parser/specification ./parser/eval.sh | tap-spec"
+    "test-parser": "./extended/interpreter/build.sh && ./parser/build.sh && ./spec-runner/run.sh parser/specification ./parser/eval.sh | tap-spec"
   },
   "repository": {
     "type": "git",
