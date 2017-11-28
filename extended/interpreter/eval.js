@@ -92,8 +92,7 @@ const match = (context, pattern, input) => {
     } else {
         assert(size(pattern) > 0, 'expected size of list to be > 0');
         assert(atomIsConstructor(context, child(pattern, 0)), `Expected constructor in pattern ${toString(pattern)}`);
-        assert(isList(input), `Expected ${input} to be list`);
-        if (firstAtomValue(pattern) === child(input, 0).name) {
+        if (isList(input) && firstAtomValue(pattern) === child(input, 0).name) {
             const patterns = slice(pattern, 1);
             const inputs = slice(input, 1);
             for (let i = 0; i < size(patterns); ++i) {
@@ -104,6 +103,7 @@ const match = (context, pattern, input) => {
             return true;
         }
     }
+    return false;
 };
 
 const c = (name) => ({name, value: {name, type: 'constructor'}}); 
