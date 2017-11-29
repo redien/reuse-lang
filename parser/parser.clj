@@ -47,7 +47,7 @@
 
 (def parse-list (original-input parse-expressions)
      (match (parse-expressions original-input Empty)
-            (Pair input expressions) (ParseNext input (List expressions (range-between original-input input)))))
+            (Pair input expressions) (ParseNext input (List expressions (Range (- (offset-of original-input) 1) (offset-of input))))))
 
 (def parse-expression (input parse-expressions)
      (match input
