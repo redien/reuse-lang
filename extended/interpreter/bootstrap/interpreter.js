@@ -2,7 +2,7 @@
 var fs = require('fs');
 var interpret = require(__dirname + '/eval.js').interpret;
 var Immutable = require('immutable');
-var ast = require('../../parser/bootstrap/ast');
+var ast = require('../../../parser/bootstrap/ast');
 
 var source = fs.readFileSync(process.argv[2], 'utf8');
 var expression = process.argv[3];
