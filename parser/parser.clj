@@ -37,17 +37,20 @@
      (match input
             (Pair _ offset) offset))
 
-(def range-between (start end)
+(def range-for-symbol (start end)
      (Range (offset-of start) (offset-of end)))
 
-(def parse-symbol (original-input)
-     (match (read-while atom-character? original-input)
-            (Pair input Empty) (ParseOut input)
-            (Pair input name)  (ParseNext input (Symbol name (range-between original-input input)))))
+(def parse-symbol (input)
+     (match (read-while atom-character? input)
+            (Pair next-input Empty) (ParseOut input)
+            (Pair next-input name)  (ParseNext next-input (Symbol name (range-for-symbol input next-input)))))
 
-(def parse-list (original-input parse-expressions)
-     (match (parse-expressions original-input Empty)
-            (Pair input expressions) (ParseNext input (List expressions (Range (- (offset-of original-input) 1) (offset-of input))))))
+(def range-for-list (start end)
+     (Range (- (offset-of start) 1) (offset-of end)))
+
+(def parse-list (input parse-expressions)
+     (match (parse-expressions input Empty)
+            (Pair next-input expressions) (ParseNext next-input (List expressions (range-for-list input next-input)))))
 
 (def parse-expression (input parse-expressions)
      (match input
