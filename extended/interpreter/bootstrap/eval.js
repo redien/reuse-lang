@@ -87,7 +87,9 @@ const atomIsConstructor = (context, atom) => {
 };
 
 const match = (context, pattern, input) => {
-    if (isAtom(pattern)) {
+    if (typeof pattern === 'number') {
+        return pattern === input;
+    } else if (isAtom(pattern)) {
         return !atomIsConstructor(context, pattern) || (input.type === 'constructor' && input.name === value(pattern));
     } else {
         assert(size(pattern) > 0, 'expected size of list to be > 0');
