@@ -13,3 +13,9 @@ Should allow nesting constructors
 | (typ (list a) (Cons a (list a)) Empty)
 > (match (Cons 2 (Cons 3 Empty)) (Cons _ (Cons y Empty)) y _ 0)
 = 3
+
+Should allow integer constants in patterns
+| (typ (maybe a) (Some a) None)
+> (match (Some 4) (Some 4) 4 _ 0)
+= 4
+
