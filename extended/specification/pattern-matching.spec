@@ -19,3 +19,7 @@ Should allow integer constants in patterns
 > (match (Some 4) (Some 4) 4 _ 0)
 = 4
 
+| (typ (maybe a) (Some a) None)
+> (match (Some -5) (Some -5) -5 _ 0)
+= -5
+

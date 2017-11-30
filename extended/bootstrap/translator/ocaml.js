@@ -25,11 +25,26 @@ var mangle = function(prefix, name) {
     return newName;
 };
 
-var translateConstructor = function(expression) {
+var translateConstructor = function(expression, translator) {
     if (ast.isList(expression)) {
-        return 'C' + escapeNonAscii(ast.value(ast.child(expression, 0))) + ' (' + ast.join(ast.map(ast.slice(expression, 1), translateExpression), ', ') + ')';
+        return 'C' + escapeNonAscii(ast.value(ast.child(expression, 0))) + ' (' + ast.join(ast.map(ast.slice(expression, 1), translator), ', ') + ')';
     } else {
         return 'C' + escapeNonAscii(ast.value(expression));
+    }
+};
+
+var translatePattern = function(pattern) {
+    if (ast.isList(pattern)) {
+        return translateConstructor(pattern, translatePattern);
+    } else {
+        var name = ast.value(pattern);
+        if (Number.isInteger(parseFloat(name))) {
+            return name + 'l';
+        } else if (ast.contains(constructorNames, name)) {
+            return translateConstructor(pattern, translatePattern);
+        } else {
+            return escapeNonAscii(name);
+        }
     }
 };
 
@@ -37,7 +52,7 @@ var translateMatch = function(match) {
     var cases = [];
 
     for (var i = 2; i < ast.size(match); i += 2) {
-        cases.push(translateExpression(ast.child(match, i)) + ' -> ' + translateExpression(ast.child(match, i + 1)));
+        cases.push(translatePattern(ast.child(match, i)) + ' -> ' + translateExpression(ast.child(match, i + 1)));
     }
 
     return '(match ' + translateExpression(ast.child(match, 1)) + ' with ' + cases.join(' | ') + ')';
@@ -104,7 +119,7 @@ var translateExpression = function(expression) {
             const args = ast.reverse(ast.slice(expression, 1));
             return 'fun _x1 -> ' + nestFunctionApplications(args, '_x1');
         } else if (ast.isAtom(ast.child(expression, 0)) && ast.contains(constructorNames, ast.value(ast.child(expression, 0)))) {
-            return translateConstructor(expression);
+            return translateConstructor(expression, translateExpression);
         } else {
             var extraArgument = '';
             if (ast.size(expression) === 1) {
@@ -115,7 +130,7 @@ var translateExpression = function(expression) {
     } else {
         var name = ast.value(expression);
         if (ast.contains(constructorNames, name)) {
-            return translateConstructor(expression);
+            return translateConstructor(expression, translateExpression);
         } else if (mangledNames[name]) {
             return mangledNames[name];
         } else if (Number.isInteger(parseFloat(name))) {
