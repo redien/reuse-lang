@@ -54,15 +54,13 @@
 
 (def parse-expression (input parse-expressions)
      (match input
-            (Pair Empty _)   ParseEnd
+            (Pair Empty _)             ParseEnd
+            (Pair (Cons 40 xs) offset) (parse-list (Pair xs (+ 1 offset)) parse-expressions)
+            (Pair (Cons 41 xs) offset) (ParseOut (Pair xs (+ 1 offset)))
             (Pair (Cons x xs) offset)
                       (match (whitespace? x)
-                             True (parse-expression (Pair xs (+ 1 offset)) parse-expressions)
-                False (match (= x 40)
-                             True (parse-list (Pair xs (+ 1 offset)) parse-expressions)
-                False (match (= x 41)
-                             True (ParseOut (Pair xs (+ 1 offset)))
-                False (parse-symbol input))))))
+                             True  (parse-expression (Pair xs (+ 1 offset)) parse-expressions)
+                             False (parse-symbol input))))
 
 (def parse-expressions (input expressions)
      (match (parse-expression input parse-expressions)
