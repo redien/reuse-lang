@@ -87,10 +87,12 @@ const atomIsConstructor = (context, atom) => {
 };
 
 const match = (context, pattern, input) => {
-    if (typeof pattern === 'number') {
-        return pattern === input;
-    } else if (isAtom(pattern)) {
-        return !atomIsConstructor(context, pattern) || (input.type === 'constructor' && input.name === value(pattern));
+    if (isAtom(pattern)) {
+        if (Number.isInteger(parseFloat(value(pattern)))) {
+            return parseFloat(value(pattern)) === input;
+        } else {
+            return !atomIsConstructor(context, pattern) || (input.type === 'constructor' && input.name === value(pattern));
+        }
     } else {
         assert(size(pattern) > 0, 'expected size of list to be > 0');
         assert(atomIsConstructor(context, child(pattern, 0)), `Expected constructor in pattern ${toString(pattern)}`);
@@ -117,7 +119,7 @@ assert.deepEqual(true, match([c('C')], list(atom('C'), atom('b')), list({type: '
 
 const matchContext = (context, pattern, input) => {
     if (isAtom(pattern)) {
-        if (atomIsConstructor(context, pattern)) {
+        if (Number.isInteger(parseFloat(value(pattern))) || atomIsConstructor(context, pattern)) {
             return [];
         } else {
             return [{name: value(pattern), value: input}];

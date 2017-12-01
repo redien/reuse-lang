@@ -15,11 +15,17 @@ Should allow nesting constructors
 = 3
 
 Should allow integer constants in patterns
-| (typ (maybe a) (Some a) None)
-> (match (Some 4) (Some 4) 4 _ 0)
+> (match 4 4 4 _ 0)
 = 4
 
+> (match 5 1 0 5 5 _ 0)
+= 5
+
 | (typ (maybe a) (Some a) None)
-> (match (Some -5) (Some -5) -5 _ 0)
-= -5
+> (match (Some 6) (Some 6) 6 _ 0)
+= 6
+
+| (typ (maybe a) (Some a) None)
+> (match (Some -7) (Some -7) -7 _ 0)
+= -7
 
