@@ -12,4 +12,5 @@ $node_bin/babel $project_root/extended -d $project_root/generated/extended >&2
 $node_bin/babel $project_root/parser -d $project_root/generated/parser >&2
 
 echo "$(cat $standard_library/list.clj)$(cat $standard_library/string.clj)$(cat $standard_library/boolean.clj)$(cat $project_root/parser/parser.clj)" > $project_root/generated/parser/parser.clj
+echo "$(cat $project_root/generated/parser/parser.clj)$(cat $project_root/extended/interpreter/interpreter.clj)" > $project_root/generated/extended/interpreter/interpreter.clj
 
