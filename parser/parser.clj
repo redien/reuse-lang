@@ -64,8 +64,8 @@
 
 (def parse-expressions (input expressions)
      (match (parse-expression input parse-expressions)
-            ParseEnd                 (Pair input expressions)
-            (ParseOut input)         (Pair input expressions)
+            ParseEnd                 (Pair input (list-reverse expressions))
+            (ParseOut input)         (Pair input (list-reverse expressions))
             (ParseNext input result) (parse-expressions input (Cons result expressions))))
 
 (export parse (input)

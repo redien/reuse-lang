@@ -11,7 +11,8 @@
      (fn (x xs)
          (match xs
                 Empty x
-                _     (string-concat (string-concat xs separator) x))))
+                _     (string-concat (string-concat x separator) xs))))
 
 (def string-join (separator list)
      (list-foldr ('string-join-reducer separator) Empty list))
+
