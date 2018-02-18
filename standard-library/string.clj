@@ -16,3 +16,12 @@
 (def string-join (separator list)
      (list-foldr ('string-join-reducer separator) Empty list))
 
+(def string-empty? (string)
+     (match string Empty True _ False))
+
+(def string-equal? (a b)
+     (match a
+            (Cons xa xas) (match b
+            (Cons xb xbs) (and (= xa xb) (string-equal? xas xbs)))
+            Empty         (string-empty? b)))
+

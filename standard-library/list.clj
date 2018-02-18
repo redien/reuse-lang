@@ -23,3 +23,12 @@
             Empty       list
             (Cons x xs) (Cons (f x) (list-map f xs))))
 
+(def list-filter (f list)
+     (list-reverse
+        (list-foldl (fn (x xs)
+              (match (f x)
+                     True  (Cons x xs)
+                     False xs))
+                    Empty
+                    list)))
+
