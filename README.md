@@ -37,12 +37,9 @@ This example defines a recursive list type and a function to fold over it.
 For more examples please look through the `minimal/specification` and `extended/specification` directories.
 
 ## Using the compiler
-The compiler is still in a prototype stage. Inside dev-env you will find a Dockerfile that you can use to set up the required tools for using the prototype:
+The compiler is still in a prototype stage. Use our prepared docker image to launch a bash shell with the necessary tools:
 
 ```sh
-# Build the container
-docker build ./dev-env -t reuse
-# Launch a bash shell with all required dependencies:
-docker run --rm -it -v $PWD:/home/opam/reuse-lang reuse
+docker run --rm -it -v $PWD:/home/opam/reuse-lang redien/reuse-lang-dev-env
 ```
 
