@@ -26,8 +26,8 @@
 
 (typ range (Range int32 int32))
 
-(typ expression (Symbol (list int32)      range)
-                (List   (list expression) range))
+(typ sexp (Symbol (list int32)      range)
+          (List   (list sexp)       range))
 
 (typ (parse-result i e) (ParseNext i e)
                         (ParseOut i)
@@ -68,7 +68,7 @@
             (ParseOut input)         (Pair input (list-reverse expressions))
             (ParseNext input result) (parse-expressions input (Cons result expressions))))
 
-(export parse (input)
+(def parse-sexp (input)
      (match (parse-expressions (Pair input 0) Empty)
             (Pair _ expressions) expressions))
 
@@ -80,6 +80,23 @@
             (Symbol name _)      name
             (List expressions _) (wrap-in-brackets (stringify expressions))))
 
-(export stringify (expressions)
-     (string-join (string-of-char 32) (list-map (stringify-expression stringify) expressions)))
+(def stringify-sexp (expressions)
+     (string-join (string-of-char 32) (list-map (stringify-expression stringify-sexp) expressions)))
 
+
+(typ argument-list (ArgumentList        (list (list int32))))
+(typ expression    (Identifier          (list int32))
+                   (Application         expression (list expression))
+                   (Lambda              argument-list expression))
+(typ type          (SimpleType          (list int32))
+                   (ComplexType         (list int32) (list type)))
+(typ constructor   (Constructor         (list int32) (list type)))
+(typ definition    (TypeDefinition      (list int32) (list constructor))
+                   (ExportDefinition    (list int32) argument-list expression)
+                   (FunctionDefinition  (list int32) argument-list expression))
+
+(export parse (input)
+    (parse-sexp input))
+
+(export stringify (expressions)
+    (stringify-sexp expressions))
