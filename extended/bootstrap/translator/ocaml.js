@@ -87,6 +87,14 @@ var isSpecialForm = function(expression, name) {
     return ast.size(expression) > 0 && ast.isAtom(ast.child(expression, 0)) && ast.value(ast.child(expression, 0)) === name;
 };
 
+var listFromArray = function(array) {
+    if (ast.size(array) === 0) {
+	return 'CEmpty';
+    } else {
+	return 'CCons (' + translateExpression(ast.child(array, 0)) + ', ' + listFromArray(ast.slice(array, 1)) + ')';
+    }
+};
+
 var translateExpression = function(expression) {
     if (ast.isList(expression)) {
         if (isSpecialForm(expression, 'match')) {
@@ -118,7 +126,11 @@ var translateExpression = function(expression) {
         } else if (isSpecialForm(expression, 'pipe')) {
             const args = ast.reverse(ast.slice(expression, 1));
             return 'fun _x1 -> ' + nestFunctionApplications(args, '_x1');
-        } else if (ast.isAtom(ast.child(expression, 0)) && ast.contains(constructorNames, ast.value(ast.child(expression, 0)))) {
+	} else if (isSpecialForm(expression, 'list')) {
+            const args = ast.slice(expression, 1);
+            return listFromArray(args);
+
+       } else if (ast.isAtom(ast.child(expression, 0)) && ast.contains(constructorNames, ast.value(ast.child(expression, 0)))) {
             return translateConstructor(expression, translateExpression);
         } else {
             var extraArgument = '';

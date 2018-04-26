@@ -16,7 +16,7 @@ then
     opam config exec -- ocamlfind ocamlc -linkpkg -thread -package core $generated_folder/ocaml/source.ml -o $generated_folder/ocaml/out
     cat | opam config exec -- $generated_folder/ocaml/out
 else
-    echo "$1 (export main_$random_name () $2)" > $program_source
+    echo "(typ (list a) (Cons a (list a)) Empty) $1 (export main_$random_name () $2)" > $program_source
     $script_path/compile-library.sh $program_source $generated_folder
     printf "\nPrintf.printf \"%%d\" (Int32.to_int (main_$random_name ()))\n" >> $generated_folder/ocaml/source.ml
     ocaml $generated_folder/ocaml/source.ml
