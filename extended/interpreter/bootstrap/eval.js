@@ -53,16 +53,19 @@ const apply = (lambda, parameters) => {
 
 const evalApplication = (context, expression) => {
     const evaluated = map(expression, _eval.bind(null, context));
- 
+
     const parameters = slice(evaluated, 1);
     const lambda = child(evaluated, 0);
 
     if (lambda.type === 'constructor') {
         return evaluated;
     }
-    
+
+    assert(lambda.type, `
+    Internal Error: ${toString(child(expression, 0))} failed to evaluate. Value has no type information.
+        ${lambda}`);
     assert(lambda.type === 'lambda' || lambda.type === 'function', `${toString(child(expression, 0))} is not a lambda expression`);
-     
+
     const result = apply(lambda, parameters);
     if (result.type === 'error') {
         throw new Error(`${result.message} in ${toString(expression)}`);
@@ -217,6 +220,14 @@ const createGlobalContext = (parsedProgram) => {
         };
     };
 
+    const listForm = (...elements) => {
+        if (elements.length > 0) {
+            return list({ type: 'constructor', name: 'Cons' }, elements[0], listForm(...elements.slice(1)));
+        } else {
+            return { type: 'constructor', name: 'Empty' };
+        }
+    };
+
     const definitionToLambda = (definition) => ({type: 'lambda', value: slice(definition, 2)});
 
     const constructorsFromType = (definition) => {
@@ -241,6 +252,7 @@ const createGlobalContext = (parsedProgram) => {
         {name: '%', value: {type: 'function', value: (a, b) => a % b | 0}},
         {name: 'int32-less-than', value: {type: 'function', value: (a, b, x, y) => a < b ? x : y}},
         {name: 'pipe', value: {type: 'function', value: pipe}},
+        {name: 'list', value: {type: 'function', value: listForm}},
     ];
 
     const contextWithFunctions = map(
@@ -264,10 +276,10 @@ const createGlobalContext = (parsedProgram) => {
         constructorsFromType
     );
     
-    const context = contextWithBuiltIns
+    const context = toArray(contextWithTypes)
+            .concat(contextWithBuiltIns)
             .concat(toArray(contextWithFunctions))
-            .concat(toArray(contextWithTypes))
-            .concat(toArray(contextWithConstructors)); 
+            .concat(toArray(contextWithConstructors));
 
     map(contextWithFunctions, (entry) => {
         entry.value.context = context;
