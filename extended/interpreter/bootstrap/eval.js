@@ -289,7 +289,13 @@ const createGlobalContext = (parsedProgram) => {
 };
 
 module.exports.interpret = (program, expression, context) => {
-    const parsedProgram = parse(program).ast;
+    const parseResult = parse(program);
+    if (parseResult.error) {
+	const error = parseResult.error;
+        console.error(`Parse error: ${error} at ${error.line}:${error.column}.`);
+	process.exit(1);
+    }
+    const parsedProgram = parseResult.ast;
     const globalContext = createGlobalContext(parsedProgram);
     
     const parsedExpression = child(parse(expression).ast, 0);

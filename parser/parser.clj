@@ -48,55 +48,58 @@
 (def list-range (start end)
      (Range (- (offset-of start) 1) (offset-of end)))
 
-(def parse-list (input parse-expressions)
-     (match (parse-expressions input Empty)
+(def parse-list (input parse-sexps)
+     (match (parse-sexps input Empty)
             (Pair next-input expressions) (ParseNext next-input (List expressions (list-range input next-input)))))
 
-(def parse-expression (input parse-expressions)
+(def parse-expression (input parse-sexps)
      (match input
             (Pair Empty _)             ParseEnd
-            (Pair (Cons 40 xs) offset) (parse-list (Pair xs (+ 1 offset)) parse-expressions)
+            (Pair (Cons 40 xs) offset) (parse-list (Pair xs (+ 1 offset)) parse-sexps)
             (Pair (Cons 41 xs) offset) (ParseOut (Pair xs (+ 1 offset)))
             (Pair (Cons x xs) offset)
                       (match (whitespace? x)
-                             True  (parse-expression (Pair xs (+ 1 offset)) parse-expressions)
+                             True  (parse-expression (Pair xs (+ 1 offset)) parse-sexps)
                              False (parse-symbol input))))
 
-(def parse-expressions (input expressions)
-     (match (parse-expression input parse-expressions)
+(def parse-sexps (input expressions)
+     (match (parse-expression input parse-sexps)
             ParseEnd                 (Pair input (list-reverse expressions))
             (ParseOut input)         (Pair input (list-reverse expressions))
-            (ParseNext input result) (parse-expressions input (Cons result expressions))))
-
-(def parse-sexp (input)
-     (match (parse-expressions (Pair input 0) Empty)
-            (Pair _ expressions) expressions))
+            (ParseNext input result) (parse-sexps input (Cons result expressions))))
 
 (def wrap-in-brackets (string)
      (string-concat (string-of-char 40) (string-concat string (string-of-char 41))))
 
-(def stringify-expression (stringify expression)
+(def stringify-sexp (stringify expression)
      (match expression
             (Symbol name _)      name
             (List expressions _) (wrap-in-brackets (stringify expressions))))
 
-(def stringify-sexp (expressions)
-     (string-join (string-of-char 32) (list-map (stringify-expression stringify-sexp) expressions)))
-
+(def stringify-sexps (expressions)
+     (string-join (string-of-char 32) (list-map (stringify-sexp stringify-sexps) expressions)))
 
 (typ argument-list (ArgumentList        (list (list int32))))
+
 (typ expression    (Identifier          (list int32))
                    (Application         expression (list expression))
-                   (Lambda              argument-list expression))
+                   (Lambda              argument-list expression)
+                   (Match               expression (list (pair expression expression)))
+                   (Constructor         identifier (list expression)))
+
 (typ type          (SimpleType          (list int32))
                    (ComplexType         (list int32) (list type)))
+
 (typ constructor   (Constructor         (list int32) (list type)))
+
 (typ definition    (TypeDefinition      (list int32) (list constructor))
                    (ExportDefinition    (list int32) argument-list expression)
                    (FunctionDefinition  (list int32) argument-list expression))
 
-(export parse (input)
-    (parse-sexp input))
+(def parse (input)
+     (match (parse-sexps (Pair input 0) Empty)
+            (Pair _ expressions) expressions))
 
-(export stringify (expressions)
-    (stringify-sexp expressions))
+(def stringify (expressions)
+    (stringify-sexps expressions))
+
