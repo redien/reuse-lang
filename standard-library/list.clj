@@ -32,3 +32,7 @@
                     Empty
                     list)))
 
+(def list-concat (a b)
+     (match a
+            Empty       b
+            (Cons x xs) (Cons x (list-concat xs b))))
