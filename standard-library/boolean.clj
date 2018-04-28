@@ -1,6 +1,4 @@
 
-(typ boolean True False)
-
 (def not (a)
      (match a
             True False
