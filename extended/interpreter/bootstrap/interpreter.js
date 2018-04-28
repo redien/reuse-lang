@@ -9,7 +9,7 @@ var expression = process.argv[3];
 var stdin = fs.readFileSync(process.argv[4], 'utf8');
 
 function fromJs(stdin) {
-   return stdin.split('').reverse().reduce((xs, x) => ast.list({type: 'constructor', name: 'Cons'}, x.codePointAt(0), xs), {type: 'constructor', name: 'Empty'});
+   return stdin.split('').reverse().reduce((xs, x) => ast.list({type: 'constructor', name: 'Cons', typeName: 'list'}, x.codePointAt(0), xs), {type: 'constructor', name: 'Empty', typeName: 'list'});
 }
 
 function toJs(value) {

@@ -4,6 +4,18 @@ import { isList, flatMap, some, concat, atom, list, filter, slice, child, size, 
 const assert = require('assert');
 const util = require('util');
 
+const stringifyValue = (value) => {
+    if (Number.isInteger(value)) {
+        return value.toString();
+    } else if (value.type === 'constructor') {
+        return value.name;
+    } else if (isList(value)) {
+        return '(' + toArray(map(value, stringifyValue)).join(' ') + ')';
+    } else {
+        return '!!!';
+    }
+};
+
 const firstAtomValue = (expression) => value(child(expression, 0));
 const secondAtomValue = (expression) => value(child(expression, 1));
 
@@ -100,7 +112,7 @@ const match = (context, pattern, input) => {
             const patternType = findInContext(context, value(pattern)).typeName;
             const inputType = input.typeName;
             if (input.type === 'constructor' && input.name === value(pattern)) {
-                assert(patternType === inputType, `Expected types of pattern ${toString(pattern)} and input ${util.inspect(input)} to match. ${patternType} != ${inputType}.`);
+                assert(patternType === inputType, `Expected types of pattern ${toString(pattern)} and input ${stringifyValue(input)} to match. ${patternType} != ${inputType}.`);
                 return true;
             } else {
                 return false;
@@ -114,12 +126,12 @@ const match = (context, pattern, input) => {
         const patternConstructor = child(pattern, 0);
         const patternType = findInContext(context, value(patternConstructor)).typeName;
         const inputType = child(input, 0).typeName;
-        assert(patternType === inputType, `Expected types of pattern ${toString(patternConstructor)} and input ${util.inspect(child(input, 0))} to match. ${patternType} != ${inputType}.`);
+        assert(patternType === inputType, `Expected types of pattern ${toString(patternConstructor)} and input ${stringifyValue(child(input, 0))} to match. ${patternType} != ${inputType}.`);
 
         if (firstAtomValue(pattern) === child(input, 0).name) {
             const patterns = slice(pattern, 1);
             const inputs = slice(input, 1);
-            assert(size(patterns) === size(inputs), `Expected size of pattern and input to be the same at ${toString(pattern)}. Pattern is ${size(patterns)}, input is ${size(inputs)} (${util.inspect(input)}).`);
+            assert(size(patterns) === size(inputs), `Expected size of pattern and input to be the same at ${toString(pattern)}. Pattern is ${size(patterns)}, input is ${size(inputs)} ${stringifyValue(input)}.`);
             for (let i = 0; i < size(patterns); ++i) {
                 if (!match(context, child(patterns, i), child(inputs, i))) {
                     return false;
