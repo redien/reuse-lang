@@ -96,12 +96,14 @@ const match = (context, pattern, input) => {
         } else {
             return !atomIsConstructor(context, pattern) || (input.type === 'constructor' && input.name === value(pattern));
         }
-    } else {
-        assert(size(pattern) > 0, 'expected size of list to be > 0');
+    } else if (isList(input)) {
+        assert(size(pattern) > 0, 'expected size of pattern to be > 0');
+        assert(size(input) > 0, 'expected size of input to be > 0');
         assert(atomIsConstructor(context, child(pattern, 0)), `Expected constructor in pattern ${toString(pattern)}`);
         if (isList(input) && firstAtomValue(pattern) === child(input, 0).name) {
             const patterns = slice(pattern, 1);
             const inputs = slice(input, 1);
+            assert(size(patterns) === size(inputs), `Expected size of pattern and input to be the same at ${toString(pattern)}. Pattern is ${size(patterns)}, input is ${size(inputs)}.`);
             for (let i = 0; i < size(patterns); ++i) {
                 if (!match(context, child(patterns, i), child(inputs, i))) {
                     return false;
@@ -147,6 +149,8 @@ assert.deepEqual([{name: 'a', value: 42}], matchContext([c('C')], list(atom('C')
 const evalMatch = (context, expression) => {
     const input = _eval(context, child(expression, 1));
     const cases = slice(expression, 2);
+    
+    assert(size(cases) % 2 === 0, `expected pairs of pattern/result at match expression but found ${size(cases)} expressions`);
 
     for (let i = 0; i < size(cases); i += 2) {
         const pattern = child(cases, i);
