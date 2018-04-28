@@ -1,4 +1,4 @@
-var ast = require('../../../parser/bootstrap/ast');
+var ast = require('../../../sexp-parser/bootstrap/ast');
 
 var constructorNames = ast.list();
 var mangledNames = {};

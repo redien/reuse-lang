@@ -1,6 +1,6 @@
 
-import { parse } from '../../../parser/bootstrap/parser';
-import { isList, flatMap, some, concat, atom, list, filter, slice, child, size, isAtom, value, map, toString, toArray } from '../../../parser/bootstrap/ast';
+import { parse } from '../../../sexp-parser/bootstrap/parser';
+import { isList, flatMap, some, concat, atom, list, filter, slice, child, size, isAtom, value, map, toString, toArray } from '../../../sexp-parser/bootstrap/ast';
 const assert = require('assert');
 const util = require('util');
 
