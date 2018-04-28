@@ -94,16 +94,32 @@ const match = (context, pattern, input) => {
         if (Number.isInteger(parseFloat(value(pattern)))) {
             return parseFloat(value(pattern)) === input;
         } else {
-            return !atomIsConstructor(context, pattern) || (input.type === 'constructor' && input.name === value(pattern));
+            if (!atomIsConstructor(context, pattern)) {
+                return true;
+            }
+            const patternType = findInContext(context, value(pattern)).typeName;
+            const inputType = input.typeName;
+            if (input.type === 'constructor' && input.name === value(pattern)) {
+                assert(patternType === inputType, `Expected types of pattern ${toString(pattern)} and input ${util.inspect(input)} to match. ${patternType} != ${inputType}.`);
+                return true;
+            } else {
+                return false;
+            }
         }
     } else if (isList(input)) {
         assert(size(pattern) > 0, 'expected size of pattern to be > 0');
         assert(size(input) > 0, 'expected size of input to be > 0');
         assert(atomIsConstructor(context, child(pattern, 0)), `Expected constructor in pattern ${toString(pattern)}`);
-        if (isList(input) && firstAtomValue(pattern) === child(input, 0).name) {
+
+        const patternConstructor = child(pattern, 0);
+        const patternType = findInContext(context, value(patternConstructor)).typeName;
+        const inputType = child(input, 0).typeName;
+        assert(patternType === inputType, `Expected types of pattern ${toString(patternConstructor)} and input ${util.inspect(child(input, 0))} to match. ${patternType} != ${inputType}.`);
+
+        if (firstAtomValue(pattern) === child(input, 0).name) {
             const patterns = slice(pattern, 1);
             const inputs = slice(input, 1);
-            assert(size(patterns) === size(inputs), `Expected size of pattern and input to be the same at ${toString(pattern)}. Pattern is ${size(patterns)}, input is ${size(inputs)}.`);
+            assert(size(patterns) === size(inputs), `Expected size of pattern and input to be the same at ${toString(pattern)}. Pattern is ${size(patterns)}, input is ${size(inputs)} (${util.inspect(input)}).`);
             for (let i = 0; i < size(patterns); ++i) {
                 if (!match(context, child(patterns, i), child(inputs, i))) {
                     return false;
@@ -115,12 +131,12 @@ const match = (context, pattern, input) => {
     return false;
 };
 
-const c = (name) => ({name, value: {name, type: 'constructor'}}); 
+const c = (name) => ({name, value: {name, type: 'constructor', typeName: 'type'}}); 
 
 assert.deepEqual(true, match([], atom('x'), 42), "matches variable with value");
-assert.deepEqual(true, match([c('C')], list(atom('C'), atom('a')), list({type: 'constructor', name: 'C'}, 42)), "matches constructor with value");
-assert.deepEqual(true, match([c('C'), c('D')], list(atom('C'), atom('D')), list({type: 'constructor', name: 'C'}, {type: 'constructor', name: "D"})), "matches no-args constructors");
-assert.deepEqual(true, match([c('C')], list(atom('C'), atom('b')), list({type: 'constructor', name: 'C'}, {type: 'constructor', name: "D"})), "matches no-args constructors");
+assert.deepEqual(true, match([c('C')], list(atom('C'), atom('a')), list({type: 'constructor', name: 'C', typeName: 'type'}, 42)), "matches constructor with value");
+assert.deepEqual(true, match([c('C'), c('D')], list(atom('C'), atom('D')), list({type: 'constructor', name: 'C', typeName: 'type'}, {type: 'constructor', name: "D", typeName: 'type'})), "matches no-args constructors");
+assert.deepEqual(true, match([c('C')], list(atom('C'), atom('b')), list({type: 'constructor', name: 'C', typeName: 'type'}, {type: 'constructor', name: "D", typeName: 'type'})), "matches no-args constructors");
 
 const matchContext = (context, pattern, input) => {
     if (isAtom(pattern)) {
@@ -226,9 +242,9 @@ const createGlobalContext = (parsedProgram) => {
 
     const listForm = (...elements) => {
         if (elements.length > 0) {
-            return list({ type: 'constructor', name: 'Cons' }, elements[0], listForm(...elements.slice(1)));
+            return list({ type: 'constructor', name: 'Cons', typeName: 'list' }, elements[0], listForm(...elements.slice(1)));
         } else {
-            return { type: 'constructor', name: 'Empty' };
+            return { type: 'constructor', name: 'Empty', typeName: 'list' };
         }
     };
 
@@ -236,11 +252,12 @@ const createGlobalContext = (parsedProgram) => {
 
     const constructorsFromType = (definition) => {
         const constructors = slice(definition, 2);
+        const typeName = child(definition, 1);
         return map(constructors, (constructor) => {
-            const name = isAtom(constructor) ? value(constructor) : value(child(constructor, 0)); 
+            const name = isAtom(constructor) ? value(constructor) : value(child(constructor, 0));
             return {
                 name,
-                value: {type: 'constructor', name}
+                value: {type: 'constructor', name, typeName: isAtom(typeName) ? value(typeName) : value(child(typeName, 0))}
             };
         });
     };
@@ -295,9 +312,9 @@ const createGlobalContext = (parsedProgram) => {
 module.exports.interpret = (program, expression, context) => {
     const parseResult = parse(program);
     if (parseResult.error) {
-	const error = parseResult.error;
+        const error = parseResult.error;
         console.error(`Parse error: ${error} at ${error.line}:${error.column}.`);
-	process.exit(1);
+        process.exit(1);
     }
     const parsedProgram = parseResult.ast;
     const globalContext = createGlobalContext(parsedProgram);
