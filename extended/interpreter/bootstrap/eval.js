@@ -25,6 +25,15 @@ ${lines.join('\n')}
 `;
 };
 
+const lineAndColumn = (input, position) => {
+    const partial = input.slice(0, position);
+    const lines = (partial.match(/\n/g) || []).length;
+    const right = partial.slice(partial.lastIndexOf('\n'));
+    const column = right.length;
+
+    return `${lines+1}:${column}`;
+};
+
 const firstAtomValue = (expression) => value(child(expression, 0));
 const secondAtomValue = (expression) => value(child(expression, 1));
 
@@ -116,7 +125,9 @@ const evalApplication = (stackTrace, context, expression) => {
         ${lambda} ${stringifyStackTrace(stackTrace)}`);
     assert(lambda.type === 'lambda' || lambda.type === 'function', `${toString(child(expression, 0))} is not a lambda expression ${stringifyStackTrace(stackTrace)}`);
 
-    const result = apply([...stackTrace, toString(child(expression, 0))], lambda, parameters);
+    const input = getMeta(expression, 'input');
+    const range = getMeta(expression, 'range');
+    const result = apply([...stackTrace, toString(child(expression, 0)) + ' at ' + lineAndColumn(input, range[0])], lambda, parameters);
     if (result.type === 'error') {
         throw new Error(`${result.message} in ${toString(expression)} ${stringifyStackTrace(stackTrace)}`);
     } else {
