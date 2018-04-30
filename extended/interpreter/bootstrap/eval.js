@@ -1,6 +1,6 @@
 
 import { parse } from '../../../sexp-parser/bootstrap/parser';
-import { isList, flatMap, some, concat, atom, list, filter, slice, child, size, isAtom, value, map, toString, toArray } from '../../../sexp-parser/bootstrap/ast';
+import { isList, flatMap, some, concat, atom, list, filter, slice, child, size, isAtom, value, map, toString, toArray, getMeta } from '../../../sexp-parser/bootstrap/ast';
 const assert = require('assert');
 const util = require('util');
 
@@ -16,8 +16,47 @@ const stringifyValue = (value) => {
     }
 };
 
+const stringifyStackTrace = (stackTrace) => {
+    const lines = [...stackTrace].map(s => '    ' + s);
+    lines.reverse();
+    return `
+Stack trace:
+${lines.join('\n')}
+`;
+};
+
 const firstAtomValue = (expression) => value(child(expression, 0));
 const secondAtomValue = (expression) => value(child(expression, 1));
+
+const distanceToNewLine = (input, start) => {
+    let index;
+
+    for (index = start; index < input.length; index++) {
+        if (input[index] == '\n')
+            return index - start;
+    }
+
+    return index - start;
+};
+
+const showSexpLocation = (sexp) => {
+    const input = getMeta(sexp, 'input');
+    if (input == undefined)
+        return '';
+
+    const range = getMeta(sexp, 'range');
+    const string = toString(sexp);
+    const contextSizeLeft = 5;
+    const contextSizeRight = distanceToNewLine(input, range[0] + range[1]);
+    const context = input.slice(range[0] - contextSizeLeft, range[0] + range[1] + contextSizeRight);
+
+    return `
+
+${context}
+${' '.repeat(contextSizeLeft)}${string.replace(/./g, '^')}
+
+`;
+};
 
 const zip = (first, second) =>
     first.map((value, index) => [value, second[index]]);
@@ -31,7 +70,7 @@ const contextFromArgsAndParams = (argumentList, parameterList) =>
                 value: pair[1]
             }));
 
-const apply = (lambda, parameters) => {
+const apply = (stackTrace, lambda, parameters) => {
     if (lambda.type === 'function') {
         return lambda.value.apply(null, toArray(parameters));
     }
@@ -49,7 +88,7 @@ const apply = (lambda, parameters) => {
     }
 
     if (size(parameters) > size(argumentList)) {
-        return {type: 'error', message: `Function expects ${size(argumentList)} arguments but got ${size(parameters)}`}; 
+        return {type: 'error', message: `Function expects ${size(argumentList)} arguments but got ${size(parameters)} ${stringifyStackTrace(stackTrace)}`};
     }
 
     const argumentContext = contextFromArgsAndParams(argumentList, parameters);
@@ -59,12 +98,11 @@ const apply = (lambda, parameters) => {
         newContext = newContext.concat(lambda.context);
     }
 
-    return evalExpression.bind(null, newContext.concat(argumentContext), body);
-
+    return evalExpression.bind(null, stackTrace, newContext.concat(argumentContext), body);
 };
 
-const evalApplication = (context, expression) => {
-    const evaluated = map(expression, _eval.bind(null, context));
+const evalApplication = (stackTrace, context, expression) => {
+    const evaluated = map(expression, _eval.bind(null, stackTrace, context));
 
     const parameters = slice(evaluated, 1);
     const lambda = child(evaluated, 0);
@@ -75,12 +113,12 @@ const evalApplication = (context, expression) => {
 
     assert(lambda.type, `
     Internal Error: ${toString(child(expression, 0))} failed to evaluate. Value has no type information.
-        ${lambda}`);
-    assert(lambda.type === 'lambda' || lambda.type === 'function', `${toString(child(expression, 0))} is not a lambda expression`);
+        ${lambda} ${stringifyStackTrace(stackTrace)}`);
+    assert(lambda.type === 'lambda' || lambda.type === 'function', `${toString(child(expression, 0))} is not a lambda expression ${stringifyStackTrace(stackTrace)}`);
 
-    const result = apply(lambda, parameters);
+    const result = apply([...stackTrace, toString(child(expression, 0))], lambda, parameters);
     if (result.type === 'error') {
-        throw new Error(`${result.message} in ${toString(expression)}`);
+        throw new Error(`${result.message} in ${toString(expression)} ${stringifyStackTrace(stackTrace)}`);
     } else {
         return result;
     }
@@ -101,7 +139,7 @@ const atomIsConstructor = (context, atom) => {
     return found !== null && found.type === 'constructor';
 };
 
-const match = (context, pattern, input) => {
+const match = (stackTrace, context, pattern, input) => {
     if (isAtom(pattern)) {
         if (Number.isInteger(parseFloat(value(pattern)))) {
             return parseFloat(value(pattern)) === input;
@@ -112,7 +150,7 @@ const match = (context, pattern, input) => {
             const patternType = findInContext(context, value(pattern)).typeName;
             const inputType = input.typeName;
             if (input.type === 'constructor' && input.name === value(pattern)) {
-                assert(patternType === inputType, `Expected types of pattern ${toString(pattern)} and input ${stringifyValue(input)} to match. ${patternType} != ${inputType}.`);
+                assert(patternType === inputType, `Expected types of pattern ${toString(pattern)} and input ${stringifyValue(input)} to match. ${patternType} != ${inputType} at:${showSexpLocation(pattern)}${stringifyStackTrace(stackTrace)}`);
                 return true;
             } else {
                 return false;
@@ -126,14 +164,14 @@ const match = (context, pattern, input) => {
         const patternConstructor = child(pattern, 0);
         const patternType = findInContext(context, value(patternConstructor)).typeName;
         const inputType = child(input, 0).typeName;
-        assert(patternType === inputType, `Expected types of pattern ${toString(patternConstructor)} and input ${stringifyValue(child(input, 0))} to match. ${patternType} != ${inputType}.`);
+        assert(patternType === inputType, `Expected types of pattern ${toString(patternConstructor)} and input ${stringifyValue(child(input, 0))} to match. ${patternType} != ${inputType} at:${showSexpLocation(pattern)}${stringifyStackTrace(stackTrace)}`);
 
         if (firstAtomValue(pattern) === child(input, 0).name) {
             const patterns = slice(pattern, 1);
             const inputs = slice(input, 1);
-            assert(size(patterns) === size(inputs), `Expected size of pattern and input to be the same at ${toString(pattern)}. Pattern is ${size(patterns)}, input is ${size(inputs)} ${stringifyValue(input)}.`);
+            assert(size(patterns) === size(inputs), `Expected size of pattern and input to be the same at ${toString(pattern)}. Pattern is ${size(patterns)}, input is ${size(inputs)} ${stringifyValue(input)}.${stringifyStackTrace(stackTrace)}`);
             for (let i = 0; i < size(patterns); ++i) {
-                if (!match(context, child(patterns, i), child(inputs, i))) {
+                if (!match(stackTrace, context, child(patterns, i), child(inputs, i))) {
                     return false;
                 }
             }
@@ -145,10 +183,10 @@ const match = (context, pattern, input) => {
 
 const c = (name) => ({name, value: {name, type: 'constructor', typeName: 'type'}}); 
 
-assert.deepEqual(true, match([], atom('x'), 42), "matches variable with value");
-assert.deepEqual(true, match([c('C')], list(atom('C'), atom('a')), list({type: 'constructor', name: 'C', typeName: 'type'}, 42)), "matches constructor with value");
-assert.deepEqual(true, match([c('C'), c('D')], list(atom('C'), atom('D')), list({type: 'constructor', name: 'C', typeName: 'type'}, {type: 'constructor', name: "D", typeName: 'type'})), "matches no-args constructors");
-assert.deepEqual(true, match([c('C')], list(atom('C'), atom('b')), list({type: 'constructor', name: 'C', typeName: 'type'}, {type: 'constructor', name: "D", typeName: 'type'})), "matches no-args constructors");
+assert.deepEqual(true, match([], [], atom('x'), 42), "matches variable with value");
+assert.deepEqual(true, match([], [c('C')], list(atom('C'), atom('a')), list({type: 'constructor', name: 'C', typeName: 'type'}, 42)), "matches constructor with value");
+assert.deepEqual(true, match([], [c('C'), c('D')], list(atom('C'), atom('D')), list({type: 'constructor', name: 'C', typeName: 'type'}, {type: 'constructor', name: "D", typeName: 'type'})), "matches no-args constructors");
+assert.deepEqual(true, match([], [c('C')], list(atom('C'), atom('b')), list({type: 'constructor', name: 'C', typeName: 'type'}, {type: 'constructor', name: "D", typeName: 'type'})), "matches no-args constructors");
 
 const matchContext = (context, pattern, input) => {
     if (isAtom(pattern)) {
@@ -174,8 +212,8 @@ const matchContext = (context, pattern, input) => {
 
 assert.deepEqual([{name: 'a', value: 42}], matchContext([c('C')], list(atom('C'), atom('a')), list({name: 'C', type: 'constructor'}, 42)));
 
-const evalMatch = (context, expression) => {
-    const input = _eval(context, child(expression, 1));
+const evalMatch = (stackTrace, context, expression) => {
+    const input = _eval(stackTrace, context, child(expression, 1));
     const cases = slice(expression, 2);
     
     assert(size(cases) % 2 === 0, `expected pairs of pattern/result at match expression but found ${size(cases)} expressions`);
@@ -184,22 +222,22 @@ const evalMatch = (context, expression) => {
         const pattern = child(cases, i);
         const result = child(cases, i + 1);
         
-        if (match(context, pattern, input)) {
-            return evalExpression.bind(null, context.concat(matchContext(context, pattern, input)), result);
+        if (match(stackTrace, context, pattern, input)) {
+            return evalExpression.bind(null, stackTrace, context.concat(matchContext(context, pattern, input)), result);
         }
     }
 
     throw new Error(`No case matching ${toString(expression)}`);
 };
 
-const evalExpression = (context, expression) => {
+const evalExpression = (stackTrace, context, expression) => {
     if (isAtom(expression)) {
         if (!isNaN(value(expression))) {
             return parseInt(value(expression), 10) | 0;
         } else {
             const foundValue = findInContext(context, value(expression));
             if (foundValue === null) {
-                throw Error(`Could not find symbol ${value(expression)}`);
+                throw Error(`Could not find symbol ${value(expression)} ${stringifyStackTrace(stackTrace)}`);
             }
             return foundValue;
         }
@@ -209,16 +247,16 @@ const evalExpression = (context, expression) => {
             if (first === 'fn') {
                 return {type: 'lambda', value: slice(expression, 1), context};
             } else if (first === 'match') {
-                return evalMatch(context, expression);
+                return evalMatch(stackTrace, context, expression);
             }
         }
 
-        return evalApplication(context, expression);
+        return evalApplication(stackTrace, context, expression);
     }
 };
 
-const _eval = (context, expression) => {
-    let result = evalExpression.bind(null, context, expression);
+const _eval = (stackTrace, context, expression) => {
+    let result = evalExpression.bind(null, stackTrace, context, expression);
     while (typeof result === 'function') {
         result = result();
     }
@@ -245,7 +283,7 @@ const createGlobalContext = (parsedProgram) => {
             type: 'function',
             value: (x) => {
                 fs.forEach(f => {
-                    x = apply(f, list(x));
+                    x = apply([], f, list(x));
                 });
                 return x;
             }
@@ -332,6 +370,7 @@ module.exports.interpret = (program, expression, context) => {
     const globalContext = createGlobalContext(parsedProgram);
     
     const parsedExpression = child(parse(expression).ast, 0);
-    return _eval(context.concat(globalContext), parsedExpression);
+    const stackTrace = [`Expression '${toString(parsedExpression)}'`];
+    return _eval(stackTrace, context.concat(globalContext), parsedExpression);
 };
 

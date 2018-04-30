@@ -71,6 +71,7 @@ var parseListBody = function(input, index) {
     }
 
     list = ast.setMeta(list, 'range', [expressionStartIndex, index - expressionStartIndex + 1]);
+    list = ast.setMeta(list, 'input', input);
 
     return {
         ast: list,
@@ -86,6 +87,7 @@ var parseAtom = function(input, index) {
 
     var atom = ast.atom(input.substring(start, index));
     atom = ast.setMeta(atom, 'range', [start, index - start]);
+    atom = ast.setMeta(atom, 'input', input);
 
     return {
         ast: atom,
