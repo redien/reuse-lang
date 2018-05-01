@@ -4,17 +4,13 @@
         (Symbol name _)  name
         _                Empty))
 
-(def transform (value f)
-    (f value))
-
 (typ type          (SimpleType          (list int32) range)
                    (ComplexType         (list int32) (list type) range))
 (typ definition    (TypeDefinition      type sexp range)
                    (OptOut              sexp))
 
-(typ error         MalformedDefinitionError
-                   MalformedTypeError)
-
+(typ error         (MalformedDefinitionError range)
+                   (MalformedTypeError range))
 
 
 (def type-definition? (type)
@@ -27,7 +23,7 @@
                             (ComplexType name sub-types range))
                         (result-of-list (list-map sexp-to-type parameters)))
         (Symbol name range)                             (Result (SimpleType name range))
-        _                                               (Error MalformedTypeError)))
+        (List _ range)                                  (Error (MalformedTypeError range))))
 
 (def sexp-to-definition' (kind name rest range)
     (match (type-definition? (symbol-name kind))
@@ -39,7 +35,8 @@
 (def sexp-to-definition (expression)
      (match expression
         (List (Cons kind (Cons name rest)) range)  (sexp-to-definition' kind name rest range)
-        _                                          (Error MalformedDefinitionError)))
+        (List _ range)                             (Error (MalformedDefinitionError range))
+        (Symbol _ range)                           (Error (MalformedDefinitionError range))))
 
 (def sexps-to-definitions (expressions)
     (list-map sexp-to-definition expressions))
