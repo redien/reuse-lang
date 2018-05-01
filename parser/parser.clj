@@ -1,64 +1,102 @@
 
 (def symbol-name (symbol)
-    (match symbol
-        (Symbol name _)  name
-        _                Empty))
+     (match symbol
+            (Symbol name _)  name
+            _                Empty))
 
 (typ type          (SimpleType          (list int32) range)
                    (ComplexType         (list int32) (list type) range))
-(typ definition    (TypeDefinition      type sexp range)
+(typ constructor   (SimpleConstructor   (list int32) range)
+                   (ComplexConstructor  (list int32) (list type) range))
+(typ definition    (TypeDefinition      type (list constructor) range)
                    (OptOut              sexp))
 
 (typ error         (MalformedDefinitionError range)
+                   (MalformedConstructorError range)
                    (MalformedTypeError range))
 
 
 (def type-definition? (type)
-    (string-equal? type (list 116 121 112)))
+     (string-equal? type (list 116 121 112)))
+
+(def sexp-to-complex-type (name parameters range)
+     (result-map (fn (sub-types)
+                     (ComplexType name sub-types range))
+                 (sexp-to-types parameters)))
 
 (def sexp-to-type (type)
-    (match type
-        (List (Cons (Symbol name _) parameters) range)
-            (result-map (fn (sub-types)
-                            (ComplexType name sub-types range))
-                        (result-of-list (list-map sexp-to-type parameters)))
-        (Symbol name range)                             (Result (SimpleType name range))
-        (List _ range)                                  (Error (MalformedTypeError range))))
+     (match type
+            (List (Cons (Symbol name _) parameters) range)  (sexp-to-complex-type name parameters range)
+            (Symbol name range)                             (Result (SimpleType name range))
+            (List _ range)                                  (Error (MalformedTypeError range))))
+
+(def sexp-to-types (types)
+     (result-of-list (list-map sexp-to-type types)))
+
+(def sexp-to-complex-constructor (name types range)
+     (result-map (fn (types)
+                     (ComplexConstructor name types range))
+                 (sexp-to-types types)))
+
+(def sexp-to-constructor (constructor)
+     (match constructor
+            (Symbol name range)                        (Result (SimpleConstructor name range))
+            (List (Cons (Symbol name _) types) range)  (sexp-to-complex-constructor name types range)
+            (List _ range)                             (Error (MalformedConstructorError range))))
+
+(def sexp-to-constructors (constructors)
+     (result-of-list (list-map sexp-to-constructor constructors)))
+
+(def sexp-to-type-definition (name constructors range)
+     (result-flatmap (fn (type)
+     (result-map     (fn (constructors)
+                         (TypeDefinition type constructors range))
+            (sexp-to-constructors constructors)))
+            (sexp-to-type name)))
 
 (def sexp-to-definition' (kind name rest range)
-    (match (type-definition? (symbol-name kind))
-        True   (result-map (fn (type)
-                               (TypeDefinition type rest range))
-                           (sexp-to-type name))
-        False  (Result (OptOut (list-concat (list kind name) rest) range))))
+     (match (type-definition? (symbol-name kind))
+            True   (sexp-to-type-definition name rest range)
+            False  (Result (OptOut (list-concat (list kind name) rest) range))))
 
 (def sexp-to-definition (expression)
      (match expression
-        (List (Cons kind (Cons name rest)) range)  (sexp-to-definition' kind name rest range)
-        (List _ range)                             (Error (MalformedDefinitionError range))
-        (Symbol _ range)                           (Error (MalformedDefinitionError range))))
+            (List (Cons kind (Cons name rest)) range)  (sexp-to-definition' kind name rest range)
+            (List _ range)                             (Error (MalformedDefinitionError range))
+            (Symbol _ range)                           (Error (MalformedDefinitionError range))))
 
 (def sexps-to-definitions (expressions)
-    (list-map sexp-to-definition expressions))
+     (list-map sexp-to-definition expressions))
 
 
 
 (def type-to-sexp (type)
-    (match type
-        (SimpleType name range)         (Symbol name range)
-        (ComplexType name types range)  (List (list-concat (list (Symbol name range)) (list-map type-to-sexp types)) range)))
+     (match type
+            (SimpleType name range)         (Symbol name range)
+            (ComplexType name types range)  (List (Cons (Symbol name range) (types-to-sexp types)) range)))
+
+(def types-to-sexp (types)
+     (list-map type-to-sexp types))
+
+(def constructor-to-sexp (constructor)
+     (match constructor
+            (SimpleConstructor name range)         (Symbol name range)
+            (ComplexConstructor name types range)  (List (Cons (Symbol name range) (types-to-sexp types)) range)))
+
+(def constructors-to-sexp (constructors)
+     (list-map constructor-to-sexp constructors))
 
 (def typ-symbol (range)
-    (Symbol (list 116 121 112) range))
+     (Symbol (list 116 121 112) range))
 
-(def type-definition-to-sexp (type rest range)
-    (List (list-concat (list (typ-symbol range) (type-to-sexp type)) rest) range))
+(def type-definition-to-sexp (type constructors range)
+     (List (list-concat (list (typ-symbol range) (type-to-sexp type)) (constructors-to-sexp constructors)) range))
 
 (def definition-to-sexp (definition)
-    (match definition
-        (Result (TypeDefinition type rest range))  (type-definition-to-sexp type rest range)
-        (Result (OptOut sexp range))               (List sexp range)
-        (Error  _)                                 (Symbol (list 33 33 33) (Range 0 0))))
+     (match definition
+            (Result (TypeDefinition type constructors range))  (type-definition-to-sexp type constructors range)
+            (Result (OptOut sexp range))                       (List sexp range)
+            (Error  _)                                         (Symbol (list 33 33 33) (Range 0 0))))
 
 (def definitions-to-sexps (definitions)
-    (list-map definition-to-sexp definitions))
+     (list-map definition-to-sexp definitions))

@@ -21,7 +21,7 @@
         _          False))
 
 (def result-filter-list (list)
-     (list-foldl (fn (result new-list)
+     (list-foldr (fn (result new-list)
                      (match result
                             (Result x)  (Cons x new-list)
                             _           new-list))
