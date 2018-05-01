@@ -11,6 +11,10 @@ Should parse complex constructors
 > (typ a (C b))
 = (typ a (C b))
 
+Should parse function types
+> (typ (fun a) (Fun (fn ((list a)) a)))
+= (typ (fun a) (Fun (fn ((list a)) a)))
+
 Should parse standard types
 > (typ (maybe a) (Some a) None)
 = (typ (maybe a) (Some a) None)

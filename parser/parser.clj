@@ -5,7 +5,8 @@
             _                Empty))
 
 (typ type          (SimpleType          (list int32) range)
-                   (ComplexType         (list int32) (list type) range))
+                   (ComplexType         (list int32) (list type) range)
+                   (FunctionType        (list type) type range))
 (typ constructor   (SimpleConstructor   (list int32) range)
                    (ComplexConstructor  (list int32) (list type) range))
 (typ definition    (TypeDefinition      type (list constructor) range)
@@ -19,14 +20,31 @@
 (def type-definition? (type)
      (string-equal? type (list 116 121 112)))
 
+(def function-type? (type)
+     (string-equal? type (list 102 110)))
+
 (def sexp-to-complex-type (name parameters range)
      (result-map (fn (sub-types)
                      (ComplexType name sub-types range))
                  (sexp-to-types parameters)))
 
+(def sexp-to-function-type (name parameters range)
+     (match parameters
+            (Cons (List arg-types _) (Cons return-type Empty))  (result-flatmap (fn (arg-types)
+                                                                (result-map     (fn (return-type)
+                                                                                    (FunctionType arg-types return-type range))
+                                                                                (sexp-to-type return-type)))
+                                                                                (sexp-to-types arg-types))
+            _                                          (Error (MalformedTypeError range))))
+
+(def sexp-to-complex-or-function-type (name parameters range)
+     (match (function-type? name)
+            True   (sexp-to-function-type name parameters range)
+            False  (sexp-to-complex-type name parameters range)))
+
 (def sexp-to-type (type)
      (match type
-            (List (Cons (Symbol name _) parameters) range)  (sexp-to-complex-type name parameters range)
+            (List (Cons (Symbol name _) parameters) range)  (sexp-to-complex-or-function-type name parameters range)
             (Symbol name range)                             (Result (SimpleType name range))
             (List _ range)                                  (Error (MalformedTypeError range))))
 
@@ -70,10 +88,19 @@
 
 
 
+(def typ-symbol (range)
+     (Symbol (list 116 121 112) range))
+
+(def fn-symbol (range)
+     (Symbol (list 102 110) range))
+
 (def type-to-sexp (type)
      (match type
-            (SimpleType name range)         (Symbol name range)
-            (ComplexType name types range)  (List (Cons (Symbol name range) (types-to-sexp types)) range)))
+            (SimpleType name range)                     (Symbol name range)
+            (FunctionType arg-types return-type range)  (List (Cons (fn-symbol range)
+                                                              (Cons (List (types-to-sexp arg-types) range)
+                                                              (Cons (type-to-sexp return-type) Empty))) range)
+            (ComplexType name types range)              (List (Cons (Symbol name range) (types-to-sexp types)) range)))
 
 (def types-to-sexp (types)
      (list-map type-to-sexp types))
@@ -85,9 +112,6 @@
 
 (def constructors-to-sexp (constructors)
      (list-map constructor-to-sexp constructors))
-
-(def typ-symbol (range)
-     (Symbol (list 116 121 112) range))
 
 (def type-definition-to-sexp (type constructors range)
      (List (list-concat (list (typ-symbol range) (type-to-sexp type)) (constructors-to-sexp constructors)) range))

@@ -22,6 +22,7 @@
 (def string-equal? (a b)
      (match a
             (Cons xa xas) (match b
-            (Cons xb xbs) (and (= xa xb) (string-equal? xas xbs)))
+            (Cons xb xbs) (and (= xa xb) (string-equal? xas xbs))
+            Empty         (string-empty? a))
             Empty         (string-empty? b)))
 
