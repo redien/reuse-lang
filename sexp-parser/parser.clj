@@ -1,18 +1,17 @@
 
 (typ (pair a b) (Pair a b))
 
-(def read-while' (predicate input string)
-     (match input
-            (Pair Empty _)       (Pair input string)
-            (Pair (Cons x xs) offset)
-                  (match (predicate x)
-                           True  (read-while' predicate (Pair xs (+ 1 offset)) (Cons x string))
-                           False (Pair input string))))
+(def read-while' (predicate iterator string)
+     (match (indexed-iterator-get iterator)
+            None      (Pair iterator string)
+            (Some x)  (match (predicate x)
+                             True   (read-while' predicate (indexed-iterator-next iterator) (Cons x string))
+                             False  (Pair iterator string))))
 
-(def read-while (predicate input)
-     (match (read-while' predicate input Empty)
-            (Pair input Empty)  (Pair input Empty)
-            (Pair input string) (Pair input (list-reverse string))))
+(def read-while (predicate iterator)
+     (match (read-while' predicate iterator Empty)
+            (Pair iterator Empty)  (Pair iterator Empty)
+            (Pair iterator string) (Pair iterator (list-reverse string))))
 
 (def whitespace? (character)
      (or (= character 32)
@@ -33,43 +32,38 @@
                         (ParseOut i)
                         ParseEnd)
 
-(def offset-of (input)
-     (match input
-            (Pair _ offset) offset))
-
 (def symbol-range (start end)
-     (Range (offset-of start) (offset-of end)))
+     (Range (indexed-iterator-index start) (indexed-iterator-index end)))
 
-(def parse-symbol (input)
-     (match (read-while atom-character? input)
-            (Pair next-input Empty) (ParseOut input)
-            (Pair next-input name)  (ParseNext next-input (Symbol name (symbol-range input next-input)))))
+(def parse-symbol (iterator)
+     (match (read-while atom-character? iterator)
+            (Pair _ Empty)             (ParseOut iterator)
+            (Pair next-iterator name)  (ParseNext next-iterator (Symbol name (symbol-range iterator next-iterator)))))
 
 (def list-range (start end)
-     (Range (- (offset-of start) 1) (offset-of end)))
+     (Range (- (indexed-iterator-index start) 1) (indexed-iterator-index end)))
 
-(def parse-list (input parse-sexps)
-     (match (parse-sexps input Empty)
-            (Pair next-input expressions) (ParseNext next-input (List expressions (list-range input next-input)))))
+(def parse-list (iterator parse-sexps)
+     (match (parse-sexps iterator Empty)
+            (Pair next-iterator expressions)  (ParseNext next-iterator (List expressions (list-range iterator next-iterator)))))
 
-(def parse-expression (input parse-sexps)
-     (match input
-            (Pair Empty _)             ParseEnd
-            (Pair (Cons 40 xs) offset) (parse-list (Pair xs (+ 1 offset)) parse-sexps)
-            (Pair (Cons 41 xs) offset) (ParseOut (Pair xs (+ 1 offset)))
-            (Pair (Cons x xs) offset)
-                      (match (whitespace? x)
-                             True  (parse-expression (Pair xs (+ 1 offset)) parse-sexps)
-                             False (parse-symbol input))))
+(def parse-expression (iterator parse-sexps)
+     (match (indexed-iterator-get iterator)
+            None       ParseEnd
+            (Some 40)  (parse-list (indexed-iterator-next iterator) parse-sexps)
+            (Some 41)  (ParseOut (indexed-iterator-next iterator))
+            (Some x)   (match (whitespace? x)
+                              True   (parse-expression (indexed-iterator-next iterator) parse-sexps)
+                              False  (parse-symbol iterator))))
 
-(def parse-sexps' (input expressions)
-     (match (parse-expression input parse-sexps')
-            ParseEnd                 (Pair input (list-reverse expressions))
-            (ParseOut input)         (Pair input (list-reverse expressions))
-            (ParseNext input result) (parse-sexps' input (Cons result expressions))))
+(def parse-sexps' (iterator expressions)
+     (match (parse-expression iterator parse-sexps')
+            ParseEnd                    (Pair iterator (list-reverse expressions))
+            (ParseOut iterator)         (Pair iterator (list-reverse expressions))
+            (ParseNext iterator result) (parse-sexps' iterator (Cons result expressions))))
 
 (export parse (input)
-    (match (parse-sexps' (Pair input 0) Empty)
+    (match (parse-sexps' (list-to-indexed-iterator input) Empty)
         (Pair _ expressions) expressions))
 
 (def wrap-in-brackets (string)
@@ -82,4 +76,3 @@
 
 (export stringify (expressions)
      (string-join (string-of-char 32) (list-map (stringify-sexp stringify) expressions)))
-

@@ -13,9 +13,10 @@ $node_bin/babel $project_root/sexp-parser -d $project_root/generated/sexp-parser
 $node_bin/babel $project_root/parser -d $project_root/generated/parser >&2
 
 standard_library_compiled="
+$(cat $standard_library/boolean.clj)
+$(cat $standard_library/iterator.clj)
 $(cat $standard_library/list.clj)
 $(cat $standard_library/string.clj)
-$(cat $standard_library/boolean.clj)
 $(cat $standard_library/result.clj)"
 
 echo "$standard_library_compiled $(cat $project_root/sexp-parser/parser.clj)" > $project_root/generated/sexp-parser/parser.clj

@@ -36,3 +36,16 @@
      (match a
             Empty       b
             (Cons x xs) (Cons x (list-concat xs b))))
+
+(def list-indexed-iterator-get (collection _)
+      (match collection
+             (Cons x _)  (Some x)
+             Empty       None))
+
+(def list-indexed-iterator-next (iterator collection index)
+      (match collection
+             (Cons _ xs)  (IndexedIterator xs (+ index 1) list-indexed-iterator-get list-indexed-iterator-next)
+             Empty        iterator))
+
+(def list-to-indexed-iterator (list)
+      (IndexedIterator list 0 list-indexed-iterator-get list-indexed-iterator-next))
