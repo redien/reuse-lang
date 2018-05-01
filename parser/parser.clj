@@ -30,12 +30,13 @@
 
 (def sexp-to-function-type (name parameters range)
      (match parameters
-            (Cons (List arg-types _) (Cons return-type Empty))  (result-flatmap (fn (arg-types)
-                                                                (result-map     (fn (return-type)
-                                                                                    (FunctionType arg-types return-type range))
-                                                                                (sexp-to-type return-type)))
-                                                                                (sexp-to-types arg-types))
-            _                                          (Error (MalformedTypeError range))))
+            (Cons (List arg-types _) (Cons return-type Empty))
+                    (result-flatmap (fn (arg-types)
+                    (result-map     (fn (return-type)
+                                        (FunctionType arg-types return-type range))
+                                    (sexp-to-type return-type)))
+                                    (sexp-to-types arg-types))
+            _   (Error (MalformedTypeError range))))
 
 (def sexp-to-complex-or-function-type (name parameters range)
      (match (function-type? name)
