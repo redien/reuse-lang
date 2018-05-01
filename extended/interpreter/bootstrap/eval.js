@@ -9,6 +9,12 @@ const stringifyValue = (value) => {
         return value.toString();
     } else if (value.type === 'constructor') {
         return value.name;
+    } else if (value.type === 'function') {
+        return '[Built-in function]';
+    } else if (value.type === 'error') {
+        return value.message;
+    } else if (value.type === 'lambda') {
+        return `[lambda ${toString(value.value)}]`;
     } else if (isList(value)) {
         return '(' + toArray(map(value, stringifyValue)).join(' ') + ')';
     } else {
@@ -238,7 +244,7 @@ const evalMatch = (stackTrace, context, expression) => {
         }
     }
 
-    throw new Error(`No case matching ${toString(expression)}`);
+    throw new Error(`No case matching ${stringifyValue(input)} ${stringifyStackTrace(stackTrace)}`);
 };
 
 const evalExpression = (stackTrace, context, expression) => {
