@@ -89,7 +89,11 @@ const apply = (stackTrace, lambda, parameters) => {
     if (lambda.type === 'function') {
         return lambda.value.apply(null, toArray(parameters));
     }
-   
+
+    if (lambda.type === 'special-form') {
+        return lambda.value.apply(null, [stackTrace, ...toArray(parameters)]);
+    }
+
     const lambdaExpression = lambda.value;
     const argumentList = child(lambdaExpression, 0);
     const body = child(lambdaExpression, 1);
@@ -129,7 +133,7 @@ const evalApplication = (stackTrace, context, expression) => {
     assert(lambda.type, `
     Internal Error: ${toString(child(expression, 0))} failed to evaluate. Value has no type information.
         ${lambda} ${stringifyStackTrace(stackTrace)}`);
-    assert(lambda.type === 'lambda' || lambda.type === 'function', `${toString(child(expression, 0))} is not a lambda expression ${stringifyStackTrace(stackTrace)}`);
+    assert(lambda.type === 'lambda' || lambda.type === 'function' || lambda.type === 'special-form', `${toString(child(expression, 0))} is not a lambda expression ${stringifyStackTrace(stackTrace)}`);
 
     const input = getMeta(expression, 'input');
     const range = getMeta(expression, 'range');
@@ -295,12 +299,12 @@ const createGlobalContext = (parsedProgram) => {
         }
     };
 
-    const pipe = (...fs) => {
+    const pipe = (stackTrace, ...fs) => {
         return {
             type: 'function',
             value: (x) => {
                 fs.forEach(f => {
-                    x = apply([], f, list(x));
+                    x = apply(stackTrace, f, list(x));
                 });
                 return x;
             }
@@ -339,7 +343,7 @@ const createGlobalContext = (parsedProgram) => {
         {name: '/', value: {type: 'function', value: (a, b) => a / b | 0}},
         {name: '%', value: {type: 'function', value: (a, b) => a % b | 0}},
         {name: 'int32-less-than', value: {type: 'function', value: (a, b, x, y) => a < b ? x : y}},
-        {name: 'pipe', value: {type: 'function', value: pipe}},
+        {name: 'pipe', value: {type: 'special-form', value: pipe}},
         {name: 'list', value: {type: 'function', value: listForm}},
     ];
 
