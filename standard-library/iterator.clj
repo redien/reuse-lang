@@ -1,7 +1,4 @@
 
-(typ (maybe a) (Some a)
-               None)
-
 (typ (indexed-iterator (exists collection) element)
     (IndexedIterator collection
                      int32
