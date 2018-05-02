@@ -10,18 +10,23 @@
 (typ constructor   (SimpleConstructor   (list int32) range)
                    (ComplexConstructor  (list int32) (list type) range))
 (typ definition    (TypeDefinition      type (list constructor) range)
+                   (FunctionDefinition  (list int32) sexp range)
                    (OptOut              sexp))
 
 (typ error         (MalformedDefinitionError range)
+                   (MalformedFunctionNameError range)
                    (MalformedConstructorError range)
                    (MalformedTypeError range))
 
 
-(def type-definition? (type)
-     (string-equal? type (list 116 121 112)))
+(def type-definition? (kind)
+     (string-equal? kind (list 116 121 112)))
 
 (def function-type? (type)
      (string-equal? type (list 102 110)))
+
+(def function-definition? (kind)
+     (string-equal? kind (list 100 101 102)))
 
 (def sexp-to-complex-type (name parameters range)
      (result-map (fn (sub-types)
@@ -82,11 +87,21 @@
             (sexp-to-constructors constructors)))
             (sexp-to-type name)))
 
+(def sexp-to-function-definition (name-symbol rest range)
+     (match name-symbol
+            (Symbol name _)
+                (Result (FunctionDefinition name rest range))
+            (List _ range)
+                (Error (MalformedFunctionNameError range))))
+
 (def sexp-to-definition' (kind name rest range)
      (match (type-definition? (symbol-name kind))
             True   (sexp-to-type-definition name rest range)
+            False
+     (match (function-definition? (symbol-name kind))
+            True   (sexp-to-function-definition name rest range)
             False  (Result (OptOut (list-concat (list kind name) rest)
-                                   range))))
+                                   range)))))
 
 (def sexp-to-definition (expression)
      (match expression
@@ -101,6 +116,9 @@
      (list-map sexp-to-definition expressions))
 
 
+
+(def def-symbol (range)
+     (Symbol (list 100 101 102) range))
 
 (def typ-symbol (range)
      (Symbol (list 116 121 112) range))
@@ -139,10 +157,15 @@
                         (constructors-to-sexp constructors))
            range))
 
+(def function-definition-to-sexp (name rest range)
+    (List (Cons (def-symbol range) (Cons (Symbol name range) rest)) range))
+
 (def definition-to-sexp (definition)
      (match definition
             (Result (TypeDefinition type constructors range))
                 (type-definition-to-sexp type constructors range)
+            (Result (FunctionDefinition name rest range))
+                (function-definition-to-sexp name rest range)
             (Result (OptOut sexp range))
                 (List sexp range)
             (Error  _)
@@ -150,3 +173,4 @@
 
 (def definitions-to-sexps (definitions)
      (list-map definition-to-sexp definitions))
+
