@@ -10,7 +10,7 @@
 (typ constructor   (SimpleConstructor   (list int32) range)
                    (ComplexConstructor  (list int32) (list type) range))
 (typ definition    (TypeDefinition      type (list constructor) range)
-                   (FunctionDefinition  (list int32) sexp range)
+                   (FunctionDefinition  (list int32) (list (list int32)) sexp range)
                    (OptOut              sexp))
 
 (typ error         (MalformedDefinitionError range)
@@ -87,12 +87,17 @@
             (sexp-to-constructors constructors)))
             (sexp-to-type name)))
 
-(def sexp-to-function-definition (name-symbol rest range)
+(def sexp-to-function-name (name-symbol)
      (match name-symbol
             (Symbol name _)
-                (Result (FunctionDefinition name rest range))
+                (Result name))
             (List _ range)
-                (Error (MalformedFunctionNameError range))))
+                (Error (MalformedFunctionNameError range)))
+
+(def sexp-to-function-definition (name-symbol rest range)
+     (result-map (fn (name)
+                     (FunctionDefinition name Empty rest range))
+                 (sexp-to-function-name name-symbol)))
 
 (def sexp-to-definition' (kind name rest range)
      (match (type-definition? (symbol-name kind))
@@ -164,7 +169,7 @@
      (match definition
             (Result (TypeDefinition type constructors range))
                 (type-definition-to-sexp type constructors range)
-            (Result (FunctionDefinition name rest range))
+            (Result (FunctionDefinition name _ rest range))
                 (function-definition-to-sexp name rest range)
             (Result (OptOut sexp range))
                 (List sexp range)
