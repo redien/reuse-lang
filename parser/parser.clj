@@ -15,6 +15,7 @@
 
 (typ error         (MalformedDefinitionError range)
                    (MalformedFunctionNameError range)
+                   (MalformedFunctionDefinitionError range)
                    (MalformedConstructorError range)
                    (MalformedTypeError range))
 
@@ -94,10 +95,33 @@
             (List _ range)
                 (Error (MalformedFunctionNameError range)))
 
-(def sexp-to-function-definition (name-symbol rest range)
-     (result-map (fn (name)
-                     (FunctionDefinition name Empty rest range))
+(def sexp-to-function-arguments (rest range)
+     (match rest
+            (Cons (List arguments _) __)
+                (Result (list-map symbol-name arguments))
+            Empty
+                (Error (MalformedFunctionDefinition range))))
+
+(def sexp-to-function-expression (rest range)
+     (match rest
+            (Cons _ (Cons expression Empty))
+                (Result expression)
+            _
+                (Error (MalformedFunctionDefinitionError range))))
+
+(def sexp-to-function-definition (name-symbol
+                                  rest
+                                  range)
+     (result-flatmap (fn (arguments)
+     (result-flatmap (fn (expression)
+     (result-map     (fn (name)
+                         (FunctionDefinition name
+                                             arguments
+                                             expression
+                                             range))
                  (sexp-to-function-name name-symbol)))
+                 (sexp-to-function-expression rest range)))
+                 (sexp-to-function-arguments rest range)))
 
 (def sexp-to-definition' (kind name rest range)
      (match (type-definition? (symbol-name kind))
@@ -162,18 +186,35 @@
                         (constructors-to-sexp constructors))
            range))
 
-(def function-definition-to-sexp (name rest range)
-    (List (Cons (def-symbol range) (Cons (Symbol name range) rest)) range))
+(def function-arguments-to-sexp (arguments range)
+     (List (list-map (fn (name) (Symbol name range)) arguments) range))
+
+(def function-expression-to-sexp (expression range)
+     expression)
+
+(def function-definition-to-sexp (name arguments expression range)
+    (List (Cons (def-symbol range)
+          (Cons (Symbol name range)
+          (Cons (function-arguments-to-sexp arguments range)
+          (Cons (function-expression-to-sexp expression range)
+                Empty))))
+          range))
 
 (def definition-to-sexp (definition)
      (match definition
             (Result (TypeDefinition type constructors range))
                 (type-definition-to-sexp type constructors range)
-            (Result (FunctionDefinition name _ rest range))
-                (function-definition-to-sexp name rest range)
+            (Result (FunctionDefinition name
+                                        arguments
+                                        expression
+                                        range))
+                (function-definition-to-sexp name
+                                             arguments
+                                             expression
+                                             range)
             (Result (OptOut sexp range))
                 (List sexp range)
-            (Error  _)
+            (Error _)
                 (Symbol (list 33 33 33) (Range 0 0))))
 
 (def definitions-to-sexps (definitions)
