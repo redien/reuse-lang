@@ -9,9 +9,9 @@
                    (FunctionType        (list type) type range))
 (typ constructor   (SimpleConstructor   (list int32) range)
                    (ComplexConstructor  (list int32) (list type) range))
+(typ expression    (IntegerConstant     int32 range))
 (typ definition    (TypeDefinition      type (list constructor) range)
-                   (FunctionDefinition  (list int32) (list (list int32)) sexp range)
-                   (OptOut              sexp))
+                   (FunctionDefinition  (list int32) (list (list int32)) expression range))
 
 (typ error         (MalformedDefinitionError range)
                    (MalformedFunctionNameError range)
@@ -105,7 +105,7 @@
 (def sexp-to-function-expression (rest range)
      (match rest
             (Cons _ (Cons expression Empty))
-                (Result expression)
+                (Result (IntegerConstant 1 range))
             _
                 (Error (MalformedFunctionDefinitionError range))))
 
@@ -129,8 +129,7 @@
             False
      (match (function-definition? (symbol-name kind))
             True   (sexp-to-function-definition name rest range)
-            False  (Result (OptOut (list-concat (list kind name) rest)
-                                   range)))))
+            False  (Error (MalformedDefinitionError range)))))
 
 (def sexp-to-definition (expression)
      (match expression
@@ -190,7 +189,9 @@
      (List (list-map (fn (name) (Symbol name range)) arguments) range))
 
 (def function-expression-to-sexp (expression range)
-     expression)
+     (match expression
+            (IntegerConstant x range)
+                (Symbol (list 49) range)))
 
 (def function-definition-to-sexp (name arguments expression range)
     (List (Cons (def-symbol range)
@@ -212,8 +213,6 @@
                                              arguments
                                              expression
                                              range)
-            (Result (OptOut sexp range))
-                (List sexp range)
             (Error _)
                 (Symbol (list 33 33 33) (Range 0 0))))
 
