@@ -68,8 +68,12 @@
 
 (def string-from-int32 (integer)
      (match (< integer 0)
-            True 
-                (Cons 45 (string-from-int32 (* integer -1)))
+            True
+                (match (= integer -2147483648)
+                    True
+                        (list 45 50 49 52 55 52 56 51 54 52 56)
+                    False
+                        (Cons 45 (string-from-int32 (* integer -1))))
             False
                 (string-from-int32' integer Empty)))
 
