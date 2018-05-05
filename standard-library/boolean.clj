@@ -22,3 +22,10 @@
 
 (def = (a b)
      (not (or (< a b) (> a b))))
+
+(def <= (a b)
+     (or (< a b) (= a b)))
+
+(def >= (a b)
+     (or (> a b) (= a b)))
+

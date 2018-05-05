@@ -26,3 +26,20 @@
             Empty         (string-empty? a))
             Empty         (string-empty? b)))
 
+(def string-point-is-digit (point)
+     (and (>= point 48) (<= point 57)))
+
+(def string-to-int32 (string)
+     (match string
+            (Cons x _)
+                (match (string-point-is-digit x)
+                       True
+                          (Some (- x 48))
+                       False
+                          None)
+            Empty
+                None))
+
+(def string-from-int32 (integer)
+     (Cons (+ integer 48) Empty))
+

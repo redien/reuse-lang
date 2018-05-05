@@ -16,6 +16,7 @@
 (typ error         (MalformedDefinitionError range)
                    (MalformedFunctionNameError range)
                    (MalformedFunctionDefinitionError range)
+                   (MalformedExpressionError range)
                    (MalformedConstructorError range)
                    (MalformedTypeError range))
 
@@ -87,6 +88,17 @@
             (sexp-to-constructors constructors)))
             (sexp-to-type name)))
 
+(def sexp-to-expression (sexp)
+     (match sexp
+            (Symbol symbol-name range)
+                (match (string-to-int32 symbol-name) 
+                       (Some integer)
+                           (Result (IntegerConstant integer range))
+                       None
+                           (Error (MalformedExpression range)))
+            (List _ range)
+                (Error (MalformedExpression range))))
+
 (def sexp-to-function-name (name-symbol)
      (match name-symbol
             (Symbol name _)
@@ -104,7 +116,7 @@
 (def sexp-to-function-expression (rest range)
      (match rest
             (Cons _ (Cons expression Empty))
-                (Result (IntegerConstant 1 range))
+                (sexp-to-expression expression)
             _
                 (Error (MalformedFunctionDefinitionError range))))
 
@@ -187,16 +199,16 @@
 (def function-arguments-to-sexp (arguments range)
      (List (list-map (fn (name) (Symbol name range)) arguments) range))
 
-(def function-expression-to-sexp (expression range)
+(def expression-to-sexp (expression range)
      (match expression
-            (IntegerConstant x range)
-                (Symbol (list 49) range)))
+            (IntegerConstant integer range)
+                (Symbol (string-from-int32 integer) range)))
 
 (def function-definition-to-sexp (name arguments expression range)
     (List (Cons (def-symbol range)
           (Cons (Symbol name range)
           (Cons (function-arguments-to-sexp arguments range)
-          (Cons (function-expression-to-sexp expression range)
+          (Cons (expression-to-sexp expression range)
                 Empty))))
           range))
 

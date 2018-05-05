@@ -32,3 +32,11 @@
     (match (list-filter result-error? list)
            (Cons (Error error) _)  (Error error)
            Empty                   (Result (result-filter-list list))))
+
+(def result-of-maybe (maybe error)
+     (match maybe
+            (Some x)
+                (Result x)
+            None
+                (Error error)))
+
