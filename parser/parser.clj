@@ -95,7 +95,7 @@
                        (Some integer)
                            (Result (IntegerConstant integer range))
                        None
-                           (Error (MalformedExpression range)))
+                           (Error (MalformedExpressionError range)))
             (List _ range)
                 (Error (MalformedExpression range))))
 
