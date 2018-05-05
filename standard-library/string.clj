@@ -35,7 +35,7 @@
 
 
 (def string-point-is-digit (point)
-     (and (>= point 48) (<= point 57)))
+     (and (> point 47) (< point 58)))
 
 (def string-to-int32'' (string-to-int32' string accumulator x)
      (string-to-int32' string (Some (+ (* 10 accumulator) (- x 48))))) 
