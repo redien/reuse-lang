@@ -129,10 +129,10 @@
             (sexp-to-constructors constructors)))
             (sexp-to-type name)))
 
-(def sexp-to-arguments (range arguments)
+(def sexp-to-arguments (arguments)
      (result-of-list (list-map symbol-to-string arguments)))
 
-(def sexp-to-function-body (rest range)
+(def sexp-to-function-body (range rest)
      (match rest
             (Cons (List arguments _) (Cons expression Empty))
                     (Result (Pair arguments expression))
@@ -145,8 +145,8 @@
      (result-map     (fn (expression)
                          (Lambda arguments expression range))
                  (sexp-to-expression (pair-right body))))
-                 (sexp-to-arguments range (pair-left body))))
-                 (sexp-to-function-body rest range)))
+                 (sexp-to-arguments (pair-left body))))
+                 (sexp-to-function-body range rest)))
 
 (def sexp-to-function-application (range expressions)
      ((pipe
@@ -189,23 +189,10 @@
             (List _ range)
                 (Error (MalformedFunctionNameError range)))
 
-(def sexp-to-function-arguments (rest range)
-     (match rest
-            (Cons (List arguments _) __)
-                (Result (list-map symbol-name arguments))
-            Empty
-                (Error (MalformedFunctionDefinition range))))
-
-(def sexp-to-function-expression (rest range)
-     (match rest
-            (Cons _ (Cons expression Empty))
-                (sexp-to-expression expression)
-            _
-                (Error (MalformedFunctionDefinitionError range))))
-
 (def sexp-to-function-definition (name-symbol
                                   rest
                                   range)
+     (result-flatmap (fn (body)
      (result-flatmap (fn (arguments)
      (result-flatmap (fn (expression)
      (result-map     (fn (name)
@@ -214,8 +201,9 @@
                                              expression
                                              range))
                  (sexp-to-function-name name-symbol)))
-                 (sexp-to-function-expression rest range)))
-                 (sexp-to-function-arguments rest range)))
+                 (sexp-to-expression (pair-right body))))
+                 (sexp-to-arguments (pair-left body))))
+                 (sexp-to-function-body range rest)))
 
 (def sexp-to-definition' (kind name rest range)
      (match (type-definition? (symbol-name kind))
