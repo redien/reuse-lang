@@ -236,8 +236,7 @@
             (SimpleConstructor name range)
                 (Symbol name range)
             (ComplexConstructor name types range)
-                (List (Cons (Symbol name range) (types-to-sexp types))
-                      range)))
+                (List (Cons (Symbol name range) (types-to-sexp types)) range)))
 
 (def constructors-to-sexp (constructors)
      (list-map constructor-to-sexp constructors))
@@ -274,20 +273,21 @@
           range))
 
 (def definition-to-sexp (definition)
-     (match definition
-            (Result (TypeDefinition type constructors range))
-                (type-definition-to-sexp type constructors range)
-            (Result (FunctionDefinition name
-                                        arguments
-                                        expression
-                                        range))
-                (function-definition-to-sexp name
-                                             arguments
-                                             expression
-                                             range)
+     (result-map (fn (definition) 
+          (match definition
+                 (TypeDefinition type constructors range)
+                     (type-definition-to-sexp type constructors range)
+                 (FunctionDefinition name arguments expression range)
+                     (function-definition-to-sexp name arguments expression range)))
+         definition))
+
+(def error-to-sexp (result)
+     (match result
             (Error error)
-                (Symbol (error-to-string error) (Range 0 0))))
+                 (Symbol (error-to-string error) (Range 0 0))
+            (Result sexp)
+                 sexp))
 
 (def definitions-to-sexps (definitions)
-     (list-map definition-to-sexp definitions))
+     (list-map (pipe definition-to-sexp error-to-sexp) definitions))
 
