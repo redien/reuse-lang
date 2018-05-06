@@ -1,9 +1,4 @@
 
-(def symbol-name (symbol)
-     (match symbol
-            (Symbol name _)  name
-            _                Empty))
-
 (def symbol-to-string (symbol)
      (match symbol
             (Symbol name _)  (Result name)
@@ -198,13 +193,15 @@
                  (sexp-to-arguments (pair-left body))))
                  (sexp-to-function-body range rest)))
 
-(def sexp-to-definition' (kind name rest range)
-     (match (type-definition? (symbol-name kind))
-            True   (sexp-to-type-definition name rest range)
-            False
-     (match (function-definition? (symbol-name kind))
-            True   (sexp-to-function-definition name rest range)
-            False  (Error (MalformedDefinitionError range)))))
+(def sexp-to-definition' (kind-symbol name rest range)
+     (result-flatmap (fn (kind)
+                         (match (type-definition? kind)
+                                True   (sexp-to-type-definition name rest range)
+                                False
+                         (match (function-definition? kind)
+                                True   (sexp-to-function-definition name rest range)
+                                False  (Error (MalformedDefinitionError range)))))
+                     (symbol-to-string kind-symbol)))
 
 (def sexp-to-definition (expression)
      (match expression
