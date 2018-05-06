@@ -182,13 +182,6 @@
                        _ 
                           (sexp-to-list-expression expressions range))))
 
-(def sexp-to-function-name (name-symbol)
-     (match name-symbol
-            (Symbol name _)
-                (Result name))
-            (List _ range)
-                (Error (MalformedFunctionNameError range)))
-
 (def sexp-to-function-definition (name-symbol
                                   rest
                                   range)
@@ -200,7 +193,7 @@
                                              arguments
                                              expression
                                              range))
-                 (sexp-to-function-name name-symbol)))
+                 (symbol-to-string name-symbol)))
                  (sexp-to-expression (pair-right body))))
                  (sexp-to-arguments (pair-left body))))
                  (sexp-to-function-body range rest)))
