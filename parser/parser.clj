@@ -69,15 +69,15 @@
                                (error-range-to-string range))))
 
 (def sexp-to-complex-type (name parameters range)
-     (result-map (fn (sub-types)
-                     (ComplexType name sub-types range))
+     (result-first (fn (sub-types)
+                       (ComplexType name sub-types range))
                  (sexp-to-types parameters)))
 
 (def sexp-to-function-type (name parameters range)
      (match parameters
             (Cons (List arg-types _) (Cons return-type Empty))
                 (result-flatmap (fn (arg-types)
-                (result-map     (fn (return-type)
+                (result-first   (fn (return-type)
                                     (FunctionType arg-types return-type range))
                                 (sexp-to-type return-type)))
                                 (sexp-to-types arg-types))
@@ -102,8 +102,8 @@
      (result-of-list (list-map sexp-to-type types)))
 
 (def sexp-to-complex-constructor (name types range)
-     (result-map (fn (types)
-                     (ComplexConstructor name types range))
+     (result-first (fn (types)
+                       (ComplexConstructor name types range))
                  (sexp-to-types types)))
 
 (def sexp-to-constructor (constructor)
@@ -120,7 +120,7 @@
 
 (def sexp-to-type-definition (name constructors range)
      (result-flatmap (fn (type)
-     (result-map     (fn (constructors)
+     (result-first   (fn (constructors)
                          (TypeDefinition type constructors range))
             (sexp-to-constructors constructors)))
             (sexp-to-type name)))
@@ -138,7 +138,7 @@
 (def sexp-to-lambda (rest range)
      (result-flatmap (fn (body)
      (result-flatmap (fn (arguments)
-     (result-map     (fn (expression)
+     (result-first   (fn (expression)
                          (Lambda arguments expression range))
                  (sexp-to-expression (pair-right body))))
                  (sexp-to-arguments (pair-left body))))
@@ -147,8 +147,8 @@
 (def sexp-to-function-application (range expressions)
      ((pipe (list-map sexp-to-expression) 
             result-of-list
-            (result-map (fn (expressions)
-                            (FunctionApplication expressions range))))
+            (result-first (fn (expressions)
+                              (FunctionApplication expressions range))))
          expressions))
 
 (def sexp-to-list-expression (expressions range)
@@ -183,11 +183,8 @@
      (result-flatmap (fn (body)
      (result-flatmap (fn (arguments)
      (result-flatmap (fn (expression)
-     (result-map     (fn (name)
-                         (FunctionDefinition name
-                                             arguments
-                                             expression
-                                             range))
+     (result-first   (fn (name)
+                         (FunctionDefinition name arguments expression range))
                  (symbol-to-string name-symbol)))
                  (sexp-to-expression (pair-right body))))
                  (sexp-to-arguments (pair-left body))))
@@ -273,21 +270,25 @@
           range))
 
 (def definition-to-sexp (definition)
-     (result-map (fn (definition) 
-          (match definition
-                 (TypeDefinition type constructors range)
-                     (type-definition-to-sexp type constructors range)
-                 (FunctionDefinition name arguments expression range)
-                     (function-definition-to-sexp name arguments expression range)))
-         definition))
+     (match definition
+            (TypeDefinition type constructors range)
+                (type-definition-to-sexp type constructors range)
+            (FunctionDefinition name arguments expression range)
+                (function-definition-to-sexp name arguments expression range)))
 
-(def error-to-sexp (result)
+(def error-to-sexp (error)
+     (Symbol (error-to-string error) (Range 0 0)))
+
+(def render-result (result)
      (match result
-            (Error error)
-                 (Symbol (error-to-string error) (Range 0 0))
             (Result sexp)
-                 sexp))
+                sexp
+            (Error sexp)
+                sexp))
 
 (def definitions-to-sexps (definitions)
-     (list-map (pipe definition-to-sexp error-to-sexp) definitions))
+     (list-map (pipe (result-first definition-to-sexp)
+                     (result-second error-to-sexp)
+                     render-result)
+               definitions))
 

@@ -5,10 +5,15 @@
 (def result-error (error)
     (Error error))
 
-(def result-map (f result)
+(def result-first (f result)
     (match result
         (Result x)     (Result (f x))
         (Error error)  (Error error)))
+
+(def result-second (f result)
+    (match result
+        (Result x)     (Result x)
+        (Error error)  (Error (f error))))
 
 (def result-flatmap (f result)
     (match result
