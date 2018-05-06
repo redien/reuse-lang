@@ -25,3 +25,11 @@
             None
                 None))
 
+(def maybe-else (f maybe)
+     (match maybe
+            None
+                (Some (f))
+            else
+                else))
+                
+

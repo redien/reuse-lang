@@ -4,6 +4,11 @@
             (Symbol name _)  name
             _                Empty))
 
+(def symbol-to-string (symbol)
+     (match symbol
+            (Symbol name _)  (Result name)
+            (List _ range)   (Error  (MalformedSymbolError range))))
+
 (typ type          (SimpleType           (list int32) range)
                    (ComplexType          (list int32) (list type) range)
                    (FunctionType         (list type) type range))
@@ -11,6 +16,7 @@
                    (ComplexConstructor   (list int32) (list type) range))
 (typ expression    (IntegerConstant      int32 range)
                    (Identifier           (list int32) range)
+                   (Lambda               (list (list int32)) expression range)
                    (FunctionApplication  (list expression) range))
 (typ definition    (TypeDefinition       type (list constructor) range)
                    (FunctionDefinition   (list int32) (list (list int32)) expression range))
@@ -19,6 +25,7 @@
                    (MalformedFunctionDefinitionError range)
                    (MalformedFunctionNameError range)
                    (MalformedExpressionError range)
+                   (MalformedSymbolError range)
                    (MalformedConstructorError range)
                    (MalformedTypeError range))
 
@@ -44,6 +51,9 @@
             (MalformedExpressionError range)
                 (string-concat (list 77 97 108 102 111 114 109 101 100 69 120 112 114 101 115 115 105 111 110 69 114 114 111 114)
                                (error-range-to-string range))
+            (MalformedSymbolError range)
+                (string-concat (list 77 97 108 102 111 114 109 101 100 83 121 109 98 111 108 69 114 114 111 114)
+                               (error-range-to-string range))
             (MalformedConstructorError range)
                 (string-concat (list 77 97 108 102 111 114 109 101 100 67 111 110 115 116 114 117 99 116 111 114 69 114 114 111 114)
                                (error-range-to-string range))
@@ -55,7 +65,7 @@
 (def type-definition? (kind)
      (string-equal? kind (list 116 121 112)))
 
-(def function-type? (type)
+(def fn-symbol? (type)
      (string-equal? type (list 102 110)))
 
 (def function-definition? (kind)
@@ -77,7 +87,7 @@
             _   (Error (MalformedTypeError range))))
 
 (def sexp-to-complex-or-function-type (name parameters range)
-     (match (function-type? name)
+     (match (fn-symbol? name)
             True   (sexp-to-function-type name parameters range)
             False  (sexp-to-complex-type name parameters range)))
 
@@ -119,6 +129,44 @@
             (sexp-to-constructors constructors)))
             (sexp-to-type name)))
 
+(def sexp-to-arguments (range arguments)
+     (result-of-list (list-map symbol-to-string arguments)))
+
+(def sexp-to-function-body (rest range)
+     (match rest
+            (Cons (List arguments _) (Cons expression Empty))
+                    (Result (Pair arguments expression))
+            _
+                    (Error (MalformedExpressionError range)))) 
+ 
+(def sexp-to-lambda (rest range)
+     (result-flatmap (fn (body)
+     (result-flatmap (fn (arguments)
+     (result-map     (fn (expression)
+                         (Lambda arguments expression range))
+                 (sexp-to-expression (pair-right body))))
+                 (sexp-to-arguments range (pair-left body))))
+                 (sexp-to-function-body rest range)))
+
+(def sexp-to-function-application (range expressions)
+     ((pipe
+            (list-map sexp-to-expression) 
+            result-of-list
+            (result-map (fn (expressions)
+                            (FunctionApplication expressions range))))
+         expressions))
+
+(def sexp-to-list-expression (expressions range)
+     (match expressions
+            (Cons (Symbol symbol _) rest) 
+                  (match (fn-symbol? symbol)
+                         True
+                             (sexp-to-lambda rest range)
+                         False
+                             (sexp-to-function-application range expressions))
+            _
+                  (sexp-to-function-application range expressions)))
+
 (def sexp-to-expression (sexp)
      (match sexp
             (Symbol symbol-name range)
@@ -128,12 +176,11 @@
                        None
                            (Result (Identifier symbol-name range)))
             (List expressions range)
-                ((pipe
-                    (list-map sexp-to-expression) 
-                    result-of-list
-                    (result-map (fn (expressions)
-                                    (FunctionApplication expressions range))))
-                 expressions)))
+                (match expressions
+                       Empty
+                          (Error (MalformedExpressionError range))
+                       _ 
+                          (sexp-to-list-expression expressions range))))
 
 (def sexp-to-function-name (name-symbol)
      (match name-symbol
@@ -241,6 +288,12 @@
                 (Symbol (string-from-int32 integer) range)
             (Identifier string range)
                 (Symbol string range)
+            (Lambda arguments expression range)
+                (List (Cons (fn-symbol range)
+                      (Cons (function-arguments-to-sexp arguments range)
+                      (Cons (expression-to-sexp expression)
+                            Empty)))
+                      range)
             (FunctionApplication expressions range)
                 (List (list-map expression-to-sexp expressions) range)))
 

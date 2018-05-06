@@ -1,6 +1,4 @@
 
-(typ (pair a b) (Pair a b))
-
 (def read-while' (predicate iterator string)
      (match (indexed-iterator-get iterator)
             None      (Pair iterator string)
