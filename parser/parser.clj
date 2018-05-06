@@ -11,8 +11,10 @@
 
 (def symbol-to-string (symbol)
      (match symbol
-            (Symbol name _)  (Result name)
-            (List _ range)   (Error  (MalformedSymbolError range))))
+            (Symbol name _)
+                (Result name)
+            (List _ range)
+                (Error  (MalformedSymbolError range))))
 
 (typ type          (SimpleType           (list int32) range)
                    (ComplexType          (list int32) (list type) range)
@@ -74,12 +76,13 @@
 (def sexp-to-function-type (name parameters range)
      (match parameters
             (Cons (List arg-types _) (Cons return-type Empty))
-                    (result-flatmap (fn (arg-types)
-                    (result-map     (fn (return-type)
-                                        (FunctionType arg-types return-type range))
-                                    (sexp-to-type return-type)))
-                                    (sexp-to-types arg-types))
-            _   (Error (MalformedTypeError range))))
+                (result-flatmap (fn (arg-types)
+                (result-map     (fn (return-type)
+                                    (FunctionType arg-types return-type range))
+                                (sexp-to-type return-type)))
+                                (sexp-to-types arg-types))
+            _
+                (Error (MalformedTypeError range))))
 
 (def sexp-to-complex-or-function-type (name parameters range)
      (match (string-equal? name (fn-string))
@@ -89,9 +92,7 @@
 (def sexp-to-type (type)
      (match type
             (List (Cons (Symbol name _) parameters) range)
-                (sexp-to-complex-or-function-type name
-                                                  parameters
-                                                  range)
+                (sexp-to-complex-or-function-type name parameters range)
             (Symbol name range)
                 (Result (SimpleType name range))
             (List _ range)
@@ -130,9 +131,9 @@
 (def sexp-to-function-body (range rest)
      (match rest
             (Cons (List arguments _) (Cons expression Empty))
-                    (Result (Pair arguments expression))
+                (Result (Pair arguments expression))
             _
-                    (Error (MalformedExpressionError range)))) 
+                (Error (MalformedExpressionError range)))) 
  
 (def sexp-to-lambda (rest range)
      (result-flatmap (fn (body)
@@ -144,8 +145,7 @@
                  (sexp-to-function-body range rest)))
 
 (def sexp-to-function-application (range expressions)
-     ((pipe
-            (list-map sexp-to-expression) 
+     ((pipe (list-map sexp-to-expression) 
             result-of-list
             (result-map (fn (expressions)
                             (FunctionApplication expressions range))))
