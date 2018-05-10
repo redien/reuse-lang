@@ -184,8 +184,11 @@
                 None))
 
 (def sexp-to-match-pairs (range pairs)
-     (result-flatmap (fn (pairs) (result-of-list (list-map sexp-to-match-pair pairs)))
-                     (result-of-maybe (collect-pairs pairs) (MalformedExpressionError range))))
+     ((pipe collect-pairs
+            (result-of-maybe (MalformedExpressionError range))
+            (result-flatmap  (pipe (list-map sexp-to-match-pair)
+                                   result-of-list)))
+        pairs))
 
 (def sexp-to-match (range rest)
      (match rest

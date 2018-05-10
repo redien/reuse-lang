@@ -38,7 +38,7 @@
            (Cons (Error error) _)  (Error error)
            Empty                   (Result (result-filter-list list))))
 
-(def result-of-maybe (maybe error)
+(def result-of-maybe (error maybe)
      (match maybe
             (Some x)
                 (Result x)
