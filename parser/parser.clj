@@ -166,7 +166,11 @@
 (def sexp-to-match-pair (pair)
      (match pair
             (Pair pattern expression)
-                (pair (sexp-to-expression pattern) (sexp-to-expression expression))))
+                (result-flatmap (fn (pattern)
+                (result-first   (fn (expression)
+                                    (Pair pattern expression))
+                                (sexp-to-expression expression)))
+                                (sexp-to-expression pattern))))
 
 (def collect-pairs (list)
      (match list
@@ -179,15 +183,15 @@
             _
                 None))
 
-(def sexp-to-match-pairs (range accumulator rest)
-     (result-map sexp-to-match-pair
-                 (result-from-maybe (collect-pairs rest) (MalformedExpressionError range))))
+(def sexp-to-match-pairs (range pairs)
+     (result-flatmap (fn (pairs) (result-of-list (list-map sexp-to-match-pair pairs)))
+                     (result-of-maybe (collect-pairs pairs) (MalformedExpressionError range))))
 
 (def sexp-to-match (range rest)
      (match rest
             (Cons expression rest)
                 (result-flatmap (fn (expression)
-                (result-map     (fn (pairs)
+                (result-first   (fn (pairs)
                                     (Match expression pairs range))
                                 (sexp-to-match-pairs range rest)))
                                 (sexp-to-expression expression))
@@ -314,8 +318,7 @@
             (Match expression pairs range)
                 (List (Cons (Symbol (match-string) range)
                       (Cons (expression-to-sexp expression)
-                      (Cons (List (list-flatmap match-pair-to-sexp pairs) range)
-                            Empty))) range)
+                            (list-flatmap match-pair-to-sexp pairs))) range)
             (FunctionApplication expressions range)
                 (List (list-map expression-to-sexp expressions) range)))
 
