@@ -8,6 +8,9 @@
 (def fn-string ()
      (list 102 110))
 
+(def match-string ()
+     (list 109 97 116 99 104))
+
 
 (def symbol-to-string (symbol)
      (match symbol
@@ -23,10 +26,19 @@
                    (ComplexConstructor   (list int32) (list type) range))
 (typ expression    (IntegerConstant      int32 range)
                    (Identifier           (list int32) range)
-                   (Lambda               (list (list int32)) expression range)
+                   (Lambda               (list (list int32))
+                                         expression
+                                         range)
+                   (Match                expression
+                                         (list (pair expression
+                                                     expression))
+                                         range)
                    (FunctionApplication  (list expression) range))
 (typ definition    (TypeDefinition       type (list constructor) range)
-                   (FunctionDefinition   (list int32) (list (list int32)) expression range))
+                   (FunctionDefinition   (list int32)
+                                         (list (list int32))
+                                         expression
+                                         range))
 
 (typ error         (MalformedDefinitionError range)
                    (MalformedFunctionDefinitionError range)
@@ -151,6 +163,37 @@
                               (FunctionApplication expressions range))))
          expressions))
 
+(def sexp-to-match-pair (pair)
+     (match pair
+            (Pair pattern expression)
+                (pair (sexp-to-expression pattern) (sexp-to-expression expression))))
+
+(def collect-pairs (list)
+     (match list
+            (Cons a (Cons b rest))
+                (maybe-map (fn (more-pairs)
+                               (Cons (Pair a b) more-pairs))
+                           (collect-pairs rest))
+            Empty
+                (Some Empty)
+            _
+                None))
+
+(def sexp-to-match-pairs (range accumulator rest)
+     (result-map sexp-to-match-pair
+                 (result-from-maybe (collect-pairs rest) (MalformedExpressionError range))))
+
+(def sexp-to-match (range rest)
+     (match rest
+            (Cons expression rest)
+                (result-flatmap (fn (expression)
+                (result-map     (fn (pairs)
+                                    (Match expression pairs range))
+                                (sexp-to-match-pairs range rest)))
+                                (sexp-to-expression expression))
+            _
+                (Error (MalformedExpressionError range))))
+
 (def sexp-to-list-expression (expressions range)
      (match expressions
             (Cons (Symbol symbol _) rest) 
@@ -158,7 +201,11 @@
                          True
                              (sexp-to-lambda rest range)
                          False
-                             (sexp-to-function-application range expressions))
+                  (match (string-equal? symbol (match-string))
+                         True
+                             (sexp-to-match range rest)
+                         False
+                             (sexp-to-function-application range expressions)))
             _
                   (sexp-to-function-application range expressions)))
 
@@ -246,6 +293,12 @@
 (def function-arguments-to-sexp (arguments range)
      (List (list-map (fn (name) (Symbol name range)) arguments) range))
 
+(def match-pair-to-sexp (pair)
+     (match pair
+            (Pair pattern expression)
+               (Cons (expression-to-sexp pattern)
+               (Cons (expression-to-sexp expression) Empty))))
+
 (def expression-to-sexp (expression)
      (match expression
             (IntegerConstant integer range)
@@ -258,6 +311,11 @@
                       (Cons (expression-to-sexp expression)
                             Empty)))
                       range)
+            (Match expression pairs range)
+                (List (Cons (Symbol (match-string) range)
+                      (Cons (expression-to-sexp expression)
+                      (Cons (List (list-flatmap match-pair-to-sexp pairs) range)
+                            Empty))) range)
             (FunctionApplication expressions range)
                 (List (list-map expression-to-sexp expressions) range)))
 

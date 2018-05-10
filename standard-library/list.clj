@@ -23,6 +23,12 @@
             Empty       list
             (Cons x xs) (Cons (f x) (list-map f xs))))
 
+(def list-flatmap (f list)
+     (match list
+            Empty       list
+            (Cons x xs) (list-concat (f x) (list-flatmap f xs))))
+
+
 (def list-filter (f list)
      (list-reverse
         (list-foldl (fn (x xs)
