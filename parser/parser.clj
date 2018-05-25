@@ -24,6 +24,8 @@
                    (FunctionType         (list type) type range))
 (typ constructor   (SimpleConstructor    (list int32) range)
                    (ComplexConstructor   (list int32) (list type) range))
+(typ pattern       (Capture              (list int32) range)
+                   (ConstructorPattern   (list int32) (list pattern) range))
 (typ expression    (IntegerConstant      int32 range)
                    (Identifier           (list int32) range)
                    (Lambda               (list (list int32))
@@ -163,6 +165,19 @@
                               (FunctionApplication expressions range))))
          expressions))
 
+(def sexp-to-pattern (sexp)
+     (match sexp
+            (List (Cons name rest) range)
+                  (result-flatmap (fn (patterns)
+                  (result-first   (fn (name)
+                                      (ConstructorPattern name patterns range))
+                                (symbol-to-string name)))
+                                (result-of-list (list-map sexp-to-pattern rest)))
+            (List Empty range)
+                  (Error (MalformedExpressionError range))
+            (Symbol name range)
+                  (Result (Capture name range))))
+
 (def sexp-to-match-pair (pair)
      (match pair
             (Pair pattern expression)
@@ -170,7 +185,7 @@
                 (result-first   (fn (expression)
                                     (Pair pattern expression))
                                 (sexp-to-expression expression)))
-                                (sexp-to-expression pattern))))
+                                (sexp-to-pattern pattern))))
 
 (def collect-pairs (list)
      (match list
@@ -267,6 +282,7 @@
 
 
 
+
 (def type-to-sexp (type)
      (match type
             (SimpleType name range)
@@ -300,10 +316,19 @@
 (def function-arguments-to-sexp (arguments range)
      (List (list-map (fn (name) (Symbol name range)) arguments) range))
 
+(def pattern-to-sexp (pattern)
+     (match pattern
+            (ConstructorPattern name Empty range)
+                (Symbol name range)
+            (ConstructorPattern name patterns range)
+                (List (Cons (Symbol name range) (list-map pattern-to-sexp patterns)) range)
+            (Capture name range)
+                (Symbol name range)))
+
 (def match-pair-to-sexp (pair)
      (match pair
             (Pair pattern expression)
-               (Cons (expression-to-sexp pattern)
+               (Cons (pattern-to-sexp pattern)
                (Cons (expression-to-sexp expression) Empty))))
 
 (def expression-to-sexp (expression)
