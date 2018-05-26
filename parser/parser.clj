@@ -19,6 +19,16 @@
             (List _ range)
                 (Error  (MalformedSymbolError range))))
 
+(def char-is-upper-case? (char)
+     (and (>= char 65) (<= char 90)))
+
+(def name-of-constructor? (name)
+     (match name
+            (Cons first-letter _)
+                (char-is-upper-case? first-letter)
+            Empty
+                False))
+
 (typ type          (SimpleType           (list int32) range)
                    (ComplexType          (list int32) (list type) range)
                    (FunctionType         (list type) type range))
@@ -166,6 +176,11 @@
                               (FunctionApplication expressions range))))
          expressions))
 
+(def to-constructor-or-capture (range name)
+     (match (name-of-constructor? name)
+            True  (Result (ConstructorPattern name Empty range))
+            False (Result (Capture name range))))
+
 (def sexp-to-pattern (sexp)
      (match sexp
             (List (Cons name rest) range)
@@ -180,8 +195,7 @@
                   ((pipe
                       (maybe-map  (fn (integer)
                                       (Result (IntegerPattern integer range))))
-                      (maybe-else (fn ()
-                                      (Result (Capture name range))))
+                      (maybe-else (fn () (to-constructor-or-capture range name)))
                   ) (string-to-int32 name))))
 
 (def sexp-to-match-pair (pair)
