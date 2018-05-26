@@ -4,7 +4,6 @@ set -e
 
 script_path=$(dirname "$0")
 project_root=$script_path/../..
-node_bin=$project_root/node_modules/.bin
 reuse_script=$project_root/generated/extended/bootstrap/reuse.js
 
 echo >&2
