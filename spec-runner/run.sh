@@ -44,10 +44,10 @@ do
         firstChar=${line:0:1}
         if [ "$firstChar" == ">" ]; then
             read expected
-            testLine "$line" "$program" "$expected"
+            testLine "${line/'\n'/$'\n'}" "${program/'\n'/$'\n'}" "${expected/'\n'/$'\n'}"
             program=""
         elif [ "$firstChar" == "|" ]; then
-            program=$program${line:2}
+            program="$program${line:2}"
         else
             if [ "$line" != "" ]; then
                 echo \# $line

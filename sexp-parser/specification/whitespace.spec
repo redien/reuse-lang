@@ -25,3 +25,7 @@ Should ignore trailing whitespace
 
 > (() )
 = (())
+
+Should ignore new-lines
+> first\\nsecond
+= first second
