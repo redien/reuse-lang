@@ -25,6 +25,7 @@
 (typ constructor   (SimpleConstructor    (list int32) range)
                    (ComplexConstructor   (list int32) (list type) range))
 (typ pattern       (Capture              (list int32) range)
+                   (IntegerPattern       int32 range)
                    (ConstructorPattern   (list int32) (list pattern) range))
 (typ expression    (IntegerConstant      int32 range)
                    (Identifier           (list int32) range)
@@ -176,7 +177,12 @@
             (List Empty range)
                   (Error (MalformedExpressionError range))
             (Symbol name range)
-                  (Result (Capture name range))))
+                  ((pipe
+                      (maybe-map  (fn (integer)
+                                      (Result (IntegerPattern integer range))))
+                      (maybe-else (fn ()
+                                      (Result (Capture name range))))
+                  ) (string-to-int32 name))))
 
 (def sexp-to-match-pair (pair)
      (match pair
@@ -322,6 +328,8 @@
                 (Symbol name range)
             (ConstructorPattern name patterns range)
                 (List (Cons (Symbol name range) (list-map pattern-to-sexp patterns)) range)
+            (IntegerPattern value range)
+                (Symbol (string-from-int32 value) range)
             (Capture name range)
                 (Symbol name range)))
 
