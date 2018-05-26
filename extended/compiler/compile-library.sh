@@ -14,7 +14,7 @@ echo >&2
 
 echo OCaml: >&2
 mkdir -p $2/ocaml
-echo "$1" | "$project_root/extended/interpreter/bootstrap/eval.sh" "$(cat $project_root/generated/extended/compiler/compiler.clj)" "(to-ocaml (sexps-to-definitions (parse stdin)))" --stdin > $2/ocaml/source.ml
+cat "$1" | "$project_root/extended/interpreter/bootstrap/eval.sh" "$(cat $project_root/generated/extended/compiler/compiler.clj)" "(to-ocaml (sexps-to-definitions (parse stdin)))" --stdin > $2/ocaml/source.ml
 result=$?
 cat $2/ocaml/source.ml >&2
 echo >&2
