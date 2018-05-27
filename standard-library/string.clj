@@ -55,7 +55,9 @@
 (def string-to-int32 (string)
      (match string
             (Cons 45 string)
-                (maybe-map (fn (x) (* -1 x)) (string-to-int32 string))
+                (match (string-empty? string)
+                       True   None
+                       False  (maybe-map (fn (x) (* -1 x)) (string-to-int32 string)))
             _
                 (string-to-int32' string (Some 0))))
 
