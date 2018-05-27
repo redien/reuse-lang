@@ -25,3 +25,7 @@ Should parse standard types
 Should parse existential types
 > (typ (closure (exists s) a) (Closure (fn (s) a) s))
 = (typ (closure (exists s) a) (Closure (fn (s) a) s))
+
+Should parse constructor expressions
+> (def _ () (Constructor x))
+= (def _ () (Constructor x))

@@ -299,7 +299,7 @@
                          False
                   (match (name-of-constructor? symbol)
                          True
-                             (sexp-to-constructor range name rest)
+                             (sexp-to-constructor range symbol rest)
                          False
                              (sexp-to-function-application range expressions))))
             _
