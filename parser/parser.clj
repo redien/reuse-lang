@@ -14,6 +14,9 @@
 (def match-string ()
      (list 109 97 116 99 104))
 
+(def exists-string ()
+     (list 101 120 105 115 116 115))
+
 
 (def symbol-to-string (symbol)
      (match symbol
@@ -32,41 +35,46 @@
             Empty
                 False))
 
-(typ type          (SimpleType           (list int32) range)
-                   (ComplexType          (list int32) (list type) range)
-                   (FunctionType         (list type) type range))
-(typ constructor   (SimpleConstructor    (list int32) range)
-                   (ComplexConstructor   (list int32) (list type) range))
-(typ pattern       (Capture              (list int32) range)
-                   (IntegerPattern       int32 range)
-                   (ConstructorPattern   (list int32) (list pattern) range))
-(typ expression    (IntegerConstant      int32 range)
-                   (Identifier           (list int32) range)
-                   (Lambda               (list (list int32))
-                                         expression
-                                         range)
-                   (Match                expression
-                                         (list (pair expression
-                                                     expression))
-                                         range)
-                   (FunctionApplication  (list expression) range))
-(typ definition    (TypeDefinition       type (list constructor) range)
-                   (ExportDefinition     (list int32)
-                                         (list (list int32))
-                                         expression
-                                         range)
-                   (FunctionDefinition   (list int32)
-                                         (list (list int32))
-                                         expression
-                                         range))
+(typ type            (SimpleType           (list int32) range)
+                     (ComplexType          (list int32) (list type) range)
+                     (FunctionType         (list type) type range))
+(typ type-parameter  (UniversalParameter   (list int32) range)
+                     (ExistentialParameter (list int32) range))
+(typ constructor     (SimpleConstructor    (list int32) range)
+                     (ComplexConstructor   (list int32) (list type) range))
+(typ pattern         (Capture              (list int32) range)
+                     (IntegerPattern       int32 range)
+                     (ConstructorPattern   (list int32) (list pattern) range))
+(typ expression      (IntegerConstant      int32 range)
+                     (Identifier           (list int32) range)
+                     (Lambda               (list (list int32))
+                                           expression
+                                           range)
+                     (Match                expression
+                                           (list (pair expression
+                                                       expression))
+                                           range)
+                     (FunctionApplication  (list expression) range))
+(typ definition      (TypeDefinition       (list int32)
+                                           (list type-parameter)
+                                           (list constructor)
+                                           range)
+                     (ExportDefinition     (list int32)
+                                           (list (list int32))
+                                           expression
+                                           range)
+                     (FunctionDefinition   (list int32)
+                                           (list (list int32))
+                                           expression
+                                           range))
 
-(typ error         (MalformedDefinitionError range)
-                   (MalformedFunctionDefinitionError range)
-                   (MalformedFunctionNameError range)
-                   (MalformedExpressionError range)
-                   (MalformedSymbolError range)
-                   (MalformedConstructorError range)
-                   (MalformedTypeError range))
+(typ error           (MalformedDefinitionError range)
+                     (MalformedFunctionDefinitionError range)
+                     (MalformedFunctionNameError range)
+                     (MalformedExpressionError range)
+                     (MalformedSymbolError range)
+                     (MalformedConstructorError range)
+                     (MalformedTypeError range))
 
 (def error-range-to-string (range)
      (match range
@@ -150,12 +158,41 @@
 (def sexp-to-constructors (constructors)
      (result-of-list (list-map sexp-to-constructor constructors)))
 
-(def sexp-to-type-definition (name constructors range)
-     (result-flatmap (fn (type)
+(def sexp-to-type-parameter (sexp)
+     (match sexp
+            (List (Cons _ (Cons (Symbol name range) Empty)) __)
+                (Result (ExistentialParameter name range))
+            (Symbol name range)
+                (Result (UniversalParameter name range))
+            (List _ range)
+                (Error (MalformedDefinitionError range))))
+
+(def sexp-to-type-parameters (type-name)
+     (match type-name
+            (List (Cons (Symbol _ __) parameters) ___)
+                (result-of-list (list-map sexp-to-type-parameter parameters))
+            (Symbol _ __)
+                (Result Empty)
+            (List _ range)
+                (Error (MalformedTypeError range))))
+
+(def sexp-to-type-name (type-name)
+     (match type-name
+            (List (Cons (Symbol name _) __) ___)
+                (Result name)
+            (Symbol name _)
+                (Result name)
+            (List _ range)
+                (Error (MalformedTypeError range))))
+
+(def sexp-to-type-definition (type-name constructors range)
+     (result-flatmap (fn (name)
+     (result-flatmap (fn (parameters)
      (result-first   (fn (constructors)
-                         (TypeDefinition type constructors range))
+                         (TypeDefinition name parameters constructors range))
             (sexp-to-constructors constructors)))
-            (sexp-to-type name)))
+            (sexp-to-type-parameters type-name)))
+            (sexp-to-type-name type-name)))
 
 (def sexp-to-arguments (arguments)
      (result-of-list (list-map symbol-to-string arguments)))
@@ -342,8 +379,28 @@
 (def constructors-to-sexp (constructors)
      (list-map constructor-to-sexp constructors))
 
-(def type-definition-to-sexp (type constructors range)
-     (List (list-concat (list (Symbol (typ-string) range) (type-to-sexp type))
+(def type-parameter-to-sexp (parameter)
+     (match parameter
+            (ExistentialParameter name range)
+                (List (Cons (Symbol (exists-string) range)
+                      (Cons (Symbol name range)
+                            Empty))
+                      range)
+            (UniversalParameter name range)
+                (Symbol name range)))
+
+(def type-name-to-sexp (range name parameters)
+     (match parameters
+            Empty
+                (Symbol name range) 
+            _
+                (List (Cons (Symbol name range)
+                            (list-map type-parameter-to-sexp parameters))
+                      range)))
+
+(def type-definition-to-sexp (name parameters constructors range)
+     (List (list-concat (list (Symbol (typ-string) range)
+                              (type-name-to-sexp range name parameters))
                         (constructors-to-sexp constructors))
            range))
 
@@ -396,8 +453,8 @@
 
 (def definition-to-sexp (definition)
      (match definition
-            (TypeDefinition type constructors range)
-                (type-definition-to-sexp type constructors range)
+            (TypeDefinition name parameters constructors range)
+                (type-definition-to-sexp name parameters constructors range)
             (ExportDefinition name arguments expression range)
                 (function-definition-to-sexp name arguments expression range (export-string))
             (FunctionDefinition name arguments expression range)

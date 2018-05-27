@@ -21,3 +21,7 @@ Should parse standard types
 
 > (typ (list a) (Cons a (list a)) Empty)
 = (typ (list a) (Cons a (list a)) Empty)
+
+Should parse existential types
+> (typ (closure (exists s) a) (Closure (fn (s) a) s))
+= (typ (closure (exists s) a) (Closure (fn (s) a) s))
