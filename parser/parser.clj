@@ -51,7 +51,7 @@
                                            expression
                                            range)
                      (Match                expression
-                                           (list (pair expression
+                                           (list (pair pattern
                                                        expression))
                                            range)
                      (FunctionApplication  (list expression) range))

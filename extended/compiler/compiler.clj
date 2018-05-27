@@ -13,7 +13,13 @@
 (def colon () (list 32 58 32))
 (def star () (list 32 42 32))
 (def plus () (list 43))
+(def multiply () (list 42))
+(def minus () (list 45))
+(def with () (list 119 105 116 104))
+(def match-string () (list 109 97 116 99 104))
 (def int32-plus () (list 73 110 116 51 50 46 97 100 100))
+(def int32-multiply () (list 73 110 116 51 50 46 109 117 108))
+(def int32-minus () (list 73 110 116 51 50 46 115 117 98))
 
 (def join (list) (string-join Empty list))
 
@@ -33,7 +39,27 @@
 (def translate-builtins (name)
      (match (string-equal? name (plus))
             True  (int32-plus)
-            False name))
+            False
+     (match (string-equal? name (minus))
+            True  (int32-minus)
+            False
+     (match (string-equal? name (multiply))
+            True  (int32-multiply)
+            False name))))
+
+(def translate-pattern (pattern)
+     (match pattern
+            (Capture name _)
+                name
+            (IntegerPattern integer _)
+                (string-of-int32 integer)
+            (ConstructorPattern name patterns _)
+                (string-join (space) (Cons name (list-map translate-pattern patterns)))))
+
+(def translate-rule (rule)
+     (match rule
+            (Pair pattern expression)
+                 (join (list (translate-pattern pattern) (arrow) (translate-expression expression)))))
 
 (def translate-expression (expression)
      (match expression
@@ -50,6 +76,11 @@
                                                  (wrap-in-brackets (string-from-int32 integer))))
             (Identifier name _)
                 (translate-builtins name)
+            (Match expression rules _)
+                (string-join (space) (list (match-string)
+                                           (translate-expression expression)
+                                           (with)
+                                           (string-join (vertical-bar) (list-map translate-rule rules))))
             _
                 (compile-error)))
 
