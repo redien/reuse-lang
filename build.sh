@@ -17,16 +17,16 @@ mkdir -p $project_root/generated/extended/interpreter
 mkdir -p $project_root/generated/extended/compiler
 
 standard_library_compiled="
-$(cat $standard_library/boolean.clj)
-$(cat $standard_library/pair.clj)
-$(cat $standard_library/maybe.clj)
-$(cat $standard_library/iterator.clj)
-$(cat $standard_library/list.clj)
-$(cat $standard_library/string.clj)
-$(cat $standard_library/result.clj)"
+$(cat $standard_library/boolean.reuse)
+$(cat $standard_library/pair.reuse)
+$(cat $standard_library/maybe.reuse)
+$(cat $standard_library/iterator.reuse)
+$(cat $standard_library/list.reuse)
+$(cat $standard_library/string.reuse)
+$(cat $standard_library/result.reuse)"
 
-echo "$standard_library_compiled $(cat $project_root/sexp-parser/parser.clj)" > $project_root/generated/sexp-parser/parser.clj
-echo "$standard_library_compiled $(cat $project_root/sexp-parser/parser.clj)$(cat $project_root/parser/parser.clj)" > $project_root/generated/parser/parser.clj
-echo "$(cat $project_root/generated/parser/parser.clj)$(cat $project_root/extended/interpreter/interpreter.clj)" > $project_root/generated/extended/interpreter/interpreter.clj
-echo "$(cat $project_root/generated/parser/parser.clj)$(cat $project_root/extended/compiler/compiler.clj)" > $project_root/generated/extended/compiler/compiler.clj
+echo "$standard_library_compiled $(cat $project_root/sexp-parser/parser.reuse)" > $project_root/generated/sexp-parser/parser.reuse
+echo "$standard_library_compiled $(cat $project_root/sexp-parser/parser.reuse)$(cat $project_root/parser/parser.reuse)" > $project_root/generated/parser/parser.reuse
+echo "$(cat $project_root/generated/parser/parser.reuse)$(cat $project_root/extended/interpreter/interpreter.reuse)" > $project_root/generated/extended/interpreter/interpreter.reuse
+echo "$(cat $project_root/generated/parser/parser.reuse)$(cat $project_root/extended/compiler/compiler.reuse)" > $project_root/generated/extended/compiler/compiler.reuse
 
