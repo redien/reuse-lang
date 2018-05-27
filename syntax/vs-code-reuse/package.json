@@ -1,0 +1,26 @@
+{
+    "name": "vs-code-reuse",
+    "displayName": "vs-code-reuse",
+    "description": "Reuse language support",
+    "version": "0.0.1",
+    "publisher": "jesosk",
+    "engines": {
+        "vscode": "^1.23.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "reuse",
+            "aliases": ["Reuse", "reuse"],
+            "extensions": [".reuse"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "reuse",
+            "scopeName": "source.reuse",
+            "path": "./syntaxes/reuse.tmLanguage.json"
+        }]
+    }
+}

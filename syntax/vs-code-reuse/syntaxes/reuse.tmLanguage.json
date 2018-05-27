@@ -1,0 +1,47 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Reuse",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#identifiers"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [
+				{
+					"match": "[\\s\\(\\)](typ|def|match|list|pipe)[\\s\\(\\)]",
+					"captures": {
+						"1": { "name": "keyword.control.reuse" }
+					}
+				},
+				{
+					"match": "[\\s\\(\\)](\\+|\\-|\\*|\\/|\\%|or|and|\\<|\\>|\\<\\=|\\>\\=|\\=)[\\s\\(\\)]",
+					"captures": {
+						"1": { "name": "keyword.control.reuse" }
+					}
+				}
+			]
+		},
+		"identifiers": {
+			"patterns": [
+				{
+					"match": "[\\s\\(\\)]([A-Z][^\\s\\(\\)]+)[\\s\\(\\)]",
+					"captures": {
+						"1": { "name": "entity.name.class.reuse" }
+					}
+				},
+				{
+					"match": "(\\-?\\d+)",
+					"captures": {
+						"1": { "name": "constant.numeric.reuse" }
+					}
+				}
+			]
+		}
+	},
+	"scopeName": "source.reuse"
+}
