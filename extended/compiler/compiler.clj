@@ -12,6 +12,8 @@
 (def vertical-bar () (list 32 124 32))
 (def colon () (list 32 58 32))
 (def star () (list 32 42 32))
+(def plus () (list 43))
+(def int32-plus () (list 73 110 116 51 50 46 97 100 100))
 
 (def join (list) (string-join Empty list))
 
@@ -28,6 +30,11 @@
      (join (list (list 112 97 114 115 101 32 101 114 114 111 114 32)
                  (error-to-string error))))
 
+(def translate-builtins (name)
+     (match (string-equal? name (plus))
+            True  (int32-plus)
+            False name))
+
 (def translate-expression (expression)
      (match expression
             (Lambda arguments expression _)
@@ -42,7 +49,7 @@
                 (wrap-in-brackets (string-concat (list 73 110 116 51 50 46 111 102 95 105 110 116 32)
                                                  (wrap-in-brackets (string-from-int32 integer))))
             (Identifier name _)
-                name
+                (translate-builtins name)
             _
                 (compile-error)))
 
