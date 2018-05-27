@@ -57,6 +57,13 @@
             Empty
                 Empty)) 
 
+(def list-empty? (list)
+     (match list
+            (Cons _ __)
+                False
+            Empty
+                True))
+
 (def list-indexed-iterator-get (collection _)
       (match collection
              (Cons x _)  (Some x)
