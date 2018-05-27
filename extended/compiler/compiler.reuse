@@ -52,9 +52,15 @@
             (Capture name _)
                 name
             (IntegerPattern integer _)
-                (string-of-int32 integer)
+                (join (list (string-from-int32 integer) (Cons 108 Empty)))
             (ConstructorPattern name patterns _)
-                (string-join (space) (Cons name (list-map translate-pattern patterns)))))
+                (match patterns
+                       Empty
+                            (prefix-constructor name)
+                       _
+                            (join (list (prefix-constructor name)
+                                        (space)
+                                        (wrap-in-brackets (string-join (comma) (list-map translate-pattern patterns))))))))
 
 (def translate-rule (rule)
      (match rule
@@ -65,15 +71,23 @@
      (match expression
             (Lambda arguments expression _)
                 (wrap-in-brackets (translate-lambda arguments expression))
+            (Constructor name expressions _)
+                (match expressions
+                       Empty
+                            (prefix-constructor name)
+                       _
+                            (join (list (prefix-constructor name)
+                                        (space) 
+                                        (wrap-in-brackets (string-join (comma) (list-map translate-expression expressions))))))
             (FunctionApplication expressions _)
                 (match expressions
                         (Cons first Empty)
                                 (wrap-in-brackets (join (list (translate-expression first) (space) (wrap-in-brackets Empty))))
                         _
-                                (wrap-in-brackets (string-join (space) (list-map translate-expression expressions))))
+                                (string-join (space) (list-map (pipe translate-expression wrap-in-brackets) expressions)))
             (IntegerConstant integer _)
-                (wrap-in-brackets (string-concat (list 73 110 116 51 50 46 111 102 95 105 110 116 32)
-                                                 (wrap-in-brackets (string-from-int32 integer))))
+                (string-concat (list 73 110 116 51 50 46 111 102 95 105 110 116 32)
+                               (wrap-in-brackets (string-from-int32 integer)))
             (Identifier name _)
                 (translate-builtins name)
             (Match expression rules _)
