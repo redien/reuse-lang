@@ -29,3 +29,6 @@ Should parse existential types
 Should parse constructor expressions
 > (def _ () (Constructor x))
 = (def _ () (Constructor x))
+
+> (def _ () Constructor)
+= (def _ () Constructor)

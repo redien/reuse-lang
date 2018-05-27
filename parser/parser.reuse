@@ -312,7 +312,11 @@
                        (Some integer)
                            (Result (IntegerConstant integer range))
                        None
-                           (Result (Identifier symbol-name range)))
+                (match (name-of-constructor? symbol-name)
+                       True
+                           (Result (Constructor symbol-name Empty range))
+                       False
+                           (Result (Identifier symbol-name range))))
             (List expressions range)
                 (match expressions
                        Empty
@@ -446,7 +450,11 @@
                       (Cons (expression-to-sexp expression)
                             (list-flatmap match-pair-to-sexp pairs))) range)
             (Constructor name expressions range)
-                (List (Cons (Symbol name range) (list-map expression-to-sexp expressions)) range)
+                (match expressions
+                       Empty
+                            (Symbol name range)
+                       _
+                            (List (Cons (Symbol name range) (list-map expression-to-sexp expressions)) range))
             (FunctionApplication expressions range)
                 (List (list-map expression-to-sexp expressions) range)))
 
