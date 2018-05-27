@@ -36,7 +36,7 @@
      (join (list (list 112 97 114 115 101 32 101 114 114 111 114 32)
                  (error-to-string error))))
 
-(def translate-builtins (name)
+(def translate-identifier (name)
      (match (string-equal? name (plus))
             True  (int32-plus)
             False
@@ -47,6 +47,15 @@
             True  (int32-multiply)
             False name))))
 
+(def translate-constructor (translator name parameters)
+     (match parameters
+            Empty
+                (prefix-constructor name)
+            _
+                (join (list (prefix-constructor name)
+                            (space)
+                            (wrap-in-brackets (string-join (comma) (list-map translator parameters)))))))
+
 (def translate-pattern (pattern)
      (match pattern
             (Capture name _)
@@ -54,13 +63,7 @@
             (IntegerPattern integer _)
                 (join (list (string-from-int32 integer) (Cons 108 Empty)))
             (ConstructorPattern name patterns _)
-                (match patterns
-                       Empty
-                            (prefix-constructor name)
-                       _
-                            (join (list (prefix-constructor name)
-                                        (space)
-                                        (wrap-in-brackets (string-join (comma) (list-map translate-pattern patterns))))))))
+                (translate-constructor translate-pattern name patterns)))
 
 (def translate-rule (rule)
      (match rule
@@ -70,26 +73,22 @@
 (def translate-expression (expression)
      (match expression
             (Lambda arguments expression _)
-                (wrap-in-brackets (translate-lambda arguments expression))
+                (translate-lambda arguments expression)
             (Constructor name expressions _)
-                (match expressions
-                       Empty
-                            (prefix-constructor name)
-                       _
-                            (join (list (prefix-constructor name)
-                                        (space) 
-                                        (wrap-in-brackets (string-join (comma) (list-map translate-expression expressions))))))
+                (translate-constructor translate-expression name expressions)
             (FunctionApplication expressions _)
                 (match expressions
                         (Cons first Empty)
-                                (wrap-in-brackets (join (list (translate-expression first) (space) (wrap-in-brackets Empty))))
+                                (join (list (wrap-in-brackets (translate-expression first))
+                                            (space)
+                                            (wrap-in-brackets Empty)))
                         _
                                 (string-join (space) (list-map (pipe translate-expression wrap-in-brackets) expressions)))
             (IntegerConstant integer _)
                 (string-concat (list 73 110 116 51 50 46 111 102 95 105 110 116 32)
                                (wrap-in-brackets (string-from-int32 integer)))
             (Identifier name _)
-                (translate-builtins name)
+                (translate-identifier name)
             (Match expression rules _)
                 (string-join (space) (list (match-string)
                                            (translate-expression expression)
