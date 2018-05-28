@@ -132,18 +132,19 @@
             True  name
             False (with-apostrophe name)))
 
-(def translate-type (translate-types type)
+(def translate-type (type)
      (match type
             (SimpleType name _)
                 (translate-simple-type name)
             (ComplexType name types _)
-                ((pipe translate-types
+                ((pipe (list-map translate-type)
+                       (string-join (comma))
                        wrap-in-brackets
                        (fn (types) (join (list types (space) name)))
                 ) types)))
 
 (def translate-types (types)
-     ((pipe (list-map (translate-type translate-types))
+     ((pipe (list-map translate-type)
             (string-join (star))
      ) types))
 
