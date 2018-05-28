@@ -22,6 +22,7 @@
 (def with () (list 119 105 116 104))
 (def match-string () (list 109 97 116 99 104))
 (def pipe-string () (list 112 105 112 101))
+(def list-string () (list 108 105 115 116))
 
 (def int32 () (list 105 110 116 51 50))
 (def int32-plus () (list 73 110 116 51 50 46 97 100 100))
@@ -97,23 +98,39 @@
                       expressions))
             join
             wrap-in-brackets
-      ) (list-rest expressions)))
+      ) expressions))
 
-(def translate-expression-list (expressions)
-     (string-join (space) (list-map (pipe translate-expression wrap-in-brackets) expressions)))
+(def translate-list (expressions)
+     (match expressions
+            Empty
+                (list 67 69 109 112 116 121)
+            (Cons first rest)
+                (join (list (list 67 67 111 110 115 32 40)
+                            (translate-expression first)
+                            (comma)
+                            (translate-list rest)
+                            (list 41)))))
 
-(def translate-function-application (expressions)
+(def translate-function-application' (expressions)
      (match expressions
             (Cons no-args-function Empty)
                     (join (list (wrap-in-brackets (translate-expression no-args-function))
                                 (space)
                                 (wrap-in-brackets Empty)))
-            (Cons (Identifier name _) __)
-                    (match (string-equal? name (pipe-string))
-                           True  (translate-pipe expressions)
-                           False (translate-expression-list expressions))
             _
-                    (translate-expression-list expressions)))
+                    (string-join (space) (list-map (pipe translate-expression wrap-in-brackets) expressions))))
+
+(def translate-function-application (expressions)
+     (match expressions
+            (Cons (Identifier name _) rest)
+                    (match (string-equal? name (pipe-string))
+                           True  (translate-pipe rest)
+                           False
+                    (match (string-equal? name (list-string))
+                           True  (translate-list rest)
+                           False (translate-function-application' expressions)))
+            _
+                    (translate-function-application' expressions)))
 
 (def translate-expression (expression)
      (match expression
