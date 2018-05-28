@@ -5,13 +5,15 @@
 (def type () (list 116 121 112 101 32))
 (def fun () (list 102 117 110 32))
 (def arrow () (list 32 45 62 32))
-(def space () (list 32))
-(def newline () (list 10))
 (def equals () (list 32 61 32))
 (def comma () (list 44 32))
 (def vertical-bar () (list 32 124 32))
+(def pipe-operator () (list 32 124 62 32))
 (def colon () (list 32 58 32))
 (def star () (list 32 42 32))
+
+(def space () (list 32))
+(def newline () (list 10))
 (def plus () (list 43))
 (def multiply () (list 42))
 (def minus () (list 45))
@@ -19,6 +21,7 @@
 (def percent () (list 37))
 (def with () (list 119 105 116 104))
 (def match-string () (list 109 97 116 99 104))
+(def pipe-string () (list 112 105 112 101))
 
 (def int32 () (list 105 110 116 51 50))
 (def int32-plus () (list 73 110 116 51 50 46 97 100 100))
@@ -82,6 +85,36 @@
             (Pair pattern expression)
                  (join (list (translate-pattern pattern) (arrow) (wrap-in-brackets (translate-expression expression))))))
 
+(def translate-pipe (expressions)
+     ((pipe (list-map translate-expression)
+            (string-join (pipe-operator))
+            (fn (expressions)
+                (list (fun)
+                      (wrap-in-brackets (list 120))
+                      (arrow)
+                      (list 120)
+                      (pipe-operator)
+                      expressions))
+            join
+            wrap-in-brackets
+      ) (list-rest expressions)))
+
+(def translate-expression-list (expressions)
+     (string-join (space) (list-map (pipe translate-expression wrap-in-brackets) expressions)))
+
+(def translate-function-application (expressions)
+     (match expressions
+            (Cons no-args-function Empty)
+                    (join (list (wrap-in-brackets (translate-expression no-args-function))
+                                (space)
+                                (wrap-in-brackets Empty)))
+            (Cons (Identifier name _) __)
+                    (match (string-equal? name (pipe-string))
+                           True  (translate-pipe expressions)
+                           False (translate-expression-list expressions))
+            _
+                    (translate-expression-list expressions)))
+
 (def translate-expression (expression)
      (match expression
             (Lambda arguments expression _)
@@ -89,13 +122,7 @@
             (Constructor name expressions _)
                 (translate-constructor translate-expression name expressions)
             (FunctionApplication expressions _)
-                (match expressions
-                        (Cons first Empty)
-                                (join (list (wrap-in-brackets (translate-expression first))
-                                            (space)
-                                            (wrap-in-brackets Empty)))
-                        _
-                                (string-join (space) (list-map (pipe translate-expression wrap-in-brackets) expressions)))
+                (translate-function-application expressions)
             (IntegerConstant integer _)
                 (string-concat (list 73 110 116 51 50 46 111 102 95 105 110 116 32)
                                (wrap-in-brackets (string-from-int32 integer)))
