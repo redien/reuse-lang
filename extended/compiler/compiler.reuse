@@ -80,7 +80,7 @@
 (def translate-rule (rule)
      (match rule
             (Pair pattern expression)
-                 (join (list (translate-pattern pattern) (arrow) (translate-expression expression)))))
+                 (join (list (translate-pattern pattern) (arrow) (wrap-in-brackets (translate-expression expression))))))
 
 (def translate-expression (expression)
      (match expression
