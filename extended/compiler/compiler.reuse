@@ -20,6 +20,7 @@
 (def with () (list 119 105 116 104))
 (def match-string () (list 109 97 116 99 104))
 
+(def int32 () (list 105 110 116 51 50))
 (def int32-plus () (list 73 110 116 51 50 46 97 100 100))
 (def int32-multiply () (list 73 110 116 51 50 46 109 117 108))
 (def int32-minus () (list 73 110 116 51 50 46 115 117 98))
@@ -126,10 +127,15 @@
                  (translate-lambda arguments expression)
                  (definition-end))))
 
+(def translate-simple-type (name)
+     (match (string-equal? name (int32))
+            True  name
+            False (with-apostrophe name)))
+
 (def translate-type (translate-types type)
      (match type
             (SimpleType name _)
-                (with-apostrophe name)
+                (translate-simple-type name)
             (ComplexType name types _)
                 ((pipe translate-types
                        wrap-in-brackets
