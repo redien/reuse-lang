@@ -15,11 +15,16 @@
 (def plus () (list 43))
 (def multiply () (list 42))
 (def minus () (list 45))
+(def slash () (list 47))
+(def percent () (list 37))
 (def with () (list 119 105 116 104))
 (def match-string () (list 109 97 116 99 104))
+
 (def int32-plus () (list 73 110 116 51 50 46 97 100 100))
 (def int32-multiply () (list 73 110 116 51 50 46 109 117 108))
 (def int32-minus () (list 73 110 116 51 50 46 115 117 98))
+(def int32-divide () (list 73 110 116 51 50 46 100 105 118))
+(def int32-modulus () (list 73 110 116 51 50 46 114 101 109))
 
 (def join (list) (string-join Empty list))
 
@@ -40,12 +45,18 @@
      (match (string-equal? name (plus))
             True  (int32-plus)
             False
+     (match (string-equal? name (slash))
+            True  (int32-divide)
+            False
+     (match (string-equal? name (percent))
+            True  (int32-modulus)
+            False
      (match (string-equal? name (minus))
             True  (int32-minus)
             False
      (match (string-equal? name (multiply))
             True  (int32-multiply)
-            False name))))
+            False name))))))
 
 (def translate-constructor (translator name parameters)
      (match parameters
