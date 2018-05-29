@@ -15,9 +15,9 @@ Multiple type parameters
 = 3
 
 Nested types
-| (typ (myList a) MyEmpty (MyPair a (myList a)))
-| (typ (myType a) (MyConstructor (myList (myType a))) (MyValue a))
-> (match (MyConstructor (MyPair (MyValue 4) MyEmpty)) (MyConstructor l) (match l MyEmpty 0 (MyPair f r) (match f (MyValue a) a (MyConstructor ignored) 0)))
+| (typ (tList a) CEmpty (CCons a (tList a)))
+| (typ (tType a) (CList (tList (tType a))) (CValue a))
+> (match (CList (CCons (CValue 4) CEmpty)) (CValue x) 0 (CList l) (match l CEmpty 0 (CCons f r) (match f (CValue a) a (CList ignored) 0)))
 = 4
 
 Nested types with multiple type parameters
