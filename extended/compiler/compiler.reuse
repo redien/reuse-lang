@@ -11,6 +11,10 @@
 (def pipe-operator () (list 32 124 62 32))
 (def colon () (list 32 58 32))
 (def star () (list 32 42 32))
+(def if-string () (list 105 102 32))
+(def then-string () (list 32 116 104 101 110 32))
+(def else-string () (list 32 101 108 115 101 32))
+(def less-than () (list 32 60 32))
 
 (def space () (list 32))
 (def newline () (list 10))
@@ -23,6 +27,7 @@
 (def match-string () (list 109 97 116 99 104))
 (def pipe-string () (list 112 105 112 101))
 (def list-string () (list 108 105 115 116))
+(def int32-less-than-string () (list 105 110 116 51 50 45 108 101 115 115 45 116 104 97 110))
 
 (def int32 () (list 105 110 116 51 50))
 (def int32-plus () (list 73 110 116 51 50 46 97 100 100))
@@ -120,6 +125,20 @@
             _
                     (string-join (space) (list-map (pipe translate-expression wrap-in-brackets) expressions))))
 
+(def translate-less-than (expressions)
+     (match expressions
+            (Cons a (Cons b (Cons then (Cons else Empty))))
+                (join (list (if-string)
+                            (wrap-in-brackets (translate-expression a))
+                            (less-than)
+                            (wrap-in-brackets (translate-expression b))
+                            (then-string)
+                            (wrap-in-brackets (translate-expression then))
+                            (else-string)
+                            (wrap-in-brackets (translate-expression else))))
+            _
+                (compile-error)))
+
 (def translate-function-application (expressions)
      (match expressions
             (Cons (Identifier name _) rest)
@@ -128,7 +147,10 @@
                            False
                     (match (string-equal? name (list-string))
                            True  (translate-list rest)
-                           False (translate-function-application' expressions)))
+                           False
+                    (match (string-equal? name (int32-less-than-string))
+                           True  (translate-less-than rest)
+                           False (translate-function-application' expressions))))
             _
                     (translate-function-application' expressions)))
 
