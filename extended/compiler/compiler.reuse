@@ -210,13 +210,13 @@
 
 (def translate-simple-type (name parameters)
      (match (list-any? (string-equal? name) parameters)
-            False  name
-            True   (with-apostrophe name)))
+            False  (escape-identifier name)
+            True   (with-apostrophe (escape-identifier name))))
 
 (def translate-type (parameters type)
      (match type
             (SimpleType name _)
-                (escape-identifier (translate-simple-type name parameters))
+                (translate-simple-type name parameters)
             (ComplexType name types _)
                 ((pipe (list-map (translate-type parameters))
                        (string-join (comma))
