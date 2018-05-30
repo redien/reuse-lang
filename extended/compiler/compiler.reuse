@@ -213,6 +213,13 @@
             False  (escape-identifier name)
             True   (with-apostrophe (escape-identifier name))))
 
+(def translate-type-parameter (parameter)
+     (match parameter
+            (UniversalParameter name _)
+                name
+            (ExistentialParameter name _)
+                name))
+
 (def translate-type (parameters type)
      (match type
             (SimpleType name _)
@@ -242,7 +249,7 @@
             (ComplexConstructor name types _)
                 (join (list (prefix-constructor (escape-identifier name))
                             (colon)
-                            (translate-types (list-map translate-type-parameter-unescaped parameters) types)
+                            (translate-types (list-map translate-type-parameter parameters) types)
                             (arrow)
                             type))))
 
@@ -251,19 +258,16 @@
             (string-join (vertical-bar))
       ) constructors))
 
-(def translate-type-parameter-unescaped (parameter)
+(def translate-type-parameter-for-definition (parameter)
      (match parameter
             (UniversalParameter name _)
-                name
+                (escape-identifier name)
             (ExistentialParameter _ __)
                 Empty))
 
-(def translate-type-parameter (parameter)
-     (escape-identifier (translate-type-parameter-unescaped parameter)))
-
 (def translate-type-parameters (parameters)
      ((pipe 
-            (list-map translate-type-parameter)
+            (list-map translate-type-parameter-for-definition)
             (list-filter not-empty?)
             (list-map with-apostrophe)
             (string-join (comma))
