@@ -2,7 +2,7 @@
 (def compile-error () (list 42 99 111 109 112 105 108 101 32 101 114 114 111 114 42))
 (def definition-end () (list 59 59))
 (def let-rec () (list 108 101 116 32 114 101 99 32))
-(def type () (list 116 121 112 101 32))
+(def type () (list 116 121 112 101))
 (def fun () (list 102 117 110 32))
 (def arrow () (list 32 45 62 32))
 (def equals () (list 32 61 32))
@@ -51,6 +51,21 @@
      (join (list (list 112 97 114 115 101 32 101 114 114 111 114 32)
                  (error-to-string error))))
 
+(def is-alphanumeric (char)
+     (or (and (>= char 65) (<= char 90))
+     (or (and (>= char 48) (<= char 57))
+         (and (>= char 97) (<= char 122)))))
+
+(def escape-char (char)
+     (match (is-alphanumeric char)
+            True   (list char)
+            False  (Cons 95 (string-from-int32 char))))
+
+(def escape-identifier (name)
+     (match (string-equal? name (type))
+            True   (Cons 95 (type))
+            False  (list-flatmap escape-char name)))
+
 (def translate-identifier (name)
      (match (string-equal? name (plus))
             True  (int32-plus)
@@ -66,21 +81,21 @@
             False
      (match (string-equal? name (multiply))
             True  (int32-multiply)
-            False name))))))
+            False (escape-identifier name)))))))
 
 (def translate-constructor (translator name parameters)
      (match parameters
             Empty
-                (prefix-constructor name)
+                (prefix-constructor (escape-identifier name))
             _
-                (join (list (prefix-constructor name)
+                (join (list (prefix-constructor (escape-identifier name))
                             (space)
                             (wrap-in-brackets (string-join (comma) (list-map translator parameters)))))))
 
 (def translate-pattern (pattern)
      (match pattern
             (Capture name _)
-                name
+                (escape-identifier name)
             (IntegerPattern integer _)
                 (join (list (string-from-int32 integer) (Cons 108 Empty)))
             (ConstructorPattern name patterns _)
@@ -178,7 +193,7 @@
 (def translate-argument-list (arguments)
      (match (list-empty? arguments)
             True  (wrap-in-brackets Empty)
-            False (string-join (space) arguments)))
+            False (string-join (space) (list-map escape-identifier arguments))))
 
 (def translate-lambda (arguments expression)
      (join (list (fun)
@@ -188,7 +203,7 @@
 
 (def translate-function-definition (name arguments expression)
      (join (list (let-rec)
-                 name 
+                 (escape-identifier name)
                  (equals)
                  (translate-lambda arguments expression)
                  (definition-end))))
@@ -196,7 +211,7 @@
 (def translate-simple-type (name)
      (match (string-equal? name (int32))
             True  name
-            False (with-apostrophe name)))
+            False (with-apostrophe (escape-identifier name))))
 
 (def translate-type (type)
      (match type
@@ -206,7 +221,7 @@
                 ((pipe (list-map translate-type)
                        (string-join (comma))
                        wrap-in-brackets
-                       (fn (types) (join (list types (space) name)))
+                       (fn (types) (join (list types (space) (escape-identifier name))))
                 ) types)))
 
 (def translate-types (types)
@@ -217,9 +232,9 @@
 (def translate-constructor-definition (type constructor)
      (match constructor
             (SimpleConstructor name _)
-                (prefix-constructor name)
+                (prefix-constructor (escape-identifier name))
             (ComplexConstructor name types _)
-                (join (list (prefix-constructor name) (colon) (translate-types types) (arrow) type))))
+                (join (list (prefix-constructor (escape-identifier name)) (colon) (translate-types types) (arrow) type))))
 
 (def translate-constructor-definitions (type constructors)
      ((pipe (list-map (translate-constructor-definition type))
@@ -229,7 +244,7 @@
 (def translate-type-parameter (parameter)
      (match parameter
             (UniversalParameter name _)
-                name
+                (escape-identifier name)
             (ExistentialParameter _ __)
                 Empty))
 
@@ -244,14 +259,15 @@
 (def translate-type-name (name parameters)
      (match (translate-type-parameters parameters)
             Empty
-                name
+                (escape-identifier name)
             parameters
                 (join (list (wrap-in-brackets parameters)
                             (space)
-                            name))))
+                            (escape-identifier name)))))
 
 (def translate-type-definition (name parameters constructors)
      (join (list (type)
+                 (space)
                  (translate-type-name name parameters)
                  (equals)
                  (translate-constructor-definitions (translate-type-name name parameters) constructors)

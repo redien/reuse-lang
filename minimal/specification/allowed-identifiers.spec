@@ -33,6 +33,6 @@ Should allow defining variables with non-latin characters
 = 7
 
 Should allow defining constructors with non-latin characters
-| (typ (myType a) (日本語 a))
-> (match (日本語 8) (日本語 x) x)
+| (typ (myType a) (A日本語 a))
+> (match (A日本語 8) (A日本語 x) x)
 = 8
