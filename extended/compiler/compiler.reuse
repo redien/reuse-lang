@@ -222,7 +222,13 @@
                        (string-join (comma))
                        wrap-in-brackets
                        (fn (types) (join (list types (space) (escape-identifier name))))
-                ) types)))
+                ) types)
+            (FunctionType argument-types return-type _)
+                (wrap-in-brackets (join (list ((pipe (list-map (translate-type parameters))
+                                                     (string-join (arrow)))
+                                                     argument-types)
+                                                 (arrow)
+                                                 (translate-type parameters return-type))))))
 
 (def translate-types (parameters types)
      ((pipe (list-map (translate-type parameters))
