@@ -208,45 +208,52 @@
                  (translate-lambda arguments expression)
                  (definition-end))))
 
-(def translate-simple-type (name)
-     (match (string-equal? name (int32))
-            True  name
-            False (with-apostrophe (escape-identifier name))))
+(def translate-simple-type (name parameters)
+     (match (list-any? (string-equal? name) parameters)
+            False  name
+            True   (with-apostrophe name)))
 
-(def translate-type (type)
+(def translate-type (parameters type)
      (match type
             (SimpleType name _)
-                (translate-simple-type name)
+                (escape-identifier (translate-simple-type name parameters))
             (ComplexType name types _)
-                ((pipe (list-map translate-type)
+                ((pipe (list-map (translate-type parameters))
                        (string-join (comma))
                        wrap-in-brackets
                        (fn (types) (join (list types (space) (escape-identifier name))))
                 ) types)))
 
-(def translate-types (types)
-     ((pipe (list-map translate-type)
+(def translate-types (parameters types)
+     ((pipe (list-map (translate-type parameters))
             (string-join (star))
      ) types))
 
-(def translate-constructor-definition (type constructor)
+(def translate-constructor-definition (type parameters constructor)
      (match constructor
             (SimpleConstructor name _)
                 (prefix-constructor (escape-identifier name))
             (ComplexConstructor name types _)
-                (join (list (prefix-constructor (escape-identifier name)) (colon) (translate-types types) (arrow) type))))
+                (join (list (prefix-constructor (escape-identifier name))
+                            (colon)
+                            (translate-types (list-map translate-type-parameter-unescaped parameters) types)
+                            (arrow)
+                            type))))
 
-(def translate-constructor-definitions (type constructors)
-     ((pipe (list-map (translate-constructor-definition type))
+(def translate-constructor-definitions (type parameters constructors)
+     ((pipe (list-map (translate-constructor-definition type parameters))
             (string-join (vertical-bar))
       ) constructors))
 
-(def translate-type-parameter (parameter)
+(def translate-type-parameter-unescaped (parameter)
      (match parameter
             (UniversalParameter name _)
-                (escape-identifier name)
+                name
             (ExistentialParameter _ __)
                 Empty))
+
+(def translate-type-parameter (parameter)
+     (escape-identifier (translate-type-parameter-unescaped parameter)))
 
 (def translate-type-parameters (parameters)
      ((pipe 
@@ -270,7 +277,7 @@
                  (space)
                  (translate-type-name name parameters)
                  (equals)
-                 (translate-constructor-definitions (translate-type-name name parameters) constructors)
+                 (translate-constructor-definitions (translate-type-name name parameters) parameters constructors)
                  (definition-end))))
 
 (def translate-definition (definition)

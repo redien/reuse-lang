@@ -28,15 +28,17 @@
             Empty       list
             (Cons x xs) (list-concat (f x) (list-flatmap f xs))))
 
-
 (def list-filter (f list)
      (list-reverse
         (list-foldl (fn (x xs)
-              (match (f x)
-                     True  (Cons x xs)
-                     False xs))
+                        (match (f x)
+                                True  (Cons x xs)
+                                False xs))
                     Empty
                     list)))
+
+(def list-any? (f list)
+     (not (list-empty? (list-filter f list))))
 
 (def list-concat (a b)
      (match a
