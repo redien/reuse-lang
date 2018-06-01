@@ -4,9 +4,7 @@ set -e
 
 script_path=$(dirname "$0")
 
-random_name=$(node -e "console.log(crypto.randomBytes(Math.ceil(12)).toString('hex').slice(0,12))")
-generated_folder=$script_path/../generated/$random_name
-mkdir -p $generated_folder
+generated_folder=$(mktemp -d)
 cleanup() {
     rm -R $generated_folder
 }
@@ -16,15 +14,15 @@ program_source=$generated_folder/program_source.lisp
 
 if [ "$3" == "--stdin" ]
 then
-    echo "$1 (export main$random_name (stdin) $2)" > $program_source
+	echo "$1 (export main (stdin) $2)" > $program_source
     $script_path/$IMPL/compile-library.sh $program_source $generated_folder
-    printf "\n$(cat $script_path/stdin_wrapper.ml)\nPrintf.printf \"%%s\" (_list_to_string (main$random_name _stdin_list))\n" >> $generated_folder/ocaml/source.ml
+    printf "\n$(cat $script_path/stdin_wrapper.ml)\nPrintf.printf \"%%s\" (_list_to_string (main _stdin_list))\n" >> $generated_folder/ocaml/source.ml
     opam config exec -- ocamlfind ocamlc -linkpkg -thread -package core $generated_folder/ocaml/source.ml -o $generated_folder/ocaml/out
     cat | opam config exec -- $generated_folder/ocaml/out
 else
-    echo "$1 (export main$random_name () $2)" > $program_source
+	echo "$1 (export main () $2)" > $program_source
     $script_path/$IMPL/compile-library.sh $program_source $generated_folder
-    printf "\nPrintf.printf \"%%d\" (Int32.to_int (main$random_name ()))\n" >> $generated_folder/ocaml/source.ml
+    printf "\nPrintf.printf \"%%d\" (Int32.to_int (main ()))\n" >> $generated_folder/ocaml/source.ml
     ocaml $generated_folder/ocaml/source.ml
 fi
 
