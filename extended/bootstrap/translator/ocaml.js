@@ -249,7 +249,7 @@ var translateData = function(definition) {
 
         parameters = ast.slice(list, 1);
     } else {
-        name = translateExpression(ast.child(definition, 1));
+        name = ast.value(ast.child(definition, 1));
         name = mangle('type', name);
     }
 
