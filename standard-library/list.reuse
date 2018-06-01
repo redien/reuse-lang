@@ -1,3 +1,4 @@
+(typ (list a) (Cons a (list a)) Empty)
 
 (def list-reverse' (list new-list)
      (match list

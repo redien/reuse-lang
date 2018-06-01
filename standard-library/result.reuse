@@ -1,4 +1,6 @@
 
+(typ (result v e) (Result v) (Error e))
+
 (def result-result (result)
     (Result result))
 
