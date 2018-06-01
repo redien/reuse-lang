@@ -306,5 +306,5 @@
             (Error error)
                 (parse-error error)))
 
-(export to-ocaml (definitions)
+(export to_ocaml (definitions)
         (string-join (newline) (list-map translate-result definitions)))
