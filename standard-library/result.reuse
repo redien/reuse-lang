@@ -38,6 +38,7 @@
 (def result-of-list (list)
     (match (list-filter result-error? list)
            (Cons (Error error) _)  (Error error)
+           (Cons (Result error) _) (Result Empty)
            Empty                   (Result (result-filter-list list))))
 
 (def result-of-maybe (error maybe)
