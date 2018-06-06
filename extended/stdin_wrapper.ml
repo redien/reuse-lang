@@ -13,7 +13,10 @@ let rec _string_to_list_i = fun input i result ->
     else
         CCons ((Int32.of_int (Char.code (String.get input i))), result);;
 
-let _string_to_list = fun input -> _string_to_list_i input ((String.length input) - 1) CEmpty;;
+let _string_to_list = fun input ->
+    if String.length input == 0
+    then CEmpty
+    else _string_to_list_i input ((String.length input) - 1) CEmpty;;
 
 let rec _list_to_string_r = fun input result ->
     match input with
