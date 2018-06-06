@@ -1,7 +1,10 @@
 
-open Stdio;;
-
-let _stdin_str = In_channel.input_all stdin;;
+let _stdin_string =
+    let ch = stdin in
+    let buf = Buffer.create 1024 in
+    (try Buffer.add_channel buf ch max_int with _ -> ());
+    close_in ch;
+    Buffer.contents buf;;
 
 let rec _string_to_list_i = fun input i result ->
     if i > 0 then
@@ -22,4 +25,4 @@ let rec _list_to_string_r = fun input result ->
 
 let _list_to_string = fun input -> (_list_to_string_r input "");;
 
-let _stdin_list = _string_to_list _stdin_str;;
+let _stdin_list = _string_to_list _stdin_string;;

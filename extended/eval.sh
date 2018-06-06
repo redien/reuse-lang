@@ -38,8 +38,7 @@ then
     compile
     printf "\n$(cat $script_path/stdin_wrapper.ml)\nPrintf.printf \"%%s\" (_list_to_string (main _stdin_list))\n" >> $generated_folder/ocaml/source.ml
     
-    opam config exec -- ocamlfind ocamlc -linkpkg -thread -package core $generated_folder/ocaml/source.ml -o $generated_folder/ocaml/out
-    cat | opam config exec -- $generated_folder/ocaml/out
+    ocaml $generated_folder/ocaml/source.ml
 else
     echo "$1 (export main () $2)" > $program_source
     compile
