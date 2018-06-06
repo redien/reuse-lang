@@ -3,8 +3,9 @@
 set -e
 
 script_path=$(dirname "$0")
+mkdir -p $script_path/../generated/tests
+generated_folder=$(mktemp -d -p $script_path/../generated/tests)
 
-generated_folder=$(mktemp -d)
 cleanup() {
     rm -R $generated_folder
 }
