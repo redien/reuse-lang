@@ -18,13 +18,6 @@
      (list 101 120 105 115 116 115))
 
 
-(def symbol-to-string (symbol)
-     (match symbol
-            (Symbol name _)
-                (Result name)
-            (List _ range)
-                (Error  (MalformedSymbolError range))))
-
 (def char-is-upper-case? (char)
      (and (>= char 65) (<= char 90)))
 
@@ -34,6 +27,21 @@
                 (char-is-upper-case? first-letter)
             Empty
                 False))
+
+(typ error           (MalformedDefinitionError range)
+                     (MalformedFunctionDefinitionError range)
+                     (MalformedFunctionNameError range)
+                     (MalformedExpressionError range)
+                     (MalformedSymbolError range)
+                     (MalformedConstructorError range)
+                     (MalformedTypeError range))
+
+(def symbol-to-string (symbol)
+     (match symbol
+            (Symbol name _)
+                (Result name)
+            (List _ range)
+                (Error  (MalformedSymbolError range))))
 
 (typ type            (SimpleType           (list int32) range)
                      (ComplexType          (list int32) (list type) range)
@@ -69,14 +77,6 @@
                                            expression
                                            range))
 
-(typ error           (MalformedDefinitionError range)
-                     (MalformedFunctionDefinitionError range)
-                     (MalformedFunctionNameError range)
-                     (MalformedExpressionError range)
-                     (MalformedSymbolError range)
-                     (MalformedConstructorError range)
-                     (MalformedTypeError range))
-
 (def error-range-to-string (range)
      (match range
             (Range start end)
@@ -109,12 +109,12 @@
                 (string-concat (list 77 97 108 102 111 114 109 101 100 84 121 112 101 69 114 114 111 114)
                                (error-range-to-string range))))
 
-(def sexp-to-complex-type (name parameters range)
+(def sexp-to-complex-type (sexp-to-types name parameters range)
      (result-first (fn (sub-types)
                        (ComplexType name sub-types range))
                  (sexp-to-types parameters)))
 
-(def sexp-to-function-type (name parameters range)
+(def sexp-to-function-type (sexp-to-types sexp-to-type name parameters range)
      (match parameters
             (Cons (List arg-types _) (Cons return-type Empty))
                 (result-flatmap (fn (arg-types)
@@ -125,22 +125,22 @@
             _
                 (Error (MalformedTypeError range))))
 
-(def sexp-to-complex-or-function-type (name parameters range)
+(def sexp-to-complex-or-function-type (sexp-to-types sexp-to-type name parameters range)
      (match (string-equal? name (fn-string))
-            True   (sexp-to-function-type name parameters range)
-            False  (sexp-to-complex-type name parameters range)))
+            True   (sexp-to-function-type sexp-to-types sexp-to-type name parameters range)
+            False  (sexp-to-complex-type sexp-to-types name parameters range)))
 
-(def sexp-to-type (type)
+(def sexp-to-type (sexp-to-types type)
      (match type
             (List (Cons (Symbol name _) parameters) range)
-                (sexp-to-complex-or-function-type name parameters range)
+                (sexp-to-complex-or-function-type sexp-to-types (sexp-to-type sexp-to-types) name parameters range)
             (Symbol name range)
                 (Result (SimpleType name range))
             (List _ range)
                 (Error (MalformedTypeError range))))
 
 (def sexp-to-types (types)
-     (result-of-list (list-map sexp-to-type types)))
+     (result-of-list (list-map (sexp-to-type sexp-to-types) types)))
 
 (def sexp-to-complex-constructor (name types range)
      (result-first (fn (types)
@@ -205,7 +205,7 @@
             _
                 (Error (MalformedExpressionError range)))) 
  
-(def sexp-to-lambda (rest range)
+(def sexp-to-lambda (sexp-to-expression rest range)
      (result-flatmap (fn (body)
      (result-flatmap (fn (arguments)
      (result-first   (fn (expression)
@@ -214,7 +214,7 @@
                  (sexp-to-arguments (pair-left body))))
                  (sexp-to-function-body range rest)))
 
-(def sexp-to-function-application (range expressions)
+(def sexp-to-function-application (sexp-to-expression range expressions)
      ((pipe (list-map sexp-to-expression) 
             result-of-list
             (result-first (fn (expressions)
@@ -243,7 +243,7 @@
                       (maybe-else (fn () (to-constructor-or-capture range name)))
                   ) (string-to-int32 name))))
 
-(def sexp-to-match-pair (pair)
+(def sexp-to-match-pair (sexp-to-expression pair)
      (match pair
             (Pair pattern expression)
                 (result-flatmap (fn (pattern)
@@ -263,47 +263,47 @@
             _
                 None))
 
-(def sexp-to-match-pairs (range pairs)
+(def sexp-to-match-pairs (sexp-to-expression range pairs)
      ((pipe collect-pairs
             (result-of-maybe (MalformedExpressionError range))
-            (result-flatmap  (pipe (list-map sexp-to-match-pair)
+            (result-flatmap  (pipe (list-map (sexp-to-match-pair sexp-to-expression))
                                    result-of-list)))
         pairs))
 
-(def sexp-to-match (range rest)
+(def sexp-to-match (sexp-to-expression range rest)
      (match rest
             (Cons expression rest)
                 (result-flatmap (fn (expression)
                 (result-first   (fn (pairs)
                                     (Match expression pairs range))
-                                (sexp-to-match-pairs range rest)))
+                                (sexp-to-match-pairs sexp-to-expression range rest)))
                                 (sexp-to-expression expression))
             _
                 (Error (MalformedExpressionError range))))
 
-(def sexp-to-constructor (range name rest)
+(def sexp-to-constructor (sexp-to-expression range name rest)
      (result-first (fn (expressions)
                        (Constructor name expressions range))
                    (result-of-list (list-map sexp-to-expression rest))))
 
-(def sexp-to-list-expression (expressions range)
+(def sexp-to-list-expression (sexp-to-expression expressions range)
      (match expressions
             (Cons (Symbol symbol _) rest) 
                   (match (string-equal? symbol (fn-string))
                          True
-                             (sexp-to-lambda rest range)
+                             (sexp-to-lambda sexp-to-expression rest range)
                          False
                   (match (string-equal? symbol (match-string))
                          True
-                             (sexp-to-match range rest)
+                             (sexp-to-match sexp-to-expression range rest)
                          False
                   (match (name-of-constructor? symbol)
                          True
-                             (sexp-to-constructor range symbol rest)
+                             (sexp-to-constructor sexp-to-expression range symbol rest)
                          False
-                             (sexp-to-function-application range expressions))))
+                             (sexp-to-function-application sexp-to-expression range expressions))))
             _
-                  (sexp-to-function-application range expressions)))
+                  (sexp-to-function-application sexp-to-expression range expressions)))
 
 (def sexp-to-expression (sexp)
      (match sexp
@@ -322,7 +322,7 @@
                        Empty
                           (Error (MalformedExpressionError range))
                        _ 
-                          (sexp-to-list-expression expressions range))))
+                          (sexp-to-list-expression sexp-to-expression expressions range))))
 
 (def sexp-to-function-definition (name-symbol
                                   rest
@@ -368,20 +368,20 @@
 
 
 
-(def type-to-sexp (type)
+(def type-to-sexp (types-to-sexp type)
      (match type
             (SimpleType name range)
                 (Symbol name range)
             (FunctionType arg-types return-type range)
                 (List (list (Symbol (fn-string) range)
                             (List (types-to-sexp arg-types) range)
-                            (type-to-sexp return-type))
+                            (type-to-sexp types-to-sexp return-type))
                       range)
             (ComplexType name types range)
                 (List (Cons (Symbol name range) (types-to-sexp types)) range)))
 
 (def types-to-sexp (types)
-     (list-map type-to-sexp types))
+     (list-map (type-to-sexp types-to-sexp) types))
 
 (def constructor-to-sexp (constructor)
      (match constructor
@@ -429,7 +429,7 @@
             (Capture name range)
                 (Symbol name range)))
 
-(def match-pair-to-sexp (pair)
+(def match-pair-to-sexp (expression-to-sexp pair)
      (match pair
             (Pair pattern expression)
                (list (pattern-to-sexp pattern) (expression-to-sexp expression))))
@@ -448,7 +448,7 @@
             (Match expression pairs range)
                 (List (Cons (Symbol (match-string) range)
                       (Cons (expression-to-sexp expression)
-                            (list-flatmap match-pair-to-sexp pairs))) range)
+                            (list-flatmap (match-pair-to-sexp expression-to-sexp) pairs))) range)
             (Constructor name expressions range)
                 (match expressions
                        Empty
