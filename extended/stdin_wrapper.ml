@@ -1,10 +1,17 @@
 
-let _stdin_string =
-    let ch = stdin in
-    let buf = Buffer.create 1024 in
-    (try Buffer.add_channel buf ch max_int with _ -> ());
-    close_in ch;
-    Buffer.contents buf;;
+let _read_line ic =
+    try Some (input_line ic)
+    with End_of_file -> None
+
+let _read_lines ic =
+    let rec loop acc =
+        match _read_line ic with
+        | Some line -> loop (line :: acc)
+        | None -> List.rev acc
+    in
+        loop [];;
+
+let _stdin_string = String.concat "\n" (_read_lines stdin);;
 
 let rec _string_to_list_i = fun input i result ->
     if i > 0 then
