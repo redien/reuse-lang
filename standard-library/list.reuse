@@ -1,5 +1,26 @@
 (typ (list a) (Cons a (list a)) Empty)
 
+(def list-first (list)
+     (match list
+            (Cons x _)
+                (Some x)
+            Empty
+                None))
+
+(def list-rest (list)
+     (match list
+            (Cons _ rest)
+                rest
+            Empty
+                Empty)) 
+
+(def list-empty? (list)
+     (match list
+            (Cons _ __)
+                False
+            Empty
+                True))
+
 (def list-reverse' (list new-list)
      (match list
             Empty       new-list
@@ -7,6 +28,11 @@
 
 (def list-reverse (list)
      (list-reverse' list Empty))
+
+(def list-concat (a b)
+     (match a
+            Empty       b
+            (Cons x xs) (Cons x (list-concat xs b))))
 
 (def list-foldr (f initial list)
      (match list
@@ -40,32 +66,6 @@
 
 (def list-any? (f list)
      (not (list-empty? (list-filter f list))))
-
-(def list-concat (a b)
-     (match a
-            Empty       b
-            (Cons x xs) (Cons x (list-concat xs b))))
-
-(def list-first (list)
-     (match list
-            (Cons x _)
-                (Some x)
-            Empty
-                None))
-
-(def list-rest (list)
-     (match list
-            (Cons _ rest)
-                rest
-            Empty
-                Empty)) 
-
-(def list-empty? (list)
-     (match list
-            (Cons _ __)
-                False
-            Empty
-                True))
 
 (def list-indexed-iterator-get (collection _)
       (match collection
