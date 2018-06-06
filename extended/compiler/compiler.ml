@@ -208,12 +208,20 @@ let rec fn_translate_45definition = fun type_definition -> (match type_definitio
 let rec fn_translate_45result = fun type_result -> (match type_result with CResult (type_definition) -> fn_translate_45definition type_definition | CError (ptrn_error) -> fn_parse_45error ptrn_error);;
 let rec to_ocaml = fun definitions -> fn_string_45join (fn_newline ()) (fn_list_45map fn_translate_45result definitions);;
 
-let _stdin_string =
-    let ch = stdin in
-    let buf = Buffer.create 1024 in
-    (try Buffer.add_channel buf ch max_int with _ -> ());
-    close_in ch;
-    Buffer.contents buf;;
+let _read_line ic =
+  try Some (input_line ic)
+  with End_of_file -> None
+ 
+let _read_lines ic =
+  let rec loop acc =
+    match _read_line ic with
+    | Some line -> loop (line :: acc)
+    | None -> List.rev acc
+  in
+  loop [];;
+
+let _stdin_string = String.concat "
+" (_read_lines stdin);;
 
 let rec _string_to_list_i = fun input i result ->
     if i > 0 then
@@ -222,7 +230,10 @@ let rec _string_to_list_i = fun input i result ->
     else
         CCons ((Int32.of_int (Char.code (String.get input i))), result);;
 
-let _string_to_list = fun input -> _string_to_list_i input ((String.length input) - 1) CEmpty;;
+let _string_to_list = fun input ->
+    if String.length input == 0
+    then CEmpty
+    else _string_to_list_i input ((String.length input) - 1) CEmpty;;
 
 let rec _list_to_string_r = fun input result ->
     match input with
