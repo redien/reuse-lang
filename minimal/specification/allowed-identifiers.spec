@@ -99,6 +99,10 @@ Should allow commonly reserved words as variable names
 > (class' 10)
 = 10
 
+| (def constructor' (constructor) constructor)
+> (constructor' 10)
+= 10
+
 Type names should be allowed as capture variables
 | (typ a (B int32))
 > (match (B 11) (B a) a)

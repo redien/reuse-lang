@@ -30,8 +30,11 @@ var escapeNonAscii = function(name) {
 };
 
 var mangle = function(prefix, name) {
+    if (mangledNames[':' + name]) {
+        return mangledNames[':' + name];
+    }
     var newName = prefix + '_' + escapeNonAscii(name);
-    mangledNames[name] = newName;
+    mangledNames[':' + name] = newName;
     return newName;
 };
 
@@ -153,8 +156,8 @@ var translateExpression = function(expression) {
         var name = ast.value(expression);
         if (ast.contains(constructorNames, name)) {
             return translateConstructor(expression, translateExpression);
-        } else if (mangledNames[name]) {
-            return mangledNames[name];
+        } else if (mangledNames[':' + name]) {
+            return mangledNames[':' + name];
         } else if (Number.isInteger(parseFloat(name))) {
             return '(Int32.of_int (' + name + '))';
         } else {
