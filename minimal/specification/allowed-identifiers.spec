@@ -27,7 +27,7 @@ Should allow defining functions with non-latin characters
 > (日本語 6)
 = 6
 
-Should allow defining variables with non-latin characters
+Should allow defining pattern captures with non-latin characters
 | (typ (myType a) (MyPair a))
 > (match (MyPair 7) (MyPair 日本語) 日本語)
 = 7
@@ -36,3 +36,65 @@ Should allow defining constructors with non-latin characters
 | (typ (myType a) (A日本語 a))
 > (match (A日本語 8) (A日本語 x) x)
 = 8
+
+Should allow defining function arguments with non-latin characters
+| (def a (日本語) 日本語)
+> (a 9)
+= 9
+
+Should allow commonly reserved words as variable names
+| (def if' (if) if)
+> (if' 10)
+= 10
+
+| (def then' (then) then)
+> (then' 10)
+= 10
+
+| (def else' (else) else)
+> (else' 10)
+= 10
+
+| (def end' (end) end)
+> (end' 10)
+= 10
+
+| (def with' (with) with)
+> (with' 10)
+= 10
+
+| (def in' (in) in)
+> (in' 10)
+= 10
+
+| (def of' (of) of)
+> (of' 10)
+= 10
+
+| (def type' (type) type)
+> (type' 10)
+= 10
+
+| (def data' (data) data)
+> (data' 10)
+= 10
+
+| (def lambda' (lambda) lambda)
+> (lambda' 10)
+= 10
+
+| (def fun' (fun) fun)
+> (fun' 10)
+= 10
+
+| (def let' (let) let)
+> (let' 10)
+= 10
+
+| (def var' (var) var)
+> (var' 10)
+= 10
+
+| (def class' (class) class)
+> (class' 10)
+= 10
