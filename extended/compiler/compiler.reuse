@@ -197,9 +197,7 @@
                 (string-join (space) (list (match-string)
                                            (translate-expression expression)
                                            (with)
-                                           (string-join (vertical-bar) (list-map (translate-rule translate-expression) rules))))
-            _
-                (compile-error)))
+                                           (string-join (vertical-bar) (list-map (translate-rule translate-expression) rules))))))
 
 (def translate-function-definition (name arguments expression)
      (join (list (let-rec)
