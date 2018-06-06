@@ -17,3 +17,6 @@ generated
 build.log
 *.swp
 
+*.out
+*.cmo
+*.cmi
