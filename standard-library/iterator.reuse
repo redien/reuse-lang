@@ -3,7 +3,7 @@
     (IndexedIterator collection
                      int32
                      (fn (collection int32) (maybe element))
-                     (fn ((iterator element) collection int32) (iterator element))))
+                     (fn ((indexed-iterator element) collection int32) (indexed-iterator element))))
 
 (def indexed-iterator-next (iterator)
      (match iterator
