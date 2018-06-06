@@ -6,6 +6,16 @@ var noArgumentFunctions = ast.list();
 
 var escapeNonAscii = function(name) {
     if (name === 'end') { return '_end'; }
+    if (name === 'if') { return '_if'; }
+    if (name === 'then') { return '_then'; }
+    if (name === 'else') { return '_else'; }
+    if (name === 'type') { return '_type'; }
+    if (name === 'of') { return '_of'; }
+    if (name === 'in') { return '_in'; }
+    if (name === 'with') { return '_with'; }
+    if (name === 'fun') { return '_fun'; }
+    if (name === 'let') { return '_let'; }
+    if (name === 'class') { return '_class'; }
     var newName = '';
     for (var i = 0; i < name.length; ++i) {
         var char = name.charCodeAt(i);
@@ -121,7 +131,7 @@ var translateExpression = function(expression) {
         } else if (isSpecialForm(expression, 'fn')) {
             const args = ast.child(expression, 1);
             const body = ast.child(expression, 2);
-            const argString = ast.size(args) > 0 ? ast.join(ast.map(args, ast.value), ' ') : '_';
+            const argString = ast.size(args) > 0 ? ast.join(ast.map(args, translateExpression), ' ') : '_';
             return 'fun ' + argString + ' -> ' + translateExpression(body);
         } else if (isSpecialForm(expression, 'pipe')) {
             const args = ast.reverse(ast.slice(expression, 1));
