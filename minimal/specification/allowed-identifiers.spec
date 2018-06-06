@@ -98,3 +98,14 @@ Should allow commonly reserved words as variable names
 | (def class' (class) class)
 > (class' 10)
 = 10
+
+Type names should be allowed as capture variables
+| (typ a (B int32))
+> (match (B 11) (B a) a)
+= 11
+
+Type names should be allowed as function arguments
+| (typ a (B int32))
+| (def f (a) a)
+> (match (B 12) (B x) (f x))
+= 12

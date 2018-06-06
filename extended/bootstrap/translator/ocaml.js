@@ -53,7 +53,7 @@ var translatePattern = function(pattern) {
         } else if (ast.contains(constructorNames, name)) {
             return translateConstructor(pattern, translatePattern);
         } else {
-            return escapeNonAscii(name);
+            return mangle('ptrn', name);
         }
     }
 };
