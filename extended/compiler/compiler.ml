@@ -209,16 +209,16 @@ let rec fn_translate_45result = fun type_result -> (match type_result with CResu
 let rec to_ocaml = fun definitions -> fn_string_45join (fn_newline ()) (fn_list_45map fn_translate_45result definitions);;
 
 let _read_line ic =
-  try Some (input_line ic)
-  with End_of_file -> None
- 
+    try Some (input_line ic)
+    with End_of_file -> None
+
 let _read_lines ic =
-  let rec loop acc =
-    match _read_line ic with
-    | Some line -> loop (line :: acc)
-    | None -> List.rev acc
-  in
-  loop [];;
+    let rec loop acc =
+        match _read_line ic with
+        | Some line -> loop (line :: acc)
+        | None -> List.rev acc
+    in
+        loop [];;
 
 let _stdin_string = String.concat "
 " (_read_lines stdin);;
