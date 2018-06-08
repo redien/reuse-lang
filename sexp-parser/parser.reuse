@@ -14,7 +14,8 @@
 (def whitespace? (character)
      (or (= character 32)
      (or (= character 13)
-         (= character 10))))
+     (or (= character 9)
+         (= character 10)))))
 
 (def atom-character? (character)
      (and (not (= character 40))

@@ -29,3 +29,8 @@ Should ignore trailing whitespace
 Should ignore new-lines
 > first\\nsecond
 = first second
+
+Should ignore tabs
+> first		second
+= first second
+
