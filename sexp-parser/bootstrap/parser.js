@@ -18,7 +18,9 @@ var nextCharacterIs = function(character, input, index) {
 };
 
 var nextCharacterIsWhitespace = function(input, index) {
-    return nextCharacterIs(SPACE_CHARACTER, input, index) || nextCharacterIs(NEWLINE_CHARACTER, input, index);
+    return nextCharacterIs(SPACE_CHARACTER, input, index) ||
+	   nextCharacterIs(NEWLINE_CHARACTER, input, index) ||
+	   nextCharacterIs('\t', input, index);
 };
 
 var skipWhitespace = function(input, index) {
