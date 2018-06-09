@@ -231,7 +231,7 @@
 
 (def translate-function-definition (name arguments expression)
      (join (list (let-rec)
-                 (escape-identifier name)
+                 name
                  (equals)
                  (translate-lambda translate-expression arguments expression)
                  (definition-end))))
@@ -321,7 +321,7 @@
 (def translate-definition (definition)
      (match definition
         (FunctionDefinition name arguments expression _)
-                (translate-function-definition name arguments expression)
+                (translate-function-definition (escape-identifier name) arguments expression)
         (ExportDefinition name arguments expression _)
                 (translate-function-definition name arguments expression)
         (TypeDefinition name parameters constructors _)
