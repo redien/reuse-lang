@@ -16,6 +16,8 @@ var escapeNonAscii = function(name) {
     if (name === 'fun') { return '_fun'; }
     if (name === 'let') { return '_let'; }
     if (name === 'class') { return '_class'; }
+    if (name === 'and') { return '_and'; }
+    if (name === 'or') { return '_or'; }
     var newName = '';
     for (var i = 0; i < name.length; ++i) {
         var char = name.charCodeAt(i);

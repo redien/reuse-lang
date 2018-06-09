@@ -20,6 +20,8 @@
 (def end () (list 101 110 100))
 (def in () (list 105 110))
 (def let () (list 108 101 116))
+(def and-string () (list 97 110 100))
+(def or-string () (list 111 114))
 (def less-than () (list 32 60 32))
 
 (def space () (list 32))
@@ -78,7 +80,9 @@
      (or (string-equal? name (in))
      (or (string-equal? name (fun))
      (or (string-equal? name (let))
-         (string-equal? name (class)))))))))))))
+     (or (string-equal? name (and-string))
+     (or (string-equal? name (or-string))
+         (string-equal? name (class)))))))))))))))
 
 (def escape-identifier (name)
      (match (string-is-reserved? name)

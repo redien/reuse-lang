@@ -99,6 +99,18 @@ Should allow commonly reserved words as variable names
 > (class' 10)
 = 10
 
+| (def and' (and) and)
+> (and' 10)
+= 10
+
+| (def or' (or) or)
+> (or' 10)
+= 10
+
+| (def not' (not) not)
+> (not' 10)
+= 10
+
 | (def constructor' (constructor) constructor)
 > (constructor' 10)
 = 10
