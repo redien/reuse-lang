@@ -17,7 +17,11 @@ cat $script_path/generated/extended/compiler/compiler.reuse | $script_path/bin/r
 cat << END_OF_SOURCE >> $temporary_dir/ocaml/source.ml
 
 $(cat $script_path/extended/stdin_wrapper.ml)
-Printf.printf "%s" (_list_to_string (to_ocaml (sexps_45to_45definitions (parse _stdin_list))))
+
+let output = to_ocaml (sexps_45to_45definitions (parse _stdin_list)) _stdin_list in
+    match output with
+        CResult (source) -> Printf.printf "%s" (_list_to_string source) ; exit 0
+      | CError (error) -> Printf.eprintf "%s" (_list_to_string error) ; exit 1;;
 
 END_OF_SOURCE
 
