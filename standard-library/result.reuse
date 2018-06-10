@@ -22,10 +22,13 @@
         (Result x)     (f x)
         (Error error)  (Error error)))
 
-(def result-error? (result)
+(def result-result? (result)
      (match result
-        (Error _)  True
-        _          False))
+        (Error _)  False
+        _          True))
+
+(def result-error? (result)
+     (not (result-result? result)))
 
 (def result-filter-list (list)
      (list-foldr (fn (result new-list)
@@ -35,11 +38,11 @@
                  Empty
                  list))
 
-(def result-of-list (list)
-    (match (list-filter result-error? list)
-           (Cons (Error error) _)  (Error error)
-           (Cons (Result error) _) (Result Empty)
-           Empty                   (Result (result-filter-list list))))
+(def result-concat (list)
+     (match (list-filter result-error? list)
+            (Cons (Error error) _)  (Error error)
+            (Cons (Result _) __)    (Result Empty)
+            Empty                   (Result (result-filter-list list))))
 
 (def result-of-maybe (error maybe)
      (match maybe
@@ -47,4 +50,3 @@
                 (Result x)
             None
                 (Error error)))
-
