@@ -11,26 +11,59 @@ mkdir -p generated
 rm generated/build.log > /dev/null 2>&1
 
 function testLine {
-    result=$($eval_command "${2}" "${1:2}" 2>> generated/build.log)
-
-    if [ "$?" != "0" ]; then
-        result="Build error"
+    if [ "${3:0:1}" == "=" ]; then
+        result=$($eval_command "${2}" "${1:2}" 2>> generated/build.log)
+    else
+        result=$($eval_command "${2}" "${1:2}" 2>&1)
     fi
-
+    status_code="$?"
     tests=$((tests+1))
 
-    if [ "$result" == "${3:2}" ]; then
-        echo ok $tests - ${1:2} = $result
-        passing=$((passing+1))
+    if [ "${3:0:1}" == "=" ]; then
+        if [ "$status_code" != "0" ]; then
+            echo not ok $tests - program returned non-zero status code
+            echo  ---
+            echo    status-code:   \'$status_code\'
+            echo  ...
+            failing=$((failing+1))
+
+        elif [ "$result" == "${3:2}" ]; then
+            echo ok $tests - ${1:2} = $result
+            passing=$((passing+1))
+
+        else
+            echo not ok $tests - expected \'${3:2}\' but got \'$result\'
+            echo  ---
+            echo    expression: \'${1:2}\'
+            echo    program: \'${2}\'
+            echo    expected: \'${3:2}\'
+            echo    actual:   \'$result\'
+            echo  ...
+            failing=$((failing+1))
+        fi
+    
     else
-        echo not ok $tests - expected \"${3:2}\" but got \"$result\"
-        echo  ---
-        echo    expression: \'${1:2}\'
-        echo    program: \'${2}\'
-        echo    expected: \'${3:2}\'
-        echo    actual:   \'$result\'
-        echo  ...
-        failing=$((failing+1))
+        if [ "$status_code" == "0" ]; then
+            echo not ok $tests - expected program to return a non-zero status code
+            echo  ---
+            echo    status-code:   \'$status_code\'
+            echo  ...
+            failing=$((failing+1))
+
+        elif [[ "$result" == *"${3:2}"* ]]; then
+            echo ok $tests - output contains \'$result\'
+            passing=$((passing+1))
+
+        else
+            echo not ok $tests - expected \'$result\' to contain \'${3:2}\'
+            echo  ---
+            echo    expression: \'${1:2}\'
+            echo    program: \'${2}\'
+            echo    expected: \'${3:2}\'
+            echo    actual:   \'$result\'
+            echo  ...
+            failing=$((failing+1))
+        fi
     fi
 }
 
