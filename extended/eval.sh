@@ -20,6 +20,7 @@ print_source() {
 }
 
 print_output() {
+    echo >&2
     echo Compiled library: >&2
     cat $1 >&2
     echo >&2
@@ -47,6 +48,4 @@ else
     ocaml $generated_folder/ocaml/source.ml
 fi
 
-result=$?
-
-exit $result
+exit $?
