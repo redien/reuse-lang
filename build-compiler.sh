@@ -2,6 +2,7 @@
 
 script_path=$(dirname $0)
 output_dir=$script_path/generated/extended/compiler
+mkdir -p $script_path/generated
 temporary_dir=$(mktemp -d -p $script_path/generated)
 
 mkdir -p $script_path/bin
