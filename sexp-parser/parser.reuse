@@ -22,14 +22,18 @@
      (and (not (= character 41))
           (not (whitespace? character)))))
 
-(typ range (Range int32 int32))
+(typ range               (Range int32 int32))
 
-(typ sexp (Symbol (list int32)      range)
-          (List   (list sexp)       range))
+(typ sexp                (Symbol (list int32)      range)
+                         (List   (list sexp)       range))
 
-(typ (parse-result i e) (ParseNext i e)
-                        (ParseOut i)
-                        ParseEnd)
+(typ parse-error         (ParseErrorTooFewClosingBrackets i)
+                         (ParseErrorTooManyClosingBrackets i))
+
+(typ (parse-result i e)  (ParseNext i e)
+                         (ParseOut i)
+                         ParseEnd
+                         (ParseError parse-error))
 
 (def symbol-range (start end)
      (Range (indexed-iterator-index start) (indexed-iterator-index end)))
@@ -62,8 +66,8 @@
             (ParseNext iterator result) (parse-sexps' iterator (Cons result expressions))))
 
 (export parse (input)
-    (match (parse-sexps' (list-to-indexed-iterator input) Empty)
-        (Pair _ expressions) expressions))
+        (match (parse-sexps' (list-to-indexed-iterator input) Empty)
+               (Pair _ expressions) expressions))
 
 (def wrap-in-brackets (string)
      (string-concat (string-of-char 40) (string-concat string (string-of-char 41))))
@@ -74,4 +78,4 @@
             (List expressions _) (wrap-in-brackets (stringify expressions))))
 
 (export stringify (expressions)
-     (string-join (string-of-char 32) (list-map (stringify-sexp stringify) expressions)))
+        (string-join (string-of-char 32) (list-map (stringify-sexp stringify) expressions)))
