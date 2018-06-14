@@ -115,6 +115,14 @@ Should allow commonly reserved words as variable names
 > (constructor' 10)
 = 10
 
+| (def open' (open) open)
+> (open' 10)
+= 10
+
+| (def close' (close) close)
+> (close' 10)
+= 10
+
 Type names should be allowed as capture variables
 | (typ a (B int32))
 > (match (B 11) (B a) a)
