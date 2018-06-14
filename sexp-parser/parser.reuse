@@ -27,13 +27,12 @@
 (typ sexp                (Symbol (list int32)      range)
                          (List   (list sexp)       range))
 
-(typ parse-error         (ParseErrorTooFewClosingBrackets i)
-                         (ParseErrorTooManyClosingBrackets i))
+(typ parse-error         ParseErrorTooFewClosingBrackets
+                         ParseErrorTooManyClosingBrackets)
 
 (typ (parse-result i e)  (ParseNext i e)
                          (ParseOut i)
-                         ParseEnd
-                         (ParseError parse-error))
+                         ParseEnd)
 
 (def symbol-range (start end)
      (Range (indexed-iterator-index start) (indexed-iterator-index end)))
