@@ -64,9 +64,33 @@
             (ParseOut iterator)         (Pair iterator (list-reverse expressions))
             (ParseNext iterator result) (parse-sexps' iterator (Cons result expressions))))
 
+(def inc (x) (+ x 1))
+
+(def count-parens (iterator)
+     (indexed-iterator-foldl
+        (fn (c count)
+                (match c
+                       40  (pair-map-left inc count)
+                       41  (pair-map-right inc count)
+                       _   count))
+        (Pair 0 0)
+        iterator))
+
+(def check-errors (iterator)
+     (match (count-parens iterator)
+            (Pair open close)
+                (match (< open close)
+                       True   (Some ParseErrorTooManyClosingBrackets)
+                       False
+                (match (> open close)
+                       True   (Some ParseErrorTooFewClosingBrackets)
+                       False  None))))
+
 (export parse (input)
-        (match (parse-sexps' (list-to-indexed-iterator input) Empty)
-               (Pair _ expressions) expressions))
+        (match (check-errors (list-to-indexed-iterator input))
+               (Some error)  (Error error)
+               None          (match (parse-sexps' (list-to-indexed-iterator input) Empty)
+                                    (Pair _ expressions)  (Result expressions))))
 
 (def wrap-in-brackets (string)
      (string-concat (string-of-char 40) (string-concat string (string-of-char 41))))

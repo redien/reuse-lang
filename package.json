@@ -22,8 +22,8 @@
     "test-bootstrap-compiler": "./build.sh && ./spec-runner/run.sh extended/specification ./extended/bootstrap/eval.sh | tap-spec && ./spec-runner/run.sh minimal/specification ./extended/bootstrap/eval.sh | tap-spec",
     "test-bootstrap-interpreter": "./build.sh && ./spec-runner/run.sh extended/specification ./extended/interpreter/bootstrap/eval.sh | tap-spec && ./spec-runner/run.sh minimal/specification ./extended/interpreter/bootstrap/eval.sh | tap-spec",
     "test-bootstrap-sexp-parser": "./build.sh && ./spec-runner/run.sh sexp-parser/specification ./sexp-parser/bootstrap/eval.sh | tap-spec",
-    "test-minimal": "./build.sh && ./spec-runner/run.sh minimal/specification ./$IMPL/eval.sh | tap-spec",
-    "test-extended": "./build.sh && ./spec-runner/run.sh extended/specification ./$IMPL/eval.sh | tap-spec"
+    "test-minimal": "./spec-runner/run.sh minimal/specification ./$IMPL/eval.sh | tap-spec",
+    "test-extended": "./spec-runner/run.sh extended/specification ./$IMPL/eval.sh | tap-spec"
   },
   "repository": {
     "type": "git",

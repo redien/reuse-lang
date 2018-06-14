@@ -34,7 +34,9 @@
                      (MalformedExpressionError range)
                      (MalformedSymbolError range)
                      (MalformedConstructorError range)
-                     (MalformedTypeError range))
+                     (MalformedTypeError range)
+                     MalformedSexpTooFewClosingBrackets
+                     MalformedSexpTooManyClosingBrackets)
 
 (def symbol-to-string (symbol)
      (match symbol
@@ -107,7 +109,11 @@
                                (error-range-to-string range))
             (MalformedTypeError range)
                 (string-concat (list 77 97 108 102 111 114 109 101 100 84 121 112 101 69 114 114 111 114)
-                               (error-range-to-string range))))
+                               (error-range-to-string range))
+            MalformedSexpTooFewClosingBrackets
+                (list 084 104 101 114 101 032 097 114 101 032 116 111 111 032 102 101 119 032 099 108 111 115 105 110 103 032 112 097 114 101 110 116 104 101 115 101 115)
+            MalformedSexpTooManyClosingBrackets
+                (list 084 104 101 114 101 032 097 114 101 032 116 111 111 032 109 097 110 121 032 099 108 111 115 105 110 103 032 112 097 114 101 110 116 104 101 115 101 115)))
 
 (def sexp-to-complex-type (sexp-to-types name parameters range)
      (result-first (fn (sub-types)
@@ -362,7 +368,11 @@
                 (Error (MalformedDefinitionError range))))
 
 (def sexps-to-definitions (expressions)
-     (list-map sexp-to-definition expressions))
+     (match expressions
+            (Result expressions)  (list-map sexp-to-definition expressions)
+            (Error error)         (match error
+                                         ParseErrorTooFewClosingBrackets   (list (Error MalformedSexpTooFewClosingBrackets))
+                                         ParseErrorTooManyClosingBrackets  (list (Error MalformedSexpTooManyClosingBrackets)))))
 
 
 

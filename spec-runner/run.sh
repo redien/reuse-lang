@@ -51,7 +51,7 @@ function testLine {
             failing=$((failing+1))
 
         elif [[ "$result" == *"${3:2}"* ]]; then
-            echo ok $tests - output contains \'$result\'
+            echo ok $tests - Error contains \'${3:2}\'
             passing=$((passing+1))
 
         else

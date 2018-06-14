@@ -9,3 +9,10 @@
      (match pair
             (Pair _ x)  x))
 
+(def pair-map-left (f pair)
+     (match pair
+            (Pair x y)  (Pair (f x) y)))
+
+(def pair-map-right (f pair)
+     (match pair
+            (Pair x y)  (Pair x (f y))))
