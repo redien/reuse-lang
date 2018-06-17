@@ -215,7 +215,7 @@
 (def translate-expression (expression)
      (match expression
             (Lambda arguments expression _)
-                (translate-lambda translate-expression arguments expression)
+                (wrap-in-brackets (translate-lambda translate-expression arguments expression))
             (Constructor name expressions _)
                 (translate-constructor translate-expression name expressions)
             (FunctionApplication expressions _)
