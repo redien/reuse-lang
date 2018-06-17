@@ -55,3 +55,14 @@ Should return an error given a malformed function definition
 | (def name () a b)
 > 1
 ? I think you wanted to write a function definition, but it doesn't have the right shape. It should look like this:\\n\\n(def name-of-function (arguments) expression)\\n\\n
+
+
+Should return an error given a malformed match expression
+> (match 1)
+? This match expression is not correct, make sure you have put parentheses correctly so that all your match rules come in pairs like this:\\n\\n(match e\\n       pattern1  e1\\n       pattern2  e2\\n       ...)\\n\\n
+
+> (match 1 x)
+? This match expression is not correct, make sure you have put parentheses correctly so that all your match rules come in pairs like this:\\n\\n(match e\\n       pattern1  e1\\n       pattern2  e2\\n       ...)\\n\\n
+
+> (match 1 x y z)
+? This match expression is not correct, make sure you have put parentheses correctly so that all your match rules come in pairs like this:\\n\\n(match e\\n       pattern1  e1\\n       pattern2  e2\\n       ...)\\n\\n

@@ -33,6 +33,7 @@
                      (MalformedFunctionDefinitionError range)
                      (MalformedFunctionNameError range)
                      (MalformedExpressionError range)
+                     (MalformedMatchExpressionError range)
                      (MalformedSymbolError range)
                      (MalformedConstructorError range)
                      (MalformedTypeError range)
@@ -104,6 +105,9 @@
                                (error-range-to-string range))
             (MalformedExpressionError range)
                 (string-concat (list 77 97 108 102 111 114 109 101 100 69 120 112 114 101 115 115 105 111 110 69 114 114 111 114)
+                               (error-range-to-string range))
+            (MalformedMatchExpressionError range)
+                (string-concat (list 084 104 105 115 032 109 097 116 099 104 032 101 120 112 114 101 115 115 105 111 110 032 105 115 032 110 111 116 032 099 111 114 114 101 099 116 044 032 109 097 107 101 032 115 117 114 101 032 121 111 117 032 104 097 118 101 032 112 117 116 032 112 097 114 101 110 116 104 101 115 101 115 032 099 111 114 114 101 099 116 108 121 032 115 111 032 116 104 097 116 032 097 108 108 032 121 111 117 114 032 109 097 116 099 104 032 114 117 108 101 115 032 099 111 109 101 032 105 110 032 112 097 105 114 115 032 108 105 107 101 032 116 104 105 115 058 010 010 040 109 097 116 099 104 032 101 010 032 032 032 032 032 032 032 112 097 116 116 101 114 110 049 032 032 101 049 010 032 032 032 032 032 032 032 112 097 116 116 101 114 110 050 032 032 101 050 010 032 032 032 032 032 032 032 046 046 046 041 010 010)
                                (error-range-to-string range))
             (MalformedSymbolError range)
                 (string-concat (list 77 97 108 102 111 114 109 101 100 83 121 109 98 111 108 69 114 114 111 114)
@@ -275,7 +279,10 @@
 
 (def sexp-to-match-pairs (sexp-to-expression range pairs)
      ((pipe collect-pairs
-            (result-of-maybe (MalformedExpressionError range))
+            (fn (pairs) (match pairs
+                               (Some Empty)  None
+                               other         other))
+            (result-of-maybe (MalformedMatchExpressionError range))
             (result-flatmap  (pipe (list-map (sexp-to-match-pair sexp-to-expression))
                                    result-concat)))
         pairs))
