@@ -1,23 +1,4 @@
 
-(def def-string ()
-     (list 100 101 102))
-
-(def export-string ()
-     (list 101 120 112 111 114 116))
-
-(def typ-string ()
-     (list 116 121 112)) 
-
-(def fn-string ()
-     (list 102 110))
-
-(def match-string ()
-     (list 109 97 116 99 104))
-
-(def exists-string ()
-     (list 101 120 105 115 116 115))
-
-
 (def char-is-upper-case? (char)
      (and (>= char 65) (<= char 90)))
 
@@ -39,6 +20,31 @@
                      (MalformedTypeError range)
                      MalformedSexpTooFewClosingBrackets
                      MalformedSexpTooManyClosingBrackets)
+
+(def error-to-string (error)
+     (match error
+            (MalformedDefinitionError range)
+                (i18n-malformed-definition-error English range)
+            (MalformedFunctionDefinitionError range)
+                (i18n-malformed-function-definition-error English range)
+            (MalformedTypeDefinitionError range)
+                (i18n-malformed-type-definition-error English range)
+            (MalformedFunctionNameError range)
+                (i18n-malformed-function-name-error English range)
+            (MalformedExpressionError range)
+                (i18n-malformed-expression-error English range)
+            (MalformedMatchExpressionError range)
+                (i18n-malformed-match-expression-error English range)
+            (MalformedSymbolError range)
+                (i18n-malformed-symbol-error English range)
+            (MalformedConstructorError range)
+                (i18n-malformed-constructor-error English range)
+            (MalformedTypeError range)
+                (i18n-malformed-type-error English range)
+            MalformedSexpTooFewClosingBrackets
+                (i18n-malformed-sexp-too-few-closing-brackets English)
+            MalformedSexpTooManyClosingBrackets
+                (i18n-malformed-sexp-too-many-closing-brackets English)))
 
 (def symbol-to-string (symbol)
      (match symbol
@@ -80,48 +86,6 @@
                                            (list (list int32))
                                            expression
                                            range))
-
-(def error-range-to-string (range)
-     (match range
-            (Range start end)
-                 (string-concat (list 32 97 116 32)
-                 (string-concat (string-from-int32 start)
-                 (string-concat (list 45)
-                                (string-from-int32 end))))))
-
-(def error-to-string (error)
-     (match error
-            (MalformedDefinitionError range)
-                (string-concat (list 079 110 108 121 032 116 121 112 101 045 032 111 114 032 102 117 110 099 116 105 111 110 032 100 101 102 105 110 105 116 105 111 110 115 032 099 097 110 032 098 101 032 105 110 032 116 104 101 032 116 111 112 032 108 101 118 101 108 032 111 102 032 097 032 102 105 108 101 046 032 089 111 117 032 110 101 101 100 032 116 111 032 119 114 097 112 032 101 120 112 114 101 115 115 105 111 110 115 032 105 110 032 097 032 102 117 110 099 116 105 111 110 046)
-                               (error-range-to-string range))
-            (MalformedFunctionDefinitionError range)
-                (string-concat (list 073 032 116 104 105 110 107 032 121 111 117 032 119 097 110 116 101 100 032 116 111 032 119 114 105 116 101 032 097 032 102 117 110 099 116 105 111 110 032 100 101 102 105 110 105 116 105 111 110 044 032 098 117 116 032 105 116 032 100 111 101 115 110 039 116 032 104 097 118 101 032 116 104 101 032 114 105 103 104 116 032 115 104 097 112 101 046 032 073 116 032 115 104 111 117 108 100 032 108 111 111 107 032 108 105 107 101 032 116 104 105 115 058 010 010 040 100 101 102 032 110 097 109 101 045 111 102 045 102 117 110 099 116 105 111 110 032 040 097 114 103 117 109 101 110 116 115 041 032 101 120 112 114 101 115 115 105 111 110 041 010 010)
-                               (error-range-to-string range))
-            (MalformedTypeDefinitionError range)
-                (string-concat (list 073 032 116 104 105 110 107 032 121 111 117 032 119 097 110 116 101 100 032 116 111 032 119 114 105 116 101 032 097 032 116 121 112 101 032 100 101 102 105 110 105 116 105 111 110 044 032 098 117 116 032 105 116 032 100 111 101 115 110 039 116 032 104 097 118 101 032 116 104 101 032 114 105 103 104 116 032 115 104 097 112 101 046 032 073 116 032 115 104 111 117 108 100 032 108 111 111 107 032 108 105 107 101 032 116 104 105 115 058 010 010 040 116 121 112 101 032 110 097 109 101 045 111 102 045 116 121 112 101 032 078 097 109 101 079 102 067 111 110 115 116 114 117 099 116 111 114 032 046 046 046 041 010 010)
-                               (error-range-to-string range))
-            (MalformedFunctionNameError range)
-                (string-concat (list 77 97 108 102 111 114 109 101 100 70 117 110 99 116 105 111 110 78 97 109 101 69 114 114 111 114)
-                               (error-range-to-string range))
-            (MalformedExpressionError range)
-                (string-concat (list 77 97 108 102 111 114 109 101 100 69 120 112 114 101 115 115 105 111 110 69 114 114 111 114)
-                               (error-range-to-string range))
-            (MalformedMatchExpressionError range)
-                (string-concat (list 084 104 105 115 032 109 097 116 099 104 032 101 120 112 114 101 115 115 105 111 110 032 105 115 032 110 111 116 032 099 111 114 114 101 099 116 044 032 109 097 107 101 032 115 117 114 101 032 121 111 117 032 104 097 118 101 032 112 117 116 032 112 097 114 101 110 116 104 101 115 101 115 032 099 111 114 114 101 099 116 108 121 032 115 111 032 116 104 097 116 032 097 108 108 032 121 111 117 114 032 109 097 116 099 104 032 114 117 108 101 115 032 099 111 109 101 032 105 110 032 112 097 105 114 115 032 108 105 107 101 032 116 104 105 115 058 010 010 040 109 097 116 099 104 032 101 010 032 032 032 032 032 032 032 112 097 116 116 101 114 110 049 032 032 101 049 010 032 032 032 032 032 032 032 112 097 116 116 101 114 110 050 032 032 101 050 010 032 032 032 032 032 032 032 046 046 046 041 010 010)
-                               (error-range-to-string range))
-            (MalformedSymbolError range)
-                (string-concat (list 77 97 108 102 111 114 109 101 100 83 121 109 98 111 108 69 114 114 111 114)
-                               (error-range-to-string range))
-            (MalformedConstructorError range)
-                (string-concat (list 77 97 108 102 111 114 109 101 100 67 111 110 115 116 114 117 99 116 111 114 69 114 114 111 114)
-                               (error-range-to-string range))
-            (MalformedTypeError range)
-                (string-concat (list 77 97 108 102 111 114 109 101 100 84 121 112 101 69 114 114 111 114)
-                               (error-range-to-string range))
-            MalformedSexpTooFewClosingBrackets
-                (list 084 104 101 114 101 032 097 114 101 032 116 111 111 032 102 101 119 032 099 108 111 115 105 110 103 032 112 097 114 101 110 116 104 101 115 101 115)
-            MalformedSexpTooManyClosingBrackets
-                (list 084 104 101 114 101 032 097 114 101 032 116 111 111 032 109 097 110 121 032 099 108 111 115 105 110 103 032 112 097 114 101 110 116 104 101 115 101 115)))
 
 (def sexp-to-complex-type (sexp-to-types name parameters range)
      (result-first (fn (sub-types)
