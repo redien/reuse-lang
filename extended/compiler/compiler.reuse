@@ -11,8 +11,7 @@
      (Cons 67 constructor))
 
 (def parse-error (error)
-     (join (list (list 112 97 114 115 101 32 101 114 114 111 114 32)
-                 (error-to-string error))))
+     (join (list (data-parse-error) (error-to-string error))))
 
 (def is-alphanumeric (char)
      (or (and (>= char 65) (<= char 90))
@@ -177,8 +176,9 @@
             (FunctionApplication expressions _)
                 (translate-function-application translate-expression expressions)
             (IntegerConstant integer _)
-                (string-concat (list 73 110 116 51 50 46 111 102 95 105 110 116 32)
-                               (wrap-in-brackets (string-from-int32 integer)))
+                (join (list (data-int32)
+                            (space) 
+                            (wrap-in-brackets (string-from-int32 integer))))
             (Identifier name _)
                 (translate-identifier name)
             (Match expression rules _)
