@@ -234,16 +234,19 @@
             (ExistentialParameter name _)
                 name))
 
+(def translate-complex-constructor-definition (name type types parameters)
+     (join (list (prefix-constructor (escape-identifier name))
+                 (colon)
+                 ((translate-types (list-map translate-type-parameter parameters) (star)) types)
+                 (arrow)
+                 type)))
+
 (def translate-constructor-definition (type parameters constructor)
      (match constructor
             (SimpleConstructor name _)
                 (prefix-constructor (escape-identifier name))
             (ComplexConstructor name types _)
-                (join (list (prefix-constructor (escape-identifier name))
-                            (colon)
-                            ((translate-types (list-map translate-type-parameter parameters) (star)) types)
-                            (arrow)
-                            type))))
+                (translate-complex-constructor-definition name type types parameters)))
 
 (def translate-constructor-definitions (type parameters)
      (pipe (list-map (translate-constructor-definition type parameters))
