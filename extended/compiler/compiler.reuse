@@ -106,14 +106,23 @@
             _
                 (compile-error)))
 
+(def translate-constructor-expression' (translator name)
+     (pipe (list-map translator)
+           (string-join (comma))
+           wrap-in-brackets
+           (fn (parameters)
+               (list (prefix-constructor (escape-identifier name))
+                     (space)
+                     parameters))
+           join
+           wrap-in-brackets))
+
 (def translate-constructor-expression (translator name parameters)
      (match parameters
             Empty
                 (prefix-constructor (escape-identifier name))
             _
-                (wrap-in-brackets (join (list (prefix-constructor (escape-identifier name))
-                                              (space)
-                                              (wrap-in-brackets (string-join (comma) (list-map translator parameters))))))))
+                ((translate-constructor-expression' translator name) parameters)))
 
 (def translate-pattern (pattern)
      (match pattern
