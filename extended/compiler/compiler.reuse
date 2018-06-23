@@ -72,8 +72,7 @@
                      (list 120)
                      (pipe-operator)
                      expressions))
-           join
-           wrap-in-brackets))
+           join))
 
 (def translate-list (translate-expression expressions)
      (match expressions
@@ -93,17 +92,17 @@
             (Cons a (Cons b (Cons then-case (Cons else-case Empty))))
                 (join (list (if)
                             (space)
-                            (wrap-in-brackets (translate-expression a))
+                            (translate-expression a)
                             (less-than)
-                            (wrap-in-brackets (translate-expression b))
+                            (translate-expression b)
                             (space)
                             (then)
                             (space)
-                            (wrap-in-brackets (translate-expression then-case))
+                            (translate-expression then-case)
                             (space)
                             (else)
                             (space)
-                            (wrap-in-brackets (translate-expression else-case))))
+                            (translate-expression else-case)))
             _
                 (compile-error)))
 
@@ -112,9 +111,9 @@
             Empty
                 (prefix-constructor (escape-identifier name))
             _
-                (join (list (prefix-constructor (escape-identifier name))
-                            (space)
-                            (wrap-in-brackets (string-join (comma) (list-map translator parameters)))))))
+                (wrap-in-brackets (join (list (prefix-constructor (escape-identifier name))
+                                              (space)
+                                              (wrap-in-brackets (string-join (comma) (list-map translator parameters))))))))
 
 (def translate-pattern (pattern)
      (match pattern
@@ -128,7 +127,7 @@
 (def translate-rule (translate-expression rule)
      (match rule
             (Pair pattern expression)
-                 (join (list (translate-pattern pattern) (arrow) (wrap-in-brackets (translate-expression expression))))))
+                 (join (list (translate-pattern pattern) (arrow) (translate-expression expression)))))
 
 (def translate-match-expression (translate-expression expression)
      (pipe (list-map (translate-rule translate-expression))
@@ -140,11 +139,11 @@
 (def translate-function-application' (translate-expression expressions)
      (match expressions
             (Cons no-args-function Empty)
-                    (join (list (wrap-in-brackets (translate-expression no-args-function))
+                    (join (list (translate-expression no-args-function)
                                 (space)
                                 (wrap-in-brackets Empty)))
             _
-                    (string-join (space) (list-map (pipe translate-expression wrap-in-brackets) expressions))))
+                    (string-join (space) (list-map translate-expression expressions))))
 
 (def translate-function-application (translate-expression expressions)
      (match expressions
@@ -180,15 +179,15 @@
             (Constructor name expressions _)
                 (translate-constructor-expression translate-expression name expressions)
             (FunctionApplication expressions _)
-                (translate-function-application translate-expression expressions)
+                (wrap-in-brackets (translate-function-application translate-expression expressions))
             (IntegerConstant integer _)
-                (join (list (data-int32)
-                            (space) 
-                            (wrap-in-brackets (string-from-int32 integer))))
+                (wrap-in-brackets (join (list (data-int32)
+                                              (space) 
+                                              (wrap-in-brackets (string-from-int32 integer)))))
             (Identifier name _)
                 (translate-identifier name)
             (Match expression rules _)
-                ((translate-match-expression translate-expression expression) rules)))
+                (wrap-in-brackets ((translate-match-expression translate-expression expression) rules))))
 
 (def translate-function-definition (name arguments expression)
      (join (list (let-rec)
