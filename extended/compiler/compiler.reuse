@@ -61,29 +61,6 @@
             True  (int32-multiply)
             False (escape-identifier name)))))))
 
-(def translate-constructor (translator name parameters)
-     (match parameters
-            Empty
-                (prefix-constructor (escape-identifier name))
-            _
-                (join (list (prefix-constructor (escape-identifier name))
-                            (space)
-                            (wrap-in-brackets (string-join (comma) (list-map translator parameters)))))))
-
-(def translate-pattern (pattern)
-     (match pattern
-            (Capture name _)
-                (escape-identifier name)
-            (IntegerPattern integer _)
-                (join (list (string-from-int32 integer) (Cons 108 Empty)))
-            (ConstructorPattern name patterns _)
-                (translate-constructor translate-pattern name patterns)))
-
-(def translate-rule (translate-expression rule)
-     (match rule
-            (Pair pattern expression)
-                 (join (list (translate-pattern pattern) (arrow) (wrap-in-brackets (translate-expression expression))))))
-
 (def translate-pipe (translate-expression)
      (pipe (list-map translate-expression)
            (string-join (pipe-operator))
@@ -111,15 +88,6 @@
                             (translate-list translate-expression rest)
                             (list 41)))))
 
-(def translate-function-application' (translate-expression expressions)
-     (match expressions
-            (Cons no-args-function Empty)
-                    (join (list (wrap-in-brackets (translate-expression no-args-function))
-                                (space)
-                                (wrap-in-brackets Empty)))
-            _
-                    (string-join (space) (list-map (pipe translate-expression wrap-in-brackets) expressions))))
-
 (def translate-less-than (translate-expression expressions)
      (match expressions
             (Cons a (Cons b (Cons then-case (Cons else-case Empty))))
@@ -138,6 +106,45 @@
                             (wrap-in-brackets (translate-expression else-case))))
             _
                 (compile-error)))
+
+(def translate-constructor-expression (translator name parameters)
+     (match parameters
+            Empty
+                (prefix-constructor (escape-identifier name))
+            _
+                (join (list (prefix-constructor (escape-identifier name))
+                            (space)
+                            (wrap-in-brackets (string-join (comma) (list-map translator parameters)))))))
+
+(def translate-pattern (pattern)
+     (match pattern
+            (Capture name _)
+                (escape-identifier name)
+            (IntegerPattern integer _)
+                (join (list (string-from-int32 integer) (Cons 108 Empty)))
+            (ConstructorPattern name patterns _)
+                (translate-constructor-expression translate-pattern name patterns)))
+
+(def translate-rule (translate-expression rule)
+     (match rule
+            (Pair pattern expression)
+                 (join (list (translate-pattern pattern) (arrow) (wrap-in-brackets (translate-expression expression))))))
+
+(def translate-match-expression (translate-expression expression)
+     (pipe (list-map (translate-rule translate-expression))
+           (string-join (vertical-bar))
+           (fn (rules)
+               (list (match-string) (translate-expression expression) (with) rules))
+           (string-join (space))))
+
+(def translate-function-application' (translate-expression expressions)
+     (match expressions
+            (Cons no-args-function Empty)
+                    (join (list (wrap-in-brackets (translate-expression no-args-function))
+                                (space)
+                                (wrap-in-brackets Empty)))
+            _
+                    (string-join (space) (list-map (pipe translate-expression wrap-in-brackets) expressions))))
 
 (def translate-function-application (translate-expression expressions)
      (match expressions
@@ -166,19 +173,12 @@
                  (arrow)
                  (translate-expression expression))))
 
-(def translate-match-expression (translate-expression expression)
-     (pipe (list-map (translate-rule translate-expression))
-           (string-join (vertical-bar))
-           (fn (rules)
-               (list (match-string) (translate-expression expression) (with) rules))
-           (string-join (space))))
-
 (def translate-expression (expression)
      (match expression
             (Lambda arguments expression _)
                 (wrap-in-brackets (translate-lambda translate-expression arguments expression))
             (Constructor name expressions _)
-                (translate-constructor translate-expression name expressions)
+                (translate-constructor-expression translate-expression name expressions)
             (FunctionApplication expressions _)
                 (translate-function-application translate-expression expressions)
             (IntegerConstant integer _)
