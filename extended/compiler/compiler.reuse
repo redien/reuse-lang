@@ -84,20 +84,19 @@
             (Pair pattern expression)
                  (join (list (translate-pattern pattern) (arrow) (wrap-in-brackets (translate-expression expression))))))
 
-(def translate-pipe (translate-expression expressions)
-     ((pipe (list-map translate-expression)
-            (string-join (pipe-operator))
-            (fn (expressions)
-                (list (fun)
-                      (space)
-                      (wrap-in-brackets (list 120))
-                      (arrow)
-                      (list 120)
-                      (pipe-operator)
-                      expressions))
-            join
-            wrap-in-brackets
-      ) expressions))
+(def translate-pipe (translate-expression)
+     (pipe (list-map translate-expression)
+           (string-join (pipe-operator))
+           (fn (expressions)
+               (list (fun)
+                     (space)
+                     (wrap-in-brackets (list 120))
+                     (arrow)
+                     (list 120)
+                     (pipe-operator)
+                     expressions))
+           join
+           wrap-in-brackets))
 
 (def translate-list (translate-expression expressions)
      (match expressions
@@ -144,7 +143,7 @@
      (match expressions
             (Cons (Identifier name _) rest)
                     (match (string-equal? name (pipe-string))
-                           True  (translate-pipe translate-expression rest)
+                           True  ((translate-pipe translate-expression) rest)
                            False
                     (match (string-equal? name (list-string))
                            True  (translate-list translate-expression rest)
@@ -167,6 +166,13 @@
                  (arrow)
                  (translate-expression expression))))
 
+(def translate-match-expression (translate-expression expression)
+     (pipe (list-map (translate-rule translate-expression))
+           (string-join (vertical-bar))
+           (fn (rules)
+               (list (match-string) (translate-expression expression) (with) rules))
+           (string-join (space))))
+
 (def translate-expression (expression)
      (match expression
             (Lambda arguments expression _)
@@ -182,10 +188,7 @@
             (Identifier name _)
                 (translate-identifier name)
             (Match expression rules _)
-                (string-join (space) (list (match-string)
-                                           (translate-expression expression)
-                                           (with)
-                                           (string-join (vertical-bar) (list-map (translate-rule translate-expression) rules))))))
+                ((translate-match-expression translate-expression expression) rules)))
 
 (def translate-function-definition (name arguments expression)
      (join (list (let-rec)
@@ -242,10 +245,9 @@
                             (arrow)
                             type))))
 
-(def translate-constructor-definitions (type parameters constructors)
-     ((pipe (list-map (translate-constructor-definition type parameters))
-            (string-join (vertical-bar))
-      ) constructors))
+(def translate-constructor-definitions (type parameters)
+     (pipe (list-map (translate-constructor-definition type parameters))
+           (string-join (vertical-bar))))
 
 (def translate-type-parameter-for-definition (parameter)
      (match parameter
@@ -254,16 +256,14 @@
             (ExistentialParameter _ __)
                 Empty))
 
-(def translate-type-parameters (parameters)
-     ((pipe 
-            (list-map translate-type-parameter-for-definition)
-            (list-filter not-empty?)
-            (list-map with-apostrophe)
-            (string-join (comma))
-      ) parameters))
+(def translate-type-parameters ()
+     (pipe (list-map translate-type-parameter-for-definition)
+           (list-filter not-empty?)
+           (list-map with-apostrophe)
+           (string-join (comma))))
 
 (def translate-type-name (name parameters)
-     (match (translate-type-parameters parameters)
+     (match ((translate-type-parameters) parameters)
             Empty
                 (escape-identifier name)
             parameters
@@ -276,7 +276,7 @@
                  (space)
                  (translate-type-name name parameters)
                  (equals)
-                 (translate-constructor-definitions (translate-type-name name parameters) parameters constructors)
+                 ((translate-constructor-definitions (translate-type-name name parameters) parameters) constructors)
                  (definition-end))))
 
 (def translate-definition (definition)
