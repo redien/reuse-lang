@@ -106,7 +106,7 @@
             _
                 (compile-error)))
 
-(def translate-constructor-expression' (translator name)
+(def translate-constructor (translator name)
      (pipe (list-map translator)
            (string-join (comma))
            wrap-in-brackets
@@ -117,21 +117,16 @@
            join
            wrap-in-brackets))
 
-(def translate-constructor-expression (translator name parameters)
-     (match parameters
-            Empty
-                (prefix-constructor (escape-identifier name))
-            _
-                ((translate-constructor-expression' translator name) parameters)))
-
 (def translate-pattern (pattern)
      (match pattern
             (Capture name _)
                 (escape-identifier name)
             (IntegerPattern integer _)
                 (join (list (string-from-int32 integer) (Cons 108 Empty)))
+            (ConstructorPattern name Empty _)
+                (prefix-constructor (escape-identifier name))
             (ConstructorPattern name patterns _)
-                (translate-constructor-expression translate-pattern name patterns)))
+                ((translate-constructor translate-pattern name) patterns)))
 
 (def translate-rule (translate-expression rule)
      (match rule
@@ -185,8 +180,10 @@
      (match expression
             (Lambda arguments expression _)
                 (wrap-in-brackets (translate-lambda translate-expression arguments expression))
+            (Constructor name Empty _)
+                (prefix-constructor (escape-identifier name))
             (Constructor name expressions _)
-                (translate-constructor-expression translate-expression name expressions)
+                ((translate-constructor translate-expression name) expressions)
             (FunctionApplication expressions _)
                 (wrap-in-brackets (translate-function-application translate-expression expressions))
             (IntegerConstant integer _)
