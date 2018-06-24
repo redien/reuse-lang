@@ -1,5 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-script_path=$(dirname "$0")
+project_root=$(dirname "$0")/..
 
-echo "$2" | $script_path/../extended/interpreter/bootstrap/eval.sh "$(cat $script_path/../generated/parser/parser.reuse)$1" "(stringify (definitions-to-sexps (sexps-to-definitions (parse stdin))))" --stdin
+echo "$2" | $project_root/extended/compiler/eval.sh "$(cat $project_root/generated/parser.reuse)$1" "(stringify (definitions-to-sexps (sexps-to-definitions (parse stdin))))" --stdin

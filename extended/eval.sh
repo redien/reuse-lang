@@ -1,5 +1,4 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
 set -e
 
 script_path=$(dirname "$0")
@@ -28,9 +27,9 @@ print_output() {
 
 compile() {
     echo >&2
-    print_source $program_source
+#    print_source $program_source
     $script_path/$IMPL/compile-library.sh $program_source $generated_folder
-    print_output $generated_folder/ocaml/source.ml
+#    print_output $generated_folder/ocaml/source.ml
 }
 
 if [ "$3" == "--stdin" ]

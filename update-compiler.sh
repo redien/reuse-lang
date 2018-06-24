@@ -1,20 +1,31 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
 set -e
 
-script_path=$(dirname "$0")
+project_root=$(dirname "$0")
 
-build() {
-    $script_path/build.sh
+build_compiler_source() {
+    $project_root/extended/compiler/build.sh
+}
+
+build_compiler_binary() {
+    $project_root/build.sh
 }
 
 copy_compiler() {
-    cp $script_path/generated/extended/compiler/compiler.ml $script_path/extended/compiler/compiler.ml
+    cp $project_root/generated/extended/CompilerOCaml.ml $project_root/extended/compiler/ocaml.ml
 }
 
-build
+>&2 echo First stage: Build new compiler source
+build_compiler_source
 copy_compiler
-build
+build_compiler_binary
+
+>&2 echo Second stage: Build source again with binary derived from itself
+build_compiler_source
 copy_compiler
+build_compiler_binary
+
+>&2 echo Third stage: Build source one last time to make sure it bootstraps
+build_compiler_source
 
 >&2 echo Updated successfully!
