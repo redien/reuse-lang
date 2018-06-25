@@ -2,4 +2,4 @@
 
 project_root=$(dirname "$0")/..
 
-echo "$2" | $project_root/generated/sexp-parser/ocaml/executable
+echo "$2" | $project_root/generated/sexp-parser/executable
