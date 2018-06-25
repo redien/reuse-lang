@@ -10,7 +10,7 @@ cat "$3/executable.reuse" | "$project_root/generated/extended/compiler-ocaml" > 
 
 if [ "$4" == "--stdin" ]
 then
-    printf "\n$(cat $script_path/../stdin_wrapper.ml)\nPrintf.printf \"%%s\" (_list_to_string (main _stdin_list))\n" >> $3/executable.ml
+    printf "\n$(cat $script_path/stdin_wrapper.ml)\nPrintf.printf \"%%s\" (_list_to_string (main _stdin_list))\n" >> $3/executable.ml
 else
     printf "\nPrintf.printf \"%%d\" (Int32.to_int (main ()))\n" >> $3/executable.ml
 fi
