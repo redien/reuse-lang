@@ -14,6 +14,6 @@ program_source=$generated_folder/program_source.reuse
 
 echo "$1 (export main (stdin) $2)" > $program_source
 $script_path/$IMPL/compile-executable.sh $program_source $generated_folder "$3"
-ocaml $generated_folder/executable.ml
+./$generated_folder/executable
 
 exit $?

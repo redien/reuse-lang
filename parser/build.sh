@@ -17,4 +17,3 @@ $(cat $project_root/parser/parser.reuse)
 [ -d $project_root/generated/parser ] || mkdir $project_root/generated/parser
 
 $project_root/extended/compiler/compile-executable.sh $project_root/generated/parser.reuse $project_root/generated/parser --stdin
-ocamlc -g $project_root/generated/parser/executable.ml -o $project_root/generated/parser/executable
