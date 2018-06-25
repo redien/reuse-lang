@@ -4,7 +4,7 @@ set -e
 project_root=$(dirname "$0")
 
 build_compiler_source() {
-    $project_root/extended/compiler/build.sh
+    $project_root/extended/ocaml-compiler/build.sh
 }
 
 build_compiler_binary() {
@@ -12,7 +12,7 @@ build_compiler_binary() {
 }
 
 copy_compiler() {
-    cp $project_root/generated/extended/CompilerOCaml.ml $project_root/extended/compiler/ocaml.ml
+    cp $project_root/generated/extended/CompilerOCaml.ml $project_root/extended/ocaml-compiler/ocaml.ml
 }
 
 >&2 echo First stage: Build new compiler source
