@@ -13,6 +13,8 @@ $(cat $project_root/generated/standard-library.reuse)
 $(cat $project_root/sexp-parser/parser.reuse)
 $(cat $project_root/parser/strings.reuse)
 $(cat $project_root/parser/parser.reuse)
+$(cat $script_path/../common-strings.reuse)
+$(cat $script_path/../common.reuse)
 $(cat $script_path/ocaml-strings.reuse)
 $(cat $script_path/ocaml.reuse)
 "
