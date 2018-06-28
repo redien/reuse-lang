@@ -17,6 +17,7 @@
     "test": "npm run test-compiler && npm run test-sexp-parser && npm run test-parser",
     "test-compiler": "npm run test-ocaml-compiler",
     "test-ocaml-compiler": "extended/ocaml-compiler/build.sh && IMPL=extended/ocaml-compiler npm run test-extended && IMPL=extended/ocaml-compiler npm run test-minimal",
+    "test-minimal-compiler": "extended/minimal-compiler/build.sh && IMPL=extended/minimal-compiler npm run test-minimal && IMPL=extended/minimal-compiler npm run test-extended",
     "test-sexp-parser": "sexp-parser/build.sh && ./spec-runner/run.sh sexp-parser/specification ./sexp-parser/eval.sh | tap-spec",
     "test-parser": "parser/build.sh && ./spec-runner/run.sh parser/specification ./parser/eval.sh | tap-spec",
     "test-minimal": "./spec-runner/run.sh minimal/specification ./$IMPL/eval.sh | tap-spec",

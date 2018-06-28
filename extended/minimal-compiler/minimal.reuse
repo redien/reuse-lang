@@ -1,0 +1,108 @@
+
+(def translate-pipe (translate-expression)
+     (pipe (list-map translate-expression)
+           (string-join (space))
+           (fn (expressions)
+               (list (pipe-string)
+                     (space)
+                     expressions))
+           join))
+
+(def translate-list (translate-expression)
+     (pipe (list-map translate-expression)
+           (string-join (space))
+           (fn (expressions)
+               (list (list-string)
+                     (space)
+                     expressions))
+           join))
+
+(def translate-constructor (translator name)
+     (pipe (list-map translator)
+           (string-join (space))
+           (fn (parameters)
+               (list name
+                     (space)
+                     parameters))
+           join
+           wrap-in-brackets))
+
+(def translate-pattern (pattern)
+     (match pattern
+            (Capture name _)
+                name
+            (IntegerPattern integer _)
+                (string-from-int32 integer)
+            (ConstructorPattern name Empty _)
+                name
+            (ConstructorPattern name patterns _)
+                ((translate-constructor translate-pattern name) patterns)))
+
+(def translate-rule (translate-expression rule)
+     (match rule
+            (Pair pattern expression)
+                 (join (list (translate-pattern pattern) (space) (translate-expression expression)))))
+
+(def translate-match-expression (translate-expression expression)
+     (pipe (list-map (translate-rule translate-expression))
+           (string-join (space))
+           (fn (rules)
+               (list (match-string) (translate-expression expression) rules))
+           (string-join (space))))
+
+(def translate-function-application (translate-expression expressions)
+     (match expressions
+            (Cons (Identifier name _) rest)
+                    (match (string-equal? name (pipe-string))
+                           True  ((translate-pipe translate-expression) rest)
+                           False
+                    (match (string-equal? name (list-string))
+                           True  ((translate-list translate-expression) rest)
+                           False (string-join (space) (list-map translate-expression expressions))))
+            _
+                    (string-join (space) (list-map translate-expression expressions))))
+
+(def translate-argument-list (arguments)
+     (wrap-in-brackets (string-join (space) arguments)))
+
+(def translate-lambda (translate-expression arguments expression)
+     (join (list (fn-string)
+                 (translate-argument-list arguments)
+                 (translate-expression expression))))
+
+(def translate-expression (expression)
+     (match expression
+            (Lambda arguments expression _)
+                (wrap-in-brackets (translate-lambda translate-expression arguments expression))
+            (Constructor name Empty _)
+                name
+            (Constructor name expressions _)
+                ((translate-constructor translate-expression name) expressions)
+            (FunctionApplication expressions _)
+                (wrap-in-brackets (translate-function-application translate-expression expressions))
+            (IntegerConstant integer _)
+                (string-from-int32 integer)
+            (Identifier name _)
+                name
+            (Match expression rules _)
+                (wrap-in-brackets ((translate-match-expression translate-expression expression) rules))))
+
+(def translate-function-definition (name arguments expression)
+     (wrap-in-brackets (string-join (space) (list (def-string)
+                                                  name
+                                                  (translate-argument-list arguments)
+                                                  (translate-expression expression)))))
+
+(def translate-definition (definition)
+     (match definition
+        (FunctionDefinition name arguments expression _)
+                (translate-function-definition name arguments expression)
+        (ExportDefinition name arguments expression _)
+                (translate-function-definition name arguments expression)
+        (TypeDefinition name parameters constructors _)
+                (stringify (definitions-to-sexps (list (Result definition))))))
+
+(export to_reuse (definitions source)
+        (match (result-concat definitions)
+               (Result definitions)  (Result (string-join (newline) (list-map translate-definition definitions)))
+               (Error error)         (Error  (parse-error error))))
