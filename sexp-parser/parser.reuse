@@ -58,11 +58,11 @@
                               True   (parse-expression (indexed-iterator-next iterator) parse-sexps)
                               False  (parse-symbol iterator))))
 
-(def parse-sexps' (iterator expressions)
-     (match (parse-expression iterator parse-sexps')
+(def parse-sexps (iterator expressions)
+     (match (parse-expression iterator parse-sexps)
             ParseEnd                    (Pair iterator (list-reverse expressions))
             (ParseOut iterator)         (Pair iterator (list-reverse expressions))
-            (ParseNext iterator result) (parse-sexps' iterator (Cons result expressions))))
+            (ParseNext iterator result) (parse-sexps iterator (Cons result expressions))))
 
 (def inc (x) (+ x 1))
 
@@ -89,7 +89,7 @@
 (export parse (input)
         (match (check-errors (list-to-indexed-iterator input))
                (Some error)  (Error error)
-               None          (match (parse-sexps' (list-to-indexed-iterator input) Empty)
+               None          (match (parse-sexps (list-to-indexed-iterator input) Empty)
                                     (Pair _ expressions)  (Result expressions))))
 
 (def wrap-in-brackets (string)
