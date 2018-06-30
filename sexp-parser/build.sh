@@ -14,4 +14,4 @@ $(cat $project_root/sexp-parser/parser.reuse)
 
 [ -d $project_root/generated/sexp-parser ] || mkdir $project_root/generated/sexp-parser
 
-$project_root/extended/ocaml-compiler/compile-executable.sh $project_root/generated/sexp-parser.reuse $project_root/generated/sexp-parser --stdin
+$project_root/compile-executable.sh $project_root/generated/sexp-parser.reuse $project_root/generated/sexp-parser --stdin

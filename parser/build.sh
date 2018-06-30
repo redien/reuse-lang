@@ -16,4 +16,4 @@ $(cat $project_root/parser/parser.reuse)
 
 [ -d $project_root/generated/parser ] || mkdir $project_root/generated/parser
 
-$project_root/extended/ocaml-compiler/compile-executable.sh $project_root/generated/parser.reuse $project_root/generated/parser --stdin
+$project_root/compile-executable.sh $project_root/generated/parser.reuse $project_root/generated/parser --stdin

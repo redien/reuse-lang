@@ -4,7 +4,11 @@ set -e
 script_path=$(dirname "$0")
 project_root=$script_path/../..
 
-cat "$1" | "$project_root/generated/extended/compiler-ocaml" > "$2/executable.ml"
+if [ -z "$REUSE_COMPILER" ]; then
+    REUSE_COMPILER="$project_root/generated/extended/compiler-ocaml"
+fi
+
+cat "$1" | "$REUSE_COMPILER" > "$2/executable.ml"
 
 if [ "$3" == "--stdin" ]
 then
