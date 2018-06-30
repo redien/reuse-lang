@@ -9,7 +9,7 @@ project_root=$(dirname "$0")/..
 $(cat $project_root/standard-library/boolean.reuse)
 $(cat $project_root/standard-library/pair.reuse)
 $(cat $project_root/standard-library/maybe.reuse)
-$(cat $project_root/standard-library/iterator.reuse)
+$(cat $project_root/standard-library/indexed-iterator.reuse)
 $(cat $project_root/standard-library/list.reuse)
 $(cat $project_root/standard-library/string.reuse)
 $(cat $project_root/standard-library/result.reuse)
