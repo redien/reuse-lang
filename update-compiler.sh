@@ -28,4 +28,7 @@ build_compiler_binary
 >&2 echo Third stage: Build source one last time to make sure it bootstraps
 build_compiler_source
 
+>&2 echo Fourth stage: Run test suite
+npm test
+
 >&2 echo Updated successfully!
