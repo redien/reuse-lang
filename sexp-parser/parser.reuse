@@ -1,16 +1,4 @@
 
-(def read-while' (predicate iterator string)
-     (match (indexed-iterator-get iterator)
-            None      (Pair iterator string)
-            (Some x)  (match (predicate x)
-                             True   (read-while' predicate (indexed-iterator-next iterator) (Cons x string))
-                             False  (Pair iterator string))))
-
-(def read-while (predicate iterator)
-     (match (read-while' predicate iterator Empty)
-            (Pair iterator Empty)  (Pair iterator Empty)
-            (Pair iterator string) (Pair iterator (list-reverse string))))
-
 (def whitespace? (character)
      (or (= character 32)
      (or (= character 13)
@@ -38,7 +26,7 @@
      (Range (indexed-iterator-index start) (indexed-iterator-index end)))
 
 (def parse-symbol (iterator)
-     (match (read-while atom-character? iterator)
+     (match (list-collect-from-indexed-iterator atom-character? iterator)
             (Pair _ Empty)             (ParseOut iterator)
             (Pair next-iterator name)  (ParseNext next-iterator (Symbol name (symbol-range iterator next-iterator)))))
 

@@ -1,5 +1,8 @@
 (typ (list a) (Cons a (list a)) Empty)
 
+(def list-cons (x xs)
+     (Cons x xs))
+
 (def list-first (list)
      (match list
             (Cons x _)
@@ -80,3 +83,13 @@
 (def list-to-indexed-iterator (list)
       (IndexedIterator list 0 list-indexed-iterator-get list-indexed-iterator-next))
 
+(def list-collect-from-indexed-iterator' (predicate iterator initial)
+     (match (indexed-iterator-get iterator)
+            None      (Pair iterator initial)
+            (Some x)  (match (predicate x)
+                             True   (list-collect-from-indexed-iterator' predicate (indexed-iterator-next iterator) (Cons x initial))
+                             False  (Pair iterator initial))))
+
+(def list-collect-from-indexed-iterator (predicate iterator)
+     (match (list-collect-from-indexed-iterator' predicate iterator Empty)
+            (Pair iterator result) (Pair iterator (list-reverse result))))
