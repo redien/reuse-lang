@@ -24,48 +24,48 @@
             Empty
                 True))
 
-(def list-reverse' (list new-list)
+(def list-foldrk (f initial list continue)
      (match list
-            Empty       new-list
-            (Cons x xs) (list-reverse' xs (Cons x new-list))))
+            Empty       (continue initial)
+            (Cons x xs) (list-foldrk f initial xs (fn (value) (f x value continue)))))
 
-(def list-reverse (list)
-     (list-reverse' list Empty))
-
-(def list-concat (a b)
-     (match a
-            Empty       b
-            (Cons x xs) (Cons x (list-concat xs b))))
+(def list-foldlk (f initial list continue)
+     (match list
+            Empty       (continue initial)
+            (Cons x xs) (f x initial (fn (new-value)
+                                         (list-foldlk f new-value xs continue)))))
 
 (def list-foldr (f initial list)
-     (match list
-            Empty       initial
-            (Cons x xs) (f x (list-foldr f initial xs))))
+     (list-foldrk (fn (x value continue)
+                      (continue (f x value)))
+                  initial
+                  list
+                  (fn (x) x)))
 
 (def list-foldl (f initial list)
      (match list
             Empty       initial
             (Cons x xs) (list-foldl f (f x initial) xs)))
 
+(def list-concat (a b)
+     (list-foldr list-cons b a))
+
+(def list-reverse (list)
+     (list-foldl list-cons Empty list))
 
 (def list-map (f list)
-     (match list
-            Empty       Empty
-            (Cons x xs) (Cons (f x) (list-map f xs))))
+     (list-foldr (fn (head tail) (list-cons (f head) tail)) Empty list))
 
 (def list-flatmap (f list)
-     (match list
-            Empty       Empty
-            (Cons x xs) (list-concat (f x) (list-flatmap f xs))))
+     (list-foldr (fn (head tail) (list-concat (f head) tail)) Empty list))
 
 (def list-filter (f list)
-     (list-reverse
-        (list-foldl (fn (x xs)
-                        (match (f x)
-                                True  (Cons x xs)
-                                False xs))
-                    Empty
-                    list)))
+     (list-foldr (fn (head tail)
+                     (match (f head)
+                            True  (Cons head tail)
+                            False tail))
+                 Empty
+                 list))
 
 (def list-any? (f list)
      (not (list-empty? (list-filter f list))))
