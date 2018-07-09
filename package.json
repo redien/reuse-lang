@@ -3,25 +3,19 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "dependencies": {
-    "bs-platform": "1.7.0",
-    "immutable": "^3.8.1",
-    "prettier": "^1.3.1"
-  },
   "devDependencies": {
-    "babel-cli": "^6.24.1",
-    "babel-preset-env": "^1.5.2",
     "tap-spec": "^4.1.1"
   },
   "scripts": {
     "test": "npm run test-compiler && npm run test-sexp-parser && npm run test-parser",
     "test-compiler": "npm run test-ocaml-compiler",
     "test-ocaml-compiler": "extended/ocaml-compiler/build.sh && IMPL=extended/ocaml-compiler npm run test-extended && IMPL=extended/ocaml-compiler npm run test-minimal",
-    "test-minimal-compiler": "extended/minimal-compiler/build.sh && IMPL=extended/minimal-compiler npm run test-minimal && IMPL=extended/minimal-compiler npm run test-extended",
+    "test-minimal-compiler": "rm -fR generated/tests && extended/minimal-compiler/build.sh && IMPL=extended/minimal-compiler npm run test-minimal && IMPL=extended/minimal-compiler npm run test-extended",
     "test-sexp-parser": "sexp-parser/build.sh && ./spec-runner/run.sh sexp-parser/specification ./sexp-parser/eval.sh | tap-spec",
     "test-parser": "parser/build.sh && ./spec-runner/run.sh parser/specification ./parser/eval.sh | tap-spec",
     "test-minimal": "./spec-runner/run.sh minimal/specification ./$IMPL/eval.sh | tap-spec",
-    "test-extended": "./spec-runner/run.sh extended/specification ./$IMPL/eval.sh | tap-spec"
+    "test-extended": "./spec-runner/run.sh extended/specification ./$IMPL/eval.sh | tap-spec",
+    "line-count": "git ls-files | grep '\\.reuse' | xargs wc -l"
   },
   "repository": {
     "type": "git",
