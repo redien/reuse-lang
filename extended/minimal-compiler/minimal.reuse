@@ -8,14 +8,16 @@
                      expressions))
            join))
 
+(def translate-cons (first rest)
+     (wrap-in-brackets (join (list (data-cons)
+                                   (space)
+                                   first
+                                   (space)
+                                   rest))))
+
 (def translate-list (translate-expression)
      (pipe (list-map translate-expression)
-           (string-join (space))
-           (fn (expressions)
-               (list (list-string)
-                     (space)
-                     expressions))
-           join))
+           (list-foldr translate-cons (data-empty))))
 
 (def translate-constructor (translator name)
      (pipe (list-map translator)
@@ -54,13 +56,13 @@
      (match expressions
             (Cons (Identifier name _) rest)
                     (match (string-equal? name (pipe-string))
-                           True  ((translate-pipe translate-expression) rest)
+                           True  (wrap-in-brackets ((translate-pipe translate-expression) rest))
                            False
                     (match (string-equal? name (list-string))
                            True  ((translate-list translate-expression) rest)
-                           False (string-join (space) (list-map translate-expression expressions))))
+                           False (wrap-in-brackets (string-join (space) (list-map translate-expression expressions)))))
             _
-                    (string-join (space) (list-map translate-expression expressions))))
+                    (wrap-in-brackets (string-join (space) (list-map translate-expression expressions)))))
 
 (def translate-argument-list (arguments)
      (wrap-in-brackets (string-join (space) arguments)))
@@ -79,7 +81,7 @@
             (Constructor name expressions _)
                 ((translate-constructor translate-expression name) expressions)
             (FunctionApplication expressions _)
-                (wrap-in-brackets (translate-function-application translate-expression expressions))
+                (translate-function-application translate-expression expressions)
             (IntegerConstant integer _)
                 (string-from-int32 integer)
             (Identifier name _)
