@@ -24,6 +24,16 @@
             Empty
                 True))
 
+(def list-size' (list size)
+     (match list
+            (Cons _ rest)
+                (list-size' rest (+ size 1))
+            Empty
+                size))
+
+(def list-size (list)
+     (list-size' list 0))
+
 (def list-foldrk (f initial list continue)
      (match list
             Empty       (continue initial)
