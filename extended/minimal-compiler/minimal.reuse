@@ -52,6 +52,17 @@
                (list (match-string) (translate-expression expression) rules))
            (string-join (space))))
 
+(def translate-apply (expressions)
+     (list-concat (data-apply) (string-from-int32 (list-size expressions))))
+
+(def translate-function-application' (translate-expression expressions)
+     ((pipe (list-map translate-expression)
+            (fn (expressions)
+                (Cons (translate-apply expressions) expressions))
+            (string-join (space))
+            wrap-in-brackets)
+        expressions))
+
 (def translate-function-application (translate-expression expressions)
      (match expressions
             (Cons (Identifier name _) rest)
@@ -60,9 +71,9 @@
                            False
                     (match (string-equal? name (list-string))
                            True  ((translate-list translate-expression) rest)
-                           False (wrap-in-brackets (string-join (space) (list-map translate-expression expressions)))))
+                           False (translate-function-application' translate-expression expressions)))
             _
-                    (wrap-in-brackets (string-join (space) (list-map translate-expression expressions)))))
+                    (translate-function-application' translate-expression expressions)))
 
 (def translate-argument-list (arguments)
      (wrap-in-brackets (string-join (space) arguments)))
