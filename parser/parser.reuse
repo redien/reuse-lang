@@ -351,6 +351,8 @@
                        False  (Error (MalformedDefinitionError range))))
             (List (Cons kind (Cons name rest)) range)
                 (result-flatmap (sexp-to-definition' name rest range) (symbol-to-string kind))
+            (List (Cons (List _ range) Empty) __)
+                (Error (MalformedDefinitionError range))
             (List Empty range)
                 (Error (MalformedDefinitionError range))
             (Symbol _ range)
