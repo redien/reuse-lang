@@ -1,0 +1,60 @@
+
+(typ (parser a i) (Parser (fn (i) (maybe (pair a i)))))
+
+(def parser-result (x)
+     (Parser (fn (input) (Some (Pair x input)))))
+
+(def parser-fail ()
+     (Parser (fn (_) None)))
+
+(def parser-apply (parser input)
+     (match parser
+            (Parser p)  (p input)))
+
+(def parser-run (parser input)
+     (maybe-map pair-left (parser-apply parser input)))
+
+(def parser-bind (f parser)
+     (Parser (fn (input)
+                 (match (parser-apply parser input)
+                         None                      None
+                         (Some (Pair value rest))  (parser-apply (f value) rest)))))
+
+(def parser-if (predicate parser)
+     (parser-bind (fn (value)
+                      (match (predicate value)
+                              True   (parser-result value)
+                              False  (parser-fail)))
+                  parser))
+
+(def parser-and (f parser-a parser-b)
+     (parser-bind (fn (a)
+     (parser-bind (fn (b)
+                      (f a b))
+                  parser-b))
+                  parser-a))
+
+(def parser-or (parser-a parser-b)
+     (Parser (fn (input)
+                 (match (parser-apply parser-a input)
+                        (Some x)  (Some x)
+                        None      (parser-apply parser-b input)))))
+
+(def parser-while' (parser-while parser f)
+     (parser-bind (fn (first)
+     (parser-bind (fn (rest)
+                      (parser-result (f first rest)))
+                  (parser-while parser)))
+                  parser))
+
+(def parser-while (f initial parser)
+     (parser-or (parser-while' (parser-while f initial) parser f)
+                (parser-result initial)))
+
+(def parser-zero-or-more (parser)
+     (parser-while list-cons Empty parser))
+
+(def parser-one-or-more (parser)
+     (parser-and (fn (first rest) (parser-result (list-cons first rest)))
+                 parser
+                 (parser-zero-or-more parser)))

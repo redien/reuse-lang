@@ -1,6 +1,9 @@
 
 (typ (pair a b) (Pair a b))
 
+(def pair-cons (a b)
+     (Pair a b))
+
 (def pair-left (pair)
      (match pair
             (Pair x _)  x))
