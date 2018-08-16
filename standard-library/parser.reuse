@@ -40,21 +40,18 @@
                         (Some x)  (Some x)
                         None      (parser-apply parser-b input)))))
 
-(def parser-while' (parser-while parser f)
+(def parser-zero-or-more' (parser-zero-or-more parser f)
      (parser-bind (fn (first)
      (parser-bind (fn (rest)
                       (parser-result (f first rest)))
-                  (parser-while parser)))
+                  (parser-zero-or-more parser)))
                   parser))
 
-(def parser-while (f initial parser)
-     (parser-or (parser-while' (parser-while f initial) parser f)
+(def parser-zero-or-more (f initial parser)
+     (parser-or (parser-zero-or-more' (parser-zero-or-more f initial) parser f)
                 (parser-result initial)))
 
-(def parser-zero-or-more (parser)
-     (parser-while list-cons Empty parser))
-
-(def parser-one-or-more (parser)
-     (parser-and (fn (first rest) (parser-result (list-cons first rest)))
+(def parser-one-or-more (f initial parser)
+     (parser-and (fn (first rest) (parser-result (f first rest)))
                  parser
-                 (parser-zero-or-more parser)))
+                 (parser-zero-or-more f initial parser)))

@@ -16,6 +16,12 @@
 (def parser-one-if (predicate)
      (parser-if predicate (parser-one)))
 
+(def parser-zero-or-more-list (parser)
+     (parser-zero-or-more list-cons Empty parser))
+
+(def parser-one-or-more-list (parser)
+     (parser-one-or-more list-cons Empty parser))
+
 (def whitespace? (character)
      (or (= character 32)
      (or (= character 13)
@@ -30,9 +36,9 @@
      (parser-bind (fn (value)
      (parser-bind (fn (_)
                       (parser-result value))
-                  (parser-zero-or-more (parser-whitespace))))
+                  (parser-zero-or-more-list (parser-whitespace))))
                   parser))
-                  (parser-zero-or-more (parser-whitespace))))
+                  (parser-zero-or-more-list (parser-whitespace))))
 
 (def atom-character? (character)
      (and (not (= character 40))
@@ -45,7 +51,7 @@
 (def parser-atom ()
      (parser-bind (fn (name)
                       (parser-result (Symbol name (Range 0 0 0))))
-                  (parser-with-whitespace (parser-one-or-more (parser-atom-character)))))
+                  (parser-with-whitespace (parser-one-or-more-list (parser-atom-character)))))
 
 (def parser-open-bracket ()
      (parser-with-whitespace (parser-if (fn (x) (= x 40)) (parser-one))))
@@ -59,7 +65,7 @@
      (parser-bind (fn (_)
                       (parser-result (List sexps (Range 0 0 0))))
                   (parser-close-bracket)))
-                  (parser-zero-or-more (sexp-parser))))
+                  (parser-zero-or-more-list (sexp-parser))))
                   (parser-open-bracket)))
 
 (def sexp-parser ()
@@ -67,7 +73,7 @@
                 (parser-atom)))
 
 (def parse-sexps (input)
-     (parser-run (parser-zero-or-more (sexp-parser)) (Pair 0 input)))
+     (parser-run (parser-zero-or-more-list (sexp-parser)) (Pair 0 input)))
 
 (export parse (input)
         (match (parse-sexps input)
