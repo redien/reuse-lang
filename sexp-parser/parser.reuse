@@ -10,8 +10,8 @@
 (def parser-one ()
      (Parser (fn (input)
                  (match input
-                        Empty        None
-                        (Cons x xs)  (Some (Pair x xs))))))
+                        (Pair offset Empty)        None
+                        (Pair offset (Cons x xs))  (Some (Pair x (Pair (+ offset 1) xs)))))))
 
 (def parser-one-if (predicate)
      (parser-if predicate (parser-one)))
@@ -67,7 +67,7 @@
                 (parser-atom)))
 
 (def parse-sexps (input)
-     (parser-run (parser-zero-or-more (sexp-parser)) input))
+     (parser-run (parser-zero-or-more (sexp-parser)) (Pair 0 input)))
 
 (export parse (input)
         (match (parse-sexps input)
