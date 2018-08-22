@@ -1,5 +1,16 @@
 
-(typ range               (Range int32 int32 int32))
+(def whitespace? (character)
+     (or (= character 32)
+     (or (= character 13)
+     (or (= character 9)
+         (= character 10)))))
+
+(def atom-character? (character)
+     (and (not (= character 40))
+     (and (not (= character 41))
+          (not (whitespace? character)))))
+
+(typ range               (Range int32 int32))
 
 (typ sexp                (Symbol (list int32)      range)
                          (List   (list sexp)       range))
@@ -7,81 +18,70 @@
 (typ parse-error         ParseErrorTooFewClosingBrackets
                          ParseErrorTooManyClosingBrackets)
 
-(def parser-one ()
-     (Parser (fn (input)
-                 (match input
-                        (Pair offset Empty)        None
-                        (Pair offset (Cons x xs))  (Some (Pair x (Pair (+ offset 1) xs)))))))
+(typ (parse-result i e)  (ParseNext i e)
+                         (ParseOut i)
+                         ParseEnd)
 
-(def parser-one-if (predicate)
-     (parser-if predicate (parser-one)))
+(def symbol-range (start end)
+     (Range (indexed-iterator-index start) (indexed-iterator-index end)))
 
-(def parser-zero-or-more-list (parser)
-     (parser-zero-or-more list-cons Empty parser))
+(def parse-symbol (iterator)
+     (match (list-collect-from-indexed-iterator atom-character? iterator)
+            (Pair _ Empty)             (ParseOut iterator)
+            (Pair next-iterator name)  (ParseNext next-iterator (Symbol name (symbol-range iterator next-iterator)))))
 
-(def parser-one-or-more-list (parser)
-     (parser-one-or-more list-cons Empty parser))
+(def list-range (start end)
+     (Range (- (indexed-iterator-index start) 1) (indexed-iterator-index end)))
 
-(def whitespace? (character)
-     (or (= character 32)
-     (or (= character 13)
-     (or (= character 9)
-         (= character 10)))))
+(def parse-list (iterator parse-sexps)
+     (match (parse-sexps iterator Empty)
+            (Pair next-iterator expressions)  (ParseNext next-iterator (List expressions (list-range iterator next-iterator)))))
 
-(def parser-whitespace ()
-     (parser-if whitespace? (parser-one)))
+(def parse-expression (iterator parse-sexps)
+     (match (indexed-iterator-get iterator)
+            None       ParseEnd
+            (Some 40)  (parse-list (indexed-iterator-next iterator) parse-sexps)
+            (Some 41)  (ParseOut (indexed-iterator-next iterator))
+            (Some x)   (match (whitespace? x)
+                              True   (parse-expression (indexed-iterator-next iterator) parse-sexps)
+                              False  (parse-symbol iterator))))
 
-(def parser-with-whitespace (parser)
-     (parser-bind (fn (_)
-     (parser-bind (fn (value)
-     (parser-bind (fn (_)
-                      (parser-result value))
-                  (parser-zero-or-more-list (parser-whitespace))))
-                  parser))
-                  (parser-zero-or-more-list (parser-whitespace))))
+(def parse-sexps (iterator expressions)
+     (match (parse-expression iterator parse-sexps)
+            ParseEnd                    (Pair iterator (list-reverse expressions))
+            (ParseOut iterator)         (Pair iterator (list-reverse expressions))
+            (ParseNext iterator result) (parse-sexps iterator (Cons result expressions))))
 
-(def atom-character? (character)
-     (and (not (= character 40))
-     (and (not (= character 41))
-          (not (whitespace? character)))))
+(def inc (x) (+ x 1))
 
-(def parser-atom-character ()
-     (parser-if atom-character? (parser-one)))
+(def count-parens (iterator)
+     (indexed-iterator-foldl
+        (fn (c count)
+                (match c
+                       40  (pair-map-left inc count)
+                       41  (pair-map-right inc count)
+                       _   count))
+        (Pair 0 0)
+        iterator))
 
-(def parser-atom ()
-     (parser-bind (fn (name)
-                      (parser-result (Symbol name (Range 0 0 0))))
-                  (parser-with-whitespace (parser-one-or-more-list (parser-atom-character)))))
-
-(def parser-open-bracket ()
-     (parser-with-whitespace (parser-if (fn (x) (= x 40)) (parser-one))))
-
-(def parser-close-bracket ()
-     (parser-with-whitespace (parser-if (fn (x) (= x 41)) (parser-one))))
-
-(def list-parser (sexp-parser)
-     (parser-bind (fn (_)
-     (parser-bind (fn (sexps)
-     (parser-bind (fn (_)
-                      (parser-result (List sexps (Range 0 0 0))))
-                  (parser-close-bracket)))
-                  (parser-zero-or-more-list (sexp-parser))))
-                  (parser-open-bracket)))
-
-(def sexp-parser ()
-     (parser-or (list-parser sexp-parser)
-                (parser-atom)))
-
-(def parse-sexps (input)
-     (parser-run (parser-zero-or-more-list (sexp-parser)) (Pair 0 input)))
+(def check-errors (iterator)
+     (match (count-parens iterator)
+            (Pair open close)
+                (match (< open close)
+                       True   (Some ParseErrorTooManyClosingBrackets)
+                       False
+                (match (> open close)
+                       True   (Some ParseErrorTooFewClosingBrackets)
+                       False  None))))
 
 (export parse (input)
-        (match (parse-sexps input)
-               (Some expressions)  (Result expressions)
-               None                (Result Empty)))
+        (match (check-errors (list-to-indexed-iterator input))
+               (Some error)  (Error error)
+               None          (match (parse-sexps (list-to-indexed-iterator input) Empty)
+                                    (Pair _ expressions)  (Result expressions))))
 
 (def wrap-in-brackets (string)
-     (string-concat (list 40) (string-concat string (list 41))))
+     (string-concat (string-of-char 40) (string-concat string (string-of-char 41))))
 
 (def stringify-sexp (stringify expression)
      (match expression
