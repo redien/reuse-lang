@@ -1,11 +1,12 @@
 
 # Reuse
-Reuse is a minimalistic programming language designed to provide a small set of powerful abstractions.
+Reuse is a programming language that can be used in other languages.
+Code written in reuse can be reused because it translates to your favorite language.
+It is easy to learn and allows you to use the code you write even when
+your choice of platform or framework changes.
 
 It does not have any side-effects, no input/output and all data is immutable.
-
 Reuse transpiles to other programming languages so that code written in Reuse can be reused. (Side-effects can be handled in the language translated to.)
-
 The language is strongly typed with complete and decidable type inference.
 
 # Minimal and extended
