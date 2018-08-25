@@ -108,14 +108,22 @@
 
 (def translate-definition (definition)
      (match definition
-        (FunctionDefinition name arguments expression _)
-                (translate-function-definition name arguments expression)
-        (ExportDefinition name arguments expression _)
-                (translate-function-definition name arguments expression)
-        (TypeDefinition name parameters constructors _)
-                (stringify (definitions-to-sexps (list (Result definition))))))
+            (FunctionDefinition name arguments expression _)
+                   (translate-function-definition name arguments expression)
+            (ExportDefinition name arguments expression _)
+                   (translate-function-definition name arguments expression)
+            (TypeDefinition name parameters constructors _)
+                   (stringify (definitions-to-sexps (list (Result definition))))))
 
-(export to_reuse (definitions source)
+(def translate-definitions (definitions)
+     ((pipe (list-map (pipe state-lift (state-map translate-definition)))
+            (state-foldl list-cons Empty))
+        definitions))
+
+(def translate (definitions)
+     (state-run Empty (translate-definitions definitions)))
+
+(export to_reuse (definitions _)
         (match (result-concat definitions)
-               (Result definitions)  (Result (string-join (newline) (list-map translate-definition definitions)))
+               (Result definitions)  (Result (string-join (newline) (translate definitions)))
                (Error error)         (Error  (parse-error error))))
