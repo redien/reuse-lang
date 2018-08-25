@@ -22,3 +22,4 @@ build.log
 *.out
 *.cmo
 *.cmi
+.DS_Store
