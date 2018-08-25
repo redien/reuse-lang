@@ -1,0 +1,41 @@
+
+(typ (state s v) (State (fn (s) (pair s v))))
+
+(def state-apply (operation state)
+     (match operation
+            (State f)  (f state)))
+
+(def state-run (initial-state operation)
+     (match (state-apply operation initial-state)
+            (Pair _ value)  value))
+
+(def state-lift (value)
+     (State (fn (state)
+                (Pair state value))))
+
+(def state-bind (f operation)
+     (State (fn (state)
+                (match (state-apply operation state)
+                       (Pair new-state new-value)  (state-apply (f new-value) new-state)))))
+
+(def state-map (f operation)
+     (state-bind (fn (value)
+                     (State (fn (state)
+                                (Pair state (f value)))))
+                 operation))
+
+(def state-modify (f operation)
+     (state-bind (fn (value)
+                     (State (fn (state)
+                                (Pair (f state) value))))
+                 operation))
+
+(def state-foldl (f initial-value operations)
+     (list-foldl (fn (current rest)
+                     (state-bind (fn (definition)
+                     (state-map  (fn (definitions)
+                                     (f definition definitions))
+                                 rest))
+                                 current))
+                 (state-lift initial-value)
+                 operations))

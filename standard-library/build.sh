@@ -14,4 +14,5 @@ $(cat $project_root/standard-library/list.reuse)
 $(cat $project_root/standard-library/string.reuse)
 $(cat $project_root/standard-library/result.reuse)
 $(cat $project_root/standard-library/parser.reuse)
+$(cat $project_root/standard-library/state.reuse)
 "
