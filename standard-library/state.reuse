@@ -39,3 +39,13 @@
                                  current))
                  (state-lift initial-value)
                  operations))
+
+(def state-foldr (f initial-value operations)
+     (list-foldr (fn (current rest)
+                     (state-bind (fn (definition)
+                     (state-map  (fn (definitions)
+                                     (f definition definitions))
+                                 rest))
+                                 current))
+                 (state-lift initial-value)
+                 operations))

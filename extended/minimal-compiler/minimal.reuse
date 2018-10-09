@@ -117,7 +117,7 @@
 
 (def translate-definitions (definitions)
      ((pipe (list-map (pipe state-lift (state-map translate-definition)))
-            (state-foldl list-cons Empty))
+            (state-foldr list-cons Empty))
         definitions))
 
 (def translate (definitions)
