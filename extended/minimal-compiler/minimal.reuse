@@ -100,8 +100,8 @@
             (Match expression rules _)
                 (wrap-in-brackets ((translate-match-expression translate-expression expression) rules))))
 
-(def translate-function-definition (name arguments expression)
-     (wrap-in-brackets (string-join (space) (list (def-string)
+(def translate-function-definition (prefix name arguments expression)
+     (wrap-in-brackets (string-join (space) (list (prefix)
                                                   name
                                                   (translate-argument-list arguments)
                                                   (translate-expression expression)))))
@@ -109,9 +109,9 @@
 (def translate-definition (definition)
      (match definition
             (FunctionDefinition name arguments expression _)
-                   (translate-function-definition name arguments expression)
+                   (translate-function-definition def-string name arguments expression)
             (ExportDefinition name arguments expression _)
-                   (translate-function-definition name arguments expression)
+                   (translate-function-definition export-string name arguments expression)
             (TypeDefinition name parameters constructors _)
                    (stringify (definitions-to-sexps (list (Result definition))))))
 
