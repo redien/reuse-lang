@@ -1,0 +1,31 @@
+
+(typ (dictionary value) (Dictionary (list (pair (list int32) value))))
+
+(def dictionary-entries (dictionary)
+     (match dictionary
+            (Dictionary entries) entries))
+
+(def entry-get-key' (entry)
+     (match entry
+            (Pair key _) key))
+
+(def entry-get-value' (entry)
+     (match entry
+            (Pair _ value) value))
+
+(def entry-matches-key' (key entry)
+     (string-equal? key (entry-get-key' entry)))
+
+(def entries-matching-key' (key dictionary)
+     ((pipe dictionary-entries
+            (list-filter (entry-matches-key' key)))
+        dictionary))
+
+(def dictionary-lookup (key dictionary)
+     ((pipe (entries-matching-key' key)
+            list-first
+            (maybe-map entry-get-value'))
+        dictionary))
+
+(def dictionary-add (key value dictionary)
+     (Dictionary (Cons (Pair key value) (dictionary-entries dictionary))))
