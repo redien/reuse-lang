@@ -1,6 +1,8 @@
 
 (typ (dictionary value) (Dictionary (list (pair (list int32) value))))
 
+(def dictionary-new () (Dictionary Empty))
+
 (def dictionary-entries (dictionary)
      (match dictionary
             (Dictionary entries) entries))

@@ -87,12 +87,6 @@
                                            expression
                                            range))
 
-(def definition-name (definition)
-     (match definition
-            (TypeDefinition name _  __ ___)     name
-            (FunctionDefinition name _ __ ___)  name
-            (ExportDefinition name _ __ ___)    name))
-
 (def sexp-to-complex-type (sexp-to-types name parameters range)
      (result-first (fn (sub-types)
                        (ComplexType name sub-types range))

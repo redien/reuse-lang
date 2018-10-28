@@ -1,9 +1,11 @@
 
 (typ compiler-state (CompilerState (dictionary definition)))
 
-(def compiler-state-add-function (definition state)
+(def compiler-state-new () (CompilerState (dictionary-new)))
+
+(def compiler-state-add-function (name definition state)
      (match state
-            (CompilerState dictionary)  (CompilerState (dictionary-add (definition-name definition) definition dictionary))))
+            (CompilerState dictionary)  (CompilerState (dictionary-add name definition dictionary))))
 
 (def compiler-state-lookup-function (name state)
      (match state
@@ -112,27 +114,29 @@
                 (wrap-in-brackets ((translate-match-expression translate-expression expression) rules))))
 
 (def translate-function-definition (prefix name arguments expression)
-     (wrap-in-brackets (string-join (space) (list (prefix)
-                                                  name
-                                                  (translate-argument-list arguments)
-                                                  (translate-expression expression)))))
+     (state-lift (wrap-in-brackets (string-join (space) (list (prefix)
+                                                              name
+                                                              (translate-argument-list arguments)
+                                                              (translate-expression expression))))))
 
 (def translate-definition (definition)
      (match definition
             (FunctionDefinition name arguments expression _)
-                   (translate-function-definition def-string name arguments expression)
+                   (state-modify (compiler-state-add-function name definition)
+                                 (translate-function-definition def-string name arguments expression))
             (ExportDefinition name arguments expression _)
-                   (translate-function-definition export-string name arguments expression)
+                   (state-modify (compiler-state-add-function name definition)
+                                 (translate-function-definition export-string name arguments expression))
             (TypeDefinition name parameters constructors _)
-                   (stringify (definitions-to-sexps (list (Result definition))))))
+                   (state-lift (stringify (definitions-to-sexps (list (Result definition)))))))
 
 (def translate-definitions (definitions)
-     ((pipe (list-map (pipe state-lift (state-map translate-definition)))
-            (state-foldr list-cons Empty))
+     ((pipe (list-map (pipe state-lift (state-flatmap translate-definition)))
+            state-all)
         definitions))
 
 (def translate (definitions)
-     (state-run Empty (translate-definitions definitions)))
+     (state-run (compiler-state-new) (translate-definitions definitions)))
 
 (export to_reuse (definitions _)
         (match (result-concat definitions)

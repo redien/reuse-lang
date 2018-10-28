@@ -49,3 +49,6 @@
                                  current))
                  (state-lift initial-value)
                  operations))
+
+(def state-all (operations)
+     (state-foldr list-cons Empty operations))
