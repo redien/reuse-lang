@@ -15,4 +15,5 @@ $(cat $project_root/standard-library/string.reuse)
 $(cat $project_root/standard-library/result.reuse)
 $(cat $project_root/standard-library/parser.reuse)
 $(cat $project_root/standard-library/state.reuse)
+$(cat $project_root/standard-library/dictionary.reuse)
 "

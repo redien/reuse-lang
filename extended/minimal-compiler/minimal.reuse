@@ -1,4 +1,15 @@
 
+(typ compiler-state (CompilerState (dictionary definition)))
+
+(def compiler-state-add-function (definition state)
+     (match state
+            (CompilerState dictionary)  (CompilerState (dictionary-add (definition-name definition) definition dictionary))))
+
+(def compiler-state-lookup-function (name state)
+     (match state
+            (CompilerState dictionary)  (dictionary-lookup name dictionary)))
+
+
 (def translate-pipe (translate-expression)
      (pipe (list-map translate-expression)
            (string-join (space))
