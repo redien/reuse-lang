@@ -15,12 +15,12 @@
 (def translate-pipe (translate-expression)
      (pipe (list-map translate-expression)
            state-all
-           (state-map (string-join (space)))
-           (state-map (fn (expressions)
-                          (list (pipe-string)
-                                (space)
-                                expressions)))
-           (state-map join)))
+           (state-map (pipe (string-join (space))
+                            (fn (expressions)
+                                (list (pipe-string)
+                                      (space)
+                                      expressions))
+                            join))))
 
 (def translate-cons (first rest)
      (wrap-in-brackets (join (list (data-cons) (space) first (space) rest))))
@@ -33,13 +33,13 @@
 (def translate-constructor (translator name)
      (pipe (list-map translator)
            state-all
-           (state-map (string-join (space)))
-           (state-map (fn (parameters)
-                          (list name
-                                (space)
-                                parameters)))
-           (state-map join)
-           (state-map wrap-in-brackets)))
+           (state-map (pipe (string-join (space))
+                            (fn (parameters)
+                                (list name
+                                      (space)
+                                      parameters))
+                            join
+                            wrap-in-brackets))))
 
 (def translate-pattern (pattern)
      (match pattern
@@ -77,10 +77,10 @@
 (def translate-function-application' (translate-expression expressions)
      ((pipe (list-map translate-expression)
             state-all
-            (state-map (fn (expressions)
-                           (Cons (translate-apply expressions) expressions)))
-            (state-map (string-join (space)))
-            (state-map wrap-in-brackets))
+            (state-map (pipe (fn (expressions)
+                                 (Cons (translate-apply expressions) expressions))
+                             (string-join (space))
+                             wrap-in-brackets)))
         expressions))
 
 (def translate-function-application (translate-expression expressions)
