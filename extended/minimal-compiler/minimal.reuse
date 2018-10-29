@@ -14,73 +14,80 @@
 
 (def translate-pipe (translate-expression)
      (pipe (list-map translate-expression)
-           (string-join (space))
-           (fn (expressions)
-               (list (pipe-string)
-                     (space)
-                     expressions))
-           join))
+           state-all
+           (state-map (string-join (space)))
+           (state-map (fn (expressions)
+                          (list (pipe-string)
+                                (space)
+                                expressions)))
+           (state-map join)))
 
 (def translate-cons (first rest)
-     (wrap-in-brackets (join (list (data-cons)
-                                   (space)
-                                   first
-                                   (space)
-                                   rest))))
+     (wrap-in-brackets (join (list (data-cons) (space) first (space) rest))))
 
 (def translate-list (translate-expression)
      (pipe (list-map translate-expression)
-           (list-foldr translate-cons (data-empty))))
+           state-all
+           (state-map (list-foldr translate-cons (data-empty)))))
 
 (def translate-constructor (translator name)
      (pipe (list-map translator)
-           (string-join (space))
-           (fn (parameters)
-               (list name
-                     (space)
-                     parameters))
-           join
-           wrap-in-brackets))
+           state-all
+           (state-map (string-join (space)))
+           (state-map (fn (parameters)
+                          (list name
+                                (space)
+                                parameters)))
+           (state-map join)
+           (state-map wrap-in-brackets)))
 
 (def translate-pattern (pattern)
      (match pattern
             (Capture name _)
-                name
+                (state-lift name)
             (IntegerPattern integer _)
-                (string-from-int32 integer)
+                (state-lift (string-from-int32 integer))
             (ConstructorPattern name Empty _)
-                name
+                (state-lift name)
             (ConstructorPattern name patterns _)
                 ((translate-constructor translate-pattern name) patterns)))
 
 (def translate-rule (translate-expression rule)
      (match rule
             (Pair pattern expression)
-                 (join (list (translate-pattern pattern) (space) (translate-expression expression)))))
+                 (state-flatmap (fn (translated-patterns)
+                 (state-map     (fn (translated-expression)
+                                    (join (list translated-patterns (space) translated-expression)))
+                                (translate-expression expression)))
+                                (translate-pattern pattern))))
 
 (def translate-match-expression (translate-expression expression)
      (pipe (list-map (translate-rule translate-expression))
-           (string-join (space))
-           (fn (rules)
-               (list (match-string) (translate-expression expression) rules))
-           (string-join (space))))
+           state-all
+           (state-map (string-join (space)))
+           (state-flatmap (fn (rules)
+           (state-map     (fn (translated-expression)
+                              (list (match-string) translated-expression rules))
+                          (translate-expression expression))))
+           (state-map (string-join (space)))))
 
 (def translate-apply (expressions)
      (list-concat (data-apply) (string-from-int32 (list-size expressions))))
 
 (def translate-function-application' (translate-expression expressions)
      ((pipe (list-map translate-expression)
-            (fn (expressions)
-                (Cons (translate-apply expressions) expressions))
-            (string-join (space))
-            wrap-in-brackets)
+            state-all
+            (state-map (fn (expressions)
+                           (Cons (translate-apply expressions) expressions)))
+            (state-map (string-join (space)))
+            (state-map wrap-in-brackets))
         expressions))
 
 (def translate-function-application (translate-expression expressions)
      (match expressions
             (Cons (Identifier name _) rest)
                     (match (string-equal? name (pipe-string))
-                           True  (wrap-in-brackets ((translate-pipe translate-expression) rest))
+                           True  (state-map wrap-in-brackets ((translate-pipe translate-expression) rest))
                            False
                     (match (string-equal? name (list-string))
                            True  ((translate-list translate-expression) rest)
@@ -92,32 +99,37 @@
      (wrap-in-brackets (string-join (space) arguments)))
 
 (def translate-lambda (translate-expression arguments expression)
-     (join (list (fn-string)
-                 (translate-argument-list arguments)
-                 (translate-expression expression))))
+     (state-flatmap (fn (argument-list)
+     (state-map     (fn (translated-expression)
+                        (join (list (fn-string) argument-list translated-expression)))
+                    (state-lift (translate-argument-list arguments))))
+                    (translate-expression expression)))
 
 (def translate-expression (expression)
      (match expression
             (Lambda arguments expression _)
-                (wrap-in-brackets (translate-lambda translate-expression arguments expression))
+                (state-map wrap-in-brackets (translate-lambda translate-expression arguments expression))
             (Constructor name Empty _)
-                name
+                (state-lift name)
             (Constructor name expressions _)
                 ((translate-constructor translate-expression name) expressions)
             (FunctionApplication expressions _)
                 (translate-function-application translate-expression expressions)
             (IntegerConstant integer _)
-                (string-from-int32 integer)
+                (state-lift (string-from-int32 integer))
             (Identifier name _)
-                name
+                (state-lift name)
             (Match expression rules _)
-                (wrap-in-brackets ((translate-match-expression translate-expression expression) rules))))
+                (state-map wrap-in-brackets ((translate-match-expression translate-expression expression) rules))))
 
 (def translate-function-definition (prefix name arguments expression)
-     (state-lift (wrap-in-brackets (string-join (space) (list (prefix)
-                                                              name
-                                                              (translate-argument-list arguments)
-                                                              (translate-expression expression))))))
+     (state-flatmap (fn (argument-list)
+     (state-flatmap (fn (translated-expression)
+     (state-map     (pipe (string-join (space))
+                          wrap-in-brackets)
+                    (state-lift (list (prefix) name argument-list translated-expression))))
+                    (translate-expression expression)))
+                    (state-lift (translate-argument-list arguments))))
 
 (def translate-definition (definition)
      (match definition
