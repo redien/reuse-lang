@@ -84,7 +84,7 @@
 (def translate-function-application' (translate-expression expressions)
      ((pipe (list-map translate-expression)
             state-all
-            (state-map-with-state (fn (expressions state)
+            (state-map-with-state (fn (state expressions)
                                       (translate-closure-apply expressions))))
         expressions))
 
