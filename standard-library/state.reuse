@@ -13,6 +13,9 @@
      (Operation (fn (state)
                     (Pair state value))))
 
+(def state-get (operation)
+     (Operation (fn (state) (Pair state state))))
+
 (def state-flatmap (f operation)
      (Operation (fn (state)
                     (match (state-apply state operation)
@@ -22,13 +25,25 @@
      (state-flatmap (fn (value)
                         (Operation (fn (state)
                                        (Pair state (f value)))))
-                 operation))
+                    operation))
 
 (def state-modify (f operation)
      (state-flatmap (fn (value)
                         (Operation (fn (state)
                                        (Pair (f state) value))))
-                 operation))
+                    operation))
+
+(def state-gets (f operation)
+     (state-flatmap (fn (state)
+                        (state-lift (f state)))
+                    (state-get operation)))
+
+(def state-map-with-state (f operation)
+     (state-flatmap (fn (value)
+     (state-gets    (fn (state)
+                        (f value state))
+                    (state-lift value)))
+                    operation))
 
 (def state-foldl (f initial-value operations)
      (list-foldl (fn (current rest)

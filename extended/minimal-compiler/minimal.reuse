@@ -71,16 +71,21 @@
                           (translate-expression expression))))
            (state-map (string-join (space)))))
 
-(def translate-apply (expressions)
-     (list-concat (data-apply) (string-from-int32 (list-size expressions))))
+(def translate-closure-apply (expressions)
+     ((pipe list-size
+            string-from-int32
+            (list-concat (data-apply))
+            (fn (application)
+                (Cons application expressions))
+            (string-join (space))
+            wrap-in-brackets)
+        expressions))
 
 (def translate-function-application' (translate-expression expressions)
      ((pipe (list-map translate-expression)
             state-all
-            (state-map (pipe (fn (expressions)
-                                 (Cons (translate-apply expressions) expressions))
-                             (string-join (space))
-                             wrap-in-brackets)))
+            (state-map-with-state (fn (expressions state)
+                                      (translate-closure-apply expressions))))
         expressions))
 
 (def translate-function-application (translate-expression expressions)
