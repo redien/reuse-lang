@@ -153,7 +153,7 @@
         definitions))
 
 (def translate (definitions)
-     (state-run (compiler-state-new) (translate-definitions definitions)))
+     (state-final-value (compiler-state-new) (translate-definitions definitions)))
 
 (export to_reuse (definitions _)
         (match (result-concat definitions)

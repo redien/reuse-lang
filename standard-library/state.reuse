@@ -1,12 +1,12 @@
 
 (typ (state s v) (Operation (fn (s) (pair s v))))
 
-(def state-apply (state operation)
+(def state-run (state operation)
      (match operation
             (Operation f)  (f state)))
 
-(def state-run (initial-state operation)
-     (match (state-apply initial-state operation)
+(def state-final-value (initial-state operation)
+     (match (state-run initial-state operation)
             (Pair _ value)  value))
 
 (def state-lift (value)
@@ -15,8 +15,8 @@
 
 (def state-flatmap-with-state (f operation)
      (Operation (fn (state)
-                    (match (state-apply state operation)
-                           (Pair new-state new-value)  (state-apply new-state (f new-state new-value))))))
+                    (match (state-run state operation)
+                           (Pair new-state new-value)  (state-run new-state (f new-state new-value))))))
 
 (def state-modify (f operation)
      (state-flatmap-with-state (fn (state value)
@@ -33,7 +33,7 @@
 (def state-map (f operation)
      (state-flatmap (pipe f state-lift) operation))
 
-(def state-set (state operation)
+(def state-put (state operation)
      (state-modify (fn (_) state) operation))
 
 (def state-get (operation)
