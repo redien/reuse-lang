@@ -81,11 +81,23 @@
             wrap-in-brackets)
         expressions))
 
+(def translate-named-apply (expressions)
+     (wrap-in-brackets (string-join (space) expressions)))
+
 (def translate-function-application' (translate-expression expressions)
      ((pipe (list-map translate-expression)
             state-all
             (state-map-with-state (fn (state expressions)
                                       (translate-closure-apply expressions))))
+        expressions))
+
+(def translate-named-function-application (translate-expression name expressions)
+     ((pipe (list-map translate-expression)
+            state-all
+            (state-map-with-state (fn (state expressions)
+                                      (match (compiler-state-lookup-function name state)
+                                             (Some _)  (translate-closure-apply expressions)
+                                             None      (translate-named-apply expressions)))))
         expressions))
 
 (def translate-function-application (translate-expression expressions)
@@ -96,7 +108,7 @@
                            False
                     (match (string-equal? name (list-string))
                            True  ((translate-list translate-expression) rest)
-                           False (translate-function-application' translate-expression expressions)))
+                           False (translate-named-function-application translate-expression name expressions)))
             _
                     (translate-function-application' translate-expression expressions)))
 
