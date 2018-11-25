@@ -37,3 +37,74 @@
      (match (string-is-reserved? name)
             True   (Cons 95 name)
             False  (list-flatmap escape-char name)))
+
+(def over-match-pair-expression (f pair)
+     (match pair
+            (Pair pattern expression)
+                (Pair pattern (f expression))))
+
+(def over-subexpressions (f expression)
+     (match expression
+            (IntegerConstant _ __)
+                expression
+            (Identifier _ __)
+                expression
+            (Lambda arguments expression range)
+                (Lambda arguments
+                        (over-subexpressions f (f expression))
+                        range)
+            (Match expression pairs range)
+                (Match (over-subexpressions f (f expression))
+                       (list-map (over-match-pair-expression (pipe f (over-subexpressions f))) pairs)
+                       range)
+            (Constructor name expressions range)
+                (Constructor name
+                             (list-map (pipe f (over-subexpressions f)) expressions)
+                             range)
+            (FunctionApplication expressions range)
+                (FunctionApplication (list-map (pipe f (over-subexpressions f)) expressions)
+                                     range)))
+
+(def over-expressions (f definition)
+     (match definition
+            (FunctionDefinition name arguments expression range)
+                (FunctionDefinition name arguments (over-subexpressions f (f expression)) range)
+            (ExportDefinition name arguments expression range)
+                (ExportDefinition name arguments (over-subexpressions f (f expression)) range)
+            (TypeDefinition _ __ ___ ____)
+                definition))
+
+(def over-function-application (f expression)
+     (match expression
+            (IntegerConstant _ __)
+                expression
+            (Identifier _ __)
+                expression
+            (Lambda _ __ ___)
+                expression
+            (Match _ __ ___)
+                expression
+            (Constructor _ __ ___)
+                expression
+            (FunctionApplication expressions range)
+                (f expressions range)))
+
+(def expression-is-symbol? (symbol-name expression)
+     (match expression
+            (IntegerConstant _ __)
+                False
+            (Identifier name __)
+                (string-equal? symbol-name name)
+            (Lambda _ __ ___)
+                False
+            (Match _ __ ___)
+                False
+            (Constructor _ __ ___)
+                False
+            (FunctionApplication _ __)
+                False))
+
+(def first-expression-is-symbol? (symbol-name expressions)
+     ((pipe (maybe-map (expression-is-symbol? symbol-name))
+            (maybe-else (fn () False)))
+        (list-first expressions)))

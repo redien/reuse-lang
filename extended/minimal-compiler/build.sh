@@ -17,6 +17,7 @@ $(cat $project_root/parser/parser.reuse)
 $(cat $script_path/../common-strings.reuse)
 $(cat $script_path/../common.reuse)
 $(cat $script_path/minimal-strings.reuse)
+$(cat $script_path/pipe.reuse)
 $(cat $script_path/minimal.reuse)
 "
 

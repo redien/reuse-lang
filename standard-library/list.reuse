@@ -60,6 +60,9 @@
 (def list-concat (a b)
      (list-foldr list-cons b a))
 
+(def list-append (l x)
+     (list-foldr list-cons (list x) l))
+
 (def list-reverse (list)
      (list-foldl list-cons Empty list))
 
