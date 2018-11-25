@@ -13,4 +13,3 @@ Has list-form that can create a n-ary list
 | (typ (list a) (Cons a (list a)) Empty)
 > (match (list 3 4) (Cons a (Cons b Empty)) (- b a) x 0)
 = 1
-

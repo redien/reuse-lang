@@ -1,6 +1,6 @@
 
 (def transform-definitions (definitions)
-     ((pipe (list-map transform-pipe)
+     ((pipe (list-map (pipe transform-pipe transform-list))
             (list-map definition-to-sexp)
             stringify)
         definitions))

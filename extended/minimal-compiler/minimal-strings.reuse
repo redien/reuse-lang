@@ -17,3 +17,5 @@
 (def data-int32 () (list 73 110 116 51 50 46 111 102 95 105 110 116 32))
 (def data-apply () (list 97 112 112 108 121))
 (def data-x () (list 120))
+(def data-pipe () (list 112 105 112 101))
+(def data-list () (list 108 105 115 116))

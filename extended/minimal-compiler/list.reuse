@@ -1,0 +1,15 @@
+
+(def transform-list' (expressions range)
+     (list-foldr (fn (expression composed)
+                     (Constructor (data-cons) (list expression composed) range))
+                 (Constructor (data-empty) Empty range)
+                 expressions))
+
+(def transform-list (definition)
+     (over-expressions
+        (over-function-application
+            (fn (expressions range)
+                (match (first-expression-is-symbol? (data-list) expressions)
+                       True   (transform-list' (list-rest expressions) range)
+                       False  (FunctionApplication expressions range))))
+        definition))

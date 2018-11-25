@@ -11,7 +11,7 @@
      (over-expressions
         (over-function-application
             (fn (expressions range)
-                (match (first-expression-is-symbol? (pipe-string) expressions)
+                (match (first-expression-is-symbol? (data-pipe) expressions)
                        True   (transform-pipe-compose (list-rest expressions) range)
                        False  (FunctionApplication expressions range))))
         definition))
