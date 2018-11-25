@@ -12,7 +12,7 @@ rm generated/build.log > /dev/null 2>&1
 
 function testLine {
     if [ "${3:0:1}" == "=" ]; then
-        result=$($eval_command "${2}" "${1:2}" 2>> generated/build.log)
+        result=$($eval_command "${2}" "${1:2}" 2> generated/error.log)
     else
         result=$($eval_command "${2}" "${1:2}" 2>&1)
     fi
@@ -23,7 +23,11 @@ function testLine {
         if [ "$status_code" != "0" ]; then
             echo not ok $tests - program returned non-zero status code
             echo  ---
-            echo    status-code:   \'$status_code\'
+            echo    expression:  \'${1:2}\'
+            echo    program:     \'${2}\'
+            echo    status-code: \'$status_code\'
+            echo    error:
+            echo "$(cat generated/error.log)"
             echo  ...
             failing=$((failing+1))
 
@@ -35,9 +39,9 @@ function testLine {
             echo not ok $tests - expected \'${3:2}\' but got \'$result\'
             echo  ---
             echo    expression: \'${1:2}\'
-            echo    program: \'${2}\'
-            echo    expected: \'${3:2}\'
-            echo    actual:   \'$result\'
+            echo    program:    \'${2}\'
+            echo    expected:   \'${3:2}\'
+            echo    actual:     \'$result\'
             echo  ...
             failing=$((failing+1))
         fi
@@ -58,9 +62,9 @@ function testLine {
             echo not ok $tests - expected \'$result\' to contain \'${3:2}\'
             echo  ---
             echo    expression: \'${1:2}\'
-            echo    program: \'${2}\'
-            echo    expected: \'${3:2}\'
-            echo    actual:   \'$result\'
+            echo    program:    \'${2}\'
+            echo    expected:   \'${3:2}\'
+            echo    actual:     \'$result\'
             echo  ...
             failing=$((failing+1))
         fi
