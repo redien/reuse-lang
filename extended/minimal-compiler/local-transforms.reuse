@@ -3,7 +3,7 @@
      (over-expressions
         (over-function-application
             (fn (expressions range)
-                (match (first-expression-is-symbol? symbol-name expressions)
+                (match (first-expression-is-symbol? (symbol-name) expressions)
                        True   (transformer (list-rest expressions) range)
                        False  (FunctionApplication expressions range))))
         definition))
@@ -18,11 +18,11 @@
 
 (def transform-list (expressions range)
      (list-foldr (fn (expression composed)
-                     (Constructor (data-cons) (list expression composed) range))
-                 (Constructor (data-empty) Empty range)
+                     (Constructor (data-Cons) (list expression composed) range))
+                 (Constructor (data-Empty) Empty range)
                  expressions))
 
 (def local-transforms (definitions)
-     (list-map (pipe (transform-special-form (data-pipe) transform-pipe)
-                     (transform-special-form (data-list) transform-list))
+     (list-map (pipe (transform-special-form data-pipe transform-pipe)
+                     (transform-special-form data-list transform-list))
                definitions))
