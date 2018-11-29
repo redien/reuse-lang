@@ -28,3 +28,8 @@ Should isolate lambdas syntacticly
 | (def f (x) ((pipe (fn (x) (match x (Some y) y None 0)) (fn (x) (Some x))) x))
 > (match (f (Some 6)) (Some x) x None -1)
 = 6
+
+Should not shadow symbols
+| (def x (a b) (+ a b))
+> ((pipe (x 2) (x 4)) -1)
+= 5
