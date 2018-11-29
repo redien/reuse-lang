@@ -133,3 +133,13 @@ Type names should be allowed as function arguments
 | (def f (a) a)
 > (match (B 12) (B x) (f x))
 = 12
+
+Should allow reserved symbols
+| (def f (✨x) ✨x)
+> (f 13)
+= 13
+
+Should not allow unknown reserved symbols
+| (def f (✨a) ✨a)
+> (f 14)
+? Symbols prefixed with ✨ are reserved
