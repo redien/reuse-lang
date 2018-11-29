@@ -45,10 +45,6 @@
 
 (def over-subexpressions (f expression)
      (match expression
-            (IntegerConstant _ __)
-                expression
-            (Identifier _ __)
-                expression
             (Lambda arguments expression range)
                 (Lambda arguments
                         (over-subexpressions f (f expression))
@@ -63,7 +59,9 @@
                              range)
             (FunctionApplication expressions range)
                 (FunctionApplication (list-map (pipe f (over-subexpressions f)) expressions)
-                                     range)))
+                                     range)
+            _
+                expression))
 
 (def over-expressions (f definition)
      (match definition
@@ -76,32 +74,25 @@
 
 (def over-function-application (f expression)
      (match expression
-            (IntegerConstant _ __)
-                expression
-            (Identifier _ __)
-                expression
-            (Lambda _ __ ___)
-                expression
-            (Match _ __ ___)
-                expression
-            (Constructor _ __ ___)
-                expression
             (FunctionApplication expressions range)
-                (f expressions range)))
+                (f expressions range)
+            _
+                expression))
+
+(def over-identifier (f expression)
+     (match expression
+            (Identifier name range)
+                (Identifier (f name) range)
+            (Lambda arguments expression range)
+                (Lambda (list-map f arguments) expression range)
+            _
+                expression))
 
 (def expression-is-symbol? (symbol-name expression)
      (match expression
-            (IntegerConstant _ __)
-                False
             (Identifier name __)
                 (string-equal? symbol-name name)
-            (Lambda _ __ ___)
-                False
-            (Match _ __ ___)
-                False
-            (Constructor _ __ ___)
-                False
-            (FunctionApplication _ __)
+            _
                 False))
 
 (def first-expression-is-symbol? (symbol-name expressions)
