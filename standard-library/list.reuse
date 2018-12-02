@@ -3,6 +3,9 @@
 (def list-cons (x xs)
      (Cons x xs))
 
+(def list-from (x)
+     (Cons x Empty))
+
 (def list-first (list)
      (match list
             (Cons x _)

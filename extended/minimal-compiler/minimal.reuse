@@ -1,11 +1,7 @@
 
-(def transform-definitions (definitions)
-     ((pipe local-transforms
-            (list-map definition-to-sexp)
-            stringify)
-        definitions))
-
 (export to_reuse (definitions _)
-        (match (result-concat definitions)
-               (Result definitions)  (Result (transform-definitions definitions))
-               (Error error)         (Error  (parse-error error))))
+        ((pipe local-transforms
+               (list-map (result-first definition-to-sexp))
+               result-concat
+               (result-first stringify))
+            definitions))

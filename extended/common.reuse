@@ -17,6 +17,9 @@
 (def parse-error (error)
      (join (list (data-parse-error) (error-to-string error))))
 
+(def stringify-parse-errors (definitions)
+     (list-map (result-second error-to-string) definitions))
+
 (def string-is-reserved? (name)
      (or (string-equal? name (type))
      (or (string-equal? name (if))
@@ -65,11 +68,11 @@
 
 (def over-expressions (f definition)
      (match definition
-            (FunctionDefinition name arguments expression range)
-                (FunctionDefinition name arguments (over-subexpressions f (f expression)) range)
-            (ExportDefinition name arguments expression range)
-                (ExportDefinition name arguments (over-subexpressions f (f expression)) range)
-            (TypeDefinition _ __ ___ ____)
+            (Result (FunctionDefinition name arguments expression range))
+                (Result (FunctionDefinition name arguments (over-subexpressions f (f expression)) range))
+            (Result (ExportDefinition name arguments expression range))
+                (Result (ExportDefinition name arguments (over-subexpressions f (f expression)) range))
+            _
                 definition))
 
 (def over-function-application (f expression)
