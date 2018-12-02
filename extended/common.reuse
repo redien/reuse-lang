@@ -14,9 +14,6 @@
             True   (list char)
             False  (Cons 95 (string-from-int32 char))))
 
-(def parse-error (error)
-     (join (list (data-parse-error) (error-to-string error))))
-
 (def stringify-parse-errors (definitions)
      (list-map (result-second error-to-string) definitions))
 

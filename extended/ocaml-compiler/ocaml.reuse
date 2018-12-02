@@ -250,14 +250,17 @@
 
 (def translate-definition (definition)
      (match definition
-        (FunctionDefinition name arguments expression _)
-                (translate-function-definition (escape-identifier name) arguments expression)
-        (ExportDefinition name arguments expression _)
-                (translate-function-definition name arguments expression)
-        (TypeDefinition name parameters constructors _)
-                (translate-type-definition name parameters constructors)))
+        (Result (FunctionDefinition name arguments expression _))
+                (Result (translate-function-definition (escape-identifier name) arguments expression))
+        (Result (ExportDefinition name arguments expression _))
+                (Result (translate-function-definition name arguments expression))
+        (Result (TypeDefinition name parameters constructors _))
+                (Result (translate-type-definition name parameters constructors))
+        (Error error)
+                (Error error)))
 
 (export to_ocaml (definitions source)
-        (match (result-concat definitions)
-               (Result definitions)  (Result (string-join (newline) (list-map translate-definition definitions)))
-               (Error error)         (Error  (parse-error error))))
+        ((pipe (list-map translate-definition)
+               result-concat
+               (result-first (string-join (newline))))
+            definitions))
