@@ -88,3 +88,9 @@
      ((pipe (maybe-map (expression-is-symbol? symbol-name))
             (maybe-else (fn () False)))
         (list-first expressions)))
+
+(def symbol-is-reserved? (name)
+     (match name
+            (Cons char _)  (= char 2728)
+            Empty          False))
+
