@@ -42,12 +42,12 @@
             _
                 expression))
 
-(def over-expressions (f definition)
+(def over-definition-expressions (f definition)
      (match definition
             (Result (FunctionDefinition name arguments expression range))
-                (Result (FunctionDefinition name arguments (over-subexpressions f (f expression)) range))
+                (Result (FunctionDefinition name arguments (f expression) range))
             (Result (ExportDefinition name arguments expression range))
-                (Result (ExportDefinition name arguments (over-subexpressions f (f expression)) range))
+                (Result (ExportDefinition name arguments (f expression) range))
             _
                 definition))
 

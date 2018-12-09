@@ -1,12 +1,13 @@
 
 (def transform-special-form (symbol-name transformer definition)
-     (over-expressions
-        (over-function-application
-            (fn (expressions range)
-                (match (first-expression-is-symbol? (symbol-name) expressions)
-                       True   (transformer (list-rest expressions) range)
-                       False  (FunctionApplication expressions range))))
-        definition))
+     (over-definition-expressions
+        (over-subexpressions
+            (over-function-application
+                (fn (expressions range)
+                    (match (first-expression-is-symbol? (symbol-name) expressions)
+                        True   (transformer (list-rest expressions) range)
+                        False  (FunctionApplication expressions range)))))
+            definition))
 
 (def transform-pipe (expressions range)
      (Lambda (list (data-x))
