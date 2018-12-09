@@ -17,27 +17,6 @@
 (def stringify-parse-errors (definitions)
      (list-map (result-second error-to-string) definitions))
 
-(def string-is-reserved? (name)
-     (or (string-equal? name (type))
-     (or (string-equal? name (if))
-     (or (string-equal? name (then))
-     (or (string-equal? name (else))
-     (or (string-equal? name (with))
-     (or (string-equal? name (of))
-     (or (string-equal? name (end))
-     (or (string-equal? name (in))
-     (or (string-equal? name (fun))
-     (or (string-equal? name (let))
-     (or (string-equal? name (open))
-     (or (string-equal? name (and-string))
-     (or (string-equal? name (or-string))
-         (string-equal? name (class))))))))))))))))
-
-(def escape-identifier (name)
-     (match (string-is-reserved? name)
-            True   (Cons 95 name)
-            False  (list-flatmap escape-char name)))
-
 (def over-match-pair-expression (f pair)
      (match pair
             (Pair pattern expression)
