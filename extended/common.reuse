@@ -63,7 +63,17 @@
             (Identifier name range)
                 (Identifier (f name) range)
             (Lambda arguments expression range)
-                (Lambda (list-map f arguments) expression range)
+                (Lambda (list-map f arguments) (over-identifier f expression) range)
+            (Constructor name Empty range)
+                (Constructor (f name) Empty range)
+            (Constructor name expressions range)
+                (Constructor (f name) (list-map (over-identifier f) expressions) range)
+            (FunctionApplication expressions range)
+                (FunctionApplication (list-map (over-identifier f) expressions) range)
+            (Match expression rules range)
+                (Match (over-identifier f expression)
+                       (list-map (over-match-pair-expression (over-identifier f)) rules)
+                       range)
             _
                 expression))
 
