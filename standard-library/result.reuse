@@ -12,7 +12,7 @@
         (Result x)     (Result (f x))
         (Error error)  (Error error)))
 
-(def result-second (f result)
+(def result-map-error (f result)
     (match result
         (Result x)     (Result x)
         (Error error)  (Error (f error))))

@@ -140,6 +140,5 @@ Should allow reserved symbols
 = 13
 
 Should not allow unknown reserved symbols
-| (def f (✨a) ✨a)
-> (f 14)
+> ✨a
 ? Symbols prefixed with ✨ are reserved

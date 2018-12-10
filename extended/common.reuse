@@ -15,7 +15,7 @@
             False  (Cons 95 (string-from-int32 char))))
 
 (def stringify-parse-errors (definitions)
-     (list-map (result-second error-to-string) definitions))
+     (list-map (result-map-error error-to-string) definitions))
 
 (def over-match-pair-expression (f pair)
      (match pair
@@ -74,7 +74,7 @@
             _
                 (result-lift expression)))
 
-(def over-identifier (f expression)
+(def over-identifiers (f expression)
      (match expression
             (Identifier name range)
                 (result-map (fn (name)
@@ -85,7 +85,7 @@
                 (result-map     (fn (arguments)
                                     (Lambda arguments expression range))
                               (result-concat (list-map f arguments))))
-                              (over-identifier f expression))
+                              (over-identifiers f expression))
             (Constructor name Empty range)
                 (result-map (fn (name)
                                 (Constructor name Empty range))
@@ -95,17 +95,17 @@
                 (result-map     (fn (name)
                                     (Constructor name expressions range))
                                 (f name)))
-                                (result-concat (list-map (over-identifier f) expressions)))
+                                (result-concat (list-map (over-identifiers f) expressions)))
             (FunctionApplication expressions range)
                 (result-map (fn (expressions)
                                 (FunctionApplication expressions range))
-                            (result-concat (list-map (over-identifier f) expressions)))
+                            (result-concat (list-map (over-identifiers f) expressions)))
             (Match expression rules range)
                 (result-flatmap (fn (rules)
                 (result-map     (fn (expression)
                                     (Match expression rules range))
-                              (over-identifier f expression)))
-                              (result-concat (list-map (over-match-pair-expression (over-identifier f)) rules)))
+                              (over-identifiers f expression)))
+                              (result-concat (list-map (over-match-pair-expression (over-identifiers f)) rules)))
             _
                 (result-lift expression)))
 
@@ -123,6 +123,6 @@
 
 (def symbol-is-reserved? (name)
      (match name
-            (Cons char _)  (= char 2728)
-            Empty          False))
-
+            (Cons 226 (Cons 156 (Cons 168 (Cons 120 Empty))))  False
+            (Cons 226 (Cons 156 (Cons 168 _)))                 True
+            _                                                  False))

@@ -280,8 +280,16 @@
         (Error error)
                 (Error error)))
 
+(def validate-identifier (identifier)
+     (match (symbol-is-reserved? identifier)
+            True   (result-error (data-error-reserved-identifier))
+            False  (result-lift identifier)))
+
+(def validate-reserved-identifiers (definition)
+     (result-flatmap (over-definition-expressions (over-identifiers validate-identifier)) definition))
+
 (export to_ocaml (definitions source)
-        ((pipe (list-map translate-definition)
+        ((pipe (list-map (pipe validate-reserved-identifiers translate-definition))
                result-concat
                (result-map (string-join (newline))))
             definitions))
