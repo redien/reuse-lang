@@ -1,13 +1,13 @@
 
 (typ (result v e) (Result v) (Error e))
 
-(def result-result (result)
+(def result-lift (result)
     (Result result))
 
 (def result-error (error)
     (Error error))
 
-(def result-first (f result)
+(def result-map (f result)
     (match result
         (Result x)     (Result (f x))
         (Error error)  (Error error)))
@@ -22,13 +22,10 @@
         (Result x)     (f x)
         (Error error)  (Error error)))
 
-(def result-result? (result)
-     (match result
-        (Error _)  False
-        _          True))
-
 (def result-error? (result)
-     (not (result-result? result)))
+     (match result
+            (Error _)  True
+            _          False))
 
 (def result-filter-list (list)
      (list-foldr (fn (result new-list)

@@ -283,5 +283,5 @@
 (export to_ocaml (definitions source)
         ((pipe (list-map translate-definition)
                result-concat
-               (result-first (string-join (newline))))
+               (result-map (string-join (newline))))
             definitions))

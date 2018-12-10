@@ -6,8 +6,8 @@
      (over-function-application
          (fn (expressions range)
              (match (first-expression-is-symbol? (symbol-name) expressions)
-                 True   (result-result (transformer (list-rest expressions) range))
-                 False  (result-result (FunctionApplication expressions range)))))))
+                 True   (result-lift (transformer (list-rest expressions) range))
+                 False  (result-lift (FunctionApplication expressions range)))))))
          definition))
 
 (def transform-pipe (expressions range)
