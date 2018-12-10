@@ -29,3 +29,5 @@
 (def and-string () (list 97 110 100))
 (def or-string () (list 111 114))
 (def less-than () (list 32 60 32))
+
+(def data-error-reserved-identifier () (list 83 121 109 98 111 108 115 32 112 114 101 102 105 120 101 100 32 119 105 116 104 32 226 156 168 32 97 114 101 32 114 101 115 101 114 118 101 100))

@@ -123,6 +123,13 @@
 
 (def symbol-is-reserved? (name)
      (match name
-            (Cons 226 (Cons 156 (Cons 168 (Cons 120 Empty))))  False
             (Cons 226 (Cons 156 (Cons 168 _)))                 True
             _                                                  False))
+
+(def validate-identifier (identifier)
+     (match (symbol-is-reserved? identifier)
+            True   (result-error (data-error-reserved-identifier))
+            False  (result-lift identifier)))
+
+(def validate-reserved-identifiers (definition)
+     (result-flatmap (over-definition-expressions (over-identifiers validate-identifier)) definition))

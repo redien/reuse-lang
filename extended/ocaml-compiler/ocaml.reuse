@@ -49,9 +49,9 @@
            (fn (expressions)
                (list (fun)
                      (space)
-                     (wrap-in-brackets (list 120))
+                     (wrap-in-brackets (list 95 120))
                      (arrow)
-                     (list 120)
+                     (list 95 120)
                      (pipe-operator)
                      expressions))
            join))
@@ -280,16 +280,13 @@
         (Error error)
                 (Error error)))
 
-(def validate-identifier (identifier)
-     (match (symbol-is-reserved? identifier)
-            True   (result-error (data-error-reserved-identifier))
-            False  (result-lift identifier)))
+(def validate-reserved-identifiers-when-not (as_minimal)
+     (match as_minimal
+            True   (fn (definition) definition)
+            False  (fn (definition) (validate-reserved-identifiers definition))))
 
-(def validate-reserved-identifiers (definition)
-     (result-flatmap (over-definition-expressions (over-identifiers validate-identifier)) definition))
-
-(export to_ocaml (definitions source)
-        ((pipe (list-map (pipe validate-reserved-identifiers translate-definition))
+(export to_ocaml (definitions source as_minimal)
+        ((pipe (list-map (pipe (validate-reserved-identifiers-when-not as_minimal) translate-definition))
                result-concat
                (result-map (string-join (newline))))
             definitions))
