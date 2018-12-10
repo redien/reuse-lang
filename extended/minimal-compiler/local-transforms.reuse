@@ -11,10 +11,10 @@
          definition))
 
 (def transform-pipe (expressions range)
-     (Lambda (list (data-x))
+     (Lambda (list (data-sparkle-x))
              (list-foldl (fn (expression composed)
                              (FunctionApplication (list expression composed) range))
-                         (Identifier (data-x) range)
+                         (Identifier (data-sparkle-x) range)
                          expressions)
              range))
 
