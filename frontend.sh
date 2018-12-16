@@ -8,6 +8,11 @@ REUSE_MINIMAL=false
 REUSE_EXECUTABLE=false
 REUSE_NOSTDLIB=false
 
+throw_error() {
+    echo $(basename $0): $@ >&2
+    exit 1
+}
+
 while [[ $# -gt 0 ]]
 do
     arg="$1"
@@ -31,8 +36,7 @@ do
             shift
         ;;
         --*)
-            echo Unrecognized flag $arg
-            exit 1
+            throw_error Unrecognized flag $arg
         ;;
         *)
             REUSE_SOURCE="$REUSE_SOURCE
@@ -43,13 +47,11 @@ $(cat $arg)"
 done
 
 if [ "$REUSE_OUTPUT" == "" ]; then
-    echo No output file specified, please use the --output [file] flag. >&2
-    exit 1
+    throw_error No output file specified, please use the --output [file] flag.
 fi
 
 if [[ "$REUSE_NOSTDLIB" == "true" && "$REUSE_EXECUTABLE" == "true" ]]; then
-    echo Cannot compile an executable without the standard library >&2
-    exit 1
+    throw_error Cannot compile an executable without the standard library
 fi
 
 root_path=$(dirname $(readlink -f "$0"))
