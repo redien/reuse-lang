@@ -6,7 +6,6 @@ project_root=$(dirname "$0")/..
 $project_root/standard-library/build.sh
 
 >$project_root/generated/sexp-parser.reuse echo "
-$(cat $project_root/generated/standard-library.reuse)
 $(cat $project_root/sexp-parser/parser.reuse)
 (export main (stdin)
         (match (parse stdin) (Result expressions) (stringify expressions) (Error _) (list 45)))
@@ -14,4 +13,4 @@ $(cat $project_root/sexp-parser/parser.reuse)
 
 [ -d $project_root/generated/sexp-parser ] || mkdir $project_root/generated/sexp-parser
 
-$project_root/compile-executable.sh $project_root/generated/sexp-parser.reuse $project_root/generated/sexp-parser --stdin
+$project_root/frontend.sh --executable --stdin --output $project_root/generated/sexp-parser/executable $project_root/generated/sexp-parser.reuse

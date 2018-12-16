@@ -21,7 +21,7 @@ $(cat $script_path/local-transforms.reuse)
 $(cat $script_path/minimal.reuse)
 "
 
-cat $project_root/generated/extended/compiler-minimal.reuse | $project_root/bin/reuse-ocaml > $project_root/generated/extended/CompilerMinimal.ml
+$project_root/frontend.sh --nostdlib --output $project_root/generated/extended/CompilerMinimal.ml $project_root/generated/extended/compiler-minimal.reuse
 
 cat << END_OF_SOURCE >> $project_root/generated/extended/CompilerMinimal.ml
 
