@@ -8,8 +8,21 @@ REUSE_MINIMAL=false
 REUSE_EXECUTABLE=false
 REUSE_NOSTDLIB=false
 
+usage() {
+    echo Usage: $(basename $0) [flags] --output [OUTPUT FILE] [FILE]... >&2
+    echo >&2
+    echo Compiler for the Reuse programming language>&2
+    echo >&2
+    echo "       --minimal         Only use minimal subset language" >&2
+    echo "       --executable      Compile executable file" >&2
+    echo "       --nostdlib        Do not include the standard library" >&2
+    echo "       --output [FILE]   File to write output to" >&2
+}
+
 throw_error() {
     echo $(basename $0): $@ >&2
+    echo >&2
+    usage
     exit 1
 }
 
