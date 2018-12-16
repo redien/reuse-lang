@@ -43,6 +43,11 @@ if [ "$REUSE_OUTPUT" == "" ]; then
     exit 1
 fi
 
+if [[ "$REUSE_NOSTDLIB" == "true" && "$REUSE_EXECUTABLE" == "true" ]]; then
+    echo Cannot compile an executable without the standard library >&2
+    exit 1
+fi
+
 root_path=$(dirname $0)
 
 if [ "$REUSE_NOSTDLIB" == "false" ]; then
