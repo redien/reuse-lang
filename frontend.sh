@@ -14,26 +14,30 @@ do
 
     case $arg in
         --minimal)
-        REUSE_MINIMAL=true
-        shift
+            REUSE_MINIMAL=true
+            shift
         ;;
         --executable)
-        REUSE_EXECUTABLE=true
-        shift
+            REUSE_EXECUTABLE=true
+            shift
         ;;
         --nostdlib)
-        REUSE_NOSTDLIB=true
-        shift
+            REUSE_NOSTDLIB=true
+            shift
         ;;
         --output)
-        REUSE_OUTPUT="$2"
-        shift
-        shift
+            REUSE_OUTPUT="$2"
+            shift
+            shift
+        ;;
+        --*)
+            echo Unrecognized flag $arg
+            exit 1
         ;;
         *)
-        REUSE_SOURCE="$REUSE_SOURCE
+            REUSE_SOURCE="$REUSE_SOURCE
 $(cat $arg)"
-        shift
+            shift
         ;;
     esac
 done
