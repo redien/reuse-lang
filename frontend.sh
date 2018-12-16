@@ -13,10 +13,10 @@ usage() {
     echo >&2
     echo Compiler for the Reuse programming language>&2
     echo >&2
-    echo "       --minimal         Only use minimal subset language" >&2
-    echo "       --executable      Compile executable file" >&2
+    echo "       --minimal         Only use the minimal subset language" >&2
+    echo "       --executable      Compile an executable file" >&2
     echo "       --nostdlib        Do not include the standard library" >&2
-    echo "       --output [FILE]   File to write output to" >&2
+    echo "       --output [FILE]   Write output to FILE" >&2
 }
 
 throw_error() {
