@@ -13,4 +13,4 @@ $(cat $project_root/sexp-parser/parser.reuse)
 
 [ -d $project_root/generated/sexp-parser ] || mkdir $project_root/generated/sexp-parser
 
-$project_root/frontend.sh --executable --stdin --output $project_root/generated/sexp-parser/executable $project_root/generated/sexp-parser.reuse
+$project_root/frontend.sh --executable --output $project_root/generated/sexp-parser/executable $project_root/generated/sexp-parser.reuse

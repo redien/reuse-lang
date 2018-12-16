@@ -15,4 +15,4 @@ $(cat $project_root/parser/parser.reuse)
 
 [ -d $project_root/generated/parser ] || mkdir $project_root/generated/parser
 
-$project_root/frontend.sh --executable --stdin --output $project_root/generated/parser/executable $project_root/generated/parser.reuse
+$project_root/frontend.sh --executable --output $project_root/generated/parser/executable $project_root/generated/parser.reuse

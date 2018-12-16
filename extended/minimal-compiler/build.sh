@@ -10,7 +10,6 @@ $project_root/standard-library/build.sh
 [ -d $project_root/generated/extended ] || mkdir $project_root/generated/extended
 
 >$project_root/generated/extended/compiler-minimal.reuse echo "
-$(cat $project_root/generated/standard-library.reuse)
 $(cat $project_root/sexp-parser/parser.reuse)
 $(cat $project_root/parser/strings.reuse)
 $(cat $project_root/parser/parser.reuse)
@@ -21,7 +20,7 @@ $(cat $script_path/local-transforms.reuse)
 $(cat $script_path/minimal.reuse)
 "
 
-$project_root/frontend.sh --nostdlib --output $project_root/generated/extended/CompilerMinimal.ml $project_root/generated/extended/compiler-minimal.reuse
+$project_root/frontend.sh --output $project_root/generated/extended/CompilerMinimal.ml $project_root/generated/extended/compiler-minimal.reuse
 
 cat << END_OF_SOURCE >> $project_root/generated/extended/CompilerMinimal.ml
 
