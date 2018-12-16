@@ -67,7 +67,7 @@ if [[ "$REUSE_NOSTDLIB" == "true" && "$REUSE_EXECUTABLE" == "true" ]]; then
     throw_error Cannot compile an executable without the standard library
 fi
 
-root_path=$(dirname $(readlink "$0"))
+root_path=$(dirname $(readlink -f "$0"))
 
 if [ "$REUSE_NOSTDLIB" == "false" ]; then
     REUSE_SOURCE="$(cat $root_path/generated/standard-library.reuse)
