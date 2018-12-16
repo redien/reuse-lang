@@ -52,7 +52,7 @@ if [[ "$REUSE_NOSTDLIB" == "true" && "$REUSE_EXECUTABLE" == "true" ]]; then
     exit 1
 fi
 
-root_path=$(dirname $0)
+root_path=$(dirname $(readlink -f "$0"))
 
 if [ "$REUSE_NOSTDLIB" == "false" ]; then
     REUSE_SOURCE="$(cat $root_path/generated/standard-library.reuse)
