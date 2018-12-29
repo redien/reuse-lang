@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-IMPL=ocaml-compiler `dirname $0`/../eval.sh "$1" "$2" "$3"
+IMPL=ocaml-compiler `dirname $0`/../eval.sh "$1" "$2"

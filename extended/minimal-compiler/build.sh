@@ -9,15 +9,16 @@ $project_root/standard-library/build.sh
 
 [ -d $project_root/generated/extended ] || mkdir $project_root/generated/extended
 
-$project_root/frontend.sh --output $project_root/generated/extended/CompilerMinimal.ml\
-                          $project_root/sexp-parser/parser.reuse\
-                          $project_root/parser/strings.reuse\
-                          $project_root/parser/parser.reuse\
-                          $script_path/../common-strings.reuse\
-                          $script_path/../common.reuse\
-                          $script_path/minimal-strings.reuse\
-                          $script_path/local-transforms.reuse\
-                          $script_path/minimal.reuse
+$project_root/reusec --language ocaml\
+                     --output $project_root/generated/extended/CompilerMinimal.ml\
+                     $project_root/sexp-parser/parser.reuse\
+                     $project_root/parser/strings.reuse\
+                     $project_root/parser/parser.reuse\
+                     $script_path/../common-strings.reuse\
+                     $script_path/../common.reuse\
+                     $script_path/minimal-strings.reuse\
+                     $script_path/local-transforms.reuse\
+                     $script_path/minimal.reuse
 
 cat << END_OF_SOURCE >> $project_root/generated/extended/CompilerMinimal.ml
 
