@@ -16,7 +16,7 @@ usage() {
     echo >&2
     echo Compiler for the Reuse programming language>&2
     echo >&2
-    echo "       --minimal          Compile as Minimal Reuse" >&2
+    echo "       --minimal          Source language should be treated as Minimal Reuse" >&2
     echo "       --nostdlib         Do not include the standard library" >&2
     echo "       --language [LANG]  Target language to compile to." >&2
     echo "                          Can be $LANGUAGES." >&2
