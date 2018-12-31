@@ -1,0 +1,23 @@
+
+(typ type  (UniversalType (list int32))
+           (ExistentialType (list int32))
+           (ConstType (list int32) (list type))
+           (FnType (list type) type))
+
+(typ (type-annotation meta)  (TypeAnnotation type meta))
+
+(def definition-type (definition)
+     (match (definition-meta definition)
+            (TypeAnnotation type _)  type))
+
+(def infer-definition-type (definition)
+     (match definition
+            (TypeDefinition a b c meta)
+                (TypeDefinition a b c (TypeAnnotation (UniversalType (list 66)) meta))
+            (FunctionDefinition a b c meta)
+                (FunctionDefinition a b c (TypeAnnotation (UniversalType (list 66)) meta))
+            (ExportDefinition a b c meta)
+                (ExportDefinition a b c (TypeAnnotation (UniversalType (list 66)) meta))))
+
+(def infer-types (definitions)
+     (list-map (result-map infer-definition-type) definitions))
