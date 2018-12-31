@@ -30,18 +30,15 @@
 
 
 (def infer-definition-type (definition)
-     (gensym     (fn (symbol definition)
-     (state-lift
-     (result-map (fn (definition)
-                     (match definition
-                            (TypeDefinition a b c meta)
-                                (TypeDefinition a b c (TypeAnnotation (UniversalType symbol) meta))
-                            (FunctionDefinition a b c meta)
-                                (FunctionDefinition a b c (TypeAnnotation (UniversalType symbol) meta))
-                            (ExportDefinition a b c meta)
-                                (ExportDefinition a b c (TypeAnnotation (UniversalType symbol) meta))))
-                 definition)))
-                 definition))
+     (gensym (fn (symbol definition)
+                 (match definition
+                        (TypeDefinition a b c meta)
+                            (state-lift (TypeDefinition a b c (TypeAnnotation (UniversalType symbol) meta)))
+                        (FunctionDefinition a b c meta)
+                            (state-lift (FunctionDefinition a b c (TypeAnnotation (UniversalType symbol) meta)))
+                        (ExportDefinition a b c meta)
+                            (state-lift (ExportDefinition a b c (TypeAnnotation (UniversalType symbol) meta)))))
+             definition))
 
 (def infer-types (definitions)
      (state-final-value (TypeInferenceContext Empty 0)

@@ -21,9 +21,9 @@
                     arg-types)))
 
 (def stringify-definitions (definitions)
-     (result-concat (list-map (result-map (fn (definition) (stringify-type (definition-type definition)))) definitions)))
+     (list-map (fn (definition) (stringify-type (definition-type definition))) definitions))
 
 (export main (stdin)
-        (match (stringify-definitions (infer-types (sexps-to-definitions (parse stdin))))
-               (Result types)  (string-join (list 32) types)
-               (Error error)   Empty))
+        (match (result-concat (sexps-to-definitions (parse stdin)))
+               (Result definitions)  (string-join (list 32) (stringify-definitions (infer-types definitions)))
+               (Error error)         Empty))

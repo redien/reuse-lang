@@ -1,5 +1,5 @@
 
-Should give int32 as return type
+Should infer integer constants to have type int32
 > (def f () 1)
 = (fn () int32)
 
