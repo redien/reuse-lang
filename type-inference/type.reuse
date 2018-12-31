@@ -1,0 +1,11 @@
+
+(typ type  (UniversalType (list int32))
+           (ExistentialType (list int32))
+           (ConstType (list int32) (list type))
+           (FnType (list type) type))
+
+(typ (type-annotation meta)  (TypeAnnotation type meta))
+
+(def definition-type (definition)
+     (match (definition-meta definition)
+            (TypeAnnotation type _)  type))

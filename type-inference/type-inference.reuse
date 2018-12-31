@@ -1,33 +1,4 @@
 
-(typ type  (UniversalType (list int32))
-           (ExistentialType (list int32))
-           (ConstType (list int32) (list type))
-           (FnType (list type) type))
-
-(typ (type-annotation meta)  (TypeAnnotation type meta))
-
-(def definition-type (definition)
-     (match (definition-meta definition)
-            (TypeAnnotation type _)  type))
-
-
-(typ type-inference-context (TypeInferenceContext (list (pair (list int32) type))
-                                                  int32))
-
-(def type-inference-context-gensym-increment (state)
-     (match state
-            (TypeInferenceContext context symbol-count)
-                (TypeInferenceContext context (+ symbol-count 1))))
-
-(def type-inference-context-symbol (state)
-     (match state
-            (TypeInferenceContext _ symbol-count)
-                (Cons 84 (string-from-int32 symbol-count))))
-
-(def gensym (f state)
-     (state-flatmap-with-state (fn (state value) (f (type-inference-context-symbol state) value))
-     (state-modify type-inference-context-gensym-increment state)))
-
 
 (def infer-definition-type (definition)
      (gensym (fn (symbol definition)

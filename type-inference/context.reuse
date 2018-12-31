@@ -1,0 +1,22 @@
+
+(typ type-inference-context (TypeInferenceContext (list (pair (list int32) type))
+                                                  int32))
+
+(def type-inference-context-gensym-increment (context)
+     (match context
+            (TypeInferenceContext types symbol-count)
+                (TypeInferenceContext types (+ symbol-count 1))))
+
+(def type-inference-context-symbol (context)
+     (match context
+            (TypeInferenceContext _ symbol-count)
+                (Cons 84 (string-from-int32 symbol-count))))
+
+(def type-inference-context-add-type (name type context)
+     (match context
+            (TypeInferenceContext types symbol-count)
+                (TypeInferenceContext (Cons (Pair name type) types) symbol-count)))
+
+(def gensym (f state)
+     (state-flatmap-with-state (fn (state value) (f (type-inference-context-symbol state) value))
+     (state-modify type-inference-context-gensym-increment state)))
