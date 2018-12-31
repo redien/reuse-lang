@@ -10,14 +10,39 @@
      (match (definition-meta definition)
             (TypeAnnotation type _)  type))
 
+
+(typ type-inference-context (TypeInferenceContext (list (pair (list int32) type))
+                                                  int32))
+
+(def type-inference-context-gensym-increment (state)
+     (match state
+            (TypeInferenceContext context symbol-count)
+                (TypeInferenceContext context (+ symbol-count 1))))
+
+(def type-inference-context-symbol (state)
+     (match state
+            (TypeInferenceContext _ symbol-count)
+                (Cons 84 (string-from-int32 symbol-count))))
+
+(def gensym (f state)
+     (state-flatmap-with-state (fn (state value) (f (type-inference-context-symbol state) value))
+     (state-modify type-inference-context-gensym-increment state)))
+
+
 (def infer-definition-type (definition)
-     (match definition
-            (TypeDefinition a b c meta)
-                (TypeDefinition a b c (TypeAnnotation (UniversalType (list 66)) meta))
-            (FunctionDefinition a b c meta)
-                (FunctionDefinition a b c (TypeAnnotation (UniversalType (list 66)) meta))
-            (ExportDefinition a b c meta)
-                (ExportDefinition a b c (TypeAnnotation (UniversalType (list 66)) meta))))
+     (gensym     (fn (symbol definition)
+     (state-lift
+     (result-map (fn (definition)
+                     (match definition
+                            (TypeDefinition a b c meta)
+                                (TypeDefinition a b c (TypeAnnotation (UniversalType symbol) meta))
+                            (FunctionDefinition a b c meta)
+                                (FunctionDefinition a b c (TypeAnnotation (UniversalType symbol) meta))
+                            (ExportDefinition a b c meta)
+                                (ExportDefinition a b c (TypeAnnotation (UniversalType symbol) meta))))
+                 definition)))
+                 definition))
 
 (def infer-types (definitions)
-     (list-map (result-map infer-definition-type) definitions))
+     (state-final-value (TypeInferenceContext Empty 0)
+                        (state-all (list-map (pipe state-lift infer-definition-type) definitions))))
