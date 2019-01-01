@@ -12,5 +12,5 @@
              definition))
 
 (def infer-types (definitions)
-     (state-final-value (TypeInferenceContext Empty 0)
+     (state-final-value (type-inference-context-empty)
                         (state-all (list-map (pipe state-lift infer-definition-type) definitions))))

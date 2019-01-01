@@ -1,29 +1,43 @@
 
 (typ type-inference-context (TypeInferenceContext (list (pair (list int32) type))
-                                                  int32))
+                                                  int32
+                                                  (list (pair type type))))
+
+(def type-inference-context-empty ()
+     (TypeInferenceContext Empty 0 Empty))
 
 (def type-inference-context-gensym-increment (context)
      (match context
-            (TypeInferenceContext types symbol-count)
-                (TypeInferenceContext types (+ symbol-count 1))))
+            (TypeInferenceContext types symbol-count constraints)
+                (TypeInferenceContext types (+ symbol-count 1) constraints)))
 
 (def type-inference-context-symbol (context)
      (match context
-            (TypeInferenceContext _ symbol-count)
+            (TypeInferenceContext _ symbol-count __)
                 (Cons 84 (string-from-int32 symbol-count))))
-
-(def type-inference-context-add-type (name type context)
-     (match context
-            (TypeInferenceContext types symbol-count)
-                (TypeInferenceContext (Cons (Pair name type) types) symbol-count)))
-
-(def type-inference-context-resolve (name context)
-     (match context
-            (TypeInferenceContext types _)
-                (match (list-find-first (fn (pair) (string-equal? name (pair-left pair))) types)
-                       (Some pair)  (Some (pair-right pair))
-                       None         None)))
 
 (def gensym (f state)
      (state-flatmap-with-state (fn (state value) (f (type-inference-context-symbol state) value))
      (state-modify type-inference-context-gensym-increment state)))
+
+(def type-inference-context-add-type (name type context)
+     (match context
+            (TypeInferenceContext types symbol-count constraints)
+                (TypeInferenceContext (Cons (Pair name type) types) symbol-count constraints)))
+
+(def type-inference-context-resolve (name context)
+     (match context
+            (TypeInferenceContext types _ __)
+                (match (list-find-first (fn (pair) (string-equal? name (pair-left pair))) types)
+                       (Some pair)  (Some (pair-right pair))
+                       None         None)))
+
+(def type-inference-context-add-constraint (a b context)
+     (match context
+            (TypeInferenceContext types symbol-count constraints)
+                (TypeInferenceContext types symbol-count (Cons (Pair a b) constraints))))
+
+(def type-inference-context-constraints (context)
+     (match context
+            (TypeInferenceContext _ __ constraints)
+                constraints))
