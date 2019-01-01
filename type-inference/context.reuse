@@ -17,6 +17,13 @@
             (TypeInferenceContext types symbol-count)
                 (TypeInferenceContext (Cons (Pair name type) types) symbol-count)))
 
+(def type-inference-context-resolve (name context)
+     (match context
+            (TypeInferenceContext types _)
+                (match (list-find-first (fn (pair) (string-equal? name (pair-left pair))) types)
+                       (Some pair)  (Some (pair-right pair))
+                       None         None)))
+
 (def gensym (f state)
      (state-flatmap-with-state (fn (state value) (f (type-inference-context-symbol state) value))
      (state-modify type-inference-context-gensym-increment state)))

@@ -75,6 +75,13 @@
 (def list-flatmap (f list)
      (list-foldr (fn (head tail) (list-concat (f head) tail)) Empty list))
 
+(def list-find-first (predicate list)
+     (match list
+            Empty        None
+            (Cons x xs)  (match (predicate x)
+                                True   (Some x)
+                                False  (list-find-first predicate xs))))
+
 (def list-filter (f list)
      (list-foldr (fn (head tail)
                      (match (f head)
