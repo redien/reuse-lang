@@ -1,10 +1,34 @@
 
+(def type-from-ast-type (ast-type)
+     (match ast-type
+            (SimpleType name _)                          (ConstType name Empty)
+            (ComplexType name ast-types _)               (ConstType name (list-map type-from-ast-type ast-types))
+            (FunctionType argument-types return-type _)  (FnType (list-map type-from-ast-type argument-types)
+                                                                 (type-from-ast-type return-type))))
+
+(def type-from-constructor (return-type constructor)
+     (match constructor
+             (SimpleConstructor name _)             (Pair name (FnType Empty return-type))
+             (ComplexConstructor name ast-types _)  (Pair name (FnType (list-map type-from-ast-type ast-types) return-type))))
+
+(def type-from-parameter (parameter)
+     (match parameter
+            (UniversalParameter name _)    (UniversalType name)
+            (ExistentialParameter name _)  (ExistentialType name)))
+
+(def type-from-definition (name parameters)
+     (ConstType name (list-map type-from-parameter parameters)))
+
+(def types-from-constructors (name parameters constructors)
+     (list-map (type-from-constructor (type-from-definition name parameters)) constructors))
 
 (def infer-definition-type (definition)
      (gensym (fn (symbol definition)
                  (match definition
-                        (TypeDefinition a b c meta)
-                            (state-lift (TypeDefinition a b c (TypeAnnotation (UniversalType symbol) meta)))
+                        (TypeDefinition name parameters constructors meta)
+                            (state-modify (fn (context)
+                                              (type-inference-context-add-types (types-from-constructors name parameters constructors) context))
+                                          (state-lift (TypeDefinition name parameters constructors (TypeAnnotation (UniversalType symbol) meta))))
                         (FunctionDefinition a b c meta)
                             (state-lift (FunctionDefinition a b c (TypeAnnotation (UniversalType symbol) meta)))
                         (ExportDefinition a b c meta)

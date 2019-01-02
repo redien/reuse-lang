@@ -20,10 +20,10 @@
      (state-flatmap-with-state (fn (state value) (f (type-inference-context-symbol state) value))
      (state-modify type-inference-context-gensym-increment state)))
 
-(def type-inference-context-add-type (name type context)
+(def type-inference-context-add-types (new-types context)
      (match context
             (TypeInferenceContext types symbol-count constraints)
-                (TypeInferenceContext (Cons (Pair name type) types) symbol-count constraints)))
+                (TypeInferenceContext (list-concat new-types types) symbol-count constraints)))
 
 (def type-inference-context-resolve (name context)
      (match context
