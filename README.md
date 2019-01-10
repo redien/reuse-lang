@@ -44,7 +44,7 @@ brew install --HEAD reuse
 
 #### Linux/Unix
 
-Clone the repository and symlink `[reuse path]/reusec` to the appropriate directory in your PATH.
+Clone the repository and symlink `[repository path]/reusec` to the appropriate directory in your PATH.
 
 #### Windows
 
