@@ -19,7 +19,8 @@ So what does Reuse code look like?
 You might recognize this as the factorial function. (Or not, depending on what you think of parentheses.)
 
 ```
-(typ (list a) (Cons a (list a)) Empty)
+(typ (list a) (Cons a (list a))
+              Empty)
 (def reduce (f initial list)
      (match list
             Empty       initial
@@ -56,10 +57,11 @@ Usage: reusec [flags] --output [OUTPUT FILE] [FILE]...
 
 Compiler for the Reuse programming language
 
-       --minimal         Only use the minimal subset language
-       --executable      Compile an executable file
-       --nostdlib        Do not include the standard library
-       --output [FILE]   Write output to FILE
+       --minimal          Source language should be treated as Minimal Reuse
+       --nostdlib         Do not include the standard library
+       --language [LANG]  Target language to compile to.
+                          Can be ocaml or minimal.
+       --output [FILE]    Write output to FILE
 ```
 
 # Minimal and extended
