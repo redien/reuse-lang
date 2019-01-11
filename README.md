@@ -35,7 +35,7 @@ For more examples please look through the `minimal/specification` and `extended/
 
 #### MacOS
 
-The Reuse compiler is distributed using a Homebrew tap. Use the terminal to install using:
+The Reuse compiler is distributed using a Homebrew tap. Install it using the following commands:
 
 ```
 brew tap redien/reuse
@@ -48,7 +48,7 @@ Clone the repository and symlink `[repository path]/reusec` to the appropriate d
 
 #### Windows
 
-Windows is currently not supported.
+Windows support is currently not implemented.
 
 ## Usage
 
