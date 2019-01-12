@@ -80,7 +80,7 @@ $ reusec --language ocaml --output factorial.ml factorial.reuse
 
 This will compile the library we just wrote into an OCaml source file named `factorial.ml`. We can compile to all supported languages using the same Reuse source file. See the [usage section](#Usage) for a list of supported languages and the different compiler options.
 
-Since we are using OCaml for this guide, let's write a small program that will use our library to calculate the factorial of 10 and call it `main.ml`.
+Let's write a small OCaml program that will use our library to calculate the factorial of 10 and put it in a file we'll name `main.ml`.
 
 ```ocaml
 Printf.printf "%ld\n" (Factorial.factorial 10l)
