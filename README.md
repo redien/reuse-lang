@@ -38,7 +38,7 @@ Another example involving algebraic data-types:
             (Cons x xs) (reduce f (f x initial) xs)))
 ```
 
-For more examples please look through the `minimal/specification` and `extended/specification` directories.
+For more examples please look through the `minimal/specification` and `extended/specification` directories. Also see the [getting started section](#Getting-Started).
 
 ## Installation
 
@@ -70,7 +70,7 @@ Let's create a library for the factorial function from the previous section by c
                False  (* n (factorial (- n 1)))))
 ```
 
-The one difference from the example above is that instead of simply defining a function, we're exporting it to the host language using the `export` keyword. This let's us call the function after we compile the library.
+The one difference from the example above is that instead of simply defining a function, we're exporting it to the host language using the `export` keyword. This lets us call the function after we compile the library.
 
 Once we've saved the source file we need to compile it using the Reuse compiler called `reusec`.
 
@@ -104,6 +104,46 @@ $ ./factorial
 ```
 
 ## Language
+
+#### Integer manipulation
+
+The int32 type is a 32-bit signed integer.
+
+```
+(+ 1 2)    3
+(- 1 2)    -1
+(* 1 2)    2
+(/ 1 2)    0
+(% 1 2)    1
+
+(= 1 2)    False
+(< 1 2)    True
+(> 1 2)    True
+(>= 1 2)   False
+(<= 1 2)   True
+```
+
+#### Boolean operators
+
+```
+(and True False)    False
+(or True False)     True
+(not True)          False
+```
+
+#### Function Definition
+
+```
+(def identity (x)
+     x)
+```
+
+For a function to be exposed to the host language, it needs to be exported.
+
+```
+(export increment (x)
+        (+ x 1))
+```
 
 ## Usage
 
