@@ -6,19 +6,36 @@
 (def type-inference-context-empty ()
      (TypeInferenceContext Empty 0 Empty))
 
-(def type-inference-context-gensym-increment (context)
+(def type-inference-context-gensym-increment (n context)
      (match context
             (TypeInferenceContext types symbol-count constraints)
-                (TypeInferenceContext types (+ symbol-count 1) constraints)))
+                (TypeInferenceContext types (+ symbol-count n) constraints)))
+
+(def type-inference-context-symbol-from-count (count)
+     (Cons 84 (string-from-int32 count)))
 
 (def type-inference-context-symbol (context)
      (match context
             (TypeInferenceContext _ symbol-count __)
-                (Cons 84 (string-from-int32 symbol-count))))
+                (type-inference-context-symbol-from-count symbol-count)))
+
+(def type-inference-context-symbols (n context)
+     (match context
+            (TypeInferenceContext _ symbol-count __)
+                (list-map type-inference-context-symbol-from-count
+                          (list-from-range symbol-count (+ symbol-count n)))))
 
 (def gensym (f state)
-     (state-flatmap-with-state (fn (state value) (f (type-inference-context-symbol state) value))
-     (state-modify type-inference-context-gensym-increment state)))
+     (state-modify (type-inference-context-gensym-increment 1)
+     (state-flatmap-with-state (fn (context value)
+                                   (f (type-inference-context-symbol context) value))
+                               state)))
+
+(def gensyms (count f state)
+     (state-modify (type-inference-context-gensym-increment count)
+     (state-flatmap-with-state (fn (context value)
+                                   (f (type-inference-context-symbols count context) value))
+                               state)))
 
 (def type-inference-context-add-types (new-types context)
      (match context
