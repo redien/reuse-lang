@@ -59,6 +59,10 @@ Clone the repository and symlink `[repository path]/reusec` to the appropriate d
 
 Windows support is currently not implemented.
 
+## Getting Started
+
+## Language
+
 ## Usage
 
 ```
@@ -73,7 +77,9 @@ Compiler for the Reuse programming language
        --output [FILE]    Write output to FILE
 ```
 
-# Minimal and extended
+## Design Rationale
+
+#### Minimal and extended
 
 Reuse has a minimal subset making it trivial to write a translator for a new language.
 
