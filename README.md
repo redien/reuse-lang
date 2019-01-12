@@ -1,19 +1,9 @@
 # Reuse
 
-Reuse is a programming language that can be used in other languages.
-Code written in reuse can be reused because it translates to your favorite language.
-It is easy to learn and allows you to use the code you write even when
-your choice of platform or framework changes.
+Reuse is a general-purpose programming language designed to compile to other programming languages. This dramatically increases the number of platforms and languages that libraries written in Reuse support.
 
-It does not have any side-effects, no input/output and all data is immutable.
-Reuse transpiles to other programming languages so that code written in Reuse can be reused. (Side-effects can be handled in the language translated to.)
-The language is strongly typed with complete and decidable type inference.
-
-# Minimal and extended
-
-Reuse has a minimal subset making it trivial to write a translator for a new language.
-
-The extended language gives us more convenience and compiles down to the minimal subset.
+The language is strongly typed with a complete and sound type system and decidable type inference.
+The language does not support side-effects by design and all data is immutable. Any input/output or other kinds of side-effects should be handled by the host language.
 
 # Examples
 
@@ -29,7 +19,8 @@ So what does Reuse code look like?
 You might recognize this as the factorial function. (Or not, depending on what you think of parentheses.)
 
 ```
-(typ (list a) (Cons a (list a)) Empty)
+(typ (list a) (Cons a (list a))
+              Empty)
 (def reduce (f initial list)
      (match list
             Empty       initial
@@ -44,7 +35,7 @@ For more examples please look through the `minimal/specification` and `extended/
 
 #### MacOS
 
-The Reuse compiler is distributed with Homebrew. Use the terminal to install using:
+The Reuse compiler is distributed using a Homebrew tap. Install it using the following commands:
 
 ```
 brew tap redien/reuse
@@ -53,11 +44,11 @@ brew install --HEAD reuse
 
 #### Linux/Unix
 
-Clone the repository and symlink `[reuse path]/frontend.sh` to the appropriate directory in your PATH.
+Clone the repository and symlink `[repository path]/reusec` to the appropriate directory in your PATH.
 
 #### Windows
 
-Windows is currently not supported.
+Windows support is currently not implemented.
 
 ## Usage
 
@@ -66,11 +57,18 @@ Usage: reusec [flags] --output [OUTPUT FILE] [FILE]...
 
 Compiler for the Reuse programming language
 
-       --minimal         Only use the minimal subset language
-       --executable      Compile an executable file
-       --nostdlib        Do not include the standard library
-       --output [FILE]   Write output to FILE
+       --minimal          Source language should be treated as Minimal Reuse
+       --nostdlib         Do not include the standard library
+       --language [LANG]  Target language to compile to.
+                          Can be ocaml or minimal.
+       --output [FILE]    Write output to FILE
 ```
+
+# Minimal and extended
+
+Reuse has a minimal subset making it trivial to write a translator for a new language.
+
+The extended language gives us more convenience and compiles down to the minimal subset.
 
 ## Development
 
