@@ -3,11 +3,19 @@
 Reuse is a general-purpose programming language designed to compile to other programming languages. This dramatically increases the number of platforms and languages that libraries written in Reuse support.
 
 The language is strongly typed with a complete and sound type system and decidable type inference.
-The language does not support side-effects by design and all data is immutable. Any input/output or other kinds of side-effects should be handled by the host language.
+The language does not support side-effects by design and all data is immutable. Any input/output or other kinds of side-effects can be performed by the host language.
 
-# Examples
+## Contents
 
-So what does Reuse code look like?
+- [Examples](#Examples)
+- [Installation](#Installation)
+- [Getting Started](#Getting-Started)
+- [Language](#Language)
+- [Usage](#Usage)
+- [Design Rationale](#Design-Rationale)
+- [Development](#Development)
+
+## Examples
 
 ```
 (def factorial (n)
