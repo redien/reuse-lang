@@ -17,6 +17,7 @@
                 ((pipe (stringify-type-list stringify-type)
                        wrap-in-brackets
                        (string-concat (string-concat (fn-string) (list 32)))
+                       (string-append (Cons 32 (stringify-type ret-type)))
                        wrap-in-brackets)
                     arg-types)))
 
