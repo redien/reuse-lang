@@ -17,25 +17,26 @@ The language does not support side-effects by design and all data is immutable. 
 
 ## Examples
 
+This is what a factorial function looks like in Reuse:
+
 ```
 (def factorial (n)
-    (int32-less-than n 2
-        1
-        (* n (factorial (- n 1)))))
+     (match (< n 2)
+            True   1
+            False  (* n (factorial (- n 1)))))
 ```
 
-You might recognize this as the factorial function. (Or not, depending on what you think of parentheses.)
+Another example involving algebraic data-types:
 
 ```
 (typ (list a) (Cons a (list a))
               Empty)
+
 (def reduce (f initial list)
      (match list
             Empty       initial
             (Cons x xs) (reduce f (f x initial) xs)))
 ```
-
-This example defines a recursive list type and a function to fold over it.
 
 For more examples please look through the `minimal/specification` and `extended/specification` directories.
 
