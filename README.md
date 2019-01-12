@@ -61,6 +61,44 @@ Windows support is currently not implemented.
 
 ## Getting Started
 
+Let's create a library for the factorial function from the previous section by creating a Reuse source file called `factorial.reuse`.
+
+```
+(export factorial (n)
+        (match (< n 2)
+               True   1
+               False  (* n (factorial (- n 1)))))
+```
+
+The one difference from the example above is that instead of simply defining a function, we're exporting it to the host language using the `export` keyword. This let's us call the function after we compile the library.
+
+Once we've saved the source file we need to compile it using the Reuse compiler called `reusec`.
+
+```sh
+$ reusec --language ocaml --output factorial.ml factorial.reuse
+```
+
+This will compile the library we just wrote into an OCaml source file named `factorial.ml`. We can compile to all supported languages using the same Reuse source file. See the [usage section](#Usage) for a list of supported languages and the different compiler options.
+
+Since we are using OCaml for this guide, let's write a small program that will use our library and call it `main.ml`.
+
+```ocaml
+Printf.printf "%ld" (Factorial.factorial 10)
+```
+
+We can now compile the example using the OCaml compiler.
+
+```sh
+$ ocamlc -g main.ml factorial.ml -o factorial
+```
+
+And finally if we run the compiled program we should get the correct result for the factorial of 10.
+
+```sh
+$ ./factorial
+3628800
+```
+
 ## Language
 
 ## Usage
