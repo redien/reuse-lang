@@ -16,7 +16,8 @@
     "test-type-inference": "type-inference/build.sh && ./dev-env/spec-runner/run.sh type-inference/specification ./type-inference/eval.sh | tap-spec",
     "test-minimal": "./dev-env/spec-runner/run.sh minimal/specification ./$IMPL/eval.sh | tap-spec",
     "test-extended": "./dev-env/spec-runner/run.sh extended/specification ./$IMPL/eval.sh | tap-spec",
-    "line-count": "git ls-files | grep '\\.reuse' | xargs wc -l"
+    "line-count": "git ls-files | grep '\\.reuse' | xargs wc -l",
+    "vscode-install": "ln -s ./dev-env/editor-support/vs-code-reuse ~/.vscode/extensions/vs-code-reuse"
   },
   "repository": {
     "type": "git",
