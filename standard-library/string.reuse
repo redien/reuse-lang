@@ -13,6 +13,9 @@
             Empty       b
             (Cons x xs) (Cons x (string-concat xs b))))
 
+(def string-append (a b)
+     (string-concat b a))
+
 (def 'string-join-reducer (separator)
      (fn (x xs)
          (match xs
