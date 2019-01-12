@@ -6,6 +6,11 @@
 (def list-from (x)
      (Cons x Empty))
 
+(def list-from-range (_from _to)
+     (match (< _from _to)
+            True   (Cons _from (list-from-range (+ _from 1) _to))
+            False  Empty))
+
 (def list-first (list)
      (match list
             (Cons x _)
