@@ -161,6 +161,15 @@ Compiler for the Reuse programming language
 
 ## Design Rationale
 
+- Keeping the language as small as possible
+  - Reduces the work of implementing new language targets and tools
+  - Fewer features to learn
+- No let expression
+  - let generalization is [not frequently used](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/tldi10-vytiniotis.pdf).
+  - Encourages smaller functions because variable binding is only done through new function definitions.
+- Limited ad-hoc polymorphism
+  - Should not require type annotations.
+
 #### Minimal and extended
 
 Reuse has a minimal subset making it trivial to write a translator for a new language.
