@@ -1,18 +1,28 @@
 
+(def add-constructor-types (name parameters constructors)
+     (type-inference-context-add-types
+     (types-from-constructors name
+                              (list-map type-from-parameter parameters)
+                              constructors)))
+
 (def add-type-constructors-to-context (name parameters constructors meta)
-     (state-modify (fn (context)
-                       (type-inference-context-add-types (types-from-constructors name (list-map type-from-parameter parameters) constructors) context))
-                   (state-lift (TypeDefinition name parameters constructors (TypeAnnotation (UniversalType Empty) meta)))))
+     (state-bind   (add-constructor-types name parameters constructors) (fn (_)
+     (state-return (TypeDefinition name
+                                   parameters
+                                   constructors
+                                   (TypeAnnotation (UniversalType Empty)
+                                   meta))))))
+
+(def generate-function-type (argument-types return-type)
+     (FnType (list-map (fn (type) (UniversalType type)) argument-types)
+             (UniversalType return-type)))
 
 (def add-function-constraints (constructor name arguments body meta)
-     ((pipe (gensyms   (list-size arguments) 
-                       (fn (argument-types _)
-                           (state-lift (list-map (fn (type) (UniversalType type)) argument-types))))
-            (gensym    (fn (return-type argument-types)
-                           (state-lift (FnType argument-types (UniversalType return-type)))))
-            (state-map (fn (type)
-                           (constructor name arguments body (TypeAnnotation type meta)))))
-            (state-lift arguments)))
+     (state-bind   (gensyms (list-size arguments))                     (fn (argument-types)
+     (state-bind   (gensym)                                            (fn (return-type)
+     (state-let    (generate-function-type argument-types return-type) (fn (type)
+     (state-let    (TypeAnnotation type meta)                          (fn (annotation)
+     (state-return (constructor name arguments body annotation)))))))))))
 
 (def construct-function-definition (name arguments body meta)
      (FunctionDefinition name arguments body meta))

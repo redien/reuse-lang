@@ -14,6 +14,7 @@
     "test-sexp-parser": "sexp-parser/build.sh && ./dev-env/spec-runner/run.sh sexp-parser/specification ./sexp-parser/eval.sh | tap-spec",
     "test-parser": "parser/build.sh && ./dev-env/spec-runner/run.sh parser/specification ./parser/eval.sh | tap-spec",
     "test-type-inference": "type-inference/build.sh && ./dev-env/spec-runner/run.sh type-inference/specification ./type-inference/eval.sh | tap-spec",
+    "test-standard-library": "standard-library/build.sh && ./dev-env/spec-runner/run.sh standard-library/specification ./standard-library/eval.sh | tap-spec",
     "test-minimal": "./dev-env/spec-runner/run.sh minimal/specification ./$IMPL/eval.sh | tap-spec",
     "test-extended": "./dev-env/spec-runner/run.sh extended/specification ./$IMPL/eval.sh | tap-spec",
     "line-count": "git ls-files | grep '\\.reuse' | xargs wc -l",
