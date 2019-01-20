@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-project_root=$(dirname "$0")
+project_root=$(dirname "$0")/..
 
 build_compiler_source() {
     $project_root/extended/ocaml-compiler/build.sh
