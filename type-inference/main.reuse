@@ -22,7 +22,7 @@
                     arg-types)))
 
 (def stringify-definitions (definitions)
-     (list-map (fn (definition) (stringify-type (definition-type definition))) definitions))
+     (list-map (fn (definition) (stringify-type (rename-type (definition-type definition)))) definitions))
 
 (export main (stdin)
         (match (result-concat (sexps-to-definitions (parse stdin)))

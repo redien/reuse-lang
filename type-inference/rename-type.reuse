@@ -1,0 +1,59 @@
+
+(def rename-gensym-increment ()
+     (state-modify (fn (context)
+     (match context
+            (Pair count dictionary)  (Pair (+ count 1) dictionary)))))
+
+(def rename-gensym-get ()
+     (state-bind (state-get) (fn (context)
+     (match context
+            (Pair count _)
+                (state-return count)))))
+
+(def rename-gensym ()
+     (state-bind (rename-gensym-get)       (fn (count)
+     (state-bind (rename-gensym-increment) (fn (_)
+     (match (< count 10)
+            True   (state-return (list (+ 65 count)))
+            False  (state-return (Cons 84 (string-from-int32 count)))))))))
+
+(def rename-lookup (name)
+     (state-bind (state-get) (fn (context)
+     (match context
+            (Pair _ dictionary)
+                (state-return (dictionary-lookup name dictionary))))))
+
+(def rename-add (name new-name)
+     (state-modify (fn (context)
+     (match context
+            (Pair count dictionary)  (Pair count (dictionary-add name new-name dictionary))))))
+
+(def rename-in-context (name)
+     (state-bind (rename-lookup name) (fn (result)
+     (match result
+            (Some new-name)
+                (state-return new-name)
+            None
+                (state-bind (rename-gensym)            (fn (new-name)
+                (state-bind (rename-add name new-name) (fn (_)
+                (state-return new-name)))))))))
+
+(def rename-type' (type)
+     (match type
+            (UniversalType name)
+                (state-bind (rename-in-context name)           (fn (new-name)
+                (state-return (UniversalType new-name))))
+            (ExistentialType name)
+                (state-bind (rename-in-context name)           (fn (new-name)
+                (state-return (ExistentialType new-name))))
+            (ConstType name types)
+                (state-bind (state-foreach rename-type' types) (fn (new-types)
+                (state-return (ConstType name new-types))))
+            (FnType argument-types return-type)
+                (state-bind (state-foreach rename-type' argument-types) (fn (new-argument-types)
+                (state-bind (rename-type' return-type)                  (fn (new-return-type)
+                (state-return (FnType new-argument-types new-return-type))))))))
+
+(def rename-type (type)
+     (state-final-value (Pair 0 (dictionary-new))
+     (rename-type' type)))
