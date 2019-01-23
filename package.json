@@ -3,20 +3,17 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "devDependencies": {
-    "tap-spec": "^4.1.1"
-  },
   "scripts": {
     "test": "npm run test-compilers && npm run test-sexp-parser && npm run test-parser && npm run test-standard-library",
     "test-compilers": "npm run test-ocaml-compiler && npm run test-minimal-compiler",
     "test-ocaml-compiler": "extended/ocaml-compiler/build.sh && IMPL=extended/ocaml-compiler npm run test-extended && IMPL=extended/ocaml-compiler npm run test-minimal",
     "test-minimal-compiler": "extended/minimal-compiler/build.sh && IMPL=extended/minimal-compiler npm run test-minimal && IMPL=extended/minimal-compiler npm run test-extended",
-    "test-sexp-parser": "sexp-parser/build.sh && ./dev-env/spec-runner/run.sh sexp-parser/specification ./sexp-parser/eval.sh | tap-spec",
-    "test-parser": "parser/build.sh && ./dev-env/spec-runner/run.sh parser/specification ./parser/eval.sh | tap-spec",
-    "test-standard-library": "standard-library/build.sh && ./dev-env/spec-runner/run.sh standard-library/specification ./standard-library/eval.sh | tap-spec",
-    "test-type-inference": "type-inference/build.sh && ./dev-env/spec-runner/run.sh type-inference/specification ./type-inference/eval.sh | tap-spec",
-    "test-minimal": "./dev-env/spec-runner/run.sh minimal/specification ./$IMPL/eval.sh | tap-spec",
-    "test-extended": "./dev-env/spec-runner/run.sh extended/specification ./$IMPL/eval.sh | tap-spec",
+    "test-sexp-parser": "sexp-parser/build.sh && ./dev-env/spec-runner/run.sh sexp-parser/specification ./sexp-parser/eval.sh | ./dev-env/tap-format/tap-format.sh",
+    "test-parser": "parser/build.sh && ./dev-env/spec-runner/run.sh parser/specification ./parser/eval.sh | ./dev-env/tap-format/tap-format.sh",
+    "test-standard-library": "standard-library/build.sh && ./dev-env/spec-runner/run.sh standard-library/specification ./standard-library/eval.sh | ./dev-env/tap-format/tap-format.sh",
+    "test-type-inference": "type-inference/build.sh && ./dev-env/spec-runner/run.sh type-inference/specification ./type-inference/eval.sh | ./dev-env/tap-format/tap-format.sh",
+    "test-minimal": "./dev-env/spec-runner/run.sh minimal/specification ./$IMPL/eval.sh | ./dev-env/tap-format/tap-format.sh",
+    "test-extended": "./dev-env/spec-runner/run.sh extended/specification ./$IMPL/eval.sh | ./dev-env/tap-format/tap-format.sh",
     "line-count": "git ls-files | grep '\\.reuse' | xargs wc -l",
     "vscode-install": "ln -s $PWD/dev-env/editor-support/vs-code-reuse ~/.vscode/extensions/vs-code-reuse"
   },
