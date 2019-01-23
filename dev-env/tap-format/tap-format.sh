@@ -10,15 +10,15 @@ failed_tests=0
 
 while IFS= read -r line; do
     if [[ "$line" == "# fail 0" ]]; then
-        echo -e "${result_passed_format}All tests passed\n\n"
+        echo -e "${result_passed_format}All tests passed\n\n$reset_format"
     elif [[ "$line" == "# fail "* ]]; then
-        echo -e "$result_failed_format${line:7} tests failed$reset_format\n\n"
+        echo -e "$result_failed_format${line:7} tests failed\n\n$reset_format"
     elif [[ "$line" == "# pass "* ]]; then
         echo -e "$result_passed_format${line:7} tests passed$reset_format"
     elif [[ "$line" == "# tests "* ]]; then
         echo -e "\n\n  ${line:8} tests in total$reset_format"
     elif [[ "$line" == "# "* ]]; then
-        echo -e "\n$title_format${line:2}$reset_format\n"
+        echo -e "\n$title_format${line:2}\n$reset_format"
     elif [[ "$line" == "ok "* ]]; then
         echo -e "$ok_format${line:2}$reset_format"
     elif [[ "$line" == "not ok "* ]]; then
