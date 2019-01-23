@@ -3,18 +3,20 @@
 title_format="  \033[4m"
 ok_format="    \033[32m✔\033[90m "
 not_ok_format="    \033[91m✖ "
-result_failed_format="\033[91m "
-result_passed_format="\033[92m "
+result_failed_format="\033[91m  "
+result_passed_format="\033[92m  "
 reset_format="\033[0m"
 failed_tests=0
 
 while IFS= read -r line; do
-    if [[ "$line" == "# fail "* ]]; then
+    if [[ "$line" == "# fail 0" ]]; then
+        echo -e "${result_passed_format}All tests passed\n\n"
+    elif [[ "$line" == "# fail "* ]]; then
         echo -e "$result_failed_format${line:7} tests failed$reset_format\n\n"
     elif [[ "$line" == "# pass "* ]]; then
         echo -e "$result_passed_format${line:7} tests passed$reset_format"
     elif [[ "$line" == "# tests "* ]]; then
-        echo -e "\n\n ${line:8} tests in total$reset_format"
+        echo -e "\n\n  ${line:8} tests in total$reset_format"
     elif [[ "$line" == "# "* ]]; then
         echo -e "\n$title_format${line:2}$reset_format\n"
     elif [[ "$line" == "ok "* ]]; then
