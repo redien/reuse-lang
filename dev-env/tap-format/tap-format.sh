@@ -5,8 +5,21 @@ ok_format="    \033[32m✔\033[90m "
 not_ok_format="    \033[91m✖ "
 result_failed_format="\033[91m  "
 result_passed_format="\033[92m  "
+error_data_format="        \033[93m"
 reset_format="\033[0m"
 failed_tests=0
+
+echo_error_data() {
+    echo -e "${error_data_format}---$reset_format"
+    while IFS= read -r line; do
+        if [[ "$line" == *"..." ]]; then
+            break
+        else
+            echo -e "${error_data_format}$line$reset_format"
+        fi
+    done
+    echo -e "${error_data_format}...$reset_format"
+}
 
 while IFS= read -r line; do
     if [[ "$line" == "# fail 0" ]]; then
@@ -24,6 +37,8 @@ while IFS= read -r line; do
     elif [[ "$line" == "not ok "* ]]; then
         echo -e "$not_ok_format${line:6}$reset_format"
         failed_tests=1
+    elif [[ "$line" == *"---" ]]; then
+        echo_error_data
     fi
 done
 
