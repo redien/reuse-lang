@@ -29,6 +29,6 @@ build_compiler_binary
 build_compiler_source
 
 >&2 echo Fourth stage: Run test suite
-npm test
+dev-env/run.sh test
 
 >&2 echo Updated successfully!

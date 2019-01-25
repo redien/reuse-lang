@@ -1,16 +1,11 @@
 
 (def compile-error () (list 42 99 111 109 112 105 108 101 32 101 114 114 111 114 42))
-(def definition-end () (list 59 59))
-(def let-rec () (list 108 101 116 32 114 101 99 32))
 (def arrow () (list 32 45 62 32))
 (def equals () (list 32 61 32))
-(def comma () (list 44 32))
 (def vertical-bar () (list 32 124 32))
 (def pipe-operator () (list 32 124 62 32))
 (def colon () (list 32 58 32))
 (def star () (list 32 42 32))
-
-(def with () (list 119 105 116 104))
 
 (def int32 () (list 105 110 116 51 50))
 (def int32-plus () (list 73 110 116 51 50 46 97 100 100))
@@ -22,3 +17,7 @@
 (def data-cempty () (list 67 69 109 112 116 121))
 (def data-ccons () (list 67 67 111 110 115))
 (def data-int32 () (list 73 110 116 51 50 46 111 102 95 105 110 116 32))
+(def data-comma () (list 44))
+(def data-with () (list 119 105 116 104))
+(def data-definition-end () (list 59 59))
+(def data-let-rec () (list 108 101 116 32 114 101 99 32))

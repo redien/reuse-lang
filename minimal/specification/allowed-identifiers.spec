@@ -123,6 +123,106 @@ Should allow commonly reserved words as variable names
 > (close' 10)
 = 10
 
+| (def as' (as) as)
+> (as' 10)
+= 10
+
+| (def assert' (assert) assert)
+> (assert' 10)
+= 10
+
+| (def asr' (asr) asr)
+> (asr' 10)
+= 10
+
+| (def begin' (begin) begin)
+> (begin' 10)
+= 10
+
+| (def constraint' (constraint) constraint)
+> (constraint' 10)
+= 10
+
+| (def do' (do) do)
+> (do' 10)
+= 10
+
+| (def done' (done) done)
+> (done' 10)
+= 10
+
+| (def downto' (downto) downto)
+> (downto' 10)
+= 10
+
+| (def exception' (exception) exception)
+> (exception' 10)
+= 10
+
+| (def external' (external) external)
+> (external' 10)
+= 10
+
+| (def false' (false) false)
+> (false' 10)
+= 10
+
+| (def true' (true) true)
+> (true' 10)
+= 10
+
+| (def for' (for) for)
+> (for' 10)
+= 10
+
+| (def function' (function) function)
+> (function' 10)
+= 10
+
+| (def functor' (functor) functor)
+> (functor' 10)
+= 10
+
+| (def if' (if) if)
+> (if' 10)
+= 10
+
+| (def include' (include) include)
+> (include' 10)
+= 10
+
+| (def inherit' (inherit) inherit)
+> (inherit' 10)
+= 10
+
+| (def initializer' (initializer) initializer)
+> (initializer' 10)
+= 10
+
+| (def land' (land) land)
+> (land' 10)
+= 10
+
+| (def lazy' (lazy) lazy)
+> (lazy' 10)
+= 10
+
+| (def lor' (lor) lor)
+> (lor' 10)
+= 10
+
+| (def lsl' (lsl) lsl)
+> (lsl' 10)
+= 10
+
+| (def lsr' (lsr) lsr)
+> (lsr' 10)
+= 10
+
+| (def lxor' (lxor) lxor)
+> (lxor' 10)
+= 10
+
 Type names should be allowed as capture variables
 | (typ a (B int32))
 > (match (B 11) (B a) a)
