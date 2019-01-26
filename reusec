@@ -30,6 +30,12 @@ throw_error() {
     exit 1
 }
 
+if [ "$(uname)" = "Darwin" ] ; then
+    root_path=$(dirname $(greadlink -f "$0"))
+else
+    root_path=$(dirname $(readlink -f "$0"))
+fi
+
 while [[ $# -gt 0 ]]
 do
     arg="$1"
@@ -57,8 +63,13 @@ do
             throw_error Unrecognized flag $arg
         ;;
         *)
-            REUSE_SOURCE="$REUSE_SOURCE
+            if [[ "$arg" == *".strings" ]]; then
+                REUSE_SOURCE="$REUSE_SOURCE
+$(cat $arg | $root_path/bin/string-gen)"
+            else
+                REUSE_SOURCE="$REUSE_SOURCE
 $(cat $arg)"
+            fi
             shift
         ;;
     esac
@@ -74,12 +85,6 @@ esac
 
 if [ "$REUSE_OUTPUT" == "" ]; then
     throw_error No output file specified, please use the --output [file] flag.
-fi
-
-if [ "$(uname)" = "Darwin" ] ; then
-    root_path=$(dirname $(greadlink -f "$0"))
-else
-    root_path=$(dirname $(readlink -f "$0"))
 fi
 
 if [ "$REUSE_NOSTDLIB" == "false" ]; then
