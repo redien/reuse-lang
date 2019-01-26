@@ -36,6 +36,21 @@
 (def string-split (separator string)
      (string-split' separator string Empty Empty))
 
+(def string-trim-start (string)
+     (match string
+            (Cons x xs)
+                (match (= x 32)
+                       True   (string-trim-start xs)
+                       False  string)
+            Empty
+                string))
+
+(def string-trim-end (string)
+     (list-reverse (string-trim-start (list-reverse string))))
+
+(def string-trim (string)
+     (string-trim-start (string-trim-end string)))
+
 (def string-empty? (string)
      (match string Empty True _ False))
 
