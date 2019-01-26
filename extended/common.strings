@@ -48,4 +48,22 @@ lor                       |lor
 lsl                       |lsl
 lsr                       |lsr
 lxor                      |lxor
+method                    |method
+mod                       |mod
+module                    |module
+mutable                   |mutable
+new                       |new
+nonrec                    |nonrec
+object                    |object
+private                   |private
+rec                       |rec
+sig                       |sig
+struct                    |struct
+try                       |try
+val                       |val
+virtual                   |virtual
+when                      |when
+while                     |while
+parser                    |parser
+value                     |value
 error-reserved-identifier |Symbols prefixed with ✨ are reserved

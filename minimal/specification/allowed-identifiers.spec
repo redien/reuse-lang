@@ -223,6 +223,78 @@ Should allow commonly reserved words as variable names
 > (lxor' 10)
 = 10
 
+| (def method' (method) method)
+> (method' 10)
+= 10
+
+| (def mod' (mod) mod)
+> (mod' 10)
+= 10
+
+| (def module' (module) module)
+> (module' 10)
+= 10
+
+| (def mutable' (mutable) mutable)
+> (mutable' 10)
+= 10
+
+| (def new' (new) new)
+> (new' 10)
+= 10
+
+| (def nonrec' (nonrec) nonrec)
+> (nonrec' 10)
+= 10
+
+| (def object' (object) object)
+> (object' 10)
+= 10
+
+| (def private' (private) private)
+> (private' 10)
+= 10
+
+| (def rec' (rec) rec)
+> (rec' 10)
+= 10
+
+| (def sig' (sig) sig)
+> (sig' 10)
+= 10
+
+| (def struct' (struct) struct)
+> (struct' 10)
+= 10
+
+| (def try' (try) try)
+> (try' 10)
+= 10
+
+| (def val' (val) val)
+> (val' 10)
+= 10
+
+| (def virtual' (virtual) virtual)
+> (virtual' 10)
+= 10
+
+| (def when' (when) when)
+> (when' 10)
+= 10
+
+| (def while' (while) while)
+> (while' 10)
+= 10
+
+| (def parser' (parser) parser)
+> (parser' 10)
+= 10
+
+| (def value' (value) value)
+> (value' 10)
+= 10
+
 Type names should be allowed as capture variables
 | (typ a (B int32))
 > (match (B 11) (B a) a)

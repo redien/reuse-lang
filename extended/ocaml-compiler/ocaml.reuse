@@ -14,7 +14,10 @@
         (data-exception) (data-external) (data-false) (data-true) (data-for)
         (data-function) (data-functor) (data-if) (data-include)
         (data-inherit) (data-initializer) (data-land) (data-lazy) (data-lor)
-        (data-lsl) (data-lsr) (data-lxor)
+        (data-lsl) (data-lsr) (data-lxor) (data-method) (data-mod) (data-module)
+        (data-mutable) (data-new) (data-nonrec) (data-object) (data-private)
+        (data-rec) (data-sig) (data-struct) (data-try) (data-val) (data-virtual)
+        (data-when) (data-while) (data-parser) (data-value)
      )))
 
 (def escape-identifier (name)
