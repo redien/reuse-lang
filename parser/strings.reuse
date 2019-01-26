@@ -1,22 +1,4 @@
 
-(def def-string ()
-     (list 100 101 102))
-
-(def export-string ()
-     (list 101 120 112 111 114 116))
-
-(def typ-string ()
-     (list 116 121 112)) 
-
-(def fn-string ()
-     (list 102 110))
-
-(def match-string ()
-     (list 109 97 116 99 104))
-
-(def exists-string ()
-     (list 101 120 105 115 116 115))
-
 (typ language English)
 
 (def i18n-error-range-to-string (language range)

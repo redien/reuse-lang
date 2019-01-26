@@ -115,7 +115,7 @@
      (pipe (list-map (translate-rule translate-expression))
            (string-join (data-vertical-bar))
            (fn (rules)
-               (list (match-string) (translate-expression expression) (data-with) rules))
+               (list (data-match) (translate-expression expression) (data-with) rules))
            (string-join (data-space))))
 
 (def translate-function-application' (translate-expression expressions)
