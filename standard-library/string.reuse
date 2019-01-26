@@ -16,14 +16,25 @@
 (def string-append (a b)
      (string-concat b a))
 
-(def 'string-join-reducer (separator)
-     (fn (x xs)
-         (match xs
-                Empty x
-                _     (string-concat (string-concat x separator) xs))))
-
 (def string-join (separator list)
-     (list-foldr ('string-join-reducer separator) Empty list))
+     (match list
+            (Cons first rest)
+                (list-foldl (fn (string joined)
+                                (string-concat joined (string-concat separator string)))
+                            first
+                            rest)
+            Empty
+                Empty))
+
+(def string-split' (separator string current parts)
+     (match string
+            Empty          (list-reverse (Cons (list-reverse current) parts))
+            (Cons c rest)  (match (= separator c)
+                                  True   (string-split' separator rest Empty (Cons (list-reverse current) parts))
+                                  False  (string-split' separator rest (Cons c current) parts))))
+
+(def string-split (separator string)
+     (string-split' separator string Empty Empty))
 
 (def string-empty? (string)
      (match string Empty True _ False))
