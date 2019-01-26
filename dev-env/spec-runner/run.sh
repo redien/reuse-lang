@@ -77,10 +77,10 @@ program=""
 
 for f in $spec/*.spec
 do
-    while read line; do
+    while IFS='' read line; do
         firstChar=${line:0:1}
         if [ "$firstChar" == ">" ]; then
-            read expected
+            IFS='' read expected
             testLine "${line//'\n'/$'\n'}" "${program//'\n'/$'\n'}" "${expected//'\n'/$'\n'}"
             program=""
         elif [ "$firstChar" == "|" ]; then
