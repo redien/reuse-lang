@@ -21,3 +21,7 @@ Should convert the separator
 Should ignore space between separator and identifier
 > s |A
 = (def data-s () (list 65))
+
+Should transform separate lines
+> a|A\\nb|B
+= (def data-a () (list 65))\\n(def data-b () (list 66))

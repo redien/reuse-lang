@@ -16,4 +16,4 @@
                 Empty))
 
 (export string_gen (stdin)
-        (Result (string-join (list 13) (list-map transform-line (string-split 13 stdin)))))
+        (Result (string-join (list 10) (list-map transform-line (string-split 10 stdin)))))
