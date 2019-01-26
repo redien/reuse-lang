@@ -10,6 +10,7 @@ run() {
         test-parser)            parser/build.sh && ./dev-env/spec-runner/run.sh parser/specification ./parser/eval.sh | ./dev-env/tap-format/tap-format.sh ;;
         test-standard-library)  standard-library/build.sh && ./dev-env/spec-runner/run.sh standard-library/specification ./standard-library/eval.sh | ./dev-env/tap-format/tap-format.sh ;;
         test-type-inference)    type-inference/build.sh && ./dev-env/spec-runner/run.sh type-inference/specification ./type-inference/eval.sh | ./dev-env/tap-format/tap-format.sh ;;
+        test-string-gen)        string-gen/build.sh && ./dev-env/spec-runner/run.sh string-gen/specification ./string-gen/eval.sh | ./dev-env/tap-format/tap-format.sh ;;
         test-minimal)           ./dev-env/spec-runner/run.sh minimal/specification ./$IMPL/eval.sh | ./dev-env/tap-format/tap-format.sh ;;
         test-extended)          ./dev-env/spec-runner/run.sh extended/specification ./$IMPL/eval.sh | ./dev-env/tap-format/tap-format.sh ;;
         line-count)             git ls-files | grep '\.reuse' | xargs wc -l ;;

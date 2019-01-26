@@ -1,0 +1,19 @@
+
+(def transform-line (line)
+     (match (string-split 124 line)
+            (Cons name parts)
+                (string-concat (list 40 100 101 102 32 100 97 116 97 45)
+                (string-concat (string-trim name)
+                (string-concat (list 32 40 41 32)
+                (match parts
+                       (Cons Empty Empty)
+                            (list 69 109 112 116 121 41)
+                       _
+                            (string-concat (list 40 108 105 115 116 32)
+                            (string-concat (string-join (list 32) (list-map string-from-int32 (string-join (list 124) parts)))
+                                           (list 41 41)))))))
+            Empty
+                Empty))
+
+(export string_gen (stdin)
+        (Result (string-join (list 13) (list-map transform-line (string-split 13 stdin)))))
