@@ -13,9 +13,9 @@ $project_root/reusec --language ocaml\
                      $project_root/sexp-parser/parser.reuse\
                      $project_root/parser/strings.reuse\
                      $project_root/parser/parser.reuse\
-                     $script_path/../common-strings.reuse\
+                     $script_path/../common.strings\
                      $script_path/../common.reuse\
-                     $script_path/ocaml-strings.reuse\
+                     $script_path/ocaml.strings\
                      $script_path/ocaml.reuse
 
 cat << END_OF_SOURCE >> $project_root/generated/extended/CompilerOCaml.ml

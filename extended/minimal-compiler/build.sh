@@ -14,9 +14,9 @@ $project_root/reusec --language ocaml\
                      $project_root/sexp-parser/parser.reuse\
                      $project_root/parser/strings.reuse\
                      $project_root/parser/parser.reuse\
-                     $script_path/../common-strings.reuse\
+                     $script_path/../common.strings\
                      $script_path/../common.reuse\
-                     $script_path/minimal-strings.reuse\
+                     $script_path/minimal.strings\
                      $script_path/local-transforms.reuse\
                      $script_path/minimal.reuse
 
