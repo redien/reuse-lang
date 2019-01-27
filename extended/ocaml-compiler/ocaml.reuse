@@ -1,6 +1,6 @@
 
-(def with-apostrophe (string)
-     (Cons 39 string))
+(def prefix-type-variable (string)
+     (Cons 39 (Cons 84 string)))
 
 (def prefix-constructor (constructor)
      (Cons 67 constructor))
@@ -186,7 +186,7 @@
 (def translate-simple-type (name parameters)
      (match (list-any? (string-equal? name) parameters)
             False  (escape-identifier name)
-            True   (with-apostrophe (escape-identifier name))))
+            True   (prefix-type-variable name)))
 
 (def translate-complex-types (translate-types name)
      (pipe (translate-types (data-comma))
@@ -241,14 +241,13 @@
 (def translate-type-parameter-for-definition (parameter)
      (match parameter
             (UniversalParameter name _)
-                (escape-identifier name)
+                (prefix-type-variable name)
             (ExistentialParameter _ __)
                 Empty))
 
 (def translate-type-parameters ()
      (pipe (list-map translate-type-parameter-for-definition)
            (list-filter not-empty?)
-           (list-map with-apostrophe)
            (string-join (data-comma))))
 
 (def translate-type-name (name parameters)
