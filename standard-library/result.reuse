@@ -47,3 +47,9 @@
                 (Result x)
             None
                 (Error error)))
+
+(def result-bind (result f)
+     (result-flatmap f result))
+
+(def result-return (value)
+     (result-lift value))
