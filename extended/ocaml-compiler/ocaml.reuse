@@ -42,32 +42,6 @@
             True  (data-int32-multiply)
             False (escape-identifier name)))))))
 
-(def translate-pipe (translate-expression)
-     (pipe (list-map translate-expression)
-           (string-join (data-pipe-operator))
-           (fn (expressions)
-               (list (data-fun)
-                     (data-space)
-                     (wrap-in-brackets (list 95 120))
-                     (data-arrow)
-                     (list 95 120)
-                     (data-pipe-operator)
-                     expressions))
-           join))
-
-(def translate-list (translate-expression expressions)
-     (match expressions
-            Empty
-                (data-cempty)
-            (Cons first rest)
-                (join (list (data-ccons)
-                            (data-space)
-                            (list 40)
-                            (translate-expression first)
-                            (data-comma)
-                            (translate-list translate-expression rest)
-                            (list 41)))))
-
 (def translate-less-than (translate-expression expressions)
      (match expressions
             (Cons a (Cons b (Cons then-case (Cons else-case Empty))))
@@ -133,15 +107,9 @@
 (def translate-function-application (translate-expression expressions)
      (match expressions
             (Cons (Identifier name _) rest)
-                    (match (string-equal? name (data-pipe))
-                           True  ((translate-pipe translate-expression) rest)
-                           False
-                    (match (string-equal? name (data-list))
-                           True  (translate-list translate-expression rest)
-                           False
                     (match (string-equal? name (data-int32-less-than))
                            True  (translate-less-than translate-expression rest)
-                           False (translate-function-application' translate-expression expressions))))
+                           False (translate-function-application' translate-expression expressions))
             _
                     (translate-function-application' translate-expression expressions)))
 
@@ -282,7 +250,9 @@
             False  (fn (definition) (validate-reserved-identifiers definition))))
 
 (export to_ocaml (definitions source as_minimal)
-        ((pipe (list-map (pipe (validate-reserved-identifiers-when-not as_minimal) translate-definition))
+        ((pipe (list-map (validate-reserved-identifiers-when-not as_minimal))
+               local-transforms
+               (list-map translate-definition)
                result-concat
                (result-map (string-join (list 10))))
             definitions))

@@ -67,3 +67,6 @@ while                     |while
 parser                    |parser
 value                     |value
 error-reserved-identifier |Symbols prefixed with ✨ are reserved
+sparkle-x                 |✨x
+Empty                     |Empty
+Cons                      |Cons
