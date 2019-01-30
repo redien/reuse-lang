@@ -27,6 +27,7 @@
      (result-concat (list-map (over-match-pair-expression (pipe f (result-flatmap (over-subexpressions f)))) pairs)))
 
 (def over-subexpressions (f expression)
+     (result-bind (f expression)  (fn (expression)
      (match expression
             (Lambda arguments expression range)
                 (result-bind   (f expression)                                             (fn (expression)
@@ -44,7 +45,7 @@
                 (result-bind   (result-concat (list-map (pipe f (result-flatmap (over-subexpressions f))) expressions)) (fn (expressions)
                 (result-return (FunctionApplication expressions range))))
             _
-                (result-return expression)))
+                (result-return expression)))))
 
 (def over-definition-expressions (f definition)
      (match definition
