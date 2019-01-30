@@ -235,24 +235,22 @@
 
 (def translate-definition (definition)
      (match definition
-        (Result (FunctionDefinition name arguments expression _))
-                (Result (translate-function-definition (escape-identifier name) arguments expression))
-        (Result (ExportDefinition name arguments expression _))
-                (Result (translate-function-definition name arguments expression))
-        (Result (TypeDefinition name parameters constructors _))
-                (Result (translate-type-definition name parameters constructors))
-        (Error error)
-                (Error error)))
+            (FunctionDefinition name arguments expression _)
+                (translate-function-definition (escape-identifier name) arguments expression)
+            (ExportDefinition name arguments expression _)
+                (translate-function-definition name arguments expression)
+            (TypeDefinition name parameters constructors _)
+                (translate-type-definition name parameters constructors)))
 
 (def validate-reserved-identifiers-when-not (as_minimal)
      (match as_minimal
-            True   (fn (definition) definition)
-            False  (fn (definition) (validate-reserved-identifiers definition))))
+            True   (fn (definitions) definitions)
+            False  (list-map validate-reserved-identifiers)))
 
 (export to_ocaml (definitions source as_minimal)
-        ((pipe (list-map (validate-reserved-identifiers-when-not as_minimal))
+        ((pipe (validate-reserved-identifiers-when-not as_minimal)
                local-transforms
-               (list-map translate-definition)
+               (list-map (result-map translate-definition))
                result-concat
                (result-map (string-join (list 10))))
             definitions))
