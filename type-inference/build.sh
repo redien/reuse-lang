@@ -15,6 +15,7 @@ $project_root/reusec --language ocaml\
                      $project_root/parser/parser.reuse\
                      $project_root/type-inference/type.reuse\
                      $project_root/type-inference/context.reuse\
+                     $project_root/type-inference/type-inference.strings\
                      $project_root/type-inference/type-inference.reuse\
                      $project_root/type-inference/rename-type.reuse\
                      $project_root/type-inference/main.reuse

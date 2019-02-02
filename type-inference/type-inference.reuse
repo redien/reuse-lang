@@ -1,4 +1,34 @@
 
+(def add-integer-constant (integer)
+     (state-return (ConstType (data-int32) Empty)))
+
+(def add-identifier (name)
+     (state-bind   (type-inference-context-resolve name)  (fn (type)
+     (state-let    (maybe-else (fn () ErrorType) type)    (fn (type)
+     (state-return type))))))
+
+(def add-argument-types (argument-names argument-types)
+     (state-let   (list-zip argument-names argument-types)  (fn (arguments)
+     (type-inference-context-add-types arguments))))
+
+(def add-function-constraints (add-expression-type arguments body)
+     (state-bind   (gensyms (list-size arguments))                             (fn (argument-names)
+     (state-let    (list-map (fn (type) (UniversalType type)) argument-names)  (fn (argument-types)
+     (state-bind   (add-argument-types argument-names argument-types)          (fn (_)
+     (state-bind   (add-expression-type body)                                  (fn (return-type)
+     (state-return (FnType argument-types return-type)))))))))))
+
+(def add-expression-type (expression)
+     (match expression
+            (IntegerConstant integer _)
+                (add-integer-constant integer)
+            (Identifier name _)
+                (add-identifier name)
+            (Lambda arguments body _)
+                (add-function-constraints add-expression-type arguments body)
+            _
+                (state-return ErrorType)))
+
 (def add-constructor-types (name parameters constructors)
      (type-inference-context-add-types
      (types-from-constructors name
@@ -13,18 +43,11 @@
                                    (TypeAnnotation (UniversalType Empty)
                                    meta))))))
 
-(def add-argument-types (argument-names argument-types)
-     (state-let (list-zip argument-names argument-types) (fn (arguments)
-     (type-inference-context-add-types arguments))))
-
-(def add-function-constraints (constructor name arguments body meta)
-     (state-bind   (gensyms (list-size arguments))                             (fn (argument-names)
-     (state-bind   (gensym)                                                    (fn (return-type-name)
-     (state-let    (list-map (fn (type) (UniversalType type)) argument-names)  (fn (argument-types)
-     (state-let    (FnType argument-types (UniversalType return-type-name))    (fn (type)
-     (state-bind   (add-argument-types argument-names argument-types)          (fn (_)
-     (state-let    (TypeAnnotation type meta)                                  (fn (annotation)
-     (state-return (constructor name arguments body annotation)))))))))))))))
+(def add-function-definition-constraints (constructor name arguments body meta)
+     (state-bind   (add-function-constraints add-expression-type arguments body)  (fn (type)
+     (state-bind   (type-inference-context-add-types (list (Pair name type)))     (fn (_)
+     (state-let    (TypeAnnotation type meta)                                     (fn (annotation)
+     (state-return (constructor name arguments body annotation)))))))))
 
 (def construct-function-definition (name arguments body meta)
      (FunctionDefinition name arguments body meta))
@@ -37,9 +60,9 @@
          (TypeDefinition name parameters constructors meta)
              (add-type-constructors-to-context name parameters constructors meta)
          (FunctionDefinition name arguments body meta)
-             (add-function-constraints construct-function-definition name arguments body meta)
+             (add-function-definition-constraints construct-function-definition name arguments body meta)
          (ExportDefinition name arguments body meta)
-             (add-function-constraints construct-export-definition name arguments body meta)))
+             (add-function-definition-constraints construct-export-definition name arguments body meta)))
 
 (def infer-types (definitions)
      (state-final-value (type-inference-context-empty)

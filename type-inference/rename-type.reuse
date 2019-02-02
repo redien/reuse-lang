@@ -40,6 +40,8 @@
 
 (def rename-type' (type)
      (match type
+            ErrorType
+                (state-return ErrorType)
             (UniversalType name)
                 (state-bind (rename-in-context name)           (fn (new-name)
                 (state-return (UniversalType new-name))))

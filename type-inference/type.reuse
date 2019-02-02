@@ -2,7 +2,8 @@
 (typ type  (UniversalType (list int32))
            (ExistentialType (list int32))
            (ConstType (list int32) (list type))
-           (FnType (list type) type))
+           (FnType (list type) type)
+           ErrorType)
 
 (typ (type-annotation meta)  (TypeAnnotation type meta))
 
@@ -16,7 +17,8 @@
                                  (ConstType _ __)                  False
                                  (FnType _ __)                     False
                                  (UniversalType parameter-name)    (string-equal? name parameter-name)
-                                 (ExistentialType parameter-name)  (string-equal? name parameter-name)))
+                                 (ExistentialType parameter-name)  (string-equal? name parameter-name)
+                                 ErrorType                         False))
                       parameters))
 
 (def type-from-ast-type (parameters ast-type)
