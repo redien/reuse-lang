@@ -1,58 +1,58 @@
 
-(def add-integer-constant (integer)
+(def constraints-integer-constant (integer)
      (state-return (ConstType (data-int32) Empty)))
 
-(def add-identifier (name)
+(def constraints-identifier (name)
      (type-inference-context-resolve name))
 
-(def add-argument-types (argument-names argument-types)
+(def constraints-argument (argument-names argument-types)
      (state-let   (list-zip argument-names argument-types)  (fn (arguments)
      (type-inference-context-add-types arguments))))
 
-(def add-function (add-expression-type arguments body)
+(def constraints-function (constraints-expression arguments body)
      (state-bind   (gensyms (list-size arguments))                             (fn (argument-names)
      (state-let    (list-map (fn (type) (UniversalType type)) argument-names)  (fn (argument-types)
-     (state-bind   (add-argument-types argument-names argument-types)          (fn (_)
-     (state-bind   (add-expression-type body)                                  (fn (return-type)
+     (state-bind   (constraints-argument argument-names argument-types)        (fn (_)
+     (state-bind   (constraints-expression body)                               (fn (return-type)
      (state-return (FnType argument-types return-type)))))))))))
 
-(def add-function-application (add-expression-type function)
-     (state-bind   (add-expression-type function) (fn (function-type)
+(def constraints-function-application (constraints-expression function)
+     (state-bind   (constraints-expression function) (fn (function-type)
      (match function-type
             (FnType _ return-type)
                 (state-return return-type)
             _
                 (state-return ErrorType)))))
 
-(def add-expression-type (expression)
+(def constraints-expression (expression)
      (match expression
             (IntegerConstant integer _)
-                (add-integer-constant integer)
+                (constraints-integer-constant integer)
             (Identifier name _)
-                (add-identifier name)
+                (constraints-identifier name)
             (Lambda arguments body _)
-                (add-function add-expression-type arguments body)
+                (constraints-function constraints-expression arguments body)
             (FunctionApplication (Cons function _) __)
-                (add-function-application add-expression-type function)
+                (constraints-function-application constraints-expression function)
             _
                 (state-return ErrorType)))
 
-(def add-constructor-types (name parameters constructors)
+(def constraints-constructor (name parameters constructors)
      (type-inference-context-add-types
      (types-from-constructors name
                               (list-map type-from-parameter parameters)
                               constructors)))
 
 (def add-type-constructors-to-context (name parameters constructors meta)
-     (state-bind   (add-constructor-types name parameters constructors) (fn (_)
+     (state-bind   (constraints-constructor name parameters constructors) (fn (_)
      (state-return (TypeDefinition name
                                    parameters
                                    constructors
                                    (TypeAnnotation (UniversalType Empty)
                                    meta))))))
 
-(def add-function-definition-constraints (constructor name arguments body meta)
-     (state-bind   (add-function add-expression-type arguments body)  (fn (type)
+(def constraints-function-definition (constructor name arguments body meta)
+     (state-bind   (constraints-function constraints-expression arguments body)   (fn (type)
      (state-bind   (type-inference-context-add-types (list (Pair name type)))     (fn (_)
      (state-let    (TypeAnnotation type meta)                                     (fn (annotation)
      (state-return (constructor name arguments body annotation)))))))))
@@ -63,14 +63,14 @@
 (def construct-export-definition (name arguments body meta)
      (ExportDefinition name arguments body meta))
 
-(def generate-constraints-for-definition (definition)
+(def constraints-definition (definition)
      (match definition
          (TypeDefinition name parameters constructors meta)
              (add-type-constructors-to-context name parameters constructors meta)
          (FunctionDefinition name arguments body meta)
-             (add-function-definition-constraints construct-function-definition name arguments body meta)
+             (constraints-function-definition construct-function-definition name arguments body meta)
          (ExportDefinition name arguments body meta)
-             (add-function-definition-constraints construct-export-definition name arguments body meta)))
+             (constraints-function-definition construct-export-definition name arguments body meta)))
 
 (def int32-type ()
      (ConstType (data-int32) Empty))
@@ -89,4 +89,4 @@
 (def infer-types (definitions)
      (state-final-value (type-inference-context-empty)
      (state-bind (add-intrinsic-types) (fn (_)
-     (state-foreach generate-constraints-for-definition definitions)))))
+     (state-foreach constraints-definition definitions)))))
