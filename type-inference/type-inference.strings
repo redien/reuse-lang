@@ -1,2 +1,7 @@
 int32      |int32
+plus       |+
+minus      |-
+multiply   |*
+divide     |/
+modulus    |%
 type-error |*Type error*

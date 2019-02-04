@@ -44,12 +44,17 @@
                               (TypeInferenceContext types symbol-count constraints)
                                   (TypeInferenceContext (list-concat new-types types) symbol-count constraints)))))
 
-(def type-inference-context-resolve (name)
+(def type-inference-context-resolve' (name)
      (state-bind   (state-get) (fn (context)
      (state-return (match context
                           (TypeInferenceContext types _ __)
                               (maybe-map pair-right
                                          (list-find-first (fn (pair) (string-equal? name (pair-left pair))) types)))))))
+
+(def type-inference-context-resolve (name)
+     (state-bind   (type-inference-context-resolve' name)  (fn (type)
+     (state-return (maybe-else (fn () ErrorType) type)))))
+     
 
 (def type-inference-context-add-constraint (a b)
      (state-modify (fn (context)
