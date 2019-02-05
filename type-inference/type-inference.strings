@@ -5,3 +5,5 @@ multiply   |*
 divide     |/
 modulus    |%
 type-error |*Type error*
+exists     |exists
+space      | 

@@ -34,22 +34,17 @@
                 (constraints-function constraints-expression arguments body)
             (FunctionApplication (Cons function _) __)
                 (constraints-function-application constraints-expression function)
+            (Constructor name Empty meta)
+                (constraints-function-application constraints-expression (Identifier name meta))
             _
                 (state-return ErrorType)))
 
-(def constraints-constructor (name parameters constructors)
-     (type-inference-context-add-types
-     (types-from-constructors name
-                              (list-map type-from-parameter parameters)
-                              constructors)))
-
 (def add-type-constructors-to-context (name parameters constructors meta)
-     (state-bind   (constraints-constructor name parameters constructors) (fn (_)
-     (state-return (TypeDefinition name
-                                   parameters
-                                   constructors
-                                   (TypeAnnotation (UniversalType Empty)
-                                   meta))))))
+     (state-let    (list-map type-from-parameter parameters)                   (fn (parameter-types)
+     (state-let    (TypeAnnotation (ConstType name parameter-types) meta)      (fn (annotation)
+     (state-let    (types-from-constructors name parameter-types constructors) (fn (constructor-types)
+     (state-bind   (type-inference-context-add-types constructor-types)        (fn (_)
+     (state-return (TypeDefinition name parameters constructors annotation)))))))))))
 
 (def constraints-function-definition (constructor name arguments body meta)
      (state-bind   (constraints-function constraints-expression arguments body)   (fn (type)

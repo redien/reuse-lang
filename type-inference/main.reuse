@@ -8,7 +8,7 @@
      (match type
             ErrorType              (data-type-error)
             (UniversalType name)   name
-            (ExistentialType name) name
+            (ExistentialType name) (wrap-in-brackets (string-join (data-space) (list (data-exists) name)))
             (ConstType name Empty) name
             (ConstType name types)
                 ((pipe (stringify-type-list stringify-type)
