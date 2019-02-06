@@ -20,3 +20,9 @@ Should infer types with existential type variables
 Should add constructor types to context
 > (typ myType Empty) (def f () Empty)
 = myType (fn () myType)
+
+> (typ myType First Second) (def f () Second)
+= myType (fn () myType)
+
+> (typ (myType a) (Empty a)) (def f () (Empty 1))
+= (myType A) (fn () (myType int32))
