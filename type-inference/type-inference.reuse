@@ -10,19 +10,26 @@
      (type-inference-context-add-types arguments))))
 
 (def constraints-function (constraints-expression arguments body)
-     (state-bind   (gensyms (list-size arguments))                             (fn (argument-names)
-     (state-let    (list-map (fn (type) (UniversalType type)) argument-names)  (fn (argument-types)
-     (state-bind   (constraints-argument argument-names argument-types)        (fn (_)
-     (state-bind   (constraints-expression body)                               (fn (return-type)
+     (state-bind   (gensyms (list-size arguments))                         (fn (type-names)
+     (state-let    (list-map (fn (type) (UniversalType type)) type-names)  (fn (argument-types)
+     (state-bind   (constraints-argument arguments argument-types)         (fn (_)
+     (state-bind   (constraints-expression body)                           (fn (return-type)
      (state-return (FnType argument-types return-type)))))))))))
 
-(def constraints-function-application (constraints-expression function)
-     (state-bind   (constraints-expression function) (fn (function-type)
-     (match function-type
+(def constraints-application (type)
+     (match type
             (FnType _ return-type)
                 (state-return return-type)
             _
-                (state-return ErrorType)))))
+                (state-return ErrorType)))
+
+(def constraints-function-application (constraints-expression function)
+     (state-bind (constraints-expression function) (fn (function-type)
+     (constraints-application function-type))))
+
+(def constraints-constructor-application (name)
+     (state-bind (type-inference-context-resolve name) (fn (type)
+     (constraints-application type))))
 
 (def constraints-expression (expression)
      (match expression
@@ -34,8 +41,8 @@
                 (constraints-function constraints-expression arguments body)
             (FunctionApplication (Cons function _) __)
                 (constraints-function-application constraints-expression function)
-            (Constructor name Empty meta)
-                (constraints-function-application constraints-expression (Identifier name meta))
+            (Constructor name _ __)
+                (constraints-constructor-application name)
             _
                 (state-return ErrorType)))
 

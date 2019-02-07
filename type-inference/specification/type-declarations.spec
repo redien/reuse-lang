@@ -26,3 +26,8 @@ Should add constructor types to context
 
 > (typ (myType a) (Empty a)) (def f () (Empty 1))
 = (myType A) (fn () (myType int32))
+
+
+Should recognize types defined previously
+> (typ myType Empty) (typ (myOtherType a) (Something myType a)) (def f (a b) (Something a b))
+= myType (myOtherType A) (fn (myType B) (myOtherType B))
