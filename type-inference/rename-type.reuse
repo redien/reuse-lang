@@ -38,7 +38,7 @@
                 (state-bind (rename-add name new-name) (fn (_)
                 (state-return new-name)))))))))
 
-(def rename-type' (type)
+(def rename-type (type)
      (match type
             ErrorType
                 (state-return ErrorType)
@@ -49,13 +49,13 @@
                 (state-bind (rename-in-context name)           (fn (new-name)
                 (state-return (ExistentialType new-name))))
             (ConstType name types)
-                (state-bind (state-foreach rename-type' types) (fn (new-types)
+                (state-bind (state-foreach rename-type types)  (fn (new-types)
                 (state-return (ConstType name new-types))))
             (FnType argument-types return-type)
-                (state-bind (state-foreach rename-type' argument-types) (fn (new-argument-types)
-                (state-bind (rename-type' return-type)                  (fn (new-return-type)
+                (state-bind (state-foreach rename-type argument-types) (fn (new-argument-types)
+                (state-bind (rename-type return-type)                  (fn (new-return-type)
                 (state-return (FnType new-argument-types new-return-type))))))))
 
-(def rename-type (type)
+(def rename-types (types)
      (state-final-value (Pair 0 (dictionary-new))
-     (rename-type' type)))
+     (state-foreach rename-type types)))
