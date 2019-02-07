@@ -16,20 +16,24 @@
      (state-bind   (constraints-expression body)                           (fn (return-type)
      (state-return (FnType argument-types return-type)))))))))))
 
-(def constraints-application (type)
+(def constraints-application (type expression-types)
      (match type
-            (FnType _ return-type)
-                (state-return return-type)
+            (FnType argument-types return-type)
+                (state-let  (list-zip argument-types expression-types)           (fn (constraints)
+                (state-bind (type-inference-context-add-constraints constraints) (fn (_)
+                (state-return return-type)))))
             _
                 (state-return ErrorType)))
 
-(def constraints-function-application (constraints-expression function)
-     (state-bind (constraints-expression function) (fn (function-type)
-     (constraints-application function-type))))
+(def constraints-function-application (constraints-expression function arguments)
+     (state-bind (state-foreach constraints-expression arguments) (fn (argument-types)
+     (state-bind (constraints-expression function)                (fn (function-type)
+     (constraints-application function-type argument-types))))))
 
-(def constraints-constructor-application (name)
-     (state-bind (type-inference-context-resolve name) (fn (type)
-     (constraints-application type))))
+(def constraints-constructor-application (constraints-expression name arguments)
+     (state-bind (state-foreach constraints-expression arguments) (fn (argument-types)
+     (state-bind (type-inference-context-resolve name)            (fn (type)
+     (constraints-application type argument-types))))))
 
 (def constraints-expression (expression)
      (match expression
@@ -39,10 +43,10 @@
                 (constraints-identifier name)
             (Lambda arguments body _)
                 (constraints-function constraints-expression arguments body)
-            (FunctionApplication (Cons function _) __)
-                (constraints-function-application constraints-expression function)
-            (Constructor name _ __)
-                (constraints-constructor-application name)
+            (FunctionApplication (Cons function arguments) __)
+                (constraints-function-application constraints-expression function arguments)
+            (Constructor name arguments __)
+                (constraints-constructor-application constraints-expression name arguments)
             _
                 (state-return ErrorType)))
 

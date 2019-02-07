@@ -56,11 +56,11 @@
      (state-return (maybe-else (fn () ErrorType) type)))))
      
 
-(def type-inference-context-add-constraint (a b)
+(def type-inference-context-add-constraints (new-constraints)
      (state-modify (fn (context)
                        (match context
                               (TypeInferenceContext types symbol-count constraints)
-                                  (TypeInferenceContext types symbol-count (Cons (Pair a b) constraints))))))
+                                  (TypeInferenceContext types symbol-count (list-concat new-constraints constraints))))))
 
 (def type-inference-context-constraints ()
      (state-bind   (state-get) (fn (context)
