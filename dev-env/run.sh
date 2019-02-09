@@ -14,7 +14,7 @@ run() {
         test-minimal)           ./dev-env/spec-runner/run.sh minimal/specification ./$IMPL/eval.sh | ./dev-env/tap-format/tap-format.sh ;;
         test-extended)          ./dev-env/spec-runner/run.sh extended/specification ./$IMPL/eval.sh | ./dev-env/tap-format/tap-format.sh ;;
         line-count)             git ls-files | grep '\.reuse' | xargs wc -l ;;
-        vscode-install)         ln -s $PWD/dev-env/editor-support/vs-code-reuse ~/.vscode/extensions/vs-code-reus ;;
+        vscode-install)         ln -s $PWD/dev-env/editor-support/vs-code-reuse ~/.vscode/extensions/vs-code-reuse ;;
     esac
 }
 

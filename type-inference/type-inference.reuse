@@ -35,20 +35,33 @@
      (state-bind (type-inference-context-resolve name)            (fn (type)
      (constraints-application type argument-types))))))
 
+(def constraints-match-rule (expression-type rule)
+     (state-return expression-type))
+
+(def constraints-match (constraints-expression expression rules)
+     (state-bind (constraints-expression expression)                            (fn (expression-type)
+     (state-bind (state-foreach (constraints-match-rule expression-type) rules) (fn (rule-types)
+     (state-return expression-type))))))
+
+(def constraints-error ()
+     (state-return ErrorType))
+
 (def constraints-expression (expression)
      (match expression
-            (IntegerConstant integer _)
-                (constraints-integer-constant integer)
             (Identifier name _)
                 (constraints-identifier name)
+            (IntegerConstant integer _)
+                (constraints-integer-constant integer)
             (Lambda arguments body _)
                 (constraints-function constraints-expression arguments body)
-            (FunctionApplication (Cons function arguments) __)
+            (FunctionApplication (Cons function arguments) _)
                 (constraints-function-application constraints-expression function arguments)
-            (Constructor name arguments __)
+            (FunctionApplication Empty _)
+                (constraints-error)
+            (Constructor name arguments _)
                 (constraints-constructor-application constraints-expression name arguments)
-            _
-                (state-return ErrorType)))
+            (Match expression rules _)
+                (constraints-match constraints-expression expression rules)))
 
 (def add-type-constructors-to-context (name parameters constructors meta)
      (state-let    (list-map type-from-parameter parameters)                   (fn (parameter-types)
