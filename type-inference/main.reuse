@@ -1,4 +1,8 @@
 
+(def definition-type (definition)
+     (match (definition-meta definition)
+            (TypeAnnotation type _)  type))
+
 (def stringify-definitions (definitions)
      (stringify-types (list-map definition-type definitions)))
 

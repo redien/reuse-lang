@@ -1,0 +1,35 @@
+
+(typ (type-annotation meta)  (TypeAnnotation type meta))
+
+(def lookup-type-parameter (name parameters)
+     (list-find-first (fn (parameter)
+                          (match parameter
+                                 (ConstType _ __)                  False
+                                 (FnType _ __)                     False
+                                 (UniversalType parameter-name)    (string-equal? name parameter-name)
+                                 (ExistentialType parameter-name)  (string-equal? name parameter-name)
+                                 ErrorType                         False))
+                      parameters))
+
+(def type-from-ast-type (parameters ast-type)
+     (match ast-type
+            (SimpleType name _)
+                                                         (match (lookup-type-parameter name parameters)
+                                                                (Some type)  type
+                                                                None         (ConstType name Empty))
+            (ComplexType name ast-types _)               (ConstType name (list-map (type-from-ast-type parameters) ast-types))
+            (FunctionType argument-types return-type _)  (FnType (list-map (type-from-ast-type parameters) argument-types)
+                                                                 (type-from-ast-type parameters return-type))))
+
+(def type-from-constructor (return-type parameters constructor)
+     (match constructor
+            (SimpleConstructor name _)             (Pair name (FnType Empty return-type))
+            (ComplexConstructor name ast-types _)  (Pair name (FnType (list-map (type-from-ast-type parameters) ast-types) return-type))))
+
+(def type-from-parameter (parameter)
+     (match parameter
+            (UniversalParameter name _)    (UniversalType name)
+            (ExistentialParameter name _)  (ExistentialType name)))
+
+(def types-from-constructors (name parameters constructors)
+     (list-map (type-from-constructor (ConstType name parameters) parameters) constructors))

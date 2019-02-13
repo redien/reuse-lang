@@ -1,4 +1,7 @@
 
+(def stringify-wrap (string)
+     (string-concat (list 40) (string-concat string (list 41))))
+
 (def stringify-type-list (stringify-type types)
      ((pipe (list-map stringify-type)
             (string-join (list 32)))
@@ -8,19 +11,19 @@
      (match type
             ErrorType              (data-stringify-type-error)
             (UniversalType name)   name
-            (ExistentialType name) (wrap-in-brackets (string-join (data-stringify-space) (list (data-stringify-exists) name)))
+            (ExistentialType name) (stringify-wrap (string-join (data-stringify-space) (list (data-stringify-exists) name)))
             (ConstType name Empty) name
             (ConstType name types)
                 ((pipe (stringify-type-list stringify-type)
                        (string-concat (string-concat name (list 32)))
-                       wrap-in-brackets)
+                       stringify-wrap)
                     types)
             (FnType argument-types return-type)
                 ((pipe (stringify-type-list stringify-type)
-                       wrap-in-brackets
+                       stringify-wrap
                        (string-concat (string-concat (data-stringify-fn) (list 32)))
                        (string-append (Cons 32 (stringify-type return-type)))
-                       wrap-in-brackets)
+                       stringify-wrap)
                     argument-types)))
 
 (def stringify-types (types)
