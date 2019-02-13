@@ -17,8 +17,8 @@ $project_root/reusec --language ocaml\
                      $project_root/type-system/rename-type.reuse\
                      $project_root/type-system/stringify-type.strings\
                      $project_root/type-system/stringify-type.reuse\
+                     $project_root/type-system/type-from-ast.reuse\
                      $project_root/type-inference/context.reuse\
-                     $project_root/type-inference/type-from-ast.reuse\
                      $project_root/type-inference/type-inference.strings\
                      $project_root/type-inference/type-inference.reuse\
                      $project_root/type-inference/main.reuse
