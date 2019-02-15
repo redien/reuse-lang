@@ -19,3 +19,7 @@
 (def pair-map-right (f pair)
      (match pair
             (Pair x y)  (Pair x (f y))))
+
+(def pair-swap (pair)
+     (match pair
+            (Pair x y) (Pair y x)))

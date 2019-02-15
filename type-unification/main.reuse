@@ -1,0 +1,12 @@
+
+(def parse-types (stdin)
+     (result-bind   (result-map-error sexp-error-to-ast-error (parse stdin))  (fn (sexps)
+     (result-bind   (sexp-to-types sexps)                                     (fn (ast-types)
+     (result-return (list-map (type-from-ast-type Empty) ast-types)))))))
+
+(def parse-and-unify (stdin)
+     (result-bind   (parse-types stdin)   (fn (types)
+     (result-return (stringify-types types)))))
+
+(export main (stdin)
+        (result-either (string-join (list 32)) (fn (_) Empty) (parse-and-unify stdin)))

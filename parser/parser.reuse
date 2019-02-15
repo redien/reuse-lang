@@ -341,12 +341,15 @@
             (Symbol _ range)
                 (Error (MalformedDefinitionError range))))
 
+(def sexp-error-to-ast-error (error)
+     (match error
+            ParseErrorTooFewClosingBrackets   MalformedSexpTooFewClosingBrackets
+            ParseErrorTooManyClosingBrackets  MalformedSexpTooManyClosingBrackets))
+
 (def sexps-to-definitions (expressions)
      (match expressions
             (Result expressions)  (list-map sexp-to-definition expressions)
-            (Error error)         (match error
-                                         ParseErrorTooFewClosingBrackets   (list (Error MalformedSexpTooFewClosingBrackets))
-                                         ParseErrorTooManyClosingBrackets  (list (Error MalformedSexpTooManyClosingBrackets)))))
+            (Error error)         (list (Error (sexp-error-to-ast-error error)))))
 
 
 

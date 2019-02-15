@@ -1,0 +1,29 @@
+
+(def unify-add-constraints (constraints)
+     (state-modify (list-concat constraints)))
+
+(def unify-swap (constraint)
+     (state-bind   (unify-add-constraints (list (pair-swap constraint))) (fn (_)
+     (state-return True))))
+
+(def unify (constraint)
+     (match constraint
+            (Pair (UniversalType name) (UniversalType other-name))
+                (match (string-equal? name other-name)
+                       True  (state-return True)
+                       False (state-bind   (unify-add-constraints (list constraint)) (fn (_)
+                             (state-return True))))
+
+            (Pair (FnType args1 return1) (FnType args2 return2))
+                (state-let    (Cons (Pair return1 return2) (list-zip args1 args2)) (fn (constraints)
+                (state-bind   (unify-add-constraints constraints)                  (fn (_)
+                (state-return True)))))
+
+            (Pair other (UniversalType name))
+                (unify-swap constraint)
+
+            (Pair other (ExistentialType name))
+                (unify-swap constraint)
+
+            _
+                (state-return False)))
