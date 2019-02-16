@@ -90,6 +90,11 @@
 (def list-zip (xs ys)
      (list-reverse (list-zip' xs ys Empty)))
 
+(def list-pairs (xs)
+     (match xs
+            (Cons a (Cons b rest))  (Cons (Pair a b) (list-pairs rest))
+            _                       Empty))
+
 (def list-find-first (predicate list)
      (match list
             Empty        None

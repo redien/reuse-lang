@@ -12,6 +12,10 @@
      (match pair
             (Pair _ x)  x))
 
+(def pair-map (f pair)
+     (match pair
+            (Pair x y)  (f x y)))
+
 (def pair-map-left (f pair)
      (match pair
             (Pair x y)  (Pair (f x) y)))

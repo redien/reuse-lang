@@ -9,18 +9,31 @@ list-foldl
 
 
 list-zip
-| (def sum (pairs) (list-map (fn (pair) (match pair (Pair a b) (+ a b))) pairs))
-> (sum (list-zip (list 65 65 65) (list 0 1 2)))
+> (list-map (pair-map +) (list-zip (list 65 65 65) (list 0 1 2)))
 = ABC
 
-| (def sum (pairs) (list-map (fn (pair) (match pair (Pair a b) (+ a b))) pairs))
-> (sum (list-zip (list 65 65) (list 0 1 2)))
+> (list-map (pair-map +) (list-zip (list 65 65) (list 0 1 2)))
 = AB
 
-| (def sum (pairs) (list-map (fn (pair) (match pair (Pair a b) (+ a b))) pairs))
-> (sum (list-zip (list 65 65 65) (list 0 1)))
+> (list-map (pair-map +) (list-zip (list 65 65 65) (list 0 1)))
 = AB
 
-| (def sum (pairs) (list-map (fn (pair) (match pair (Pair a b) (+ a b))) pairs))
-> (sum (list-zip Empty Empty))
+> (list-map (pair-map +) (list-zip Empty Empty))
 = 
+
+
+list-pairs
+> (list-map (pair-map +) (list-pairs Empty))
+= 
+
+> (list-map (pair-map +) (list-pairs (list 65)))
+= 
+
+> (list-map (pair-map +) (list-pairs (list 65 1)))
+= B
+
+> (list-map (pair-map +) (list-pairs (list 65 1 1)))
+= B
+
+> (list-map (pair-map +) (list-pairs (list 65 2 60 8)))
+= CD
