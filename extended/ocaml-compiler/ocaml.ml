@@ -11,8 +11,10 @@ type ('Ta,'Tb) pair = CPair : 'Ta * 'Tb -> ('Ta,'Tb) pair;;
 let rec pair_45cons = fun a b -> (CPair (a,b));;
 let rec pair_45left = fun pair -> (match pair with (CPair (x,_95)) -> x);;
 let rec pair_45right = fun pair -> (match pair with (CPair (_95,x)) -> x);;
+let rec pair_45map = fun f pair -> (match pair with (CPair (x,y)) -> (f x y));;
 let rec pair_45map_45left = fun f pair -> (match pair with (CPair (x,y)) -> (CPair ((f x),y)));;
 let rec pair_45map_45right = fun f pair -> (match pair with (CPair (x,y)) -> (CPair (x,(f y))));;
+let rec pair_45swap = fun pair -> (match pair with (CPair (x,y)) -> (CPair (y,x)));;
 type ('Ta) maybe = CSome : 'Ta -> ('Ta) maybe | CNone;;
 let rec maybe_45map = fun f maybe -> (match maybe with (CSome (x)) -> (CSome ((f x))) | CNone -> CNone);;
 let rec maybe_45flatmap = fun f maybe -> (match maybe with (CSome (x)) -> (f x) | CNone -> CNone);;
@@ -43,6 +45,7 @@ let rec list_45map = fun f list -> (list_45foldr (fun head tail -> (list_45cons 
 let rec list_45flatmap = fun f list -> (list_45foldr (fun head tail -> (list_45concat (f head) tail)) CEmpty list);;
 let rec list_45zip_39 = fun xs ys collected -> (match xs with CEmpty -> collected | (CCons (x,xs)) -> (match ys with CEmpty -> collected | (CCons (y,ys)) -> (list_45zip_39 xs ys (CCons ((CPair (x,y)),collected)))));;
 let rec list_45zip = fun xs ys -> (list_45reverse (list_45zip_39 xs ys CEmpty));;
+let rec list_45pairs = fun xs -> (match xs with (CCons (a,(CCons (b,rest)))) -> (CCons ((CPair (a,b)),(list_45pairs rest))) | _95 -> CEmpty);;
 let rec list_45find_45first = fun predicate list -> (match list with CEmpty -> CNone | (CCons (x,xs)) -> (match (predicate x) with CTrue -> (CSome (x)) | CFalse -> (list_45find_45first predicate xs)));;
 let rec list_45filter = fun f list -> (list_45foldr (fun head tail -> (match (f head) with CTrue -> (CCons (head,tail)) | CFalse -> tail)) CEmpty list);;
 let rec list_45any_63 = fun f list -> (not (list_45empty_63 (list_45filter f list)));;
@@ -76,6 +79,7 @@ let rec result_45error = fun error -> (CError (error));;
 let rec result_45map = fun f result -> (match result with (CResult (x)) -> (CResult ((f x))) | (CError (error)) -> (CError (error)));;
 let rec result_45map_45error = fun f result -> (match result with (CResult (x)) -> (CResult (x)) | (CError (error)) -> (CError ((f error))));;
 let rec result_45flatmap = fun f result -> (match result with (CResult (x)) -> (f x) | (CError (error)) -> (CError (error)));;
+let rec result_45either = fun f g result -> (match result with (CResult (x)) -> (f x) | (CError (x)) -> (g x));;
 let rec result_45error_63 = fun result -> (match result with (CError (_95)) -> CTrue | _95 -> CFalse);;
 let rec result_45filter_45list = fun list -> (list_45foldr (fun result new_45list -> (match result with (CResult (x)) -> (CCons (x,new_45list)) | _95 -> new_45list)) CEmpty list);;
 let rec result_45concat = fun list -> (match (list_45filter result_45error_63 list) with (CCons ((CError (error)),_95)) -> (CError (error)) | (CCons ((CResult (_95)),_95_95)) -> (CResult (CEmpty)) | CEmpty -> (CResult ((result_45filter_45list list))));;
@@ -195,7 +199,8 @@ let rec sexp_45to_45expression = fun sexp -> (match sexp with (CSymbol (symbol_4
 let rec sexp_45to_45function_45definition = fun name_45symbol rest range constructor -> (result_45bind (sexp_45to_45function_45body range rest) (fun body -> (result_45bind (sexp_45to_45arguments (pair_45left body)) (fun arguments -> (result_45bind (sexp_45to_45expression (pair_45right body)) (fun expression -> (result_45bind (symbol_45to_45string name_45symbol) (fun name -> (result_45return (constructor name arguments expression range))))))))));;
 let rec sexp_45to_45definition_39 = fun name rest range kind -> (match (string_45equal_63 kind (data_45typ ())) with CTrue -> (sexp_45to_45type_45definition name rest range) | CFalse -> (match (string_45equal_63 kind (data_45def ())) with CTrue -> (sexp_45to_45function_45definition name rest range (fun name arguments expression range -> (CFunctionDefinition (name,arguments,expression,range)))) | CFalse -> (match (string_45equal_63 kind (data_45export ())) with CTrue -> (sexp_45to_45function_45definition name rest range (fun name arguments expression range -> (CExportDefinition (name,arguments,expression,range)))) | CFalse -> (CError ((CMalformedDefinitionError (range)))))));;
 let rec sexp_45to_45definition = fun expression -> (match expression with (CList ((CCons ((CSymbol (kind,_95)),CEmpty)),range)) -> (match (string_45equal_63 kind (data_45typ ())) with CTrue -> (CError ((CMalformedTypeDefinitionError (range)))) | CFalse -> (match (string_45equal_63 kind (data_45def ())) with CTrue -> (CError ((CMalformedFunctionDefinitionError (range)))) | CFalse -> (CError ((CMalformedDefinitionError (range)))))) | (CList ((CCons ((CSymbol (kind,_95)),(CCons (_95_95,CEmpty)))),range)) -> (match (string_45equal_63 kind (data_45typ ())) with CTrue -> (CError ((CMalformedTypeDefinitionError (range)))) | CFalse -> (match (string_45equal_63 kind (data_45def ())) with CTrue -> (CError ((CMalformedFunctionDefinitionError (range)))) | CFalse -> (CError ((CMalformedDefinitionError (range)))))) | (CList ((CCons (kind,(CCons (name,rest)))),range)) -> (result_45flatmap (sexp_45to_45definition_39 name rest range) (symbol_45to_45string kind)) | (CList ((CCons ((CList (_95,range)),CEmpty)),_95_95)) -> (CError ((CMalformedDefinitionError (range)))) | (CList (CEmpty,range)) -> (CError ((CMalformedDefinitionError (range)))) | (CSymbol (_95,range)) -> (CError ((CMalformedDefinitionError (range)))));;
-let rec sexps_45to_45definitions = fun expressions -> (match expressions with (CResult (expressions)) -> (list_45map sexp_45to_45definition expressions) | (CError (error)) -> (match error with CParseErrorTooFewClosingBrackets -> (CCons ((CError (CMalformedSexpTooFewClosingBrackets)),CEmpty)) | CParseErrorTooManyClosingBrackets -> (CCons ((CError (CMalformedSexpTooManyClosingBrackets)),CEmpty))));;
+let rec sexp_45error_45to_45ast_45error = fun error -> (match error with CParseErrorTooFewClosingBrackets -> CMalformedSexpTooFewClosingBrackets | CParseErrorTooManyClosingBrackets -> CMalformedSexpTooManyClosingBrackets);;
+let rec sexps_45to_45definitions = fun expressions -> (match expressions with (CResult (expressions)) -> (list_45map sexp_45to_45definition expressions) | (CError (error)) -> (CCons ((CError ((sexp_45error_45to_45ast_45error error))),CEmpty)));;
 let rec type_45to_45sexp = fun types_45to_45sexp _type -> (match _type with (CSimpleType (name,range)) -> (CSymbol (name,range)) | (CFunctionType (arg_45types,return_45type,range)) -> (CList ((CCons ((CSymbol ((data_45fn ()),range)),(CCons ((CList ((types_45to_45sexp arg_45types),range)),(CCons ((type_45to_45sexp types_45to_45sexp return_45type),CEmpty)))))),range)) | (CComplexType (name,types,range)) -> (CList ((CCons ((CSymbol (name,range)),(types_45to_45sexp types))),range)));;
 let rec types_45to_45sexp = fun types -> (list_45map (type_45to_45sexp types_45to_45sexp) types);;
 let rec constructor_45to_45sexp = fun constructor -> (match constructor with (CSimpleConstructor (name,range)) -> (CSymbol (name,range)) | (CComplexConstructor (name,types,range)) -> (CList ((CCons ((CSymbol (name,range)),(types_45to_45sexp types))),range)));;
@@ -353,9 +358,10 @@ let rec translate_45type_45parameter_45for_45definition = fun parameter -> (matc
 let rec translate_45type_45parameters = fun () -> (fun _226_156_168x -> ((string_45join (data_45comma ())) ((list_45filter not_45empty_63) ((list_45map translate_45type_45parameter_45for_45definition) _226_156_168x))));;
 let rec translate_45type_45name = fun name parameters -> (match ((translate_45type_45parameters ()) parameters) with CEmpty -> (escape_45identifier name) | parameters -> (join (CCons ((wrap_45in_45brackets parameters),(CCons ((data_45space ()),(CCons ((escape_45identifier name),CEmpty))))))));;
 let rec translate_45type_45definition = fun name parameters constructors -> (join (CCons ((data_45type ()),(CCons ((data_45space ()),(CCons ((translate_45type_45name name parameters),(CCons ((data_45equals ()),(CCons (((translate_45constructor_45definitions (translate_45type_45name name parameters) parameters) constructors),(CCons ((data_45definition_45end ()),CEmpty)))))))))))));;
-let rec translate_45definition = fun definition -> (match definition with (CResult ((CFunctionDefinition (name,arguments,expression,_95)))) -> (CResult ((translate_45function_45definition (escape_45identifier name) arguments expression))) | (CResult ((CExportDefinition (name,arguments,expression,_95)))) -> (CResult ((translate_45function_45definition name arguments expression))) | (CResult ((CTypeDefinition (name,parameters,constructors,_95)))) -> (CResult ((translate_45type_45definition name parameters constructors))) | (CError (error)) -> (CError (error)));;
-let rec validate_45reserved_45identifiers_45when_45not = fun as_95minimal -> (match as_95minimal with CTrue -> (fun definition -> definition) | CFalse -> (fun definition -> (validate_45reserved_45identifiers definition)));;
-let rec to_ocaml = fun definitions source as_95minimal -> ((fun _226_156_168x -> ((result_45map (string_45join (CCons ((10l),CEmpty)))) (result_45concat ((list_45map translate_45definition) (local_45transforms ((list_45map (validate_45reserved_45identifiers_45when_45not as_95minimal)) _226_156_168x)))))) definitions);;
+let rec translate_45definition = fun definition -> (match definition with (CFunctionDefinition (name,arguments,expression,_95)) -> (translate_45function_45definition (escape_45identifier name) arguments expression) | (CExportDefinition (name,arguments,expression,_95)) -> (translate_45function_45definition name arguments expression) | (CTypeDefinition (name,parameters,constructors,_95)) -> (translate_45type_45definition name parameters constructors));;
+let rec validate_45reserved_45identifiers_45when_45not = fun as_95minimal -> (match as_95minimal with CTrue -> (fun definitions -> definitions) | CFalse -> (list_45map validate_45reserved_45identifiers));;
+let rec to_ocaml = fun definitions source as_95minimal -> ((fun _226_156_168x -> ((result_45map (string_45join (CCons ((10l),CEmpty)))) (result_45concat ((list_45map (result_45map translate_45definition)) (local_45transforms ((validate_45reserved_45identifiers_45when_45not as_95minimal) _226_156_168x)))))) definitions);;
+let stdin_wrapper_start = Unix.gettimeofday ();;
 
 let _read_line ic =
     try Some (input_line ic)
@@ -394,13 +400,27 @@ let rec _list_to_string_r = fun input result ->
 let _list_to_string = fun input -> (_list_to_string_r input "");;
 
 let _stdin_list = _string_to_list _stdin_string;;
+let stdin_wrapper_end = Unix.gettimeofday ();;
+let stdin_wrapper_time = stdin_wrapper_end -. stdin_wrapper_start;;
 
 let parse' str = stringify_45parse_45errors (sexps_45to_45definitions (parse str));;
 let getenv name = try (Sys.getenv name) with Not_found -> ""
 let as_minimal = if getenv "REUSE_MINIMAL" = "true" then CTrue else CFalse;;
+let performance = getenv "REUSE_TIME" = "true";;
 
-let output = to_ocaml (parse' _stdin_list) _stdin_list as_minimal in
-    match output with
+let parse_start = Unix.gettimeofday ();;
+let parse_output = (parse' _stdin_list);;
+let parse_end = Unix.gettimeofday ();;
+let parse_time = parse_end -. parse_start;;
+let compile_start = Unix.gettimeofday ();;
+let compile_output = (to_ocaml parse_output _stdin_list as_minimal);;
+let compile_end = Unix.gettimeofday ();;
+let compile_time = compile_end -. compile_start;;
+
+if performance then
+    (Printf.printf "%f %f %f" stdin_wrapper_time parse_time compile_time ; exit 0)
+else
+    match compile_output with
         CResult (source) -> Printf.printf "%s" (_list_to_string source) ; exit 0
       | CError (error) -> Printf.eprintf "%s" (_list_to_string error) ; exit 1;;
 
