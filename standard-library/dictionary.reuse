@@ -12,7 +12,7 @@
 (def entry-matches-key' (key entry)
      (string-equal? key (entry-get-key' entry)))
 
-(def dictionary-new () (Dictionary Empty))
+(def dictionary-empty () (Dictionary Empty))
 
 (def dictionary-entries (dictionary)
      (match dictionary
@@ -23,7 +23,7 @@
                        (list-filter (pipe pair-left (string-equal? key) not) (dictionary-entries dictionary)))))
 
 (def dictionary-of (entries)
-     (list-foldl (pair-map dictionary-set) (dictionary-new) entries))
+     (list-foldl (pair-map dictionary-set) (dictionary-empty) entries))
 
 (def dictionary-singleton (key value)
      (dictionary-set key value (Dictionary Empty)))

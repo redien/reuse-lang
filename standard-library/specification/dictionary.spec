@@ -33,3 +33,7 @@ dictionary-entries should return the list of entries in the dictionary
 dictionary-entries should only return the last set value for a given key
 > (list (list-foldl + 60 (list-map pair-right (dictionary-entries (dictionary-of (list (Pair Empty 5) (Pair Empty 7)))))))
 = C
+
+dictionary-entries of an empty dictionary should give the empty list
+> (list-map pair-right (dictionary-entries (dictionary-empty)))
+= 

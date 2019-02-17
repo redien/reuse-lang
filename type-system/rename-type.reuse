@@ -57,5 +57,5 @@
                 (state-return (FnType new-argument-types new-return-type))))))))
 
 (def rename-types (types)
-     (state-final-value (Pair 0 (dictionary-new))
+     (state-final-value (Pair 0 (dictionary-empty))
      (state-foreach rename-type types)))
