@@ -21,12 +21,12 @@
      (state-bind (state-get) (fn (context)
      (match context
             (Pair _ dictionary)
-                (state-return (dictionary-lookup name dictionary))))))
+                (state-return (dictionary-get name dictionary))))))
 
 (def rename-add (name new-name)
      (state-modify (fn (context)
      (match context
-            (Pair count dictionary)  (Pair count (dictionary-add name new-name dictionary))))))
+            (Pair count dictionary)  (Pair count (dictionary-set name new-name dictionary))))))
 
 (def rename-in-context (name)
      (state-bind (rename-lookup name) (fn (result)

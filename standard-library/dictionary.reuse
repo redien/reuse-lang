@@ -1,12 +1,6 @@
 
 (typ (dictionary value) (Dictionary (list (pair (list int32) value))))
 
-(def dictionary-new () (Dictionary Empty))
-
-(def dictionary-entries (dictionary)
-     (match dictionary
-            (Dictionary entries) entries))
-
 (def entry-get-key' (entry)
      (match entry
             (Pair key _) key))
@@ -18,16 +12,33 @@
 (def entry-matches-key' (key entry)
      (string-equal? key (entry-get-key' entry)))
 
+(def dictionary-new () (Dictionary Empty))
+
+(def dictionary-entries (dictionary)
+     (match dictionary
+            (Dictionary entries) entries))
+
+(def dictionary-set (key value dictionary)
+     (Dictionary (Cons (Pair key value) (dictionary-entries dictionary))))
+
+(def dictionary-of (entries)
+     (list-foldl (pair-map dictionary-set) (dictionary-new) entries))
+
+(def dictionary-singleton (key value)
+     (dictionary-set key value (Dictionary Empty)))
+
 (def entries-matching-key' (key dictionary)
      ((pipe dictionary-entries
             (list-filter (entry-matches-key' key)))
         dictionary))
 
-(def dictionary-lookup (key dictionary)
+(def dictionary-get (key dictionary)
      ((pipe (entries-matching-key' key)
             list-first
             (maybe-map entry-get-value'))
         dictionary))
 
-(def dictionary-add (key value dictionary)
-     (Dictionary (Cons (Pair key value) (dictionary-entries dictionary))))
+(def dictionary-get-or (key default dictionary)
+     (match (dictionary-get key dictionary)
+            (Some value)  value
+            None          default))
