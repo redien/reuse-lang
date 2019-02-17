@@ -46,22 +46,19 @@
             True   (Cons 95 name)
             False  (list-flatmap escape-char name)))
 
+(def special-identifiers ()
+     (dictionary-of (list
+        (Pair (data-plus) (data-int32-plus))
+        (Pair (data-slash) (data-int32-divide))
+        (Pair (data-percent) (data-int32-modulus))
+        (Pair (data-minus) (data-int32-minus))
+        (Pair (data-multiply) (data-int32-multiply))
+     )))
+
 (def translate-identifier (name)
-     (match (string-equal? name (data-plus))
-            True  (data-int32-plus)
-            False
-     (match (string-equal? name (data-slash))
-            True  (data-int32-divide)
-            False
-     (match (string-equal? name (data-percent))
-            True  (data-int32-modulus)
-            False
-     (match (string-equal? name (data-minus))
-            True  (data-int32-minus)
-            False
-     (match (string-equal? name (data-multiply))
-            True  (data-int32-multiply)
-            False (escape-identifier name)))))))
+     (match (dictionary-get name (special-identifiers))
+            (Some translation)  translation
+            None                (escape-identifier name)))
 
 (def translate-less-than (translate-expression expressions)
      (match expressions
