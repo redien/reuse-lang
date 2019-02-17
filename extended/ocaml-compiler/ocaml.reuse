@@ -143,11 +143,26 @@
                 (wrap-in-brackets ((translate-match-expression translate-expression expression) rules))))
 
 (def translate-function-definition (name arguments expression)
-     (join (list (data-let-rec)
-                 name
-                 (data-equals)
-                 (translate-lambda translate-expression arguments expression)
-                 (data-definition-end))))
+     (match (list-empty? arguments)
+            True  (join (list (data-let-rec)
+                              (string-concat (data-constant) name)
+                              (data-equals)
+                              (translate-expression expression)
+                              (data-definition-end)
+                              (data-let-rec)
+                              name
+                              (data-equals)
+                              (data-fun)
+                              (data-space)
+                              (wrap-in-brackets Empty)
+                              (data-arrow)
+                              (string-concat (data-constant) name)
+                              (data-definition-end)))
+            False (join (list (data-let-rec)
+                              name
+                              (data-equals)
+                              (translate-lambda translate-expression arguments expression)
+                              (data-definition-end)))))
 
 (def translate-simple-type (name parameters)
      (match (list-any? (string-equal? name) parameters)
