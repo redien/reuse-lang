@@ -19,7 +19,8 @@
             (Dictionary entries) entries))
 
 (def dictionary-set (key value dictionary)
-     (Dictionary (Cons (Pair key value) (dictionary-entries dictionary))))
+     (Dictionary (Cons (Pair key value)
+                       (list-filter (pipe pair-left (string-equal? key) not) (dictionary-entries dictionary)))))
 
 (def dictionary-of (entries)
      (list-foldl (pair-map dictionary-set) (dictionary-new) entries))
