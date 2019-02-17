@@ -16,17 +16,17 @@ copy_compiler() {
 }
 
 >&2 echo First stage: Build new compiler source
-build_compiler_source
+time build_compiler_source
 copy_compiler
 build_compiler_binary
 
 >&2 echo Second stage: Build source again with binary derived from itself
-build_compiler_source
+time build_compiler_source
 copy_compiler
 build_compiler_binary
 
 >&2 echo Third stage: Build source one last time to make sure it bootstraps
-build_compiler_source
+time build_compiler_source
 
 >&2 echo Fourth stage: Run test suite
 dev-env/run.sh test
