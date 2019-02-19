@@ -1,43 +1,60 @@
 
-(typ (dictionary value) (Dictionary (list (pair (list int32) value))))
+(typ (dictionary value) (TrieNode (maybe value) (list (pair int32 (dictionary value)))))
 
-(def entry-get-key' (entry)
-     (match entry
-            (Pair key _) key))
+(def dictionary-empty () (TrieNode None Empty))
 
-(def entry-get-value' (entry)
-     (match entry
-            (Pair _ value) value))
+(def 'dictionary-value (dictionary)
+     (match dictionary
+            (TrieNode value _) value))
 
-(def entry-matches-key' (key entry)
-     (string-equal? key (entry-get-key' entry)))
+(def 'dictionary-children (dictionary)
+     (match dictionary
+            (TrieNode _ children) children))
 
-(def dictionary-empty () (Dictionary Empty))
+(def 'dictionary-find-child (char dictionary)
+     (maybe-map pair-right (list-find-first (pipe pair-left (= char)) ('dictionary-children dictionary))))
+
+(def 'dictionary-remove-child (char dictionary)
+     (match dictionary
+            (TrieNode value children)
+                (TrieNode value (list-exclude (pipe pair-left (= char)) children))))
+
+(def dictionary-entries'' (dictionary-entries' dictionary)
+     (list-flatmap (pipe pair-right dictionary-entries') ('dictionary-children dictionary)))
+
+(def dictionary-entries' (key dictionary)
+     (match ('dictionary-value dictionary)
+            (Some value)  (Cons (Pair Empty value) (dictionary-entries'' (dictionary-entries' key) dictionary))
+            None          (dictionary-entries'' (dictionary-entries' key) dictionary)))
 
 (def dictionary-entries (dictionary)
-     (match dictionary
-            (Dictionary entries) entries))
+     (dictionary-entries' Empty dictionary))
 
-(def dictionary-set (key value dictionary)
-     (Dictionary (Cons (Pair key value)
-                       (list-filter (pipe pair-left (string-equal? key) not) (dictionary-entries dictionary)))))
+(def dictionary-set (key new-value dictionary)
+     (match key
+            Empty
+                (TrieNode (Some new-value) ('dictionary-children dictionary))
+            (Cons char rest)
+                ((pipe ('dictionary-find-child char)
+                       (maybe-else dictionary-empty)
+                       (dictionary-set rest new-value)
+                       (fn (child)
+                           (TrieNode ('dictionary-value dictionary)
+                                     (Cons (Pair char child) ('dictionary-children ('dictionary-remove-child char dictionary))))))
+                    dictionary)))
+
+(def dictionary-get (key dictionary)
+     (match key
+            (Cons char rest)
+                (maybe-flatmap (dictionary-get rest) ('dictionary-find-child char dictionary))
+            Empty
+                ('dictionary-value dictionary)))
 
 (def dictionary-of (entries)
      (list-foldl (pair-map dictionary-set) (dictionary-empty) entries))
 
 (def dictionary-singleton (key value)
-     (dictionary-set key value (Dictionary Empty)))
-
-(def entries-matching-key' (key dictionary)
-     ((pipe dictionary-entries
-            (list-filter (entry-matches-key' key)))
-        dictionary))
-
-(def dictionary-get (key dictionary)
-     ((pipe (entries-matching-key' key)
-            list-first
-            (maybe-map entry-get-value'))
-        dictionary))
+     (dictionary-set key value (dictionary-empty)))
 
 (def dictionary-get-or (key default dictionary)
      (match (dictionary-get key dictionary)

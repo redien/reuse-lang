@@ -110,6 +110,9 @@
                  Empty
                  list))
 
+(def list-exclude (f list)
+     (list-filter (pipe f not) list))
+
 (def list-any? (f list)
      (not (list-empty? (list-filter f list))))
 
