@@ -4,7 +4,7 @@ project_root=$(dirname $0)/..
 
 run() {
     case $1 in
-        test)                   run test-compilers && run test-sexp-parser && run test-parser && run test-standard-library ;;
+        test)                   run test-compilers && run test-sexp-parser && run test-parser && run test-standard-library && run test-string-gen;;
         test-compilers)         run test-ocaml-compiler && run test-minimal-compiler ;;
         test-ocaml-compiler)    $project_root/extended/ocaml-compiler/build.sh && IMPL=extended/ocaml-compiler run test-extended && IMPL=extended/ocaml-compiler run test-minimal ;;
         test-minimal-compiler)  $project_root/extended/minimal-compiler/build.sh && IMPL=extended/minimal-compiler run test-minimal && IMPL=extended/minimal-compiler run test-extended ;;

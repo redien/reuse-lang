@@ -74,10 +74,10 @@
                        True   (Some ParseErrorTooFewClosingBrackets)
                        False  None))))
 
-(export parse (input)
-        (match (check-errors (list-to-indexed-iterator input))
+(export parse (iterator)
+        (match (check-errors iterator)
                (Some error)  (Error error)
-               None          (match (parse-sexps (list-to-indexed-iterator input) Empty)
+               None          (match (parse-sexps iterator Empty)
                                     (Pair _ expressions)  (Result expressions))))
 
 (def wrap-in-brackets (string)

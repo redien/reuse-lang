@@ -13,18 +13,6 @@ let _read_lines ic =
 
 let _stdin_string = String.concat "\n" (_read_lines stdin);;
 
-let rec _string_to_list_i = fun input i result ->
-    if i > 0 then
-        let sub_input = (String.sub input 0 ((String.length input) - 1)) in
-            _string_to_list_i sub_input (i - 1) (CCons ((Int32.of_int (Char.code (String.get input i))), result))
-    else
-        CCons ((Int32.of_int (Char.code (String.get input i))), result);;
-
-let _string_to_list = fun input ->
-    if String.length input == 0
-    then CEmpty
-    else _string_to_list_i input ((String.length input) - 1) CEmpty;;
-
 let rec _list_to_string_r = fun input result ->
     match input with
           CCons(x, rest) ->
@@ -35,4 +23,15 @@ let rec _list_to_string_r = fun input result ->
 
 let _list_to_string = fun input -> (_list_to_string_r input "");;
 
-let _stdin_list = _string_to_list _stdin_string;;
+let _stdin_list = CIndexedIterator (
+        _stdin_string,
+        0l,
+        (fun s index ->
+                let i = (Int32.to_int index) in
+                if i < (String.length s) && i >= 0 then
+                        CSome (Int32.of_int (Char.code (String.get s i)))
+                else
+                        CNone),
+        (fun iter _ __ ->
+                match iter with
+                | CIndexedIterator (s, i, get, next) -> CIndexedIterator (s, Int32.succ i, get, next)));;

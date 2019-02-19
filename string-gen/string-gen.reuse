@@ -15,5 +15,7 @@
             Empty
                 Empty))
 
-(export string_gen (stdin)
-        (Result (string-join (list 10) (list-map transform-line (string-split 10 stdin)))))
+(export string_gen (stdin-iterator)
+        (match (list-collect-from-indexed-iterator (fn (_) True) stdin-iterator)
+               (Pair _ stdin)
+                    (Result (string-join (list 10) (list-map transform-line (string-split 10 stdin))))))

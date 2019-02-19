@@ -142,7 +142,7 @@ let rec parse_45sexps = fun iterator expressions -> (match (parse_45expression i
 let rec inc = fun x -> (Int32.add x (1l));;
 let rec count_45parens = fun iterator -> (indexed_45iterator_45foldl (fun c count -> (match c with 40l -> (pair_45map_45left inc count) | 41l -> (pair_45map_45right inc count) | _95 -> count)) (CPair ((0l),(0l))) iterator);;
 let rec check_45errors = fun iterator -> (match (count_45parens iterator) with (CPair (_open,close)) -> (match (_60 _open close) with CTrue -> (CSome (CParseErrorTooManyClosingBrackets)) | CFalse -> (match (_62 _open close) with CTrue -> (CSome (CParseErrorTooFewClosingBrackets)) | CFalse -> CNone)));;
-let rec parse = fun input -> (match (check_45errors (list_45to_45indexed_45iterator input)) with (CSome (error)) -> (CError (error)) | CNone -> (match (parse_45sexps (list_45to_45indexed_45iterator input) CEmpty) with (CPair (_95,expressions)) -> (CResult (expressions))));;
+let rec parse = fun iterator -> (match (check_45errors iterator) with (CSome (error)) -> (CError (error)) | CNone -> (match (parse_45sexps iterator CEmpty) with (CPair (_95,expressions)) -> (CResult (expressions))));;
 let rec wrap_45in_45brackets = fun string -> (string_45concat (string_45of_45char (40l)) (string_45concat string (string_45of_45char (41l))));;
 let rec stringify_45sexp = fun stringify expression -> (match expression with (CSymbol (name,_95)) -> name | (CList (expressions,_95)) -> (wrap_45in_45brackets (stringify expressions)));;
 let rec stringify = fun expressions -> (string_45join (string_45of_45char (32l)) (list_45map (stringify_45sexp stringify) expressions));;
@@ -386,18 +386,6 @@ let _read_lines ic =
 
 let _stdin_string = String.concat "\n" (_read_lines stdin);;
 
-let rec _string_to_list_i = fun input i result ->
-    if i > 0 then
-        let sub_input = (String.sub input 0 ((String.length input) - 1)) in
-            _string_to_list_i sub_input (i - 1) (CCons ((Int32.of_int (Char.code (String.get input i))), result))
-    else
-        CCons ((Int32.of_int (Char.code (String.get input i))), result);;
-
-let _string_to_list = fun input ->
-    if String.length input == 0
-    then CEmpty
-    else _string_to_list_i input ((String.length input) - 1) CEmpty;;
-
 let rec _list_to_string_r = fun input result ->
     match input with
           CCons(x, rest) ->
@@ -408,7 +396,18 @@ let rec _list_to_string_r = fun input result ->
 
 let _list_to_string = fun input -> (_list_to_string_r input "");;
 
-let _stdin_list = _string_to_list _stdin_string;;
+let _stdin_list = CIndexedIterator (
+        _stdin_string,
+        0l,
+        (fun s index ->
+                let i = (Int32.to_int index) in
+                if i < (String.length s) && i >= 0 then
+                        CSome (Int32.of_int (Char.code (String.get s i)))
+                else
+                        CNone),
+        (fun iter _ __ ->
+                match iter with
+                | CIndexedIterator (s, i, get, next) -> CIndexedIterator (s, Int32.succ i, get, next)));;
 let stdin_wrapper_end = Unix.gettimeofday ();;
 let stdin_wrapper_time = stdin_wrapper_end -. stdin_wrapper_start;;
 
