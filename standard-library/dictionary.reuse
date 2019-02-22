@@ -31,23 +31,23 @@
      (dictionary-entries' Empty dictionary))
 
 (def dictionary-set (key new-value dictionary)
-     (match key
-            Empty
+     (match (string-first key)
+            None
                 (TrieNode (Some new-value) ('dictionary-children dictionary))
-            (Cons char rest)
+            (Some char)
                 ((pipe ('dictionary-find-child char)
                        (maybe-else dictionary-empty)
-                       (dictionary-set rest new-value)
+                       (dictionary-set (string-rest key) new-value)
                        (fn (child)
                            (TrieNode ('dictionary-value dictionary)
                                      (Cons (Pair char child) ('dictionary-children ('dictionary-remove-child char dictionary))))))
                     dictionary)))
 
 (def dictionary-get (key dictionary)
-     (match key
-            (Cons char rest)
-                (maybe-flatmap (dictionary-get rest) ('dictionary-find-child char dictionary))
-            Empty
+     (match (string-first key)
+            (Some char)
+                (maybe-flatmap (dictionary-get (string-rest key)) ('dictionary-find-child char dictionary))
+            None
                 ('dictionary-value dictionary)))
 
 (def dictionary-of (entries)

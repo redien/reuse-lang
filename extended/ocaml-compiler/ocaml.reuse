@@ -1,9 +1,9 @@
 
 (def prefix-type-variable (string)
-     (Cons 39 (Cons 84 string)))
+     (string-cons 39 (string-cons 84 string)))
 
 (def prefix-constructor (constructor)
-     (Cons 67 constructor))
+     (string-cons 67 constructor))
 
 (def reserved-strings ()
      (dictionary-of (list
@@ -43,8 +43,8 @@
 
 (def escape-identifier (name)
      (match (string-is-reserved? name)
-            True   (Cons 95 name)
-            False  (list-flatmap escape-char name)))
+            True   (string-cons 95 name)
+            False  (string-flatmap escape-char name)))
 
 (def special-identifiers ()
      (dictionary-of (list
@@ -95,7 +95,7 @@
             (Capture name _)
                 (escape-identifier name)
             (IntegerPattern integer _)
-                (join (list (string-from-int32 integer) (list 108)))
+                (join (list (string-from-int32 integer) (string-of-char 108)))
             (ConstructorPattern name Empty _)
                 (prefix-constructor (escape-identifier name))
             (ConstructorPattern name patterns _)
@@ -118,7 +118,7 @@
             (Cons no-args-function Empty)
                     (join (list (translate-expression no-args-function)
                                 (data-space)
-                                (wrap-in-brackets Empty)))
+                                (wrap-in-brackets (string-empty))))
             _
                     (string-join (data-space) (list-map translate-expression expressions))))
 
@@ -133,7 +133,7 @@
 
 (def translate-argument-list (arguments)
      (match (list-empty? arguments)
-            True  (wrap-in-brackets Empty)
+            True  (wrap-in-brackets (string-empty))
             False (string-join (data-space) (list-map escape-identifier arguments))))
 
 (def translate-lambda (translate-expression arguments expression)
@@ -154,7 +154,7 @@
             (FunctionApplication expressions _)
                 (wrap-in-brackets (translate-function-application translate-expression expressions))
             (IntegerConstant integer _)
-                (wrap-in-brackets (string-concat (string-from-int32 integer) (list 108)))
+                (wrap-in-brackets (string-concat (string-from-int32 integer) (string-of-char 108)))
             (Identifier name _)
                 (translate-identifier name)
             (Match expression rules _)
@@ -172,7 +172,7 @@
                               (data-equals)
                               (data-fun)
                               (data-space)
-                              (wrap-in-brackets Empty)
+                              (wrap-in-brackets (string-empty))
                               (data-arrow)
                               (string-concat (data-constant) name)
                               (data-definition-end)))
@@ -242,21 +242,24 @@
             (UniversalParameter name _)
                 (prefix-type-variable name)
             (ExistentialParameter _ __)
-                Empty))
+                (string-empty)))
 
 (def translate-type-parameters ()
      (pipe (list-map translate-type-parameter-for-definition)
            (list-filter not-empty?)
            (string-join (data-comma))))
 
-(def translate-type-name (name parameters)
-     (match ((translate-type-parameters) parameters)
-            Empty
+(def translate-type-name' (name parameters)
+     (match (string-empty? parameters)
+            True
                 (escape-identifier name)
-            parameters
+            False
                 (join (list (wrap-in-brackets parameters)
                             (data-space)
                             (escape-identifier name)))))
+
+(def translate-type-name (name parameters)
+     (translate-type-name' name ((translate-type-parameters) parameters)))
 
 (def translate-type-definition (name parameters constructors)
      (join (list (data-type)
@@ -285,5 +288,5 @@
                local-transforms
                (list-map (result-map translate-definition))
                result-concat
-               (result-map (string-join (list 10))))
+               (result-map (string-join (string-of-char 10))))
             definitions))

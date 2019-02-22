@@ -1,75 +1,112 @@
 
+(typ string (String (list int32)))
+
+(def string-to-list (string)
+     (match string
+            (String list)  list))
+
+(def string-from-list (list)
+     (String list))
+
+(def string-empty ()
+     (String Empty))
+
 (def string-of-char (character)
-     (Cons character Empty))
+     (String (Cons character Empty)))
 
 (def string-first (string)
-     (list-first string))
+     (list-first (string-to-list string)))
 
 (def string-rest (string)
-     (list-rest string))
+     (String (list-rest (string-to-list string))))
 
-(def string-concat (a b)
+(def string-cons (char string)
+     (String (Cons char (string-to-list string))))
+
+(def string-substring (start size string)
+     (String (list-take size (list-skip start (string-to-list string)))))
+
+(def string-concat' (a b)
      (match a
             Empty       b
-            (Cons x xs) (Cons x (string-concat xs b))))
+            (Cons x xs) (Cons x (string-concat' xs b))))
+
+(def string-concat (a b)
+     (String (string-concat' (string-to-list a) (string-to-list b))))
 
 (def string-append (a b)
      (string-concat b a))
 
-(def string-join (separator list)
+(def string-reverse (string)
+     (String (list-reverse (string-to-list string))))
+
+(def string-join' (separator list)
      (match list
             (Cons first rest)
                 (list-foldl (fn (string joined)
-                                (string-concat joined (string-concat separator string)))
+                                (list-concat joined (list-concat separator string)))
                             first
                             rest)
             Empty
                 Empty))
 
-(def string-split' (separator string current parts)
-     (match string
+(def string-join (separator strings)
+     (String (string-join' (string-to-list separator) (list-map string-to-list strings))))
+
+(def string-flatmap (f string)
+     (string-join (string-empty) (list-map f (string-to-list string))))
+
+(def string-split' (separator list current parts)
+     (match list
             Empty          (list-reverse (Cons (list-reverse current) parts))
             (Cons c rest)  (match (= separator c)
                                   True   (string-split' separator rest Empty (Cons (list-reverse current) parts))
                                   False  (string-split' separator rest (Cons c current) parts))))
 
 (def string-split (separator string)
-     (string-split' separator string Empty Empty))
+     (list-map string-from-list (string-split' separator (string-to-list string) Empty Empty)))
 
-(def string-trim-start (string)
-     (match string
+(def string-trim-start' (list)
+     (match list
             (Cons x xs)
                 (match (= x 32)
-                       True   (string-trim-start xs)
-                       False  string)
+                       True   (string-trim-start' xs)
+                       False  list)
             Empty
-                string))
+                list))
+
+(def string-trim-start (string)
+     (String (string-trim-start' (string-to-list string))))
 
 (def string-trim-end (string)
-     (list-reverse (string-trim-start (list-reverse string))))
+     (string-reverse (string-trim-start (string-reverse string))))
 
 (def string-trim (string)
      (string-trim-start (string-trim-end string)))
 
 (def string-empty? (string)
-     (match string Empty True _ False))
+     (match string
+            (String Empty)  True
+            _               False))
 
-(def string-equal? (a b)
+(def string-equal?' (a b)
      (match a
             (Cons xa xas) (match b
-            (Cons xb xbs) (and (= xa xb) (string-equal? xas xbs))
-            Empty         (string-empty? a))
-            Empty         (string-empty? b)))
+            (Cons xb xbs) (and (= xa xb) (string-equal?' xas xbs))
+            Empty         (list-empty? a))
+            Empty         (list-empty? b)))
 
+(def string-equal? (a b)
+     (string-equal?' (string-to-list a) (string-to-list b)))
 
 
 (def string-point-is-digit (point)
      (and (> point 47) (< point 58)))
 
-(def string-to-int32'' (string-to-int32' string accumulator x)
-     (string-to-int32' string (Some (+ (* 10 accumulator) (- x 48))))) 
+(def string-to-int32''' (string-to-int32'' string accumulator x)
+     (string-to-int32'' string (Some (+ (* 10 accumulator) (- x 48))))) 
 
-(def string-to-int32' (string accumulator)
+(def string-to-int32'' (string accumulator)
      (match string
             Empty
                 accumulator
@@ -77,34 +114,42 @@
                 (maybe-flatmap (fn (accumulator)
                     ((pipe
                             (maybe-filter string-point-is-digit)
-                            (maybe-flatmap (string-to-int32'' string-to-int32' rest accumulator)))
+                            (maybe-flatmap (string-to-int32''' string-to-int32'' rest accumulator)))
                         (Some x)))
                     accumulator)))
 
-(def string-to-int32 (string)
+(def string-to-int32' (string)
      (match string
             (Cons 45 string)
-                (match (string-empty? string)
+                (match (list-empty? string)
                        True   None
-                       False  (maybe-map (fn (x) (* -1 x)) (string-to-int32 string)))
+                       False  (maybe-map (fn (x) (* -1 x)) (string-to-int32' string)))
             _
-                (string-to-int32' string (Some 0))))
+                (string-to-int32'' string (Some 0))))
 
-(def string-from-int32' (integer string)
+(def string-to-int32 (string)
+     (string-to-int32' (string-to-list string)))
+
+(def string-from-int32'' (integer string)
      (match (> integer 9)
             True
-                (string-from-int32' (/ integer 10) (Cons (+ (% integer 10) 48) string))
+                (string-from-int32'' (/ integer 10) (Cons (+ (% integer 10) 48) string))
             False
                 (Cons (+ integer 48) string)))
 
-(def string-from-int32 (integer)
+(def string-from-int32' (integer)
      (match (< integer 0)
             True
                 (match (= integer -2147483648)
                     True
                         (list 45 50 49 52 55 52 56 51 54 52 56)
                     False
-                        (Cons 45 (string-from-int32 (* integer -1))))
+                        (Cons 45 (string-from-int32' (* integer -1))))
             False
-                (string-from-int32' integer Empty)))
+                (string-from-int32'' integer Empty)))
 
+(def string-from-int32 (integer)
+     (String (string-from-int32' integer)))
+
+(def string-collect-from-indexed-iterator (predicate iterator)
+     (pair-map-right string-from-list (list-collect-from-indexed-iterator predicate iterator)))

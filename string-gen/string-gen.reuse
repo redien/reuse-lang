@@ -1,21 +1,27 @@
 
+(def parts-are-empty? (parts)
+     (match parts
+            Empty              True
+            (Cons part Empty)  (string-empty? part)
+            _                  False))
+
 (def transform-line (line)
      (match (string-split 124 line)
             (Cons name parts)
-                (string-concat (list 40 100 101 102 32 100 97 116 97 45)
+                (string-concat (string-from-list (list 40 100 101 102 32 100 97 116 97 45))
                 (string-concat (string-trim name)
-                (string-concat (list 32 40 41 32)
-                (match parts
-                       (Cons Empty Empty)
-                            (list 69 109 112 116 121 41)
-                       _
-                            (string-concat (list 40 108 105 115 116 32)
-                            (string-concat (string-join (list 32) (list-map string-from-int32 (string-join (list 124) parts)))
-                                           (list 41 41)))))))
+                (string-concat (string-from-list (list 32 40 41 32 40 115 116 114 105 110 103 45 102 114 111 109 45 108 105 115 116 32))
+                (match (parts-are-empty? parts)
+                       True
+                            (string-from-list (list 69 109 112 116 121 41 41))
+                       False
+                            (string-concat (string-from-list (list 40 108 105 115 116 32))
+                            (string-concat (string-join (string-of-char 32) (list-map string-from-int32 (string-to-list (string-join (string-of-char 124) parts))))
+                                           (string-from-list (list 41 41 41))))))))
             Empty
-                Empty))
+                (string-empty)))
 
 (export string_gen (stdin-iterator)
-        (match (list-collect-from-indexed-iterator (fn (_) True) stdin-iterator)
+        (match (string-collect-from-indexed-iterator (fn (_) True) stdin-iterator)
                (Pair _ stdin)
-                    (Result (string-join (list 10) (list-map transform-line (string-split 10 stdin))))))
+                    (Result (string-join (string-of-char 10) (list-map transform-line (string-split 10 stdin))))))

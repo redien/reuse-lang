@@ -6,6 +6,8 @@ project_root=$script_path/..
 
 [ -d $project_root/generated/string-gen ] || mkdir $project_root/generated/string-gen
 
+$project_root/standard-library/build.sh
+
 $project_root/reusec --language ocaml\
                      --output $project_root/generated/string-gen/StringGen.ml\
                      $script_path/string-gen.reuse

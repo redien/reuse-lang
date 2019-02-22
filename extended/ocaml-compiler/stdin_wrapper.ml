@@ -21,7 +21,7 @@ let rec _list_to_string_r = fun input result ->
                 (_list_to_string_r rest new_result)
         | CEmpty -> result;;
 
-let _list_to_string = fun input -> (_list_to_string_r input "");;
+let _list_to_string = fun input -> (_list_to_string_r (string_45to_45list input) "");;
 
 let _stdin_list = CIndexedIterator (
         _stdin_string,

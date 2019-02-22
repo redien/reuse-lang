@@ -1,5 +1,5 @@
 
-(def join (list) (string-join Empty list))
+(def join (list) (string-join (string-empty) list))
 
 (def not-empty? (string)
      (not (string-empty? string)))
@@ -11,8 +11,8 @@
 
 (def escape-char (char)
      (match (is-alphanumeric char)
-            True   (list char)
-            False  (Cons 95 (string-from-int32 char))))
+            True   (string-of-char char)
+            False  (string-cons 95 (string-from-int32 char))))
 
 (def stringify-parse-errors (definitions)
      (list-map (result-map-error error-to-string) definitions))
@@ -104,9 +104,7 @@
         (list-first expressions)))
 
 (def symbol-is-reserved? (name)
-     (match name
-            (Cons 226 (Cons 156 (Cons 168 _)))                 True
-            _                                                  False))
+     (string-equal? (string-substring 0 3 name) (data-sparkle)))
 
 (def validate-identifier (identifier)
      (match (symbol-is-reserved? identifier)

@@ -12,7 +12,7 @@
 
 (typ range               (Range int32 int32))
 
-(typ sexp                (Symbol (list int32)      range)
+(typ sexp                (Symbol string            range)
                          (List   (list sexp)       range))
 
 (typ parse-error         ParseErrorTooFewClosingBrackets
@@ -26,9 +26,12 @@
      (Range (indexed-iterator-index start) (indexed-iterator-index end)))
 
 (def parse-symbol (iterator)
-     (match (list-collect-from-indexed-iterator atom-character? iterator)
-            (Pair _ Empty)             (ParseOut iterator)
-            (Pair next-iterator name)  (ParseNext next-iterator (Symbol name (symbol-range iterator next-iterator)))))
+     (match (string-collect-from-indexed-iterator atom-character? iterator)
+            (Pair next-iterator name)
+                     (match (string-empty? name)
+                         True  (ParseOut iterator)
+                         False (ParseNext next-iterator
+                                          (Symbol name (symbol-range iterator next-iterator))))))
 
 (def list-range (start end)
      (Range (- (indexed-iterator-index start) 1) (indexed-iterator-index end)))
@@ -41,7 +44,7 @@
      (match (indexed-iterator-get iterator)
             None       ParseEnd
             (Some 40)  (parse-list (indexed-iterator-next iterator) parse-sexps)
-            (Some 41)  (ParseOut (indexed-iterator-next iterator))
+            (Some 41)  (ParseOut   (indexed-iterator-next iterator))
             (Some x)   (match (whitespace? x)
                               True   (parse-expression (indexed-iterator-next iterator) parse-sexps)
                               False  (parse-symbol iterator))))

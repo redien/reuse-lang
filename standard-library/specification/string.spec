@@ -1,136 +1,136 @@
 
 string-join
-> (string-join (list 44) Empty)
+> (string-join (string-of-char 44) Empty)
 = 
 
-> (string-join (list 44) (list Empty))
+> (string-join (string-of-char 44) (list (string-empty)))
 = 
 
-> (string-join (list 44) (list Empty Empty))
+> (string-join (string-of-char 44) (list (string-empty) (string-empty)))
 = ,
 
-> (string-join (list 44) (list Empty (list 65)))
+> (string-join (string-of-char 44) (list (string-empty) (string-of-char 65)))
 = ,A
 
-> (string-join (list 44) (list (list 65) (list 66)))
+> (string-join (string-of-char 44) (list (string-of-char 65) (string-of-char 66)))
 = A,B
 
-> (string-join (list 44) (list (list 65) (list 66) (list 67)))
+> (string-join (string-of-char 44) (list (string-of-char 65) (string-of-char 66) (string-of-char 67)))
 = A,B,C
 
-> (string-join (list 44) (list (list 65) Empty))
+> (string-join (string-of-char 44) (list (string-of-char 65) (string-empty)))
 = A,
 
-> (string-join (list 44) (list (list 65)))
+> (string-join (string-of-char 44) (list (string-of-char 65)))
 = A
 
 
 
 string-split
-> (string-join (list 44) (string-split 32 Empty))
+> (string-join (string-of-char 44) (string-split 32 (string-empty)))
 = 
 
-> (string-join (list 44) (string-split 32 (list 65)))
+> (string-join (string-of-char 44) (string-split 32 (string-from-list (list 65))))
 = A
 
-> (string-join (list 44) (string-split 32 (list 65 32 66)))
+> (string-join (string-of-char 44) (string-split 32 (string-from-list (list 65 32 66))))
 = A,B
 
-> (string-join (list 44) (string-split 32 (list 32)))
+> (string-join (string-of-char 44) (string-split 32 (string-from-list (list 32))))
 = ,
 
-> (string-join (list 44) (string-split 32 (list 32 65)))
+> (string-join (string-of-char 44) (string-split 32 (string-from-list (list 32 65))))
 = ,A
 
-> (string-join (list 44) (string-split 32 (list 65 66 32)))
+> (string-join (string-of-char 44) (string-split 32 (string-from-list (list 65 66 32))))
 = AB,
 
-> (string-join (list 44) (string-split 32 (list 65 66 32 32)))
+> (string-join (string-of-char 44) (string-split 32 (string-from-list (list 65 66 32 32))))
 = AB,,
 
-> (string-join (list 44) (string-split 32 (list 32 32 65 66)))
+> (string-join (string-of-char 44) (string-split 32 (string-from-list (list 32 32 65 66))))
 = ,,AB
 
-> (string-join (list 44) (string-split 32 (list 65 32 66)))
+> (string-join (string-of-char 44) (string-split 32 (string-from-list (list 65 32 66))))
 = A,B
 
-> (string-join (list 44) (string-split 32 (list 65 32 66 32 67)))
+> (string-join (string-of-char 44) (string-split 32 (string-from-list (list 65 32 66 32 67))))
 = A,B,C
 
 
 string-trim-start
-> (string-trim-start Empty)
+> (string-trim-start (string-from-list Empty))
 = 
 
-> (string-trim-start (list 65))
+> (string-trim-start (string-from-list (list 65)))
 = A
 
-> (string-trim-start (list 65 32))
+> (string-trim-start (string-from-list (list 65 32)))
 = A 
 
-> (string-trim-start (list 32 65))
+> (string-trim-start (string-from-list (list 32 65)))
 = A
 
-> (string-trim-start (list 32))
+> (string-trim-start (string-from-list (list 32)))
 = 
 
-> (string-trim-start (list 32 65 32))
+> (string-trim-start (string-from-list (list 32 65 32)))
 = A 
 
-> (string-trim-start (list 32 65 32 66 32))
+> (string-trim-start (string-from-list (list 32 65 32 66 32)))
 = A B 
 
-> (string-trim-start (list 65 32 32 66))
+> (string-trim-start (string-from-list (list 65 32 32 66)))
 = A  B
 
 
 string-trim-end
-> (string-trim-end Empty)
+> (string-trim-end (string-from-list Empty))
 = 
 
-> (string-trim-end (list 65))
+> (string-trim-end (string-from-list (list 65)))
 = A
 
-> (string-trim-end (list 65 32))
+> (string-trim-end (string-from-list (list 65 32)))
 = A
 
-> (string-trim-end (list 32 65))
+> (string-trim-end (string-from-list (list 32 65)))
 =  A
 
-> (string-trim-end (list 32))
+> (string-trim-end (string-from-list (list 32)))
 = 
 
-> (string-trim-end (list 32 65 32))
+> (string-trim-end (string-from-list (list 32 65 32)))
 =  A
 
-> (string-trim-end (list 32 65 32 66 32))
+> (string-trim-end (string-from-list (list 32 65 32 66 32)))
 =  A B
 
-> (string-trim-end (list 65 32 32 66))
+> (string-trim-end (string-from-list (list 65 32 32 66)))
 = A  B
 
 
 string-trim
-> (string-trim Empty)
+> (string-trim (string-from-list Empty))
 = 
 
-> (string-trim (list 65))
+> (string-trim (string-from-list (list 65)))
 = A
 
-> (string-trim (list 65 32))
+> (string-trim (string-from-list (list 65 32)))
 = A
 
-> (string-trim (list 32 65))
+> (string-trim (string-from-list (list 32 65)))
 = A
 
-> (string-trim (list 32))
+> (string-trim (string-from-list (list 32)))
 = 
 
-> (string-trim (list 32 65 32))
+> (string-trim (string-from-list (list 32 65 32)))
 = A
 
-> (string-trim (list 32 65 32 66 32))
+> (string-trim (string-from-list (list 32 65 32 66 32)))
 = A B
 
-> (string-trim (list 65 32 32 66))
+> (string-trim (string-from-list (list 65 32 32 66)))
 = A  B

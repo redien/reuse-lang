@@ -80,6 +80,21 @@
 (def list-flatmap (f list)
      (list-foldr (fn (head tail) (list-concat (f head) tail)) Empty list))
 
+(def list-skip (count list)
+     (match (> count 0)
+            True   (list-skip (- count 1) (list-rest list))
+            False  list))
+
+(def list-take' (count list taken)
+     (match (> count 0)
+            True   (match list
+                          (Cons char rest)  (list-take' (- count 1) rest (Cons char taken))
+                          Empty             taken)
+            False  taken))
+
+(def list-take (count list)
+     (list-reverse (list-take' count list Empty)))
+
 (def list-zip' (xs ys collected)
      (match xs
             Empty        collected
