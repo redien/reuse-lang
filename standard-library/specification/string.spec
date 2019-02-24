@@ -29,7 +29,19 @@ string-size
 
 
 string-prepend & string-append
-> (string-prepend 71 (string-append 70 (string-prepend 69 (string-append 69 (string-prepend 68 (string-append 67 (string-prepend 66 (string-append 65 (string-empty)))))))))
+> (list-foldl string-append (string-empty) (list-from-range 65 85))
+= ABCDEFGHIJKLMNOPQRST
+
+> (list-foldl string-prepend (string-empty) (list-from-range 65 85))
+= TSRQPONMLKJIHGFEDCBA
+
+> (list-foldr string-append (string-empty) (list-from-range 65 85))
+= TSRQPONMLKJIHGFEDCBA
+
+> (list-foldr string-prepend (string-empty) (list-from-range 65 85))
+= ABCDEFGHIJKLMNOPQRST
+
+> (string-append 73 (string-prepend 72 (string-append 71 (string-prepend 70 (string-append 69 (string-prepend 68 (string-append 67 (string-prepend 66 (string-append 65 (string-empty))))))))))
 = HFDBACEGI
 
 
