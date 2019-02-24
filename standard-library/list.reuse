@@ -25,6 +25,12 @@
             Empty
                 Empty)) 
 
+(def list-last (list)
+    (match list
+           Empty           None
+           (Cons x Empty)  (Some x)
+           (Cons _ rest)   (list-last rest)))
+
 (def list-empty? (list)
      (match list
             (Cons _ __)

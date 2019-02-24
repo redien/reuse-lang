@@ -39,9 +39,18 @@
 
 (def string-first (string)
      (match string
-            (FTSingle node)     (Some (string-first-node' node))
-            (FTDeep list _ __)  (maybe-map string-first-node' (list-first list))
-            _                   None))
+            FTEmpty           None
+            (FTSingle node)   (Some (string-first-node' node))
+            (FTDeep first middle last)
+                (match (list-first first)
+                    (Some x)  (Some (string-first-node' x))
+                    None
+                (match (string-first middle)
+                    (Some x)  (Some x)
+                    None
+                (match (list-last last)
+                    (Some x)  (Some (string-first-node' x))
+                    None      None)))))
 
 (def string-foldr-node' (f node identity)
      (match node
@@ -67,7 +76,7 @@
      (string-foldr list-cons Empty string))
 
 (def string-from-list (list)
-     (list-foldr string-cons (string-empty) list))
+     (list-foldr string-cons FTEmpty list))
 
 (def string-rest (string)
      (string-from-list (list-rest (string-to-list string))))
