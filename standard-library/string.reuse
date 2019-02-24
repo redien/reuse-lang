@@ -119,6 +119,25 @@
                         middle)
                     first)))
 
+(def string-foldl-node' (f node identity)
+     (match node
+            (FTValue a)        (f a identity)
+            (FTNode2 _ b a)    (string-foldl-node' f a (string-foldl-node' f b identity))
+            (FTNode3 _ c b a)  (string-foldl-node' f a (string-foldl-node' f b (string-foldl-node' f c identity)))))
+
+(def string-foldl (f identity tree)
+     (match tree
+            FTEmpty
+                identity
+            (FTSingle x)
+                (string-foldl-node' f x identity)
+            (FTDeep first middle last)
+                (list-foldl (string-foldl-node' f)
+                    (string-foldl f
+                        (list-foldl (string-foldl-node' f) identity first)
+                        middle)
+                    last)))
+
 (def string-size (string)
      (match string
             FTEmpty
@@ -137,19 +156,36 @@
      (string-foldr list-cons Empty string))
 
 (def string-from-list (list)
-     (list-foldr string-cons FTEmpty list))
+     (list-foldr string-cons (string-empty) list))
+
+(def string-skip (count string)
+     (match (> count 0)
+            True   (string-skip (- count 1) (string-rest string))
+            False  string))
+
+(def string-take' (count string taken)
+     (match (> count 0)
+            True   (match (string-first string)
+                          (Some char)  (string-take' (- count 1)
+                                                     (string-rest string)
+                                                     (string-cons char taken))
+                          None         taken)
+            False  taken))
+
+(def string-reverse (string)
+     (string-foldl string-cons (string-empty) string))
+
+(def string-take (count string)
+     (string-reverse (string-take' count string (string-empty))))
 
 (def string-substring (start size string)
-     (string-from-list (list-take size (list-skip start (string-to-list string)))))
+     (string-take size (string-skip start string)))
 
 (def string-concat (a b)
      (string-from-list (list-concat (string-to-list a) (string-to-list b))))
 
 (def string-append (a b)
      (string-concat b a))
-
-(def string-reverse (string)
-     (string-from-list (list-reverse (string-to-list string))))
 
 (def string-join' (separator list)
      (match list
@@ -200,15 +236,12 @@
             (Some _)  False
             None      True))
 
-(def string-equal?' (a b)
-     (match a
-            (Cons xa xas) (match b
-            (Cons xb xbs) (and (= xa xb) (string-equal?' xas xbs))
-            Empty         (list-empty? a))
-            Empty         (list-empty? b)))
-
 (def string-equal? (a b)
-     (string-equal?' (string-to-list a) (string-to-list b)))
+     (match (string-first a)
+            (Some xa) (match (string-first b)
+            (Some xb) (and (= xa xb) (string-equal? (string-rest a) (string-rest b)))
+            None      (string-empty? a))
+            None      (string-empty? b)))
 
 
 (def string-point-is-digit (point)
