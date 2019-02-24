@@ -1,4 +1,15 @@
 
+list-from-range
+> (string-from-list (list-map (+ 65) (list-from-range 0 0)))
+= 
+
+> (string-from-list (list-map (+ 65) (list-from-range 0 1)))
+= A
+
+> (string-from-list (list-map (+ 65) (list-from-range 0 10)))
+= ABCDEFGHIJ
+
+
 list-foldr
 > (string-from-list (list-foldr list-cons Empty (list 65 66 67)))
 = ABC

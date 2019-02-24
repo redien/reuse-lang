@@ -1,4 +1,33 @@
 
+string-size
+> (string-of-char (+ 65 (string-size (string-empty))))
+= A
+
+> (string-of-char (+ 65 (string-size (string-of-char 1))))
+= B
+
+> (string-of-char (+ 65 (string-size (string-from-list (list 1 2)))))
+= C
+
+> (string-of-char (+ 65 (string-size (string-from-list (list 1 2 3)))))
+= D
+
+> (string-of-char (+ 65 (string-size (string-from-list (list 1 2 3 4)))))
+= E
+
+> (string-of-char (+ 65 (string-size (string-from-list (list 1 2 3 4 5)))))
+= F
+
+> (string-of-char (+ 65 (string-size (string-from-list (list 1 2 3 4 5 6)))))
+= G
+
+> (string-of-char (+ 65 (string-size (string-from-list (list 1 2 3 4 5 6 7)))))
+= H
+
+> (string-of-char (+ 65 (string-size (string-from-list (list-from-range 0 20)))))
+= U
+
+
 string-join
 > (string-join (string-of-char 44) Empty)
 = 

@@ -1,7 +1,7 @@
 
 (typ string-node (FTValue int32)
-                 (FTNode2 string-node string-node)
-                 (FTNode3 string-node string-node string-node))
+                 (FTNode2 int32 string-node string-node)
+                 (FTNode3 int32 string-node string-node string-node))
 
 (typ string FTEmpty
             (FTSingle string-node)
@@ -13,6 +13,18 @@
 (def string-of-char (character)
      (FTSingle (FTValue character)))
 
+(def string-node-size' (node)
+     (match node
+            (FTValue _)              1
+            (FTNode2 size _ __)      size
+            (FTNode3 size _ __ ___)  size))
+
+(def string-node2' (a b)
+     (FTNode2 (+ (string-node-size' a) (string-node-size' b)) a b))
+
+(def string-node3' (a b c)
+     (FTNode3 (+ (string-node-size' a) (+ (string-node-size' b) (string-node-size' c))) a b c))
+
 (def string-cons' (a tree)
      (match tree
             FTEmpty
@@ -23,7 +35,7 @@
                 (match first
                        (Cons b (Cons c (Cons d (Cons e Empty))))
                             (FTDeep (list a b)
-                                    (string-cons' (FTNode3 c d e) middle)
+                                    (string-cons' (string-node3' c d e) middle)
                                     last)
                        _
                             (FTDeep (Cons a first) middle last))))
@@ -33,9 +45,9 @@
 
 (def string-first-node' (node)
      (match node
-            (FTValue x)        x
-            (FTNode2 x _)      (string-first-node' x)
-            (FTNode3 x _ __)   (string-first-node' x)))
+            (FTValue x)            x
+            (FTNode2 _ x __)       (string-first-node' x)
+            (FTNode3 _ x __ ___)   (string-first-node' x)))
 
 (def string-first (string)
      (match string
@@ -55,16 +67,16 @@
 (def string-rest-node' (node)
      (match node
             (FTValue _)             None
-            (FTNode2 a b)
+            (FTNode2 _ a b)
                 (match (string-rest-node' a)
-                       (Some node)  (Some (FTNode2 node b))
+                       (Some node)  (Some (string-node2' node b))
                        None         (string-rest-node' b))
-            (FTNode3 a b c)
+            (FTNode3 _ a b c)
                 (match (string-rest-node' a)
-                       (Some node)  (Some (FTNode3 node b c))
+                       (Some node)  (Some (string-node3' node b c))
                        None
                 (match (string-rest-node' b)
-                       (Some node)  (Some (FTNode2 node c))
+                       (Some node)  (Some (string-node2' node c))
                        None         (string-rest-node' c)))))
 
 (def string-rest (string)
@@ -90,9 +102,9 @@
 
 (def string-foldr-node' (f node identity)
      (match node
-            (FTValue a)      (f a identity)
-            (FTNode2 a b)    (string-foldr-node' f a (string-foldr-node' f b identity))
-            (FTNode3 a b c)  (string-foldr-node' f a (string-foldr-node' f b (string-foldr-node' f c identity)))))
+            (FTValue a)        (f a identity)
+            (FTNode2 _ a b)    (string-foldr-node' f a (string-foldr-node' f b identity))
+            (FTNode3 _ a b c)  (string-foldr-node' f a (string-foldr-node' f b (string-foldr-node' f c identity)))))
 
 (def string-foldr (f identity tree)
      (match tree
@@ -106,6 +118,19 @@
                         (list-foldr (string-foldr-node' f) identity last)
                         middle)
                     first)))
+
+(def string-size (string)
+     (match string
+            FTEmpty
+                0
+            (FTSingle x)
+                (string-node-size' x)
+            (FTDeep first middle last)
+                (+ (list-foldr + 0 (list-map string-node-size' first))
+                (+ (list-foldr + 0 (list-map string-node-size' last))
+                   (string-size middle)))))
+
+
 
 
 (def string-to-list (string)
