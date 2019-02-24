@@ -202,9 +202,6 @@
 (def string-concat (a b)
      (string-from-list (list-concat (string-to-list a) (string-to-list b))))
 
-(def string-append (a b)
-     (string-concat b a))
-
 (def string-join' (separator list)
      (match list
             (Cons first rest)

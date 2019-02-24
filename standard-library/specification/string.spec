@@ -29,8 +29,8 @@ string-size
 
 
 string-prepend & string-append
-> (string-prepend 68 (string-append 67 (string-prepend 66 (string-append 65 (string-empty)))))
-= DBAC
+> (string-prepend 71 (string-append 70 (string-prepend 69 (string-append 69 (string-prepend 68 (string-append 67 (string-prepend 66 (string-append 65 (string-empty)))))))))
+= HFDBACEGI
 
 
 string-join
