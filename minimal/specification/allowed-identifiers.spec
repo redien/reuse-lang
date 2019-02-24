@@ -484,6 +484,13 @@ Should allow commonly reserved words as variable names
 > (value' 10)
 = 10
 
+| (typ to MyEmpty)
+| (typ (mytype to) (MyCons to))
+| (def to () 1)
+| (def to' (to) to)
+> (to' 10)
+= 10
+
 Type names should be allowed as capture variables
 | (typ a (B int32))
 > (match (B 11) (B a) a)

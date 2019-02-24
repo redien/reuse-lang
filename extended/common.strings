@@ -66,6 +66,7 @@ when                      |when
 while                     |while
 parser                    |parser
 value                     |value
+to                        |to
 error-reserved-identifier |Symbols prefixed with ✨ are reserved
 sparkle-x                 |✨x
 sparkle                   |✨

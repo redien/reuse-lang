@@ -35,7 +35,7 @@
         (Pair (data-try) True) (Pair (data-val) True)
         (Pair (data-virtual) True) (Pair (data-when) True)
         (Pair (data-while) True) (Pair (data-parser) True)
-        (Pair (data-value) True)
+        (Pair (data-value) True) (Pair (data-to) True)
      )))
 
 (def string-is-reserved? (name)
