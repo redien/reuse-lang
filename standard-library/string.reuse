@@ -186,34 +186,31 @@
             True   (match (string-first string)
                           (Some char)  (string-take' (- count 1)
                                                      (string-rest string)
-                                                     (string-prepend char taken))
+                                                     (string-append char taken))
                           None         taken)
             False  taken))
 
+(def string-take (count string)
+     (string-take' count string (string-empty)))
+
 (def string-reverse (string)
      (string-foldl string-prepend (string-empty) string))
-
-(def string-take (count string)
-     (string-reverse (string-take' count string (string-empty))))
 
 (def string-substring (start size string)
      (string-take size (string-skip start string)))
 
 (def string-concat (a b)
-     (string-from-list (list-concat (string-to-list a) (string-to-list b))))
+     (string-foldl string-append a b))
 
-(def string-join' (separator list)
-     (match list
+(def string-join (separator strings)
+     (match strings
             (Cons first rest)
                 (list-foldl (fn (string joined)
-                                (list-concat joined (list-concat separator string)))
+                                (string-concat joined (string-concat separator string)))
                             first
                             rest)
             Empty
-                Empty))
-
-(def string-join (separator strings)
-     (string-from-list (string-join' (string-to-list separator) (list-map string-to-list strings))))
+                (string-empty)))
 
 (def string-flatmap (f string)
      (string-join (string-empty) (list-map f (string-to-list string))))
