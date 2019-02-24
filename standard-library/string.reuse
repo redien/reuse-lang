@@ -52,6 +52,42 @@
                     (Some x)  (Some (string-first-node' x))
                     None      None)))))
 
+(def string-rest-node' (node)
+     (match node
+            (FTValue _)             None
+            (FTNode2 a b)
+                (match (string-rest-node' a)
+                       (Some node)  (Some (FTNode2 node b))
+                       None         (string-rest-node' b))
+            (FTNode3 a b c)
+                (match (string-rest-node' a)
+                       (Some node)  (Some (FTNode3 node b c))
+                       None
+                (match (string-rest-node' b)
+                       (Some node)  (Some (FTNode2 node c))
+                       None         (string-rest-node' c)))))
+
+(def string-rest (string)
+     (match string
+            FTEmpty
+                string
+            (FTSingle node)
+                (match (string-rest-node' node)
+                       (Some node)  (FTSingle node)
+                       None         FTEmpty)
+            (FTDeep Empty FTEmpty (Cons node rest))
+                (match (string-rest-node' node)
+                       (Some node)  (FTDeep Empty FTEmpty (Cons node rest))
+                       None         (FTDeep Empty FTEmpty rest))
+            (FTDeep Empty middle Empty)
+                (string-rest middle)
+            (FTDeep Empty middle last)
+                (FTDeep Empty (string-rest middle) last)
+            (FTDeep (Cons node rest) middle last)
+                (match (string-rest-node' node)
+                       (Some node)  (FTDeep (Cons node rest) middle last)
+                       None         (FTDeep rest middle last))))
+
 (def string-foldr-node' (f node identity)
      (match node
             (FTValue a)      (f a identity)
@@ -77,9 +113,6 @@
 
 (def string-from-list (list)
      (list-foldr string-cons FTEmpty list))
-
-(def string-rest (string)
-     (string-from-list (list-rest (string-to-list string))))
 
 (def string-substring (start size string)
      (string-from-list (list-take size (list-skip start (string-to-list string)))))
