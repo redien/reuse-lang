@@ -1,44 +1,88 @@
 
-(typ string (String (list int32)))
+(typ string-node (FTValue int32)
+                 (FTNode2 string-node string-node)
+                 (FTNode3 string-node string-node string-node))
 
-(def string-to-list (string)
-     (match string
-            (String list)  list))
-
-(def string-from-list (list)
-     (String list))
+(typ string FTEmpty
+            (FTSingle string-node)
+            (FTDeep (list string-node) string (list string-node)))
 
 (def string-empty ()
-     (String Empty))
+     FTEmpty)
 
 (def string-of-char (character)
-     (String (Cons character Empty)))
+     (FTSingle (FTValue character)))
 
-(def string-first (string)
-     (list-first (string-to-list string)))
-
-(def string-rest (string)
-     (String (list-rest (string-to-list string))))
+(def string-cons' (a tree)
+     (match tree
+            FTEmpty
+                (FTSingle a)
+            (FTSingle x)
+                (FTDeep (list a) FTEmpty (list x))
+            (FTDeep first middle last)
+                (match first
+                       (Cons b (Cons c (Cons d (Cons e Empty))))
+                            (FTDeep (list a b)
+                                    (string-cons' (FTNode3 c d e) middle)
+                                    last)
+                       _
+                            (FTDeep (Cons a first) middle last))))
 
 (def string-cons (char string)
-     (String (Cons char (string-to-list string))))
+     (string-cons' (FTValue char) string))
+
+(def string-first-node' (node)
+     (match node
+            (FTValue x)        x
+            (FTNode2 x _)      (string-first-node' x)
+            (FTNode3 x _ __)   (string-first-node' x)))
+
+(def string-first (string)
+     (match string
+            (FTSingle node)     (Some (string-first-node' node))
+            (FTDeep list _ __)  (maybe-map string-first-node' (list-first list))
+            _                   None))
+
+(def string-foldr-node' (f node identity)
+     (match node
+            (FTValue a)      (f a identity)
+            (FTNode2 a b)    (string-foldr-node' f a (string-foldr-node' f b identity))
+            (FTNode3 a b c)  (string-foldr-node' f a (string-foldr-node' f b (string-foldr-node' f c identity)))))
+
+(def string-foldr (f identity tree)
+     (match tree
+            FTEmpty
+                identity
+            (FTSingle x)
+                (string-foldr-node' f x identity)
+            (FTDeep first middle last)
+                (list-foldr (string-foldr-node' f)
+                    (string-foldr f
+                        (list-foldr (string-foldr-node' f) identity last)
+                        middle)
+                    first)))
+
+
+(def string-to-list (string)
+     (string-foldr list-cons Empty string))
+
+(def string-from-list (list)
+     (list-foldr string-cons (string-empty) list))
+
+(def string-rest (string)
+     (string-from-list (list-rest (string-to-list string))))
 
 (def string-substring (start size string)
-     (String (list-take size (list-skip start (string-to-list string)))))
-
-(def string-concat' (a b)
-     (match a
-            Empty       b
-            (Cons x xs) (Cons x (string-concat' xs b))))
+     (string-from-list (list-take size (list-skip start (string-to-list string)))))
 
 (def string-concat (a b)
-     (String (string-concat' (string-to-list a) (string-to-list b))))
+     (string-from-list (list-concat (string-to-list a) (string-to-list b))))
 
 (def string-append (a b)
      (string-concat b a))
 
 (def string-reverse (string)
-     (String (list-reverse (string-to-list string))))
+     (string-from-list (list-reverse (string-to-list string))))
 
 (def string-join' (separator list)
      (match list
@@ -51,7 +95,7 @@
                 Empty))
 
 (def string-join (separator strings)
-     (String (string-join' (string-to-list separator) (list-map string-to-list strings))))
+     (string-from-list (string-join' (string-to-list separator) (list-map string-to-list strings))))
 
 (def string-flatmap (f string)
      (string-join (string-empty) (list-map f (string-to-list string))))
@@ -76,7 +120,7 @@
                 list))
 
 (def string-trim-start (string)
-     (String (string-trim-start' (string-to-list string))))
+     (string-from-list (string-trim-start' (string-to-list string))))
 
 (def string-trim-end (string)
      (string-reverse (string-trim-start (string-reverse string))))
@@ -85,9 +129,9 @@
      (string-trim-start (string-trim-end string)))
 
 (def string-empty? (string)
-     (match string
-            (String Empty)  True
-            _               False))
+     (match (string-first string)
+            (Some _)  False
+            None      True))
 
 (def string-equal?' (a b)
      (match a
@@ -149,7 +193,7 @@
                 (string-from-int32'' integer Empty)))
 
 (def string-from-int32 (integer)
-     (String (string-from-int32' integer)))
+     (string-from-list (string-from-int32' integer)))
 
 (def string-collect-from-indexed-iterator (predicate iterator)
      (pair-map-right string-from-list (list-collect-from-indexed-iterator predicate iterator)))
