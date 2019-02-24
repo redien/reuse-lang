@@ -25,7 +25,7 @@
 (def string-node3' (a b c)
      (FTNode3 (+ (string-node-size' a) (+ (string-node-size' b) (string-node-size' c))) a b c))
 
-(def string-cons' (a tree)
+(def string-prepend' (a tree)
      (match tree
             FTEmpty
                 (FTSingle a)
@@ -35,15 +35,15 @@
                 (match first
                        (Cons b (Cons c (Cons d (Cons e Empty))))
                             (FTDeep (list a b)
-                                    (string-cons' (string-node3' c d e) middle)
+                                    (string-prepend' (string-node3' c d e) middle)
                                     last)
                        _
                             (FTDeep (Cons a first) middle last))))
 
-(def string-cons (char string)
-     (string-cons' (FTValue char) string))
+(def string-prepend (char string)
+     (string-prepend' (FTValue char) string))
 
-(def string-snoc' (a tree)
+(def string-append' (a tree)
      (match tree
             FTEmpty
                 (FTSingle a)
@@ -53,13 +53,13 @@
                 (match last
                        (Cons e (Cons d (Cons c (Cons b Empty))))
                             (FTDeep first
-                                    (string-snoc' (string-node3' e d c) middle)
+                                    (string-append' (string-node3' e d c) middle)
                                     (list b a))
                        _
                             (FTDeep first middle (list-append a last)))))
 
-(def string-snoc (char string)
-     (string-snoc' (FTValue char) string))
+(def string-append (char string)
+     (string-append' (FTValue char) string))
 
 (def string-first-node' (node)
      (match node
@@ -174,7 +174,7 @@
      (string-foldr list-cons Empty string))
 
 (def string-from-list (list)
-     (list-foldr string-cons (string-empty) list))
+     (list-foldr string-prepend (string-empty) list))
 
 (def string-skip (count string)
      (match (> count 0)
@@ -186,12 +186,12 @@
             True   (match (string-first string)
                           (Some char)  (string-take' (- count 1)
                                                      (string-rest string)
-                                                     (string-cons char taken))
+                                                     (string-prepend char taken))
                           None         taken)
             False  taken))
 
 (def string-reverse (string)
-     (string-foldl string-cons (string-empty) string))
+     (string-foldl string-prepend (string-empty) string))
 
 (def string-take (count string)
      (string-reverse (string-take' count string (string-empty))))

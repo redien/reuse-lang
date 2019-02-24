@@ -12,7 +12,7 @@
 (def escape-char (char)
      (match (is-alphanumeric char)
             True   (string-of-char char)
-            False  (string-cons 95 (string-from-int32 char))))
+            False  (string-prepend 95 (string-from-int32 char))))
 
 (def stringify-parse-errors (definitions)
      (list-map (result-map-error error-to-string) definitions))

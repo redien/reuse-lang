@@ -1,9 +1,9 @@
 
 (def prefix-type-variable (string)
-     (string-cons 39 (string-cons 84 string)))
+     (string-prepend 39 (string-prepend 84 string)))
 
 (def prefix-constructor (constructor)
-     (string-cons 67 constructor))
+     (string-prepend 67 constructor))
 
 (def reserved-strings ()
      (dictionary-of (list
@@ -43,7 +43,7 @@
 
 (def escape-identifier (name)
      (match (string-is-reserved? name)
-            True   (string-cons 95 name)
+            True   (string-prepend 95 name)
             False  (string-flatmap escape-char name)))
 
 (def special-identifiers ()

@@ -28,8 +28,8 @@ string-size
 = U
 
 
-string-cons & string-snoc
-> (string-cons 68 (string-snoc 67 (string-cons 66 (string-snoc 65 (string-empty)))))
+string-prepend & string-append
+> (string-prepend 68 (string-append 67 (string-prepend 66 (string-append 65 (string-empty)))))
 = DBAC
 
 
