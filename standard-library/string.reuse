@@ -43,6 +43,24 @@
 (def string-cons (char string)
      (string-cons' (FTValue char) string))
 
+(def string-snoc' (a tree)
+     (match tree
+            FTEmpty
+                (FTSingle a)
+            (FTSingle x)
+                (FTDeep (list x) FTEmpty (list a))
+            (FTDeep first middle last)
+                (match last
+                       (Cons e (Cons d (Cons c (Cons b Empty))))
+                            (FTDeep first
+                                    (string-snoc' (string-node3' e d c) middle)
+                                    (list b a))
+                       _
+                            (FTDeep first middle (list-append a last)))))
+
+(def string-snoc (char string)
+     (string-snoc' (FTValue char) string))
+
 (def string-first-node' (node)
      (match node
             (FTValue x)            x
@@ -60,7 +78,7 @@
                 (match (string-first middle)
                     (Some x)  (Some x)
                     None
-                (match (list-last last)
+                (match (list-first last)
                     (Some x)  (Some (string-first-node' x))
                     None      None)))))
 

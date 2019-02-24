@@ -28,6 +28,11 @@ string-size
 = U
 
 
+string-cons & string-snoc
+> (string-cons 68 (string-snoc 67 (string-cons 66 (string-snoc 65 (string-empty)))))
+= DBAC
+
+
 string-join
 > (string-join (string-of-char 44) Empty)
 = 
