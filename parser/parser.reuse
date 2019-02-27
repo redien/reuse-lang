@@ -316,22 +316,20 @@
                                                                     (ExportDefinition name arguments expression range)))
             False  (Error (MalformedDefinitionError range))))))
 
+(def specific-malformed-definition-error (kind range)
+     (match (string-equal? kind (data-typ))
+            True   (Error (MalformedTypeDefinitionError range))
+            False
+     (match (string-equal? kind (data-def))
+            True   (Error (MalformedFunctionDefinitionError range))
+            False  (Error (MalformedDefinitionError range)))))
+
 (def sexp-to-definition (expression)
      (match expression
             (List (Cons (Symbol kind _) Empty) range)
-                (match (string-equal? kind (data-typ))
-                       True   (Error (MalformedTypeDefinitionError range))
-                       False
-                (match (string-equal? kind (data-def))
-                       True   (Error (MalformedFunctionDefinitionError range))
-                       False  (Error (MalformedDefinitionError range))))
+                (specific-malformed-definition-error kind range)
             (List (Cons (Symbol kind _) (Cons __ Empty)) range)
-                (match (string-equal? kind (data-typ))
-                       True   (Error (MalformedTypeDefinitionError range))
-                       False
-                (match (string-equal? kind (data-def))
-                       True   (Error (MalformedFunctionDefinitionError range))
-                       False  (Error (MalformedDefinitionError range))))
+                (specific-malformed-definition-error kind range)
             (List (Cons kind (Cons name rest)) range)
                 (result-flatmap (sexp-to-definition' name rest range) (symbol-to-string kind))
             (List (Cons (List _ range) Empty) __)
