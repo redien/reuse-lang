@@ -1,4 +1,60 @@
 
+string-concat
+> (string-concat (string-empty) (string-empty))
+= 
+
+> (string-concat (string-of-char 65) (string-empty))
+= A
+
+> (string-concat (string-empty) (string-of-char 65))
+= A
+
+> (string-concat (string-of-char 65) (string-of-char 66))
+= AB
+
+> (string-concat (string-from-list (list 65 66)) (string-empty))
+= AB
+
+> (string-concat (string-from-list (list 65 66 67 68)) (string-empty))
+= ABCD
+
+> (string-concat (string-from-list (list 65 66 67 68 69)) (string-empty))
+= ABCDE
+
+> (string-concat (string-from-list (list 65 66 67 68 69 70 71 72 73)) (string-empty))
+= ABCDEFGHI
+
+> (string-concat (string-empty) (string-from-list (list 65 66)))
+= AB
+
+> (string-concat (string-empty) (string-from-list (list 65 66 67 68)))
+= ABCD
+
+> (string-concat (string-empty) (string-from-list (list 65 66 67 68 69)))
+= ABCDE
+
+> (string-concat (string-empty) (string-from-list (list 65 66 67 68 69 70 71 72 73)))
+= ABCDEFGHI
+
+> (string-concat (string-from-list (list 65 66)) (string-from-list (list 67 68)))
+= ABCD
+
+> (string-concat (string-from-list (list 65 66 67 68)) (string-from-list (list 69 70 71 72)))
+= ABCDEFGH
+
+> (string-concat (string-from-list (list 65 66 67 68 69)) (string-from-list (list 70 71 72 73 74)))
+= ABCDEFGHIJ
+
+> (string-concat (string-from-list (list 65 66 67 68 69 70 71 72 73)) (string-from-list (list 74 75 76 77 78 79 80 81 82)))
+= ABCDEFGHIJKLMNOPQR
+
+> (string-concat (string-from-list (list-from-range 65 71)) (string-from-list (list-from-range 65 69)))
+= ABCDEFABCD
+
+> (string-concat (string-from-list (list-from-range 65 69)) (string-from-list (list-from-range 65 71)))
+= ABCDABCDEF
+
+
 string-size
 > (string-of-char (+ 65 (string-size (string-empty))))
 = A
