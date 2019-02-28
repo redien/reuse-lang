@@ -101,6 +101,14 @@ string-prepend & string-append
 = HFDBACEGI
 
 
+string-rest
+> (string-rest (string-append 67 (string-append 66 (string-append 65 (string-empty)))))
+= BC
+
+> (string-rest (string-rest (string-rest (string-rest (string-rest (string-append 73 (string-prepend 72 (string-append 71 (string-prepend 70 (string-append 69 (string-prepend 68 (string-append 67 (string-prepend 66 (string-append 65 (string-empty)))))))))))))))
+= CEGI
+
+
 string-join
 > (string-join (string-of-char 44) Empty)
 = 

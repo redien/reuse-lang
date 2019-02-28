@@ -27,6 +27,11 @@
             (Result x) (f x)
             (Error x)  (g x)))
 
+(def result-or-else (value result)
+     (match result
+            (Result x) x
+            (Error x)  value))
+
 (def result-error? (result)
      (match result
             (Error _)  True

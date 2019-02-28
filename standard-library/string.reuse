@@ -25,7 +25,7 @@
 (def string-node3' (a b c)
      (FTNode3 (+ (string-node-size' a) (+ (string-node-size' b) (string-node-size' c))) a b c))
 
-(def string-prepend' (a tree)
+(def string-prepend-node' (a tree)
      (match tree
             FTEmpty
                 (FTSingle a)
@@ -35,15 +35,15 @@
                 (match first
                        (Cons b (Cons c (Cons d (Cons e Empty))))
                             (FTDeep (list a b)
-                                    (string-prepend' (string-node3' c d e) middle)
+                                    (string-prepend-node' (string-node3' c d e) middle)
                                     last)
                        _
                             (FTDeep (Cons a first) middle last))))
 
 (def string-prepend (char string)
-     (string-prepend' (FTValue char) string))
+     (string-prepend-node' (FTValue char) string))
 
-(def string-append' (a tree)
+(def string-append-node' (a tree)
      (match tree
             FTEmpty
                 (FTSingle a)
@@ -51,15 +51,15 @@
                 (FTDeep (list x) FTEmpty (list a))
             (FTDeep first middle last)
                 (match last
-                       (Cons e (Cons d (Cons c (Cons b Empty))))
+                       (Cons b (Cons c (Cons d (Cons e Empty))))
                             (FTDeep first
-                                    (string-append' (string-node3' e d c) middle)
-                                    (list b a))
+                                    (string-append-node' (string-node3' e d c) middle)
+                                    (list a b))
                        _
-                            (FTDeep first middle (list-append a last)))))
+                            (FTDeep first middle (Cons a last)))))
 
 (def string-append (char string)
-     (string-append' (FTValue char) string))
+     (string-append-node' (FTValue char) string))
 
 (def string-first-node' (node)
      (match node
@@ -72,15 +72,7 @@
             FTEmpty           None
             (FTSingle node)   (Some (string-first-node' node))
             (FTDeep first middle last)
-                (match (list-first first)
-                    (Some x)  (Some (string-first-node' x))
-                    None
-                (match (string-first middle)
-                    (Some x)  (Some x)
-                    None
-                (match (list-first last)
-                    (Some x)  (Some (string-first-node' x))
-                    None      None)))))
+                (maybe-map string-first-node' (list-first first))))
 
 (def string-rest-node' (node)
      (match node
@@ -88,14 +80,11 @@
             (FTNode2 _ a b)
                 (match (string-rest-node' a)
                        (Some node)  (Some (string-node2' node b))
-                       None         (string-rest-node' b))
+                       None         (Some b))
             (FTNode3 _ a b c)
                 (match (string-rest-node' a)
                        (Some node)  (Some (string-node3' node b c))
-                       None
-                (match (string-rest-node' b)
-                       (Some node)  (Some (string-node2' node c))
-                       None         (string-rest-node' c)))))
+                       None         (Some (string-node2' b c)))))
 
 (def string-rest (string)
      (match string
@@ -105,18 +94,15 @@
                 (match (string-rest-node' node)
                        (Some node)  (FTSingle node)
                        None         FTEmpty)
-            (FTDeep Empty FTEmpty (Cons node rest))
-                (match (string-rest-node' node)
-                       (Some node)  (FTDeep Empty FTEmpty (Cons node rest))
-                       None         (FTDeep Empty FTEmpty rest))
-            (FTDeep Empty middle Empty)
-                (string-rest middle)
-            (FTDeep Empty middle last)
-                (FTDeep Empty (string-rest middle) last)
             (FTDeep (Cons node rest) middle last)
                 (match (string-rest-node' node)
                        (Some node)  (FTDeep (Cons node rest) middle last)
-                       None         (FTDeep rest middle last))))
+                       None
+                (match rest
+                       Empty        (list-foldr string-append-node' middle last)
+                       _            (FTDeep rest middle last)))
+            _
+                string))
 
 (def string-foldr-node' (f node identity)
      (match node
@@ -133,7 +119,7 @@
             (FTDeep first middle last)
                 (list-foldr (string-foldr-node' f)
                     (string-foldr f
-                        (list-foldr (string-foldr-node' f) identity last)
+                        (list-foldl (string-foldr-node' f) identity last)
                         middle)
                     first)))
 
@@ -150,7 +136,7 @@
             (FTSingle x)
                 (string-foldl-node' f x identity)
             (FTDeep first middle last)
-                (list-foldl (string-foldl-node' f)
+                (list-foldr (string-foldl-node' f)
                     (string-foldl f
                         (list-foldl (string-foldl-node' f) identity first)
                         middle)
@@ -167,7 +153,39 @@
                 (+ (list-foldr + 0 (list-map string-node-size' last))
                    (string-size middle)))))
 
+(def string-concat-nodes' (nodes)
+     (match nodes
+            (Cons a (Cons b Empty))
+                (list (string-node2' a b))
+            (Cons a (Cons b (Cons c Empty)))
+                (list (string-node3' a b c))
+            (Cons a (Cons b (Cons c (Cons d Empty))))
+                (list (string-node2' a b) (string-node2' c d))
+            (Cons a (Cons b (Cons c rest)))
+                (Cons (string-node3' a b c) (string-concat-nodes' rest))
+            _
+                Empty))
 
+(typ (triple a b c) (Triple a b c))
+(def string-concat' (a nodes b)
+     (match (Triple a nodes b)
+            (Triple FTEmpty nodes b)
+                (list-foldr string-prepend-node' b nodes)
+            (Triple a nodes FTEmpty)
+                (list-foldl string-append-node' a nodes)
+            (Triple (FTSingle x) nodes b)
+                (string-prepend-node' x (list-foldr string-prepend-node' b nodes))
+            (Triple a nodes (FTSingle x))
+                (string-append-node' x (list-foldl string-append-node' a nodes))
+            (Triple (FTDeep first1 middle1 last1)
+                    nodes
+                    (FTDeep first2 middle2 last2))
+                (FTDeep first1
+                        (string-concat' middle1 (string-concat-nodes' (list-concat (list-reverse last1) (list-concat nodes first2))) middle2)
+                        last2)))
+
+(def string-concat (a b)
+     (string-concat' a Empty b))
 
 
 (def string-to-list (string)
@@ -198,9 +216,6 @@
 
 (def string-substring (start size string)
      (string-take size (string-skip start string)))
-
-(def string-concat (a b)
-     (string-foldl string-append a b))
 
 (def string-join (separator strings)
      (match strings
@@ -309,3 +324,8 @@
 
 (def string-collect-from-indexed-iterator (predicate iterator)
      (pair-map-right string-from-list (list-collect-from-indexed-iterator predicate iterator)))
+
+(def string-from-boolean (boolean)
+     (match boolean
+            True  (string-from-list (list 84 114 117 101))
+            False (string-from-list (list 70 97 108 115 101))))
