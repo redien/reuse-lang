@@ -1,9 +1,9 @@
 
 (typ (indexed-iterator (exists collection) element)
-    (IndexedIterator collection
-                     int32
-                     (fn (collection int32) (maybe element))
-                     (fn ((indexed-iterator element) collection int32) (indexed-iterator element))))
+     (IndexedIterator collection
+                      int32
+                      (fn (collection int32) (maybe element))
+                      (fn ((indexed-iterator element) collection int32) (indexed-iterator element))))
 
 (def indexed-iterator-next (iterator)
      (match iterator
