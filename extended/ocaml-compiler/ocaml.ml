@@ -411,6 +411,10 @@ let rec translate_45type_45definition = fun name parameters constructors -> (joi
 let rec translate_45definition = fun definition -> (match definition with (CFunctionDefinition (name,arguments,expression,_95)) -> (translate_45function_45definition (escape_45identifier name) arguments expression) | (CExportDefinition (name,arguments,expression,_95)) -> (translate_45function_45definition name arguments expression) | (CTypeDefinition (name,parameters,constructors,_95)) -> (translate_45type_45definition name parameters constructors));;
 let rec validate_45reserved_45identifiers_45when_45not = fun as_95minimal -> (match as_95minimal with CTrue -> (fun definitions -> definitions) | CFalse -> (list_45map validate_45reserved_45identifiers));;
 let rec to_ocaml = fun definitions source as_95minimal -> ((fun _226_156_168x -> ((result_45map (string_45join (string_45of_45char (10l)))) (result_45concat ((list_45map (result_45map translate_45definition)) (local_45transforms ((validate_45reserved_45identifiers_45when_45not as_95minimal) _226_156_168x)))))) definitions);;
+let getenv name = try (Sys.getenv name) with Not_found -> ""
+let as_minimal = if getenv "REUSE_MINIMAL" = "true" then CTrue else CFalse;;
+let performance = getenv "REUSE_TIME" = "true";;
+
 let stdin_wrapper_start = Unix.gettimeofday ();;
 
 let _read_line ic =
@@ -452,24 +456,25 @@ let _stdin_list = CIndexedIterator (
 let stdin_wrapper_end = Unix.gettimeofday ();;
 let stdin_wrapper_time = stdin_wrapper_end -. stdin_wrapper_start;;
 
-let parse' str = stringify_45parse_45errors (sexps_45to_45definitions (parse str));;
-let getenv name = try (Sys.getenv name) with Not_found -> ""
-let as_minimal = if getenv "REUSE_MINIMAL" = "true" then CTrue else CFalse;;
-let performance = getenv "REUSE_TIME" = "true";;
+let parse_sexp_start = Unix.gettimeofday ();;
+let parse_sexp_output = (parse _stdin_list);;
+let parse_sexp_end = Unix.gettimeofday ();;
+let parse_sexp_time = parse_sexp_end -. parse_sexp_start;;
 
 let parse_start = Unix.gettimeofday ();;
-let parse_output = (parse' _stdin_list);;
+let parse_output = stringify_45parse_45errors (sexps_45to_45definitions parse_sexp_output);;
 let parse_end = Unix.gettimeofday ();;
 let parse_time = parse_end -. parse_start;;
-let compile_start = Unix.gettimeofday ();;
-let compile_output = (to_ocaml parse_output _stdin_list as_minimal);;
-let compile_end = Unix.gettimeofday ();;
-let compile_time = compile_end -. compile_start;;
+
+let codegen_start = Unix.gettimeofday ();;
+let codegen_output = (to_ocaml parse_output _stdin_list as_minimal);;
+let codegen_end = Unix.gettimeofday ();;
+let codegen_time = codegen_end -. codegen_start;;
 
 if performance then
-    (Printf.printf "%f %f %f" stdin_wrapper_time parse_time compile_time ; exit 0)
+    (Printf.printf "%f %f %f %f" stdin_wrapper_time parse_sexp_time parse_time codegen_time ; exit 0)
 else
-    match compile_output with
+    match codegen_output with
         CResult (source) -> Printf.printf "%s" (_list_to_string source) ; exit 0
       | CError (error) -> Printf.eprintf "%s" (_list_to_string error) ; exit 1;;
 

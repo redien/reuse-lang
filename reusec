@@ -101,13 +101,15 @@ fi
 if [ "$REUSE_TIME" == "true" ]; then
     DIAGNOSTICS=$(echo "$REUSE_SOURCE" | $root_path/bin/reuse-$REUSE_LANGUAGE)
     READING=$(echo $DIAGNOSTICS | awk '{print $1}')
-    PARSING=$(echo $DIAGNOSTICS | awk '{print $2}')
-    COMPILING=$(echo $DIAGNOSTICS | awk '{print $3}')
-    TOTAL=$(awk "BEGIN {print $READING+$PARSING+$COMPILING; exit}")
-    echo "Reading:   ${READING}s"
-    echo "Parsing:   ${PARSING}s"
-    echo "Compiling: ${COMPILING}s"
-    echo "Total:     ${TOTAL}s"
+    PARSING_SEXPS=$(echo $DIAGNOSTICS | awk '{print $2}')
+    PARSING=$(echo $DIAGNOSTICS | awk '{print $3}')
+    CODE_GEN=$(echo $DIAGNOSTICS | awk '{print $4}')
+    TOTAL=$(awk "BEGIN {print $READING+$PARSING_SEXPS+$PARSING+$CODE_GEN; exit}")
+    echo "Reading:         ${READING}s"
+    echo "Parsing (sexps): ${PARSING_SEXPS}s"
+    echo "Parsing:         ${PARSING}s"
+    echo "Code Generation: ${CODE_GEN}s"
+    echo "Total:           ${TOTAL}s"
 else
     echo "$REUSE_SOURCE" | $root_path/bin/reuse-$REUSE_LANGUAGE > $REUSE_OUTPUT
 fi
