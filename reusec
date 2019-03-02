@@ -69,16 +69,26 @@ do
             throw_error Unrecognized flag $arg
         ;;
         *)
-            if [[ "$arg" == *".strings" ]]; then
-                REUSE_SOURCE="$REUSE_SOURCE
-$(cat $arg | $root_path/bin/string-gen)"
-            else
-                REUSE_SOURCE="$REUSE_SOURCE
-$(cat $arg)"
-            fi
+            REUSE_SOURCE_FILES="$REUSE_SOURCE_FILES $arg"
             shift
         ;;
     esac
+done
+
+STRING_GEN_TOTAL=0
+for arg in $REUSE_SOURCE_FILES; do
+    if [[ "$arg" == *".strings" ]]; then
+        if [ "$REUSE_TIME" = "true" ]; then
+            STRING_GEN=$(cat $arg | $root_path/bin/string-gen)
+            STRING_GEN_TOTAL=$(awk "BEGIN {print $STRING_GEN_TOTAL+$STRING_GEN; exit}")
+        else
+            REUSE_SOURCE="$REUSE_SOURCE
+$(cat $arg | $root_path/bin/string-gen)"
+        fi
+    else
+        REUSE_SOURCE="$REUSE_SOURCE
+$(cat $arg)"
+    fi
 done
 
 case $REUSE_LANGUAGE in
@@ -104,11 +114,12 @@ if [ "$REUSE_TIME" == "true" ]; then
     PARSING_SEXPS=$(echo $DIAGNOSTICS | awk '{print $2}')
     PARSING=$(echo $DIAGNOSTICS | awk '{print $3}')
     CODE_GEN=$(echo $DIAGNOSTICS | awk '{print $4}')
-    TOTAL=$(awk "BEGIN {print $READING+$PARSING_SEXPS+$PARSING+$CODE_GEN; exit}")
+    TOTAL=$(awk "BEGIN {print $READING+$PARSING_SEXPS+$PARSING+$CODE_GEN+$STRING_GEN_TOTAL; exit}")
     echo "Reading:         ${READING}s"
     echo "Parsing (sexps): ${PARSING_SEXPS}s"
     echo "Parsing:         ${PARSING}s"
-    echo "Code Generation: ${CODE_GEN}s"
+    echo "Code Gen:        ${CODE_GEN}s"
+    echo "String Gen:      ${STRING_GEN_TOTAL}s"
     echo "Total:           ${TOTAL}s"
 else
     echo "$REUSE_SOURCE" | $root_path/bin/reuse-$REUSE_LANGUAGE > $REUSE_OUTPUT

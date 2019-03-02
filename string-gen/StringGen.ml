@@ -167,6 +167,9 @@ let rec dictionary_45get_45or = fun key default dictionary -> (match (dictionary
 let rec parts_45are_45empty_63 = fun parts -> (match parts with CEmpty -> CTrue | (CCons (part,CEmpty)) -> (string_45empty_63 part) | _95 -> CFalse);;
 let rec transform_45line = fun line -> (match (string_45split (124l) line) with (CCons (name,parts)) -> (string_45concat (string_45from_45list (CCons ((40l),(CCons ((100l),(CCons ((101l),(CCons ((102l),(CCons ((32l),(CCons ((100l),(CCons ((97l),(CCons ((116l),(CCons ((97l),(CCons ((45l),CEmpty))))))))))))))))))))) (string_45concat (string_45trim name) (string_45concat (string_45from_45list (CCons ((32l),(CCons ((40l),(CCons ((41l),(CCons ((32l),(CCons ((40l),(CCons ((115l),(CCons ((116l),(CCons ((114l),(CCons ((105l),(CCons ((110l),(CCons ((103l),(CCons ((45l),(CCons ((102l),(CCons ((114l),(CCons ((111l),(CCons ((109l),(CCons ((45l),(CCons ((108l),(CCons ((105l),(CCons ((115l),(CCons ((116l),(CCons ((32l),CEmpty))))))))))))))))))))))))))))))))))))))))))))) (match (parts_45are_45empty_63 parts) with CTrue -> (string_45from_45list (CCons ((69l),(CCons ((109l),(CCons ((112l),(CCons ((116l),(CCons ((121l),(CCons ((41l),(CCons ((41l),CEmpty))))))))))))))) | CFalse -> (string_45concat (string_45from_45list (CCons ((40l),(CCons ((108l),(CCons ((105l),(CCons ((115l),(CCons ((116l),(CCons ((32l),CEmpty))))))))))))) (string_45concat (string_45join (string_45of_45char (32l)) (list_45map string_45from_45int32 (string_45to_45list (string_45join (string_45of_45char (124l)) parts)))) (string_45from_45list (CCons ((41l),(CCons ((41l),(CCons ((41l),CEmpty))))))))))))) | CEmpty -> (string_45empty ()));;
 let rec string_gen = fun stdin_45iterator -> (match (string_45collect_45from_45indexed_45iterator (fun _95 -> CTrue) stdin_45iterator) with (CPair (_95,stdin)) -> (CResult ((string_45join (string_45of_45char (10l)) (list_45map transform_45line (string_45split (10l) stdin))))));;
+let getenv name = try (Sys.getenv name) with Not_found -> ""
+let performance = getenv "REUSE_TIME" = "true";;
+
 
 let _read_line ic =
     try Some (input_line ic)
@@ -205,8 +208,15 @@ let _stdin_list = CIndexedIterator (
                 match iter with
                 | CIndexedIterator (s, i, get, next) -> CIndexedIterator (s, Int32.succ i, get, next)));;
 
-let output = string_gen _stdin_list in
-    match output with
-        CResult (result) -> Printf.printf "%s" (_list_to_string result) ; exit 0
-      | CError (error) -> Printf.eprintf "%s" (_list_to_string error) ; exit 1;;
+let string_gen_start = Unix.gettimeofday ();;
+let string_gen_output = string_gen _stdin_list;;
+let string_gen_end = Unix.gettimeofday ();;
+let string_gen_time = string_gen_end -. string_gen_start;;
+
+if performance then
+    (Printf.printf "%f" string_gen_time ; exit 0)
+else
+    match string_gen_output with
+          CResult (result) -> Printf.printf "%s" (_list_to_string result) ; exit 0
+        | CError (error) -> Printf.eprintf "%s" (_list_to_string error) ; exit 1;;
 
