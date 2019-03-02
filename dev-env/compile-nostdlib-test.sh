@@ -2,6 +2,6 @@
 set -e
 
 printf "$(cat $1)\nPrintf.printf \"%%ld\" (main ())\n" > "$1.2.ml"
-ocamlc -g "$1.2.ml" -o "$1.out"
+ocamlc "$1.2.ml" -o "$1.out"
 rm "$1.2.ml"
 chmod +x "$1.out"

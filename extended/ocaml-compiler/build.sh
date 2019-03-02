@@ -55,4 +55,4 @@ else
 
 END_OF_SOURCE
 
-ocamlc unix.cma -g $project_root/generated/extended/CompilerOCaml.ml -o $project_root/generated/extended/compiler-ocaml
+ocamlopt unix.cmxa $project_root/generated/extended/CompilerOCaml.ml -o $project_root/generated/extended/compiler-ocaml
