@@ -33,6 +33,6 @@ else
 
 END_OF_SOURCE
 
-ocamlopt unix.cmxa $project_root/generated/string-gen/StringGen.ml -o $project_root/generated/string-gen/string-gen
+ocamlopt -O3 unix.cmxa $project_root/generated/string-gen/StringGen.ml -o $project_root/generated/string-gen/string-gen
 
 cp $project_root/generated/string-gen/StringGen.ml $script_path/StringGen.ml

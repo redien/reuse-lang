@@ -33,4 +33,4 @@ let output = to_reuse (parse' _stdin_list) _stdin_list in
 
 END_OF_SOURCE
 
-ocamlopt $project_root/generated/extended/CompilerMinimal.ml -o $project_root/generated/extended/compiler-minimal
+ocamlopt -O3 $project_root/generated/extended/CompilerMinimal.ml -o $project_root/generated/extended/compiler-minimal
