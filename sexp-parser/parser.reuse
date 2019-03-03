@@ -77,11 +77,14 @@
                        True   (Some ParseErrorTooFewClosingBrackets)
                        False  None))))
 
-(export parse (iterator)
-        (match (check-errors iterator)
-               (Some error)  (Error error)
-               None          (match (parse-sexps iterator Empty)
-                                    (Pair _ expressions)  (Result expressions))))
+(def parse' (iterator)
+     (match (check-errors iterator)
+            (Some error)  (Error error)
+            None          (match (parse-sexps iterator Empty)
+                                 (Pair _ expressions)  (Result expressions))))
+
+(export parse (stdin)
+        (parse' (chunk-to-indexed-iterator stdin)))
 
 (def wrap-in-brackets (string)
      (string-concat (string-of-char 40) (string-concat string (string-of-char 41))))

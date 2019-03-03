@@ -16,6 +16,8 @@ let rec pair_45map_45left = fun f pair -> (match pair with (CPair (x,y)) -> (CPa
 let rec pair_45map_45right = fun f pair -> (match pair with (CPair (x,y)) -> (CPair (x,(f y))));;
 let rec pair_45swap = fun pair -> (match pair with (CPair (x,y)) -> (CPair (y,x)));;
 type ('Ta) maybe = CSome : 'Ta -> ('Ta) maybe | CNone;;
+let rec maybe_45some = fun _value -> (CSome (_value));;
+let rec _constant_maybe_45none = CNone;;let rec maybe_45none = fun () -> _constant_maybe_45none;;
 let rec maybe_45map = fun f maybe -> (match maybe with (CSome (x)) -> (CSome ((f x))) | CNone -> CNone);;
 let rec maybe_45flatmap = fun f maybe -> (match maybe with (CSome (x)) -> (f x) | CNone -> CNone);;
 let rec maybe_45filter = fun f maybe -> (match maybe with (CSome (x)) -> (match (f x) with CTrue -> maybe | CFalse -> CNone) | CNone -> CNone);;
@@ -25,6 +27,14 @@ let rec indexed_45iterator_45next = fun iterator -> (match iterator with (CIndex
 let rec indexed_45iterator_45get = fun iterator -> (match iterator with (CIndexedIterator (collection,index,get,_95)) -> (get collection index));;
 let rec indexed_45iterator_45index = fun iterator -> (match iterator with (CIndexedIterator (_95,index,_95_95,_95_95_95)) -> index);;
 let rec indexed_45iterator_45foldl = fun f initial iterator -> (match (indexed_45iterator_45get iterator) with CNone -> initial | (CSome (x)) -> (indexed_45iterator_45foldl f (f x initial) (indexed_45iterator_45next iterator)));;
+type ('Tm,'Tvalue) chunk = CChunk : 'Tm * ('Tm -> int32) * (int32 -> 'Tm -> 'Tvalue) * (int32 -> int32 -> 'Tm -> ('Tm,'Tvalue) chunk) * ('Tm -> 'Tm -> boolean) -> ('Tm,'Tvalue) chunk;;
+let rec chunk_45size = fun chunk -> (match chunk with (CChunk (m,size,_95,_95_95,_95_95_95)) -> (size m));;
+let rec chunk_45get = fun index chunk -> (match chunk with (CChunk (m,_95,get,_95_95,_95_95_95)) -> (get index m));;
+let rec chunk_45slice = fun offset size chunk -> (match chunk with (CChunk (m,_95,_95_95,slice,_95_95_95)) -> (slice offset size m));;
+let rec chunk_45equal_63 = fun chunk other -> (match (chunk ()) with (CChunk (a,_95,_95_95,_95_95_95,equal_63)) -> (match (other ()) with (CChunk (b,_95,_95_95,_95_95_95,_95_95_95_95)) -> (equal_63 a b)));;
+let rec chunk_45indexed_45iterator_45get = fun chunk index -> (match (_62_61 index (chunk_45size chunk)) with CTrue -> CNone | CFalse -> (CSome ((chunk_45get index chunk))));;
+let rec chunk_45indexed_45iterator_45next = fun iterator chunk index -> (CIndexedIterator (chunk,(Int32.add index (1l)),chunk_45indexed_45iterator_45get,chunk_45indexed_45iterator_45next));;
+let rec chunk_45to_45indexed_45iterator = fun chunk -> (CIndexedIterator (chunk,(0l),chunk_45indexed_45iterator_45get,chunk_45indexed_45iterator_45next));;
 type ('Ta) list = CCons : 'Ta * ('Ta) list -> ('Ta) list | CEmpty;;
 let rec list_45cons = fun x xs -> (CCons (x,xs));;
 let rec list_45from = fun x -> (CCons (x,CEmpty));;
@@ -179,7 +189,8 @@ let rec parse_45sexps = fun iterator expressions -> (match (parse_45expression i
 let rec inc = fun x -> (Int32.add x (1l));;
 let rec count_45parens = fun iterator -> (indexed_45iterator_45foldl (fun c count -> (match c with 40l -> (pair_45map_45left inc count) | 41l -> (pair_45map_45right inc count) | _95 -> count)) (CPair ((0l),(0l))) iterator);;
 let rec check_45errors = fun iterator -> (match (count_45parens iterator) with (CPair (_open,close)) -> (match (_60 _open close) with CTrue -> (CSome (CParseErrorTooManyClosingBrackets)) | CFalse -> (match (_62 _open close) with CTrue -> (CSome (CParseErrorTooFewClosingBrackets)) | CFalse -> CNone)));;
-let rec parse = fun iterator -> (match (check_45errors iterator) with (CSome (error)) -> (CError (error)) | CNone -> (match (parse_45sexps iterator CEmpty) with (CPair (_95,expressions)) -> (CResult (expressions))));;
+let rec parse_39 = fun iterator -> (match (check_45errors iterator) with (CSome (error)) -> (CError (error)) | CNone -> (match (parse_45sexps iterator CEmpty) with (CPair (_95,expressions)) -> (CResult (expressions))));;
+let rec parse = fun stdin -> (parse_39 (chunk_45to_45indexed_45iterator stdin));;
 let rec wrap_45in_45brackets = fun string -> (string_45concat (string_45of_45char (40l)) (string_45concat string (string_45of_45char (41l))));;
 let rec stringify_45sexp = fun stringify expression -> (match expression with (CSymbol (name,_95)) -> name | (CList (expressions,_95)) -> (wrap_45in_45brackets (stringify expressions)));;
 let rec stringify = fun expressions -> (string_45join (string_45of_45char (32l)) (list_45map (stringify_45sexp stringify) expressions));;
@@ -441,18 +452,29 @@ let rec _list_to_string_r = fun input result ->
 
 let _list_to_string = fun input -> (_list_to_string_r (string_45to_45list input) "");;
 
-let _stdin_list = CIndexedIterator (
-        _stdin_string,
-        0l,
-        (fun s index ->
-                let i = (Int32.to_int index) in
-                if i < (String.length s) && i >= 0 then
-                        CSome (Int32.of_int (Char.code (String.get s i)))
-                else
-                        CNone),
-        (fun iter _ __ ->
-                match iter with
-                | CIndexedIterator (s, i, get, next) -> CIndexedIterator (s, Int32.succ i, get, next)));;
+let _chunk_size s = Int32.of_int (String.length s);;
+let _chunk_get index s =
+        let string_size = String.length s in
+        let i = Int32.to_int index in
+        if i < 0 || i >= string_size then
+                65l
+        else
+                Int32.of_int (Char.code (String.get s i));;
+let _chunk_equal a b =
+        match String.equal a b with
+                | true -> CTrue
+                | false -> CFalse;;
+let rec _chunk_slice offset size s =
+        let string_size = String.length s in
+        let offset = Int32.to_int offset in
+        let size = Int32.to_int size in
+        if offset < 0 || size < 0 || offset + size > string_size then
+                CChunk (s, _chunk_size, _chunk_get, _chunk_slice, _chunk_equal)
+        else
+                CChunk (String.sub s offset size, _chunk_size, _chunk_get, _chunk_slice, _chunk_equal);;
+
+let _stdin_list =
+        CChunk (_stdin_string, _chunk_size, _chunk_get, _chunk_slice, _chunk_equal);;
 let stdin_wrapper_end = Unix.gettimeofday ();;
 let stdin_wrapper_time = stdin_wrapper_end -. stdin_wrapper_start;;
 

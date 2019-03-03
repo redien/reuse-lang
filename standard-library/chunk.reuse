@@ -1,27 +1,36 @@
 
-(typ (chunk (exist m) value) (Chunk m
-                                    (fn (m) int32)
-                                    (fn (int32 m) value)
-                                    (fn (int32 int32 m) (chunk value))))
+(typ (chunk m value) (Chunk m (fn (m) int32)
+                              (fn (int32 m) value)
+                              (fn (int32 int32 m) (chunk m value))
+                              (fn (m m) boolean)))
 
 (def chunk-size (chunk)
      (match chunk
-            (Chunk m size _ __)   (size m)))
+            (Chunk m size _ __ ___)   (size m)))
 
 (def chunk-get (index chunk)
      (match chunk
-            (Chunk m _ get __)    (get index m)))
+            (Chunk m _ get __ ___)    (get index m)))
 
-(def chunk-slice (start size chunk)
+(def chunk-slice (offset size chunk)
      (match chunk
-            (Chunk m _ __ slice)  (slice start size m)))
+            (Chunk m _ __ slice ___)  (slice offset size m)))
+
+(def chunk-equal? (chunk other)
+     (match (chunk)
+            (Chunk a _ __ ___ equal?)
+     (match (other)
+            (Chunk b _ __ ___ ____)
+                (equal? a b))))
 
 
 (def chunk-indexed-iterator-get (chunk index)
-     (chunk-get index chunk))
+     (match (>= index (chunk-size chunk))
+            True  None
+            False (Some (chunk-get index chunk))))
 
 (def chunk-indexed-iterator-next (iterator chunk index)
-     (IndexedIterator (chunk-slice 1 (- (chunk-size chunk) 1) chunk) (+ index 1) chunk-indexed-iterator-get chunk-indexed-iterator-next))
+     (IndexedIterator chunk (+ index 1) chunk-indexed-iterator-get chunk-indexed-iterator-next))
 
 (def chunk-to-indexed-iterator (chunk)
      (IndexedIterator chunk 0 chunk-indexed-iterator-get chunk-indexed-iterator-next))

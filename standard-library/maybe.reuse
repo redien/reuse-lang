@@ -2,6 +2,12 @@
 (typ (maybe a) (Some a)
                None)
 
+(def maybe-some (value)
+     (Some value))
+
+(def maybe-none ()
+     None)
+
 (def maybe-map (f maybe)
      (match maybe
             (Some x)

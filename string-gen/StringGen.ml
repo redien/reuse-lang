@@ -16,6 +16,8 @@ let rec pair_45map_45left = fun f pair -> (match pair with (CPair (x,y)) -> (CPa
 let rec pair_45map_45right = fun f pair -> (match pair with (CPair (x,y)) -> (CPair (x,(f y))));;
 let rec pair_45swap = fun pair -> (match pair with (CPair (x,y)) -> (CPair (y,x)));;
 type ('Ta) maybe = CSome : 'Ta -> ('Ta) maybe | CNone;;
+let rec maybe_45some = fun _value -> (CSome (_value));;
+let rec _constant_maybe_45none = CNone;;let rec maybe_45none = fun () -> _constant_maybe_45none;;
 let rec maybe_45map = fun f maybe -> (match maybe with (CSome (x)) -> (CSome ((f x))) | CNone -> CNone);;
 let rec maybe_45flatmap = fun f maybe -> (match maybe with (CSome (x)) -> (f x) | CNone -> CNone);;
 let rec maybe_45filter = fun f maybe -> (match maybe with (CSome (x)) -> (match (f x) with CTrue -> maybe | CFalse -> CNone) | CNone -> CNone);;
@@ -25,6 +27,14 @@ let rec indexed_45iterator_45next = fun iterator -> (match iterator with (CIndex
 let rec indexed_45iterator_45get = fun iterator -> (match iterator with (CIndexedIterator (collection,index,get,_95)) -> (get collection index));;
 let rec indexed_45iterator_45index = fun iterator -> (match iterator with (CIndexedIterator (_95,index,_95_95,_95_95_95)) -> index);;
 let rec indexed_45iterator_45foldl = fun f initial iterator -> (match (indexed_45iterator_45get iterator) with CNone -> initial | (CSome (x)) -> (indexed_45iterator_45foldl f (f x initial) (indexed_45iterator_45next iterator)));;
+type ('Tm,'Tvalue) chunk = CChunk : 'Tm * ('Tm -> int32) * (int32 -> 'Tm -> 'Tvalue) * (int32 -> int32 -> 'Tm -> ('Tm,'Tvalue) chunk) * ('Tm -> 'Tm -> boolean) -> ('Tm,'Tvalue) chunk;;
+let rec chunk_45size = fun chunk -> (match chunk with (CChunk (m,size,_95,_95_95,_95_95_95)) -> (size m));;
+let rec chunk_45get = fun index chunk -> (match chunk with (CChunk (m,_95,get,_95_95,_95_95_95)) -> (get index m));;
+let rec chunk_45slice = fun offset size chunk -> (match chunk with (CChunk (m,_95,_95_95,slice,_95_95_95)) -> (slice offset size m));;
+let rec chunk_45equal_63 = fun chunk other -> (match (chunk ()) with (CChunk (a,_95,_95_95,_95_95_95,equal_63)) -> (match (other ()) with (CChunk (b,_95,_95_95,_95_95_95,_95_95_95_95)) -> (equal_63 a b)));;
+let rec chunk_45indexed_45iterator_45get = fun chunk index -> (match (_62_61 index (chunk_45size chunk)) with CTrue -> CNone | CFalse -> (CSome ((chunk_45get index chunk))));;
+let rec chunk_45indexed_45iterator_45next = fun iterator chunk index -> (CIndexedIterator (chunk,(Int32.add index (1l)),chunk_45indexed_45iterator_45get,chunk_45indexed_45iterator_45next));;
+let rec chunk_45to_45indexed_45iterator = fun chunk -> (CIndexedIterator (chunk,(0l),chunk_45indexed_45iterator_45get,chunk_45indexed_45iterator_45next));;
 type ('Ta) list = CCons : 'Ta * ('Ta) list -> ('Ta) list | CEmpty;;
 let rec list_45cons = fun x xs -> (CCons (x,xs));;
 let rec list_45from = fun x -> (CCons (x,CEmpty));;
@@ -166,7 +176,7 @@ let rec dictionary_45singleton = fun key _value -> (dictionary_45set key _value 
 let rec dictionary_45get_45or = fun key default dictionary -> (match (dictionary_45get key dictionary) with (CSome (_value)) -> _value | CNone -> default);;
 let rec parts_45are_45empty_63 = fun parts -> (match parts with CEmpty -> CTrue | (CCons (part,CEmpty)) -> (string_45empty_63 part) | _95 -> CFalse);;
 let rec transform_45line = fun line -> (match (string_45split (124l) line) with (CCons (name,parts)) -> (string_45concat (string_45from_45list (CCons ((40l),(CCons ((100l),(CCons ((101l),(CCons ((102l),(CCons ((32l),(CCons ((100l),(CCons ((97l),(CCons ((116l),(CCons ((97l),(CCons ((45l),CEmpty))))))))))))))))))))) (string_45concat (string_45trim name) (string_45concat (string_45from_45list (CCons ((32l),(CCons ((40l),(CCons ((41l),(CCons ((32l),(CCons ((40l),(CCons ((115l),(CCons ((116l),(CCons ((114l),(CCons ((105l),(CCons ((110l),(CCons ((103l),(CCons ((45l),(CCons ((102l),(CCons ((114l),(CCons ((111l),(CCons ((109l),(CCons ((45l),(CCons ((108l),(CCons ((105l),(CCons ((115l),(CCons ((116l),(CCons ((32l),CEmpty))))))))))))))))))))))))))))))))))))))))))))) (match (parts_45are_45empty_63 parts) with CTrue -> (string_45from_45list (CCons ((69l),(CCons ((109l),(CCons ((112l),(CCons ((116l),(CCons ((121l),(CCons ((41l),(CCons ((41l),CEmpty))))))))))))))) | CFalse -> (string_45concat (string_45from_45list (CCons ((40l),(CCons ((108l),(CCons ((105l),(CCons ((115l),(CCons ((116l),(CCons ((32l),CEmpty))))))))))))) (string_45concat (string_45join (string_45of_45char (32l)) (list_45map string_45from_45int32 (string_45to_45list (string_45join (string_45of_45char (124l)) parts)))) (string_45from_45list (CCons ((41l),(CCons ((41l),(CCons ((41l),CEmpty))))))))))))) | CEmpty -> (string_45empty ()));;
-let rec string_gen = fun stdin_45iterator -> (match (string_45collect_45from_45indexed_45iterator (fun _95 -> CTrue) stdin_45iterator) with (CPair (_95,stdin)) -> (CResult ((string_45join (string_45of_45char (10l)) (list_45map transform_45line (string_45split (10l) stdin))))));;
+let rec string_gen = fun stdin -> (match (string_45collect_45from_45indexed_45iterator (fun _95 -> CTrue) (chunk_45to_45indexed_45iterator stdin)) with (CPair (_95,stdin)) -> (CResult ((string_45join (string_45of_45char (10l)) (list_45map transform_45line (string_45split (10l) stdin))))));;
 let getenv name = try (Sys.getenv name) with Not_found -> ""
 let performance = getenv "REUSE_TIME" = "true";;
 
@@ -195,18 +205,29 @@ let rec _list_to_string_r = fun input result ->
 
 let _list_to_string = fun input -> (_list_to_string_r (string_45to_45list input) "");;
 
-let _stdin_list = CIndexedIterator (
-        _stdin_string,
-        0l,
-        (fun s index ->
-                let i = (Int32.to_int index) in
-                if i < (String.length s) && i >= 0 then
-                        CSome (Int32.of_int (Char.code (String.get s i)))
-                else
-                        CNone),
-        (fun iter _ __ ->
-                match iter with
-                | CIndexedIterator (s, i, get, next) -> CIndexedIterator (s, Int32.succ i, get, next)));;
+let _chunk_size s = Int32.of_int (String.length s);;
+let _chunk_get index s =
+        let string_size = String.length s in
+        let i = Int32.to_int index in
+        if i < 0 || i >= string_size then
+                65l
+        else
+                Int32.of_int (Char.code (String.get s i));;
+let _chunk_equal a b =
+        match String.equal a b with
+                | true -> CTrue
+                | false -> CFalse;;
+let rec _chunk_slice offset size s =
+        let string_size = String.length s in
+        let offset = Int32.to_int offset in
+        let size = Int32.to_int size in
+        if offset < 0 || size < 0 || offset + size > string_size then
+                CChunk (s, _chunk_size, _chunk_get, _chunk_slice, _chunk_equal)
+        else
+                CChunk (String.sub s offset size, _chunk_size, _chunk_get, _chunk_slice, _chunk_equal);;
+
+let _stdin_list =
+        CChunk (_stdin_string, _chunk_size, _chunk_get, _chunk_slice, _chunk_equal);;
 
 let string_gen_start = Unix.gettimeofday ();;
 let string_gen_output = string_gen _stdin_list;;
