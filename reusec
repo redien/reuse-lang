@@ -114,13 +114,21 @@ if [ "$REUSE_TIME" == "true" ]; then
     PARSING_SEXPS=$(echo $DIAGNOSTICS | awk '{print $2}')
     PARSING=$(echo $DIAGNOSTICS | awk '{print $3}')
     CODE_GEN=$(echo $DIAGNOSTICS | awk '{print $4}')
-    TOTAL=$(awk "BEGIN {print $READING+$PARSING_SEXPS+$PARSING+$CODE_GEN+$STRING_GEN_TOTAL; exit}")
+    TOTAL=$(awk "BEGIN {print $READING+$PARSING_SEXPS+$PARSING+$CODE_GEN; exit}")
+
+    LINE_COUNT=$(echo "$REUSE_SOURCE" | wc -l)
+    LINES_PER_SECOND=$(awk "BEGIN {print $LINE_COUNT/$TOTAL; exit}" | xargs printf "%.f" | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta')
+
     echo "Reading:         ${READING}s"
     echo "Parsing (sexps): ${PARSING_SEXPS}s"
     echo "Parsing:         ${PARSING}s"
     echo "Code Gen:        ${CODE_GEN}s"
-    echo "String Gen:      ${STRING_GEN_TOTAL}s"
     echo "Total:           ${TOTAL}s"
+    echo "Lines:           ${LINE_COUNT}"
+    echo "Throughput:      $LINES_PER_SECOND lines/s"
+    echo
+    echo "String Gen:      ${STRING_GEN_TOTAL}s"
+    echo
 else
     echo "$REUSE_SOURCE" | $root_path/bin/reuse-$REUSE_LANGUAGE > $REUSE_OUTPUT
 fi
