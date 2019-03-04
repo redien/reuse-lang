@@ -23,52 +23,56 @@
                          ParseEnd)
 
 (def symbol-range (start end)
-     (Range (indexed-iterator-index start) (indexed-iterator-index end)))
+     (Range start end))
 
-(def parse-symbol (iterator)
-     (match (string-collect-from-indexed-iterator atom-character? iterator)
-            (Pair next-iterator name)
-                     (match (string-empty? name)
-                         True  (ParseOut iterator)
-                         False (ParseNext next-iterator
-                                          (Symbol name (symbol-range iterator next-iterator))))))
+(def collect-while (predicate accumulator chunk index size)
+     (match (and (< index size) (predicate (chunk-get index chunk)))
+            True   (collect-while predicate (string-append (chunk-get index chunk) accumulator) chunk (+ index 1) size)
+            False  (Pair index accumulator)))
+
+(def parse-symbol (chunk index size)
+     (match (atom-character? (chunk-get index chunk))
+            False   (ParseOut index)
+            True
+     (match (collect-while atom-character? (string-empty) chunk index size)
+            (Pair next-index name)
+                   (ParseNext next-index (Symbol name (symbol-range index next-index))))))
 
 (def list-range (start end)
-     (Range (- (indexed-iterator-index start) 1) (indexed-iterator-index end)))
+     (Range (- start 1) end))
 
-(def parse-list (iterator parse-sexps)
-     (match (parse-sexps iterator Empty)
-            (Pair next-iterator expressions)  (ParseNext next-iterator (List expressions (list-range iterator next-iterator)))))
+(def parse-list (chunk index size parse-sexps)
+     (match (parse-sexps chunk index size Empty)
+            (Pair next-index expressions)  (ParseNext next-index (List expressions (list-range index next-index)))))
 
-(def parse-expression (iterator parse-sexps)
-     (match (indexed-iterator-get iterator)
-            None       ParseEnd
-            (Some 40)  (parse-list (indexed-iterator-next iterator) parse-sexps)
-            (Some 41)  (ParseOut   (indexed-iterator-next iterator))
-            (Some x)   (match (whitespace? x)
-                              True   (parse-expression (indexed-iterator-next iterator) parse-sexps)
-                              False  (parse-symbol iterator))))
+(def parse-expression (chunk index size parse-sexps)
+     (match (< index size)
+            False      ParseEnd
+            True
+     (match (chunk-get index chunk)
+            40  (parse-list chunk (+ index 1) size parse-sexps)
+            41  (ParseOut (+ index 1))
+            x   (match (whitespace? x)
+                       True   (parse-expression chunk (+ index 1) size parse-sexps)
+                       False  (parse-symbol chunk index size)))))
 
-(def parse-sexps (iterator expressions)
-     (match (parse-expression iterator parse-sexps)
-            ParseEnd                    (Pair iterator (list-reverse expressions))
-            (ParseOut iterator)         (Pair iterator (list-reverse expressions))
-            (ParseNext iterator result) (parse-sexps iterator (Cons result expressions))))
+(def parse-sexps (chunk index size expressions)
+     (match (parse-expression chunk index size parse-sexps)
+            ParseEnd                 (Pair index (list-reverse expressions))
+            (ParseOut index)         (Pair index (list-reverse expressions))
+            (ParseNext index result) (parse-sexps chunk index size (Cons result expressions))))
 
-(def inc (x) (+ x 1))
+(def count-parens (chunk)
+     (chunk-foldl (fn (c count)
+                      (match c
+                             40  (pair-map-left (+ 1) count)
+                             41  (pair-map-right (+ 1) count)
+                             _   count))
+                  (Pair 0 0)
+                  chunk))
 
-(def count-parens (iterator)
-     (indexed-iterator-foldl
-        (fn (c count)
-                (match c
-                       40  (pair-map-left inc count)
-                       41  (pair-map-right inc count)
-                       _   count))
-        (Pair 0 0)
-        iterator))
-
-(def check-errors (iterator)
-     (match (count-parens iterator)
+(def check-errors (chunk)
+     (match (count-parens chunk)
             (Pair open close)
                 (match (< open close)
                        True   (Some ParseErrorTooManyClosingBrackets)
@@ -77,14 +81,14 @@
                        True   (Some ParseErrorTooFewClosingBrackets)
                        False  None))))
 
-(def parse' (iterator)
-     (match (check-errors iterator)
+(def parse' (chunk)
+     (match (check-errors chunk)
             (Some error)  (Error error)
-            None          (match (parse-sexps iterator Empty)
+            None          (match (parse-sexps chunk 0 (chunk-size chunk) Empty)
                                  (Pair _ expressions)  (Result expressions))))
 
 (export parse (stdin)
-        (parse' (chunk-to-indexed-iterator stdin)))
+        (parse' stdin))
 
 (def wrap-in-brackets (string)
      (string-concat (string-of-char 40) (string-concat string (string-of-char 41))))
