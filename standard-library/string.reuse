@@ -329,3 +329,6 @@
      (match boolean
             True  (string-from-list (list 84 114 117 101))
             False (string-from-list (list 70 97 108 115 101))))
+
+(def string-from-chunk (chunk)
+     (chunk-foldl string-append (string-empty) chunk))

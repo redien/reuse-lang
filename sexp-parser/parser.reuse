@@ -12,8 +12,8 @@
 
 (typ range               (Range int32 int32))
 
-(typ sexp                (Symbol string            range)
-                         (List   (list sexp)       range))
+(typ sexp                (Symbol string range)
+                         (List (list sexp) range))
 
 (typ parse-error         ParseErrorTooFewClosingBrackets
                          ParseErrorTooManyClosingBrackets)
@@ -25,18 +25,18 @@
 (def symbol-range (start end)
      (Range start end))
 
-(def collect-while (predicate accumulator chunk index size)
+(def collect-while (predicate chunk index size)
      (match (and (< index size) (predicate (chunk-get index chunk)))
-            True   (collect-while predicate (string-append (chunk-get index chunk) accumulator) chunk (+ index 1) size)
-            False  (Pair index accumulator)))
+            True   (collect-while predicate chunk (+ index 1) size)
+            False  index))
 
 (def parse-symbol (chunk index size)
      (match (atom-character? (chunk-get index chunk))
             False   (ParseOut index)
             True
-     (match (collect-while atom-character? (string-empty) chunk index size)
-            (Pair next-index name)
-                   (ParseNext next-index (Symbol name (symbol-range index next-index))))))
+     (match (collect-while atom-character? chunk index size)
+            next-index
+                   (ParseNext next-index (Symbol (string-from-chunk (chunk-slice index (- next-index index) chunk)) (symbol-range index next-index))))))
 
 (def list-range (start end)
      (Range (- start 1) end))
@@ -95,7 +95,7 @@
 
 (def stringify-sexp (stringify expression)
      (match expression
-            (Symbol name _)      name
+            (Symbol string _)     string
             (List expressions _) (wrap-in-brackets (stringify expressions))))
 
 (export stringify (expressions)

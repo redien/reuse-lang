@@ -122,6 +122,7 @@ let rec string_45from_45int32_39 = fun integer -> (match (_60 integer (0l)) with
 let rec string_45from_45int32 = fun integer -> (string_45from_45list (string_45from_45int32_39 integer));;
 let rec string_45collect_45from_45indexed_45iterator = fun predicate iterator -> (pair_45map_45right string_45from_45list (list_45collect_45from_45indexed_45iterator predicate iterator));;
 let rec string_45from_45boolean = fun boolean -> (match boolean with CTrue -> (string_45from_45list (CCons ((84l),(CCons ((114l),(CCons ((117l),(CCons ((101l),CEmpty))))))))) | CFalse -> (string_45from_45list (CCons ((70l),(CCons ((97l),(CCons ((108l),(CCons ((115l),(CCons ((101l),CEmpty))))))))))));;
+let rec string_45from_45chunk = fun chunk -> (chunk_45foldl string_45append (string_45empty ()) chunk);;
 type ('Tv,'Te) result = CResult : 'Tv -> ('Tv,'Te) result | CError : 'Te -> ('Tv,'Te) result;;
 let rec result_45lift = fun result -> (CResult (result));;
 let rec result_45error = fun error -> (CError (error));;
@@ -183,8 +184,8 @@ type sexp = CSymbol : string * range -> sexp | CList : (sexp) list * range -> se
 type parse_45error = CParseErrorTooFewClosingBrackets | CParseErrorTooManyClosingBrackets;;
 type ('Ti,'Te) parse_45result = CParseNext : 'Ti * 'Te -> ('Ti,'Te) parse_45result | CParseOut : 'Ti -> ('Ti,'Te) parse_45result | CParseEnd;;
 let rec symbol_45range = fun start _end -> (CRange (start,_end));;
-let rec collect_45while = fun predicate accumulator chunk index size -> (match (_and (_60 index size) (predicate (chunk_45get index chunk))) with CTrue -> (collect_45while predicate (string_45append (chunk_45get index chunk) accumulator) chunk (Int32.add index (1l)) size) | CFalse -> (CPair (index,accumulator)));;
-let rec parse_45symbol = fun chunk index size -> (match (atom_45character_63 (chunk_45get index chunk)) with CFalse -> (CParseOut (index)) | CTrue -> (match (collect_45while atom_45character_63 (string_45empty ()) chunk index size) with (CPair (next_45index,name)) -> (CParseNext (next_45index,(CSymbol (name,(symbol_45range index next_45index)))))));;
+let rec collect_45while = fun predicate chunk index size -> (match (_and (_60 index size) (predicate (chunk_45get index chunk))) with CTrue -> (collect_45while predicate chunk (Int32.add index (1l)) size) | CFalse -> index);;
+let rec parse_45symbol = fun chunk index size -> (match (atom_45character_63 (chunk_45get index chunk)) with CFalse -> (CParseOut (index)) | CTrue -> (match (collect_45while atom_45character_63 chunk index size) with next_45index -> (CParseNext (next_45index,(CSymbol ((string_45from_45chunk (chunk_45slice index (Int32.sub next_45index index) chunk)),(symbol_45range index next_45index)))))));;
 let rec list_45range = fun start _end -> (CRange ((Int32.sub start (1l)),_end));;
 let rec parse_45list = fun chunk index size parse_45sexps -> (match (parse_45sexps chunk index size CEmpty) with (CPair (next_45index,expressions)) -> (CParseNext (next_45index,(CList (expressions,(list_45range index next_45index))))));;
 let rec parse_45expression = fun chunk index size parse_45sexps -> (match (_60 index size) with CFalse -> CParseEnd | CTrue -> (match (chunk_45get index chunk) with 40l -> (parse_45list chunk (Int32.add index (1l)) size parse_45sexps) | 41l -> (CParseOut ((Int32.add index (1l)))) | x -> (match (whitespace_63 x) with CTrue -> (parse_45expression chunk (Int32.add index (1l)) size parse_45sexps) | CFalse -> (parse_45symbol chunk index size))));;
@@ -194,7 +195,7 @@ let rec check_45errors = fun chunk -> (match (count_45parens chunk) with (CPair 
 let rec parse_39 = fun chunk -> (match (check_45errors chunk) with (CSome (error)) -> (CError (error)) | CNone -> (match (parse_45sexps chunk (0l) (chunk_45size chunk) CEmpty) with (CPair (_95,expressions)) -> (CResult (expressions))));;
 let rec parse = fun stdin -> (parse_39 stdin);;
 let rec wrap_45in_45brackets = fun string -> (string_45concat (string_45of_45char (40l)) (string_45concat string (string_45of_45char (41l))));;
-let rec stringify_45sexp = fun stringify expression -> (match expression with (CSymbol (name,_95)) -> name | (CList (expressions,_95)) -> (wrap_45in_45brackets (stringify expressions)));;
+let rec stringify_45sexp = fun stringify expression -> (match expression with (CSymbol (string,_95)) -> string | (CList (expressions,_95)) -> (wrap_45in_45brackets (stringify expressions)));;
 let rec stringify = fun expressions -> (string_45join (string_45of_45char (32l)) (list_45map (stringify_45sexp stringify) expressions));;
 let rec _constant_data_45def = (string_45from_45list (CCons ((100l),(CCons ((101l),(CCons ((102l),CEmpty)))))));;let rec data_45def = fun () -> _constant_data_45def;;
 let rec _constant_data_45export = (string_45from_45list (CCons ((101l),(CCons ((120l),(CCons ((112l),(CCons ((111l),(CCons ((114l),(CCons ((116l),CEmpty)))))))))))));;let rec data_45export = fun () -> _constant_data_45export;;
