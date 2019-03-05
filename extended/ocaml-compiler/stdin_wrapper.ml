@@ -31,18 +31,14 @@ let _chunk_get index s =
                 65l
         else
                 Int32.of_int (Char.code (String.get s i));;
-let _chunk_equal a b =
-        match String.equal a b with
-                | true -> CTrue
-                | false -> CFalse;;
 let rec _chunk_slice offset size s =
         let string_size = String.length s in
         let offset = Int32.to_int offset in
         let size = Int32.to_int size in
         if offset < 0 || size < 0 || offset + size > string_size then
-                CChunk (s, _chunk_size, _chunk_get, _chunk_slice, _chunk_equal)
+                CChunk (s, _chunk_size, _chunk_get, _chunk_slice)
         else
-                CChunk (String.sub s offset size, _chunk_size, _chunk_get, _chunk_slice, _chunk_equal);;
+                CChunk (String.sub s offset size, _chunk_size, _chunk_get, _chunk_slice);;
 
 let _stdin_list =
-        CChunk (_stdin_string, _chunk_size, _chunk_get, _chunk_slice, _chunk_equal);;
+        CChunk (_stdin_string, _chunk_size, _chunk_get, _chunk_slice);;

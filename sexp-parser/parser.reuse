@@ -95,7 +95,7 @@
 
 (def stringify-sexp (stringify expression)
      (match expression
-            (Symbol string _)     string
+            (Symbol string _)    string
             (List expressions _) (wrap-in-brackets (stringify expressions))))
 
 (export stringify (expressions)

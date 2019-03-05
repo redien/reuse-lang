@@ -1,27 +1,19 @@
 
-(typ (chunk m value) (Chunk m (fn (m) int32)
-                              (fn (int32 m) value)
-                              (fn (int32 int32 m) (chunk m value))
-                              (fn (m m) boolean)))
+(typ (chunk (exists m) value) (Chunk m (fn (m) int32)
+                                       (fn (int32 m) value)
+                                       (fn (int32 int32 m) (chunk value))))
 
 (def chunk-size (chunk)
      (match chunk
-            (Chunk m size _ __ ___)   (size m)))
+            (Chunk m size _ __)   (size m)))
 
 (def chunk-get (index chunk)
      (match chunk
-            (Chunk m _ get __ ___)    (get index m)))
+            (Chunk m _ get __)    (get index m)))
 
 (def chunk-slice (offset size chunk)
      (match chunk
-            (Chunk m _ __ slice ___)  (slice offset size m)))
-
-(def chunk-equal? (chunk other)
-     (match (chunk)
-            (Chunk a _ __ ___ equal?)
-     (match (other)
-            (Chunk b _ __ ___ ____)
-                (equal? a b))))
+            (Chunk m _ __ slice)  (slice offset size m)))
 
 
 (def chunk-foldl' (f accumulator index size chunk)

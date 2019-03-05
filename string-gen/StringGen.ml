@@ -27,11 +27,10 @@ let rec indexed_45iterator_45next = fun iterator -> (match iterator with (CIndex
 let rec indexed_45iterator_45get = fun iterator -> (match iterator with (CIndexedIterator (collection,index,get,_95)) -> (get collection index));;
 let rec indexed_45iterator_45index = fun iterator -> (match iterator with (CIndexedIterator (_95,index,_95_95,_95_95_95)) -> index);;
 let rec indexed_45iterator_45foldl = fun f initial iterator -> (match (indexed_45iterator_45get iterator) with CNone -> initial | (CSome (x)) -> (indexed_45iterator_45foldl f (f x initial) (indexed_45iterator_45next iterator)));;
-type ('Tm,'Tvalue) chunk = CChunk : 'Tm * ('Tm -> int32) * (int32 -> 'Tm -> 'Tvalue) * (int32 -> int32 -> 'Tm -> ('Tm,'Tvalue) chunk) * ('Tm -> 'Tm -> boolean) -> ('Tm,'Tvalue) chunk;;
-let rec chunk_45size = fun chunk -> (match chunk with (CChunk (m,size,_95,_95_95,_95_95_95)) -> (size m));;
-let rec chunk_45get = fun index chunk -> (match chunk with (CChunk (m,_95,get,_95_95,_95_95_95)) -> (get index m));;
-let rec chunk_45slice = fun offset size chunk -> (match chunk with (CChunk (m,_95,_95_95,slice,_95_95_95)) -> (slice offset size m));;
-let rec chunk_45equal_63 = fun chunk other -> (match (chunk ()) with (CChunk (a,_95,_95_95,_95_95_95,equal_63)) -> (match (other ()) with (CChunk (b,_95,_95_95,_95_95_95,_95_95_95_95)) -> (equal_63 a b)));;
+type ('Tvalue) chunk = CChunk : 'Tm * ('Tm -> int32) * (int32 -> 'Tm -> 'Tvalue) * (int32 -> int32 -> 'Tm -> ('Tvalue) chunk) -> ('Tvalue) chunk;;
+let rec chunk_45size = fun chunk -> (match chunk with (CChunk (m,size,_95,_95_95)) -> (size m));;
+let rec chunk_45get = fun index chunk -> (match chunk with (CChunk (m,_95,get,_95_95)) -> (get index m));;
+let rec chunk_45slice = fun offset size chunk -> (match chunk with (CChunk (m,_95,_95_95,slice)) -> (slice offset size m));;
 let rec chunk_45foldl_39 = fun f accumulator index size chunk -> (match (_60 index size) with CTrue -> (chunk_45foldl_39 f (f (chunk_45get index chunk) accumulator) (Int32.add index (1l)) size chunk) | CFalse -> accumulator);;
 let rec chunk_45foldl = fun f initial chunk -> (chunk_45foldl_39 f initial (0l) (chunk_45size chunk) chunk);;
 let rec chunk_45indexed_45iterator_45get = fun chunk index -> (match (_62_61 index (chunk_45size chunk)) with CTrue -> CNone | CFalse -> (CSome ((chunk_45get index chunk))));;
@@ -216,21 +215,17 @@ let _chunk_get index s =
                 65l
         else
                 Int32.of_int (Char.code (String.get s i));;
-let _chunk_equal a b =
-        match String.equal a b with
-                | true -> CTrue
-                | false -> CFalse;;
 let rec _chunk_slice offset size s =
         let string_size = String.length s in
         let offset = Int32.to_int offset in
         let size = Int32.to_int size in
         if offset < 0 || size < 0 || offset + size > string_size then
-                CChunk (s, _chunk_size, _chunk_get, _chunk_slice, _chunk_equal)
+                CChunk (s, _chunk_size, _chunk_get, _chunk_slice)
         else
-                CChunk (String.sub s offset size, _chunk_size, _chunk_get, _chunk_slice, _chunk_equal);;
+                CChunk (String.sub s offset size, _chunk_size, _chunk_get, _chunk_slice);;
 
 let _stdin_list =
-        CChunk (_stdin_string, _chunk_size, _chunk_get, _chunk_slice, _chunk_equal);;
+        CChunk (_stdin_string, _chunk_size, _chunk_get, _chunk_slice);;
 
 let string_gen_start = Unix.gettimeofday ();;
 let string_gen_output = string_gen _stdin_list;;
