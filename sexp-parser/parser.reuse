@@ -1,14 +1,17 @@
 
 (def whitespace? (character)
-     (or (= character 32)
-     (or (= character 13)
-     (or (= character 9)
-         (= character 10)))))
+     (match character
+            32  True
+            13  True
+            9   True
+            10  True
+            _   False))
 
 (def atom-character? (character)
-     (and (not (= character 40))
-     (and (not (= character 41))
-          (not (whitespace? character)))))
+     (match character
+            40 False
+            41 False
+            _  (not (whitespace? character))))
 
 (typ range               (Range int32 int32))
 
