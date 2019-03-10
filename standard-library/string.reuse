@@ -188,6 +188,18 @@
      (string-concat' a Empty b))
 
 
+
+(def string-empty? (string)
+     (match (string-first string)
+            (Some _)  False
+            None      True))
+
+(def string-any? (predicate string)
+     (string-foldl (fn (x b) (or (predicate x) b)) False string))
+
+(def string-every? (predicate string)
+     (string-foldl (fn (x b) (and (predicate x) b)) True string))
+
 (def string-to-list (string)
      (string-foldr list-cons Empty string))
 
@@ -228,7 +240,7 @@
                 (string-empty)))
 
 (def string-flatmap (f string)
-     (string-join (string-empty) (list-map f (string-to-list string))))
+     (string-foldl (fn (x xs) (string-concat xs (f x))) (string-empty) string))
 
 (def string-split' (separator list current parts)
      (match list
@@ -257,11 +269,6 @@
 
 (def string-trim (string)
      (string-trim-start (string-trim-end string)))
-
-(def string-empty? (string)
-     (match (string-first string)
-            (Some _)  False
-            None      True))
 
 (def string-equal? (a b)
      (match (string-first a)
