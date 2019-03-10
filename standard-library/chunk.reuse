@@ -24,6 +24,14 @@
 (def chunk-foldl (f initial chunk)
      (chunk-foldl' f initial 0 (chunk-size chunk) chunk))
 
+(def chunk-foldr' (f accumulator index chunk)
+     (match (>= index 0)
+            True   (chunk-foldr' f (f (chunk-get index chunk) accumulator) (- index 1) chunk)
+            False  accumulator))
+
+(def chunk-foldr (f initial chunk)
+     (chunk-foldr' f initial (- (chunk-size chunk) 1) chunk))
+
 (def chunk-indexed-iterator-get (chunk index)
      (match (>= index (chunk-size chunk))
             True  None

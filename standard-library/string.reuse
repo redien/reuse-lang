@@ -1,5 +1,6 @@
 
 (typ string-node (FTValue int32)
+                 (FTChunk int32 (chunk int32))
                  (FTNode2 int32 string-node string-node)
                  (FTNode3 int32 string-node string-node string-node))
 
@@ -16,6 +17,7 @@
 (def string-node-size' (node)
      (match node
             (FTValue _)              1
+            (FTChunk size _)         size
             (FTNode2 size _ __)      size
             (FTNode3 size _ __ ___)  size))
 
@@ -24,6 +26,14 @@
 
 (def string-node3' (a b c)
      (FTNode3 (+ (string-node-size' a) (+ (string-node-size' b) (string-node-size' c))) a b c))
+
+(def string-chunk' (chunk)
+     (FTChunk (chunk-size chunk) chunk))
+
+(def string-from-chunk (chunk)
+     (match (= 0 (chunk-size chunk))
+            True   FTEmpty
+            False  (FTSingle (string-chunk' chunk))))
 
 (def string-prepend-node' (a tree)
      (match tree
@@ -43,6 +53,9 @@
 (def string-prepend (char string)
      (string-prepend-node' (FTValue char) string))
 
+(def string-prepend-chunk (chunk string)
+     (string-prepend-node' (string-chunk' chunk) string))
+
 (def string-append-node' (a tree)
      (match tree
             FTEmpty
@@ -61,9 +74,13 @@
 (def string-append (char string)
      (string-append-node' (FTValue char) string))
 
+(def string-append-chunk (chunk string)
+     (string-append-node' (string-chunk' chunk) string))
+
 (def string-first-node' (node)
      (match node
             (FTValue x)            x
+            (FTChunk _ x)          (chunk-get 0 x)
             (FTNode2 _ x __)       (string-first-node' x)
             (FTNode3 _ x __ ___)   (string-first-node' x)))
 
@@ -77,6 +94,10 @@
 (def string-rest-node' (node)
      (match node
             (FTValue _)             None
+            (FTChunk _ x)
+                (match (= (chunk-size x) 1)
+                       True         None
+                       False        (Some (string-chunk' (chunk-slice 1 (- (chunk-size x) 1) x))))
             (FTNode2 _ a b)
                 (match (string-rest-node' a)
                        (Some node)  (Some (string-node2' node b))
@@ -107,6 +128,7 @@
 (def string-foldr-node' (f node identity)
      (match node
             (FTValue a)        (f a identity)
+            (FTChunk _ chunk)  (chunk-foldr f identity chunk)
             (FTNode2 _ a b)    (string-foldr-node' f a (string-foldr-node' f b identity))
             (FTNode3 _ a b c)  (string-foldr-node' f a (string-foldr-node' f b (string-foldr-node' f c identity)))))
 
@@ -126,6 +148,7 @@
 (def string-foldl-node' (f node identity)
      (match node
             (FTValue a)        (f a identity)
+            (FTChunk _ chunk)  (chunk-foldl f identity chunk)
             (FTNode2 _ b a)    (string-foldl-node' f a (string-foldl-node' f b identity))
             (FTNode3 _ c b a)  (string-foldl-node' f a (string-foldl-node' f b (string-foldl-node' f c identity)))))
 
@@ -336,6 +359,3 @@
      (match boolean
             True  (string-from-list (list 84 114 117 101))
             False (string-from-list (list 70 97 108 115 101))))
-
-(def string-from-chunk (chunk)
-     (chunk-foldl string-append (string-empty) chunk))
