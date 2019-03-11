@@ -8,7 +8,13 @@ $project_root/standard-library/build.sh
 
 [ -d $project_root/generated/extended ] || mkdir $project_root/generated/extended
 
-$project_root/reusec --language ocaml\
+extra_flags=
+if [ "$1" == "--diagnostics" ]; then
+    extra_flags="--diagnostics"
+fi
+
+$project_root/reusec $extra_flags\
+                     --language ocaml\
                      --output $project_root/generated/extended/CompilerOCaml.ml\
                      $project_root/sexp-parser/parser.reuse\
                      $project_root/parser/parser.strings\
@@ -57,6 +63,14 @@ else
 
 END_OF_SOURCE
 
-if [ "$1" != "--no-binary" ]; then
+compile_binary() {
     ocamlopt -O3 unix.cmxa $project_root/generated/extended/CompilerOCaml.ml -o $project_root/generated/extended/compiler-ocaml
+}
+
+if [ "$1" != "--no-binary" ]; then
+    if [ "$1" == "--diagnostics" ]; then
+        echo "OCaml:          " $(echo "time -p ocamlopt -O3 unix.cmxa $project_root/generated/extended/CompilerOCaml.ml -o $project_root/generated/extended/compiler-ocaml" | bash 2>&1 | grep "real" | awk '{ print $2; }')s
+    else
+        compile_binary
+    fi
 fi

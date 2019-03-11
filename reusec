@@ -139,7 +139,6 @@ if [ "$REUSE_TIME" == "true" ]; then
     echo "Output size:     ${FORMATTED_OUTPUT_SIZE} bytes"
     echo
     echo "String Gen:      ${STRING_GEN_TOTAL}s"
-    echo
 else
     echo "$REUSE_SOURCE" | $root_path/bin/reuse-$REUSE_LANGUAGE > $REUSE_OUTPUT
 fi
