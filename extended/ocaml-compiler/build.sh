@@ -57,4 +57,6 @@ else
 
 END_OF_SOURCE
 
-ocamlopt -O3 unix.cmxa $project_root/generated/extended/CompilerOCaml.ml -o $project_root/generated/extended/compiler-ocaml
+if [ "$1" != "--no-binary" ]; then
+    ocamlopt -O3 unix.cmxa $project_root/generated/extended/CompilerOCaml.ml -o $project_root/generated/extended/compiler-ocaml
+fi

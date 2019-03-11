@@ -4,7 +4,7 @@ set -e
 project_root=$(dirname "$0")/..
 
 build_compiler_source() {
-    $project_root/extended/ocaml-compiler/build.sh
+    $project_root/extended/ocaml-compiler/build.sh --no-binary
 }
 
 build_compiler_binary() {
