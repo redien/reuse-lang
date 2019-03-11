@@ -108,24 +108,35 @@ if [ "$REUSE_NOSTDLIB" == "false" ]; then
 $REUSE_SOURCE"
 fi
 
+format_integer() {
+    xargs printf "%.f" | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta'
+}
+
 if [ "$REUSE_TIME" == "true" ]; then
     DIAGNOSTICS=$(echo "$REUSE_SOURCE" | $root_path/bin/reuse-$REUSE_LANGUAGE)
     READING=$(echo $DIAGNOSTICS | awk '{print $1}')
     PARSING_SEXPS=$(echo $DIAGNOSTICS | awk '{print $2}')
     PARSING=$(echo $DIAGNOSTICS | awk '{print $3}')
     CODE_GEN=$(echo $DIAGNOSTICS | awk '{print $4}')
+    OUTPUT_SIZE=$(echo $DIAGNOSTICS | awk '{print $5}')
     TOTAL=$(awk "BEGIN {print $READING+$PARSING_SEXPS+$PARSING+$CODE_GEN; exit}")
 
     LINE_COUNT=$(echo "$REUSE_SOURCE" | wc -l)
-    LINES_PER_SECOND=$(awk "BEGIN {print $LINE_COUNT/$TOTAL; exit}" | xargs printf "%.f" | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta')
+    BYTE_COUNT=$(echo "$REUSE_SOURCE" | wc -c)
+    LINES_PER_SECOND=$(awk "BEGIN {print $LINE_COUNT/$TOTAL; exit}" | format_integer)
+    FORMATTED_BYTE_COUNT=$(echo "$BYTE_COUNT" | format_integer)
+    FORMATTED_OUTPUT_SIZE=$(echo "$OUTPUT_SIZE" | format_integer)
 
     echo "Reading:         ${READING}s"
     echo "Parsing (sexps): ${PARSING_SEXPS}s"
     echo "Parsing:         ${PARSING}s"
     echo "Code Gen:        ${CODE_GEN}s"
     echo "Total:           ${TOTAL}s"
+    echo
     echo "Lines:           ${LINE_COUNT}"
     echo "Throughput:      $LINES_PER_SECOND lines/s"
+    echo "Input size:      ${FORMATTED_BYTE_COUNT} bytes"
+    echo "Output size:     ${FORMATTED_OUTPUT_SIZE} bytes"
     echo
     echo "String Gen:      ${STRING_GEN_TOTAL}s"
     echo

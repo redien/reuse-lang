@@ -47,7 +47,9 @@ let codegen_end = Unix.gettimeofday ();;
 let codegen_time = codegen_end -. codegen_start;;
 
 if performance then
-    (Printf.printf "%f %f %f %f" stdin_wrapper_time parse_sexp_time parse_time codegen_time ; exit 0)
+    match codegen_output with
+        CResult (source) -> Printf.printf "%f %f %f %f %ld" stdin_wrapper_time parse_sexp_time parse_time codegen_time (string_45size source) ; exit 0
+      | CError (error) -> Printf.eprintf "%s" (_list_to_string error) ; exit 1
 else
     match codegen_output with
         CResult (source) -> Printf.printf "%s" (_list_to_string source) ; exit 0
