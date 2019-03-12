@@ -83,6 +83,9 @@ let rec string_45concat_45nodes_39 = fun nodes -> (match nodes with (CCons (a,(C
 type ('Ta,'Tb,'Tc) triple = CTriple : 'Ta * 'Tb * 'Tc -> ('Ta,'Tb,'Tc) triple;;
 let rec string_45concat_39 = fun a nodes b -> (match (CTriple (a,nodes,b)) with (CTriple (CFTEmpty,nodes,b)) -> (list_45foldr string_45prepend_45node_39 b nodes) | (CTriple (a,nodes,CFTEmpty)) -> (list_45foldl string_45append_45node_39 a nodes) | (CTriple ((CFTSingle (x)),nodes,b)) -> (string_45prepend_45node_39 x (list_45foldr string_45prepend_45node_39 b nodes)) | (CTriple (a,nodes,(CFTSingle (x)))) -> (string_45append_45node_39 x (list_45foldl string_45append_45node_39 a nodes)) | (CTriple ((CFTDeep (first1,middle1,last1)),nodes,(CFTDeep (first2,middle2,last2)))) -> (CFTDeep (first1,(string_45concat_39 middle1 (string_45concat_45nodes_39 (list_45concat (list_45reverse last1) (list_45concat nodes first2))) middle2),last2)));;
 let rec string_45concat = fun a b -> (string_45concat_39 a CEmpty b);;
+let rec string_45empty_63 = fun string -> (match (string_45first string) with (CSome (_95)) -> CFalse | CNone -> CTrue);;
+let rec string_45any_63 = fun predicate string -> (string_45foldl (fun x b -> (_or (predicate x) b)) CFalse string);;
+let rec string_45every_63 = fun predicate string -> (string_45foldl (fun x b -> (_and (predicate x) b)) CTrue string);;
 let rec string_45to_45list = fun string -> (string_45foldr list_45cons CEmpty string);;
 let rec string_45from_45list = fun list -> (list_45foldr string_45prepend (string_45empty ()) list);;
 let rec string_45skip = fun count string -> (match (_62 count (0l)) with CTrue -> (string_45skip (Int32.sub count (1l)) (string_45rest string)) | CFalse -> string);;
@@ -91,14 +94,13 @@ let rec string_45take = fun count string -> (string_45take_39 count string (stri
 let rec string_45reverse = fun string -> (string_45foldl string_45prepend (string_45empty ()) string);;
 let rec string_45substring = fun start size string -> (string_45take size (string_45skip start string));;
 let rec string_45join = fun separator strings -> (match strings with (CCons (first,rest)) -> (list_45foldl (fun string joined -> (string_45concat joined (string_45concat separator string))) first rest) | CEmpty -> (string_45empty ()));;
-let rec string_45flatmap = fun f string -> (string_45join (string_45empty ()) (list_45map f (string_45to_45list string)));;
+let rec string_45flatmap = fun f string -> (string_45foldl (fun x xs -> (string_45concat xs (f x))) (string_45empty ()) string);;
 let rec string_45split_39 = fun separator list current parts -> (match list with CEmpty -> (list_45reverse (CCons ((list_45reverse current),parts))) | (CCons (c,rest)) -> (match (_61 separator c) with CTrue -> (string_45split_39 separator rest CEmpty (CCons ((list_45reverse current),parts))) | CFalse -> (string_45split_39 separator rest (CCons (c,current)) parts)));;
 let rec string_45split = fun separator string -> (list_45map string_45from_45list (string_45split_39 separator (string_45to_45list string) CEmpty CEmpty));;
 let rec string_45trim_45start_39 = fun list -> (match list with (CCons (x,xs)) -> (match (_61 x (32l)) with CTrue -> (string_45trim_45start_39 xs) | CFalse -> list) | CEmpty -> list);;
 let rec string_45trim_45start = fun string -> (string_45from_45list (string_45trim_45start_39 (string_45to_45list string)));;
 let rec string_45trim_45end = fun string -> (string_45reverse (string_45trim_45start (string_45reverse string)));;
 let rec string_45trim = fun string -> (string_45trim_45start (string_45trim_45end string));;
-let rec string_45empty_63 = fun string -> (match (string_45first string) with (CSome (_95)) -> CFalse | CNone -> CTrue);;
 let rec string_45equal_63 = fun a b -> (match (string_45first a) with (CSome (xa)) -> (match (string_45first b) with (CSome (xb)) -> (_and (_61 xa xb) (string_45equal_63 (string_45rest a) (string_45rest b))) | CNone -> (string_45empty_63 a)) | CNone -> (string_45empty_63 b));;
 let rec string_45point_45is_45digit = fun point -> (_and (_62 point (47l)) (_60 point (58l)));;
 let rec string_45to_45int32_39_39_39 = fun string_45to_45int32_39_39 string accumulator x -> (string_45to_45int32_39_39 string (CSome ((Int32.add (Int32.mul (10l) accumulator) (Int32.sub x (48l))))));;
@@ -164,22 +166,18 @@ let rec dictionary_45get = fun key dictionary -> (match (string_45first key) wit
 let rec dictionary_45of = fun entries -> (list_45foldl (pair_45map dictionary_45set) (dictionary_45empty ()) entries);;
 let rec dictionary_45singleton = fun key _value -> (dictionary_45set key _value (dictionary_45empty ()));;
 let rec dictionary_45get_45or = fun key default dictionary -> (match (dictionary_45get key dictionary) with (CSome (_value)) -> _value | CNone -> default);;
-let rec whitespace_63 = fun character -> (_or (_61 character (32l)) (_or (_61 character (13l)) (_or (_61 character (9l)) (_61 character (10l)))));;
-let rec atom_45character_63 = fun character -> (_and (not (_61 character (40l))) (_and (not (_61 character (41l))) (not (whitespace_63 character))));;
+let rec whitespace_63 = fun character -> (match character with 32l -> CTrue | 13l -> CTrue | 9l -> CTrue | 10l -> CTrue | _95 -> CFalse);;
+let rec atom_45character_63 = fun character -> (match character with 40l -> CFalse | 41l -> CFalse | _95 -> (not (whitespace_63 character)));;
 type range = CRange : int32 * int32 -> range;;
 type sexp = CSymbol : string * range -> sexp | CList : (sexp) list * range -> sexp;;
 type parse_45error = CParseErrorTooFewClosingBrackets | CParseErrorTooManyClosingBrackets;;
-type ('Ti,'Te) parse_45result = CParseNext : 'Ti * 'Te -> ('Ti,'Te) parse_45result | CParseOut : 'Ti -> ('Ti,'Te) parse_45result | CParseEnd;;
 let rec symbol_45range = fun start _end -> (CRange ((indexed_45iterator_45index start),(indexed_45iterator_45index _end)));;
-let rec parse_45symbol = fun iterator -> (match (string_45collect_45from_45indexed_45iterator atom_45character_63 iterator) with (CPair (next_45iterator,name)) -> (match (string_45empty_63 name) with CTrue -> (CParseOut (iterator)) | CFalse -> (CParseNext (next_45iterator,(CSymbol (name,(symbol_45range iterator next_45iterator)))))));;
+let rec parse_45symbol = fun iterator _end next -> (match (string_45collect_45from_45indexed_45iterator atom_45character_63 iterator) with (CPair (next_45iterator,name)) -> (match (string_45empty_63 name) with CTrue -> (_end iterator) | CFalse -> (next next_45iterator (CSymbol (name,(symbol_45range iterator next_45iterator))))));;
 let rec list_45range = fun start _end -> (CRange ((Int32.sub (indexed_45iterator_45index start) (1l)),(indexed_45iterator_45index _end)));;
-let rec parse_45list = fun iterator parse_45sexps -> (match (parse_45sexps iterator CEmpty) with (CPair (next_45iterator,expressions)) -> (CParseNext (next_45iterator,(CList (expressions,(list_45range iterator next_45iterator))))));;
-let rec parse_45expression = fun iterator parse_45sexps -> (match (indexed_45iterator_45get iterator) with CNone -> CParseEnd | (CSome (40l)) -> (parse_45list (indexed_45iterator_45next iterator) parse_45sexps) | (CSome (41l)) -> (CParseOut ((indexed_45iterator_45next iterator))) | (CSome (x)) -> (match (whitespace_63 x) with CTrue -> (parse_45expression (indexed_45iterator_45next iterator) parse_45sexps) | CFalse -> (parse_45symbol iterator)));;
-let rec parse_45sexps = fun iterator expressions -> (match (parse_45expression iterator parse_45sexps) with CParseEnd -> (CPair (iterator,(list_45reverse expressions))) | (CParseOut (iterator)) -> (CPair (iterator,(list_45reverse expressions))) | (CParseNext (iterator,result)) -> (parse_45sexps iterator (CCons (result,expressions))));;
-let rec inc = fun x -> (Int32.add x (1l));;
-let rec count_45parens = fun iterator -> (indexed_45iterator_45foldl (fun c count -> (match c with 40l -> (pair_45map_45left inc count) | 41l -> (pair_45map_45right inc count) | _95 -> count)) (CPair ((0l),(0l))) iterator);;
-let rec check_45errors = fun iterator -> (match (count_45parens iterator) with (CPair (_open,close)) -> (match (_60 _open close) with CTrue -> (CSome (CParseErrorTooManyClosingBrackets)) | CFalse -> (match (_62 _open close) with CTrue -> (CSome (CParseErrorTooFewClosingBrackets)) | CFalse -> CNone)));;
-let rec parse = fun iterator -> (match (check_45errors iterator) with (CSome (error)) -> (CError (error)) | CNone -> (match (parse_45sexps iterator CEmpty) with (CPair (_95,expressions)) -> (CResult (expressions))));;
+let rec parse_45list = fun iterator parse_45sexps error next -> (parse_45sexps iterator CEmpty error (fun next_45iterator expressions -> (next next_45iterator (CList (expressions,(list_45range iterator next_45iterator))))));;
+let rec parse_45expression = fun depth iterator parse_45sexps error _end next -> (match (indexed_45iterator_45get iterator) with CNone -> (match depth with 0l -> (_end iterator) | _95 -> (error CParseErrorTooFewClosingBrackets)) | (CSome (40l)) -> (parse_45list (indexed_45iterator_45next iterator) (parse_45sexps (Int32.add depth (1l))) error next) | (CSome (41l)) -> (match depth with 0l -> (error CParseErrorTooManyClosingBrackets) | _95 -> (_end (indexed_45iterator_45next iterator))) | (CSome (x)) -> (match (whitespace_63 x) with CTrue -> (parse_45expression depth (indexed_45iterator_45next iterator) parse_45sexps error _end next) | CFalse -> (parse_45symbol iterator _end next)));;
+let rec parse_45sexps = fun depth iterator expressions error _end -> (parse_45expression depth iterator parse_45sexps error (fun iterator -> (_end iterator (list_45reverse expressions))) (fun iterator result -> (parse_45sexps depth iterator (CCons (result,expressions)) error _end)));;
+let rec parse = fun iterator -> (parse_45sexps (0l) iterator CEmpty (fun error -> (CError (error))) (fun _95 expressions -> (CResult (expressions))));;
 let rec wrap_45in_45brackets = fun string -> (string_45concat (string_45of_45char (40l)) (string_45concat string (string_45of_45char (41l))));;
 let rec stringify_45sexp = fun stringify expression -> (match expression with (CSymbol (name,_95)) -> name | (CList (expressions,_95)) -> (wrap_45in_45brackets (stringify expressions)));;
 let rec stringify = fun expressions -> (string_45join (string_45of_45char (32l)) (list_45map (stringify_45sexp stringify) expressions));;
@@ -472,7 +470,9 @@ let codegen_end = Unix.gettimeofday ();;
 let codegen_time = codegen_end -. codegen_start;;
 
 if performance then
-    (Printf.printf "%f %f %f %f" stdin_wrapper_time parse_sexp_time parse_time codegen_time ; exit 0)
+    match codegen_output with
+        CResult (source) -> Printf.printf "%f %f %f %f %ld" stdin_wrapper_time parse_sexp_time parse_time codegen_time (string_45size source) ; exit 0
+      | CError (error) -> Printf.eprintf "%s" (_list_to_string error) ; exit 1
 else
     match codegen_output with
         CResult (source) -> Printf.printf "%s" (_list_to_string source) ; exit 0
