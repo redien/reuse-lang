@@ -48,16 +48,3 @@ dictionary-set should keep all values even if an empty key is set
 dictionary-of should add every entry in turn to the dictionary
 > (string-of-char (dictionary-get-or (string-empty) 66 (dictionary-of (list (Pair (string-empty) 67) (Pair (string-empty) 65)))))
 = A
-
-
-dictionary-entries should return the list of entries in the dictionary
-> (string-of-char (list-foldl + 0 (list-map pair-right (dictionary-entries (dictionary-of (list (Pair (string-of-char 1) 60) (Pair (string-of-char 2) 7)))))))
-= C
-
-dictionary-entries should only return the last set value for a given key
-> (string-of-char (list-foldl + 60 (list-map pair-right (dictionary-entries (dictionary-of (list (Pair (string-empty) 5) (Pair (string-empty) 7)))))))
-= C
-
-dictionary-entries of an empty dictionary should give the empty list
-> (string-from-list (list-map pair-right (dictionary-entries (dictionary-empty))))
-= 

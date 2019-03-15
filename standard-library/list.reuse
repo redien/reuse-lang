@@ -74,9 +74,6 @@
 (def list-concat (a b)
      (list-foldr list-cons b a))
 
-(def list-append (x list)
-     (list-foldr list-cons (list x) list))
-
 (def list-reverse (list)
      (list-foldl list-cons Empty list))
 
@@ -136,19 +133,6 @@
 
 (def list-any? (f list)
      (not (list-empty? (list-filter f list))))
-
-(def list-indexed-iterator-get (collection _)
-     (match collection
-            (Cons x _)  (Some x)
-            Empty       None))
-
-(def list-indexed-iterator-next (iterator collection index)
-     (match collection
-            (Cons _ xs)  (IndexedIterator xs (+ index 1) list-indexed-iterator-get list-indexed-iterator-next)
-            Empty        iterator))
-
-(def list-to-indexed-iterator (list)
-     (IndexedIterator list 0 list-indexed-iterator-get list-indexed-iterator-next))
 
 (def list-collect-from-indexed-iterator' (predicate iterator initial)
      (match (indexed-iterator-get iterator)
