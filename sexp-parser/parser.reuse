@@ -76,3 +76,5 @@
 
 (def stringify (expressions)
      (string-join (string-of-char 32) (list-map (stringify-sexp stringify) expressions)))
+
+(export parse stringify)

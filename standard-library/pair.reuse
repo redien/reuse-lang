@@ -27,3 +27,5 @@
 (def pair-swap (pair)
      (match pair
             (Pair x y) (Pair y x)))
+
+(export pair-cons pair-left pair-right pair-map pair-map-left pair-map-right pair-swap)
