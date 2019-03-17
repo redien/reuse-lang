@@ -26,10 +26,10 @@ $(cat $script_path/../ocaml-compiler/stdin_wrapper.ml)
 
 let parse' str = stringify_45parse_45errors (sexps_45to_45definitions (parse str));;
 
-let output = to_reuse (parse' _stdin_list) _stdin_list in
+let output = to_reuse (parse' stdin_list) stdin_list in
     match output with
-        CResult (source) -> Printf.printf "%s" (_list_to_string source) ; exit 0
-      | CError (error) -> Printf.eprintf "%s" (_list_to_string error) ; exit 1;;
+        CResult (source) -> Printf.printf "%s" (list_to_string source) ; exit 0
+      | CError (error) -> Printf.eprintf "%s" (list_to_string error) ; exit 1;;
 
 END_OF_SOURCE
 

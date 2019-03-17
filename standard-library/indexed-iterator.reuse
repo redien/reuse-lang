@@ -16,3 +16,10 @@
 (def indexed-iterator-index (iterator)
      (match iterator
             (IndexedIterator _ index __ ___)  index))
+
+(def indexed-iterator-from-next' (iterator _ __)
+     (match iterator
+            (IndexedIterator s i get next) (IndexedIterator s (+ i 1) get next)))
+
+(def indexed-iterator-from (collection get)
+     (IndexedIterator collection 0 get indexed-iterator-from-next'))

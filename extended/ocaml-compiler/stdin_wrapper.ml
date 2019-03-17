@@ -31,8 +31,4 @@ let stdin_get s index =
     else
             CNone;;
 
-let stdin_list = CIndexedIterator (
-        stdin_string (), 0l, stdin_get,
-        (fun iter _ __ ->
-                match iter with
-                | CIndexedIterator (s, i, get, next) -> CIndexedIterator (s, Int32.succ i, get, next)));;
+let stdin_list = (indexed_45iterator_45from (stdin_string ()) stdin_get);;
