@@ -38,7 +38,7 @@ let stdin_wrapper_end = Unix.gettimeofday ();;
 let stdin_wrapper_time = stdin_wrapper_end -. stdin_wrapper_start;;
 
 let parse_sexp_start = Unix.gettimeofday ();;
-let parse_sexp_output = (parse _stdin_list);;
+let parse_sexp_output = (parse stdin_list);;
 let parse_sexp_end = Unix.gettimeofday ();;
 let parse_sexp_time = parse_sexp_end -. parse_sexp_start;;
 
@@ -48,18 +48,18 @@ let parse_end = Unix.gettimeofday ();;
 let parse_time = parse_end -. parse_start;;
 
 let codegen_start = Unix.gettimeofday ();;
-let codegen_output = (to_ocaml parse_output _stdin_list as_minimal);;
+let codegen_output = (to_ocaml parse_output stdin_list as_minimal);;
 let codegen_end = Unix.gettimeofday ();;
 let codegen_time = codegen_end -. codegen_start;;
 
 if performance then
     match codegen_output with
         CResult (source) -> Printf.printf "%f %f %f %f %ld" stdin_wrapper_time parse_sexp_time parse_time codegen_time (string_45size source) ; exit 0
-      | CError (error) -> Printf.eprintf "%s" (_list_to_string error) ; exit 1
+      | CError (error) -> Printf.eprintf "%s" (list_to_string error) ; exit 1
 else
     match codegen_output with
-        CResult (source) -> Printf.printf "%s" (_list_to_string source) ; exit 0
-      | CError (error) -> Printf.eprintf "%s" (_list_to_string error) ; exit 1;;
+        CResult (source) -> Printf.printf "%s" (list_to_string source) ; exit 0
+      | CError (error) -> Printf.eprintf "%s" (list_to_string error) ; exit 1;;
 
 END_OF_SOURCE
 

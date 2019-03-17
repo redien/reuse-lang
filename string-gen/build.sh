@@ -20,7 +20,7 @@ let performance = getenv "REUSE_TIME" = "true";;
 $(cat $project_root/extended/ocaml-compiler/stdin_wrapper.ml)
 
 let string_gen_start = Unix.gettimeofday ();;
-let string_gen_output = string_gen _stdin_list;;
+let string_gen_output = string_gen stdin_list;;
 let string_gen_end = Unix.gettimeofday ();;
 let string_gen_time = string_gen_end -. string_gen_start;;
 
@@ -28,8 +28,8 @@ if performance then
     (Printf.printf "%f" string_gen_time ; exit 0)
 else
     match string_gen_output with
-          CResult (result) -> Printf.printf "%s" (_list_to_string result) ; exit 0
-        | CError (error) -> Printf.eprintf "%s" (_list_to_string error) ; exit 1;;
+          CResult (result) -> Printf.printf "%s" (list_to_string result) ; exit 0
+        | CError (error) -> Printf.eprintf "%s" (list_to_string error) ; exit 1;;
 
 END_OF_SOURCE
 
