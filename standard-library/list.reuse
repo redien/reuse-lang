@@ -144,8 +144,3 @@
 (def list-collect-from-indexed-iterator (predicate iterator)
      (match (list-collect-from-indexed-iterator' predicate iterator Empty)
             (Pair iterator result) (Pair iterator (list-reverse result))))
-
-(export list-cons list-from list-from-range list-first list-rest list-last list-empty?
-        list-size list-foldrk list-foldlk list-foldr list-foldl list-concat list-reverse
-        list-map list-flatmap list-skip list-take list-zip list-pairs list-find-first
-        list-filter list-exclude list-any? list-collect-from-indexed-iterator)

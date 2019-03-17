@@ -63,7 +63,3 @@
 
 (def result-return (value)
      (result-lift value))
-
-(export result-lift result-error result-map result-map-error result-flatmap result-either
-        result-or-else result-error? result-filter-list result-concat result-of-maybe
-        result-bind result-return)

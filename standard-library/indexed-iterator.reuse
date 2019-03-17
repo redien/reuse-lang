@@ -23,5 +23,3 @@
 
 (def indexed-iterator-from (collection get)
      (IndexedIterator collection 0 get indexed-iterator-from-next'))
-
-(export indexed-iterator-next indexed-iterator-get indexed-iterator-index indexed-iterator-from)

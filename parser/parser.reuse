@@ -464,6 +464,3 @@
                      render-result)
                definitions))
 
-
-
-(export sexps-to-definitions definitions-to-sexps)

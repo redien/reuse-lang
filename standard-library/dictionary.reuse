@@ -49,5 +49,3 @@
      (match (dictionary-get key dictionary)
             (Some value)  value
             None          default))
-
-(export dictionary-empty dictionary-set dictionary-get dictionary-of dictionary-singleton dictionary-get-or)

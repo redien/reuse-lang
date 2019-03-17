@@ -30,4 +30,3 @@
 (def >= (a b)
      (or (> a b) (= a b)))
 
-(export not and or < > = <= >=)

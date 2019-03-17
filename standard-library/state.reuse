@@ -53,6 +53,3 @@
 
 (def state-lift (value)
      (state-return value))
-
-(export state-run state-final-value state-return state-bind state-get state-set
-        state-modify state-let state-foldr state-foreach state-flatmap state-map state-lift)

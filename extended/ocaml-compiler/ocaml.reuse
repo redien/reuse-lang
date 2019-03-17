@@ -288,5 +288,3 @@
             result-concat
             (result-map (string-join (string-of-char 10))))
          definitions))
-
-(export to-ocaml)
