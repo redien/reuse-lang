@@ -14,21 +14,16 @@ let read_lines ic =
 let stdin_string _ =
     String.concat "\n" (read_lines stdin);;
 
-let rec list_to_string_r = fun input result ->
-    match input with
-          CCons(x, rest) ->
-            let string_from_int = (String.make 1 (Char.chr (Int32.to_int x))) in
-            let new_result = (String.concat "" (result :: string_from_int :: [])) in
-                (list_to_string_r rest new_result)
-        | CEmpty -> result;;
+let string_cons x xs =
+    let string_from_int = (String.make 1 (Char.chr (Int32.to_int x))) in
+    xs ^ string_from_int;;
 
-let list_to_string = fun input -> (list_to_string_r (string_45to_45list input) "");;
-
-let stdin_get s index =
+let stdin_get succ fail s index =
     let i = (Int32.to_int index) in
     if i < (String.length s) && i >= 0 then
-            CSome (Int32.of_int (Char.code (String.get s i)))
+            succ (Int32.of_int (Char.code (String.get s i)))
     else
-            CNone;;
+            fail ();;
 
-let stdin_list = (indexed_45iterator_45from (stdin_string ()) stdin_get);;
+let list_to_string = fun input -> (string_45foldl string_cons "" input);;
+let stdin_list = (indexed_45iterator_45from (stdin_string ()) (stdin_get (fun x -> CSome (x)) (fun _ -> CNone)));;
