@@ -336,3 +336,10 @@
      (match boolean
             True  (string-from-list (list 84 114 117 101))
             False (string-from-list (list 70 97 108 115 101))))
+
+(export string-empty string-of-char string-prepend string-append string-first string-rest
+        string-foldr string-foldl string-size string-concat string-empty? string-any?
+        string-every? string-to-list string-from-list string-skip string-take string-reverse
+        string-substring string-join string-flatmap string-split string-trim-start string-trim-end
+        string-trim string-equal? string-point-is-digit string-to-int32 string-from-int32
+        string-collect-from-indexed-iterator string-from-boolean)

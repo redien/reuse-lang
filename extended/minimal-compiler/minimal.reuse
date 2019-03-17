@@ -6,3 +6,5 @@
             result-concat
             (result-map stringify))
          definitions))
+
+(export to-reuse)

@@ -32,3 +32,4 @@
             (Some x)
                 x))
 
+(export maybe-map maybe-flatmap maybe-filter maybe-else)
