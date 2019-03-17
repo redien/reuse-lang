@@ -32,7 +32,7 @@ cleanup() {
 }
 
 eval_reuse() {
-    echo "(export main (_) $1)" > $generated_source
+    echo "(def main (_) $1)" > $generated_source
 
     $project_root/reusec --language ocaml\
                          --output $generated_source.ml\

@@ -48,7 +48,7 @@ let parse_end = Unix.gettimeofday ();;
 let parse_time = parse_end -. parse_start;;
 
 let codegen_start = Unix.gettimeofday ();;
-let codegen_output = (to_ocaml parse_output stdin_list as_minimal);;
+let codegen_output = (to_45ocaml parse_output stdin_list as_minimal);;
 let codegen_end = Unix.gettimeofday ();;
 let codegen_time = codegen_end -. codegen_start;;
 

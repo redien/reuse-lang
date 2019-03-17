@@ -64,13 +64,11 @@ Windows support is currently not implemented.
 Let's create a library for the factorial function from the previous section by creating a Reuse source file called `factorial.reuse`.
 
 ```
-(export factorial (n)
-        (match (< n 2)
-               True   1
-               False  (* n (factorial (- n 1)))))
+(def factorial (n)
+     (match (< n 2)
+            True   1
+            False  (* n (factorial (- n 1)))))
 ```
-
-The one difference from the example above is that instead of simply defining a function, we're exporting it to the host language using the `export` keyword. This lets us call the function after we compile the library.
 
 Once we've saved the source file we need to compile it using the Reuse compiler called `reusec`.
 
@@ -136,13 +134,6 @@ The int32 type is a 32-bit signed integer.
 ```
 (def identity (x)
      x)
-```
-
-For a function to be exposed to the host language, it needs to be exported.
-
-```
-(export increment (x)
-        (+ x 1))
 ```
 
 ## Usage

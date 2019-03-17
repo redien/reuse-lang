@@ -6,7 +6,7 @@ project_root=$(dirname "$0")/..
 mkdir -p $project_root/generated/tests
 generated_source=$(mktemp -p $project_root/generated/tests 'standardlibraryXXXXXX')
 
-echo "$1 (export main (_) $2)" > $generated_source
+echo "$1 (def main (_) $2)" > $generated_source
 
 $project_root/reusec --language ocaml\
                      --output $generated_source.ml\

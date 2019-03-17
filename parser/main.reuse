@@ -1,3 +1,3 @@
 
-(export main (stdin)
-        (stringify (definitions-to-sexps (sexps-to-definitions (parse stdin)))))
+(def main (stdin)
+     (stringify (definitions-to-sexps (sexps-to-definitions (parse stdin)))))

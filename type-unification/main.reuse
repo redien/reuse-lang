@@ -14,5 +14,5 @@
      (result-bind   (parse-constraints stdin)   (fn (constraints)
      (result-return (stringify-constraints constraints)))))
 
-(export main (stdin)
-        (result-either (string-join (list 32)) (fn (_) Empty) (parse-and-unify stdin)))
+(def main (stdin)
+     (result-either (string-join (list 32)) (fn (_) Empty) (parse-and-unify stdin)))

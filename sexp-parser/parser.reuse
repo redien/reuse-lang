@@ -59,12 +59,12 @@
                        (fn (iterator result)
                            (parse-sexps depth iterator (Cons result expressions) error end))))
 
-(export parse (iterator)
-        (parse-sexps 0 iterator Empty
-                     (fn (error)
-                         (Error error))
-                     (fn (_ expressions)
-                         (Result expressions))))
+(def parse (iterator)
+     (parse-sexps 0 iterator Empty
+                  (fn (error)
+                      (Error error))
+                  (fn (_ expressions)
+                      (Result expressions))))
 
 (def wrap-in-brackets (string)
      (string-concat (string-of-char 40) (string-concat string (string-of-char 41))))
@@ -74,5 +74,5 @@
             (Symbol name _)      name
             (List expressions _) (wrap-in-brackets (stringify expressions))))
 
-(export stringify (expressions)
-        (string-join (string-of-char 32) (list-map (stringify-sexp stringify) expressions)))
+(def stringify (expressions)
+     (string-join (string-of-char 32) (list-map (stringify-sexp stringify) expressions)))

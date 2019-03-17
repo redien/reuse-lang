@@ -52,9 +52,6 @@
             (FunctionDefinition name arguments expression range)
                 (result-bind   (f expression)  (fn (expression)
                 (result-return (FunctionDefinition name arguments expression range))))
-            (ExportDefinition name arguments expression range)
-                (result-bind   (f expression)  (fn (expression)
-                (result-return (ExportDefinition name arguments expression range))))
             _
                 (result-return definition)))
 

@@ -273,8 +273,6 @@
      (match definition
             (FunctionDefinition name arguments expression _)
                 (translate-function-definition (escape-identifier name) arguments expression)
-            (ExportDefinition name arguments expression _)
-                (translate-function-definition name arguments expression)
             (TypeDefinition name parameters constructors _)
                 (translate-type-definition name parameters constructors)))
 
@@ -283,10 +281,10 @@
             True   (fn (definitions) definitions)
             False  (list-map validate-reserved-identifiers)))
 
-(export to_ocaml (definitions source as_minimal)
-        ((pipe (validate-reserved-identifiers-when-not as_minimal)
-               local-transforms
-               (list-map (result-map translate-definition))
-               result-concat
-               (result-map (string-join (string-of-char 10))))
-            definitions))
+(def to-ocaml (definitions source as_minimal)
+     ((pipe (validate-reserved-identifiers-when-not as_minimal)
+            local-transforms
+            (list-map (result-map translate-definition))
+            result-concat
+            (result-map (string-join (string-of-char 10))))
+         definitions))

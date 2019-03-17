@@ -79,17 +79,12 @@
 (def construct-function-definition (name arguments body meta)
      (FunctionDefinition name arguments body meta))
 
-(def construct-export-definition (name arguments body meta)
-     (ExportDefinition name arguments body meta))
-
 (def constraints-definition (definition)
      (match definition
          (TypeDefinition name parameters constructors meta)
              (add-type-constructors-to-context name parameters constructors meta)
          (FunctionDefinition name arguments body meta)
-             (constraints-function-definition construct-function-definition name arguments body meta)
-         (ExportDefinition name arguments body meta)
-             (constraints-function-definition construct-export-definition name arguments body meta)))
+             (constraints-function-definition construct-function-definition name arguments body meta)))
 
 (def int32-type ()
      (ConstType (data-int32) Empty))

@@ -6,7 +6,7 @@
 (def stringify-definitions (definitions)
      (stringify-types (list-map definition-type definitions)))
 
-(export main (stdin)
-        (match (result-concat (sexps-to-definitions (parse stdin)))
-               (Result definitions)  (string-join (list 32) (stringify-definitions (infer-types definitions)))
-               (Error error)         Empty))
+(def main (stdin)
+     (match (result-concat (sexps-to-definitions (parse stdin)))
+            (Result definitions)  (string-join (list 32) (stringify-definitions (infer-types definitions)))
+            (Error error)         Empty))

@@ -1,7 +1,7 @@
 
-(export main (stdin)
-        (match (parse stdin)
-               (Result expressions)
-                    (stringify expressions)
-               (Error _)
-                    (string-of-char 45)))
+(def main (stdin)
+     (match (parse stdin)
+            (Result expressions)
+                 (stringify expressions)
+            (Error _)
+                 (string-of-char 45)))

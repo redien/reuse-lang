@@ -1,8 +1,8 @@
 
-(export to_reuse (definitions _)
-        ((pipe (list-map validate-reserved-identifiers)
-               local-transforms
-               (list-map (result-map definition-to-sexp))
-               result-concat
-               (result-map stringify))
-            definitions))
+(def to-reuse (definitions _)
+     ((pipe (list-map validate-reserved-identifiers)
+            local-transforms
+            (list-map (result-map definition-to-sexp))
+            result-concat
+            (result-map stringify))
+         definitions))

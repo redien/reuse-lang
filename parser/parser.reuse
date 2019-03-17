@@ -77,10 +77,6 @@
                                                   (list (type-parameter a))
                                                   (list (constructor a))
                                                   b)
-                            (ExportDefinition     string
-                                                  (list string)
-                                                  (expression a)
-                                                  b)
                             (FunctionDefinition   string
                                                   (list string)
                                                   (expression a)
@@ -89,7 +85,6 @@
 (def definition-meta (definition)
      (match definition
             (TypeDefinition _ __ ___ meta)      meta
-            (ExportDefinition _ __ ___ meta)    meta
             (FunctionDefinition _ __ ___ meta)  meta))
 
 (def sexp-to-complex-type (sexp-to-types name parameters range)
@@ -310,11 +305,7 @@
      (match (string-equal? kind (data-def))
             True   (sexp-to-function-definition name rest range (fn (name arguments expression range)
                                                                     (FunctionDefinition name arguments expression range)))
-            False
-     (match (string-equal? kind (data-export))
-            True   (sexp-to-function-definition name rest range (fn (name arguments expression range)
-                                                                    (ExportDefinition name arguments expression range)))
-            False  (Error (MalformedDefinitionError range))))))
+            False  (Error (MalformedDefinitionError range)))))
 
 (def specific-malformed-definition-error (kind range)
      (match (string-equal? kind (data-typ))
@@ -454,8 +445,6 @@
      (match definition
             (TypeDefinition name parameters constructors range)
                 (type-definition-to-sexp name parameters constructors range)
-            (ExportDefinition name arguments expression range)
-                (function-definition-to-sexp name arguments expression range (data-export))
             (FunctionDefinition name arguments expression range)
                 (function-definition-to-sexp name arguments expression range (data-def))))
 
