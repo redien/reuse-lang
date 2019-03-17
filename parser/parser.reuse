@@ -167,7 +167,9 @@
      (result-bind   (sexp-to-type-name type-name)                   (fn (name)
      (result-bind   (sexp-to-type-parameters type-name)             (fn (parameters)
      (result-bind   (sexp-to-constructor-definitions constructors)  (fn (constructors)
-     (result-return (TypeDefinition name parameters constructors range)))))))))
+     (match constructors
+            Empty  (Error (MalformedTypeDefinitionError range))
+            _      (result-return (TypeDefinition name parameters constructors range))))))))))
 
 (def sexp-to-arguments (arguments)
      (result-concat (list-map symbol-to-string arguments)))

@@ -273,6 +273,8 @@
      (match definition
             (FunctionDefinition name arguments expression _)
                 (translate-function-definition (escape-identifier name) arguments expression)
+            (ExportDefinition _ __)
+                (string-empty)
             (TypeDefinition name parameters constructors _)
                 (translate-type-definition name parameters constructors)))
 
