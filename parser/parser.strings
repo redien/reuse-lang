@@ -1,4 +1,5 @@
 def    |def
+export |export
 typ    |typ
 fn     |fn
 match  |match
