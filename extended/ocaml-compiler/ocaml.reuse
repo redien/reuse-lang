@@ -278,13 +278,13 @@
             (TypeDefinition name parameters constructors _)
                 (translate-type-definition name parameters constructors)))
 
-(def validate-reserved-identifiers-when-not (as_minimal)
-     (match as_minimal
+(def validate-reserved-identifiers-when-not (only-minimal)
+     (match only-minimal
             True   (fn (definitions) definitions)
             False  (list-map validate-reserved-identifiers)))
 
-(def to-ocaml (definitions source as_minimal)
-     ((pipe (validate-reserved-identifiers-when-not as_minimal)
+(def to-ocaml (definitions source only-minimal)
+     ((pipe (validate-reserved-identifiers-when-not only-minimal)
             local-transforms
             (list-map (result-map translate-definition))
             result-concat
