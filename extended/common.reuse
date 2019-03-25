@@ -110,3 +110,13 @@
 
 (def validate-reserved-identifiers (definition)
      (result-flatmap (over-definition-expressions (over-identifiers validate-identifier)) definition))
+
+(def collect-exported-identifiers (definitions)
+     (result-concat
+     (list-map (result-map (fn (definition)
+                               (match definition
+                                      (ExportDefinition identifiers _)
+                                          identifiers
+                                      _
+                                          Empty)))
+                   definitions)))

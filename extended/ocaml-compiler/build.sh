@@ -43,12 +43,13 @@ let parse_sexp_end = Unix.gettimeofday ();;
 let parse_sexp_time = parse_sexp_end -. parse_sexp_start;;
 
 let parse_start = Unix.gettimeofday ();;
-let parse_output = stringify_45parse_45errors (sexps_45to_45definitions parse_sexp_output);;
+let definitions = stringify_45parse_45errors (sexps_45to_45definitions parse_sexp_output);;
 let parse_end = Unix.gettimeofday ();;
 let parse_time = parse_end -. parse_start;;
 
 let codegen_start = Unix.gettimeofday ();;
-let codegen_output = (to_45ocaml parse_output stdin_list as_minimal);;
+let exported_identifiers = collect_45exported_45identifiers definitions;;
+let codegen_output = (to_45ocaml definitions stdin_list as_minimal);;
 let codegen_end = Unix.gettimeofday ();;
 let codegen_time = codegen_end -. codegen_start;;
 
