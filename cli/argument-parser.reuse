@@ -1,0 +1,32 @@
+
+(typ cli-arguments (CliArguments (list (pair string string)) (list string))
+                   (CliErrorMissingValue string))
+
+(def is-key? (argument)
+     (string-equal? (data-double-dash) (string-take 2 argument)))
+
+(def parse-arguments' (arguments kv-args inputs)
+     (match arguments
+            (Cons first (Cons second rest))
+                (match (is-key? first)
+                       True
+                            (parse-arguments' (list-rest arguments)
+                                              (Cons (Pair first second) kv-args)
+                                              inputs)
+                       False
+                            (parse-arguments' (list-rest arguments)
+                                              kv-args
+                                              (Cons first inputs)))
+            (Cons first Empty)
+                (match (is-key? first)
+                       True
+                            (CliErrorMissingValue first)
+                       False
+                            (CliArguments kv-args (Cons first inputs)))
+            Empty
+                (CliArguments kv-args inputs)))
+
+(def parse-arguments (arguments)
+     (parse-arguments' arguments Empty Empty))
+
+(export parse-arguments)
