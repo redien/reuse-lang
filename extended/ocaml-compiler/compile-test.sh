@@ -3,7 +3,8 @@
 script_path=$(dirname "$0")
 project_root=$script_path/../..
 
-cat "$1" | "$project_root/generated/extended/compiler-ocaml" > "$2/executable.ml"
+cat "$1" >> "$2/input.reuse"
+$project_root/generated/extended/compiler-ocaml "$2/input.reuse" > "$2/executable.ml"
 result=$?
 if [ "$result" != "0" ]; then
     >&2 printf "\n in file $1\n"
