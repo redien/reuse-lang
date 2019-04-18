@@ -1,6 +1,6 @@
 
-(typ type  (UniversalType (list int32))
-           (ExistentialType (list int32))
-           (ConstType (list int32) (list type))
+(typ type  (UniversalType string)
+           (ExistentialType string)
+           (ConstType string (list type))
            (FnType (list type) type)
            ErrorType)

@@ -14,8 +14,8 @@
      (state-bind (rename-gensym-get)       (fn (count)
      (state-bind (rename-gensym-increment) (fn (_)
      (match (< count 10)
-            True   (state-return (list (+ 65 count)))
-            False  (state-return (Cons 84 (string-from-int32 count)))))))))
+            True   (state-return (string-of-char (+ 65 count)))
+            False  (state-return (string-prepend 84 (string-from-int32 count)))))))))
 
 (def rename-lookup (name)
      (state-bind (state-get) (fn (context)

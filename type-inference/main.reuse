@@ -8,5 +8,5 @@
 
 (def main (stdin)
      (match (result-concat (sexps-to-definitions (parse stdin)))
-            (Result definitions)  (string-join (list 32) (stringify-definitions (infer-types definitions)))
-            (Error error)         Empty))
+            (Result definitions)  (string-join (string-of-char 32) (stringify-definitions (infer-types definitions)))
+            (Error error)         (string-empty)))

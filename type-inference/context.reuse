@@ -1,5 +1,5 @@
 
-(typ type-inference-context (TypeInferenceContext (list (pair (list int32) type))
+(typ type-inference-context (TypeInferenceContext (list (pair string type))
                                                   int32
                                                   (list (pair type type))))
 
@@ -13,7 +13,7 @@
                                   (TypeInferenceContext types (+ symbol-count n) constraints)))))
 
 (def type-inference-context-symbol-from-count (count)
-     (Cons 84 (string-from-int32 count)))
+     (string-prepend 84 (string-from-int32 count)))
 
 (def type-inference-context-symbol ()
      (state-bind   (state-get) (fn (context)
