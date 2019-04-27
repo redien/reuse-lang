@@ -152,6 +152,9 @@ Compiler for the Reuse programming language
 
 ## Design Rationale
 
+- The case for a completely pure language
+  - No more value restriction there is not mutability
+    - https://ocamlverse.github.io/content/weak_type_variables.html
 - Keeping the language as small as possible
   - Reduces the work of implementing new language targets and tools
   - Fewer features to learn

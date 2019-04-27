@@ -31,3 +31,10 @@ Functions are polymorphic
 | (def g (x) (left (f x) (f left)))
 > (g 6)
 = 6
+
+Return types of functions with no arguments should generalize
+| (typ (my-type a) MyEmpty (MyOther a))
+| (def f () MyEmpty)
+| (def g () (f))
+> (match (g) MyEmpty 7 _ 99)
+= 7

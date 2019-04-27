@@ -6,6 +6,13 @@ Subtraction
 > (- 1 2)
 = -1
 
+Integers (32-bit signed) should wrap around
+> (+ 2147483647 1)
+= -2147483648
+
+> (- -2147483648 1)
+= 2147483647
+
 Multiplication
 > (* 2 3)
 = 6
