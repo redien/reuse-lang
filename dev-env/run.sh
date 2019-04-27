@@ -5,8 +5,9 @@ project_root=$(dirname $0)/..
 run() {
     case $1 in
         test)                   run test-string-gen && run test-sexp-parser && run test-parser && run test-compilers && run test-standard-library;;
-        test-compilers)         run test-ocaml-compiler && run test-minimal-compiler ;;
-        test-ocaml-compiler)    $project_root/extended/ocaml-compiler/build.sh && IMPL=extended/ocaml-compiler run test-extended && IMPL=extended/ocaml-compiler run test-minimal ;;
+        test-compilers)         run test-haskell-compiler && run test-ocaml-compiler && run test-minimal-compiler ;;
+        test-ocaml-compiler)    $project_root/extended/ocaml-compiler/build.sh && IMPL=extended/ocaml-compiler run test-minimal && IMPL=extended/ocaml-compiler run test-extended ;;
+        test-haskell-compiler)  $project_root/extended/haskell-compiler/build.sh && IMPL=extended/haskell-compiler run test-minimal && IMPL=extended/haskell-compiler run test-extended ;;
         test-minimal-compiler)  $project_root/extended/minimal-compiler/build.sh && IMPL=extended/minimal-compiler run test-minimal && IMPL=extended/minimal-compiler run test-extended ;;
         test-sexp-parser)       $project_root/sexp-parser/build.sh && $project_root/dev-env/spec-runner/run.sh sexp-parser/specification $project_root/sexp-parser/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
         test-parser)            $project_root/parser/build.sh && $project_root/dev-env/spec-runner/run.sh parser/specification $project_root/parser/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;

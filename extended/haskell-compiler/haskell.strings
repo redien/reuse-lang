@@ -1,0 +1,23 @@
+compile-error  |*compile error*
+arrow          | -> 
+equals         | = 
+vertical-bar   | | 
+pipe-operator  | |> 
+colon          | : 
+semicolon      | ; 
+star           | * 
+int32          |int32
+int32-plus     |Int32.add
+int32-multiply |Int32.mul
+int32-minus    |Int32.sub
+int32-divide   |Int32.div
+int32-modulus  |Int32.rem
+cempty         |CEmpty
+ccons          |CCons
+int32          |Int32.of_int 
+comma          |,
+with           |with
+let            |let 
+constant       |_constant_
+data           |data
+case           |case

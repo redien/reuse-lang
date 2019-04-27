@@ -491,6 +491,20 @@ Should allow commonly reserved words as variable names
 > (to' 10)
 = 10
 
+| (typ data MyEmpty)
+| (typ (mytype data) (MyCons data))
+| (def data () 1)
+| (def data' (data) data)
+> (data' 10)
+= 10
+
+| (typ case MyEmpty)
+| (typ (mytype case) (MyCons case))
+| (def case () 1)
+| (def case' (case) case)
+> (case' 10)
+= 10
+
 Type names should be allowed as capture variables
 | (typ a (B int32))
 > (match (B 11) (B a) a)

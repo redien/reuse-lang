@@ -1,0 +1,280 @@
+
+(def prefix-type (string)
+     (string-prepend 84 string))
+
+(def prefix-type-variable (string)
+     (string-prepend 39 (string-prepend 84 string)))
+
+(def prefix-constructor (constructor)
+     (string-prepend 67 constructor))
+
+(def reserved-strings ()
+     (dictionary-of (list
+        (Pair (data-assert) True) (Pair (data-asr) True)
+        (Pair (data-begin) True) (Pair (data-constraint) True)
+        (Pair (data-do) True) (Pair (data-done) True)
+        (Pair (data-downto) True) (Pair (data-type) True)
+        (Pair (data-if) True) (Pair (data-then) True)
+        (Pair (data-else) True) (Pair (data-with) True)
+        (Pair (data-of) True) (Pair (data-end) True)
+        (Pair (data-in) True) (Pair (data-fun) True)
+        (Pair (data-let) True) (Pair (data-open) True)
+        (Pair (data-and) True) (Pair (data-or) True)
+        (Pair (data-as) True) (Pair (data-class) True)
+        (Pair (data-exception) True) (Pair (data-external) True)
+        (Pair (data-false) True) (Pair (data-true) True)
+        (Pair (data-for) True) (Pair (data-function) True)
+        (Pair (data-functor) True) (Pair (data-if) True)
+        (Pair (data-include) True) (Pair (data-inherit) True)
+        (Pair (data-initializer) True) (Pair (data-land) True)
+        (Pair (data-lazy) True) (Pair (data-lor) True)
+        (Pair (data-lsl) True) (Pair (data-lsr) True)
+        (Pair (data-lxor) True) (Pair (data-method) True)
+        (Pair (data-mod) True) (Pair (data-module) True)
+        (Pair (data-mutable) True) (Pair (data-new) True)
+        (Pair (data-nonrec) True) (Pair (data-object) True)
+        (Pair (data-private) True) (Pair (data-rec) True)
+        (Pair (data-sig) True) (Pair (data-struct) True)
+        (Pair (data-try) True) (Pair (data-val) True)
+        (Pair (data-virtual) True) (Pair (data-when) True)
+        (Pair (data-while) True) (Pair (data-parser) True)
+        (Pair (data-value) True) (Pair (data-to) True)
+        (Pair (data-data) True) (Pair (data-case) True)
+     )))
+
+(def string-is-reserved? (name)
+     (dictionary-get-or name False (reserved-strings)))
+
+(def escape-identifier (name)
+     (match (string-is-reserved? name)
+            True   (string-prepend 95 name)
+            False  (string-flatmap escape-char name)))
+
+(def special-identifiers ()
+     (dictionary-of (list
+        (Pair (data-plus) (data-int32-plus))
+        (Pair (data-slash) (data-int32-divide))
+        (Pair (data-percent) (data-int32-modulus))
+        (Pair (data-minus) (data-int32-minus))
+        (Pair (data-multiply) (data-int32-multiply))
+     )))
+
+(def translate-identifier (name)
+     (match (dictionary-get name (special-identifiers))
+            (Some translation)  translation
+            None                (escape-identifier name)))
+
+(def translate-less-than (translate-expression expressions)
+     (match expressions
+            (Cons a (Cons b (Cons then-case (Cons else-case Empty))))
+                (join (list (data-if)
+                            (data-space)
+                            (translate-expression a)
+                            (data-less-than)
+                            (translate-expression b)
+                            (data-space)
+                            (data-then)
+                            (data-space)
+                            (translate-expression then-case)
+                            (data-space)
+                            (data-else)
+                            (data-space)
+                            (translate-expression else-case)))
+            _
+                (data-compile-error)))
+
+(def translate-constructor (translator name)
+     (pipe (list-map translator)
+           (string-join (data-comma))
+           wrap-in-brackets
+           (fn (parameters)
+               (list (prefix-constructor (escape-identifier name))
+                     (data-space)
+                     parameters))
+           join
+           wrap-in-brackets))
+
+(def translate-pattern (pattern)
+     (match pattern
+            (Capture name _)
+                (escape-identifier name)
+            (IntegerPattern integer _)
+                (join (list (string-from-int32 integer) (string-of-char 108)))
+            (ConstructorPattern name Empty _)
+                (prefix-constructor (escape-identifier name))
+            (ConstructorPattern name patterns _)
+                ((translate-constructor translate-pattern name) patterns)))
+
+(def translate-rule (translate-expression rule)
+     (match rule
+            (Pair pattern expression)
+                 (join (list (translate-pattern pattern) (data-arrow) (translate-expression expression)))))
+
+(def translate-match-expression (translate-expression expression)
+     (pipe (list-map (translate-rule translate-expression))
+           (string-join (data-semicolon))
+           (fn (rules)
+               (list (data-case) (translate-expression expression) (data-of) rules))
+           (string-join (data-space))))
+
+(def translate-function-application' (translate-expression expressions)
+     (match expressions
+            (Cons no-args-function Empty)
+                    (join (list (translate-expression no-args-function)
+                                (data-space)
+                                (wrap-in-brackets (string-empty))))
+            _
+                    (string-join (data-space) (list-map translate-expression expressions))))
+
+(def translate-function-application (translate-expression expressions)
+     (match expressions
+            (Cons (Identifier name _) rest)
+                    (match (string-equal? name (data-int32-less-than))
+                           True  (translate-less-than translate-expression rest)
+                           False (translate-function-application' translate-expression expressions))
+            _
+                    (translate-function-application' translate-expression expressions)))
+
+(def translate-argument-list (arguments)
+     (match (list-empty? arguments)
+            True  (wrap-in-brackets (string-empty))
+            False (string-join (data-space) (list-map escape-identifier arguments))))
+
+(def translate-lambda (translate-expression arguments expression)
+     (join (list (data-fun)
+                 (data-space)
+                 (translate-argument-list arguments)
+                 (data-arrow)
+                 (translate-expression expression))))
+
+(def translate-expression (expression)
+     (match expression
+            (Lambda arguments expression _)
+                (wrap-in-brackets (translate-lambda translate-expression arguments expression))
+            (Constructor name Empty _)
+                (prefix-constructor (escape-identifier name))
+            (Constructor name expressions _)
+                ((translate-constructor translate-expression name) expressions)
+            (FunctionApplication expressions _)
+                (wrap-in-brackets (translate-function-application translate-expression expressions))
+            (IntegerConstant integer _)
+                (string-from-int32 integer)
+            (Identifier name _)
+                (translate-identifier name)
+            (Match expression rules _)
+                (wrap-in-brackets ((translate-match-expression translate-expression expression) rules))))
+
+(def translate-function-definition (name arguments expression)
+     (match (list-empty? arguments)
+            True  (join (list name
+                              (data-equals)
+                              (translate-expression expression)))
+            False (join (list name
+                              (data-equals)
+                              (translate-lambda translate-expression arguments expression)))))
+
+(def translate-simple-type (name parameters)
+     (match (list-any? (string-equal? name) parameters)
+            False  (prefix-type (escape-identifier name))
+            True   (prefix-type-variable name)))
+
+(def translate-complex-types (translate-types name)
+     (pipe (translate-types (data-comma))
+           wrap-in-brackets
+           (fn (types) (list types (data-space) (prefix-type (escape-identifier name))))
+           join))
+
+(def translate-function-type (translate-types return-type)
+     (pipe (fn (argument-types)
+               (list-concat argument-types (list return-type)))
+           (translate-types (data-arrow))
+           wrap-in-brackets))
+
+(def translate-type (translate-types parameters type)
+     (match type
+            (SimpleType name _)
+                (translate-simple-type name parameters)
+            (ComplexType name types _)
+                ((translate-complex-types translate-types name) types)
+            (FunctionType argument-types return-type _)
+                ((translate-function-type translate-types return-type) argument-types)))
+
+(def translate-types (parameters separator)
+     (pipe (list-map (translate-type (translate-types parameters) parameters))
+           (string-join separator)))
+
+(def translate-type-parameter (parameter)
+     (match parameter
+            (UniversalParameter name _)
+                name
+            (ExistentialParameter name _)
+                name))
+
+(def translate-complex-constructor-definition (name type types parameters)
+     (join (list (prefix-constructor (escape-identifier name))
+                 (data-colon)
+                 ((translate-types (list-map translate-type-parameter parameters) (data-star)) types)
+                 (data-arrow)
+                 type)))
+
+(def translate-constructor-definition (type parameters constructor)
+     (match constructor
+            (SimpleConstructor name _)
+                (prefix-constructor (escape-identifier name))
+            (ComplexConstructor name types _)
+                (translate-complex-constructor-definition name type types parameters)))
+
+(def translate-constructor-definitions (type parameters)
+     (pipe (list-map (translate-constructor-definition type parameters))
+           (string-join (data-vertical-bar))))
+
+(def translate-type-parameter-for-definition (parameter)
+     (match parameter
+            (UniversalParameter name _)
+                (prefix-type-variable name)
+            (ExistentialParameter _ __)
+                (string-empty)))
+
+(def translate-type-parameters ()
+     (pipe (list-map translate-type-parameter-for-definition)
+           (list-filter not-empty?)
+           (string-join (data-comma))))
+
+(def translate-type-name' (name parameters)
+     (match (string-empty? parameters)
+            True
+                (escape-identifier name)
+            False
+                (join (list (wrap-in-brackets parameters)
+                            (data-space)
+                            (escape-identifier name)))))
+
+(def translate-type-name (name parameters)
+     (translate-type-name' (prefix-type name) ((translate-type-parameters) parameters)))
+
+(def translate-type-definition (name parameters constructors)
+     (join (list (data-data)
+                 (data-space)
+                 (translate-type-name name parameters)
+                 (data-equals)
+                 ((translate-constructor-definitions (translate-type-name name parameters) parameters) constructors))))
+
+(def translate-definition (definition)
+     (match definition
+            (FunctionDefinition name arguments expression _)
+                (translate-function-definition (escape-identifier name) arguments expression)
+            (TypeDefinition name parameters constructors _)
+                (translate-type-definition name parameters constructors)))
+
+(def validate-reserved-identifiers-when-not (as_minimal)
+     (match as_minimal
+            True   (fn (definitions) definitions)
+            False  (list-map validate-reserved-identifiers)))
+
+(def to-haskell (definitions source as_minimal)
+     ((pipe (validate-reserved-identifiers-when-not as_minimal)
+            local-transforms
+            (list-map (result-map translate-definition))
+            result-concat
+            (result-map (string-join (string-of-char 10))))
+         definitions))
