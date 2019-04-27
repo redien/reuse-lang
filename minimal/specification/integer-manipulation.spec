@@ -14,6 +14,10 @@ Division
 > (/ 4 2)
 = 2
 
+Division should round toward zero
+> (/ -3 2)
+= -1
+
 Remainder
 > (% 3 2)
 = 1
