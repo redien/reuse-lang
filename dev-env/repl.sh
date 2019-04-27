@@ -28,7 +28,7 @@ if [ "$nostdlib" != "true" ]; then
 fi
 
 cleanup() {
-    rm $generated_source{,.ml,.ml.out,.ml.2.cmi,.ml.2.cmo} 2>/dev/null
+    rm $generated_source{,.ml,.ml.out,.out,.ml.2.cmi,.ml.2.cmo} 2>/dev/null
 }
 
 eval_reuse() {
@@ -46,9 +46,9 @@ eval_reuse() {
         return
     fi
 
-    $project_root/dev-env/compile-stdin-test.sh $generated_source.ml
-    if [ -e "$generated_source.ml.out" ]; then
-        echo "" | $generated_source.ml.out
+    $project_root/dev-env/compile-stdin-test.sh $generated_source.ml $generated_source.out
+    if [ -e "$generated_source.out" ]; then
+        echo "" | $generated_source.out
         printf "\n"
     fi
     cleanup

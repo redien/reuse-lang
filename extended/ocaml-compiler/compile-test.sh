@@ -11,4 +11,4 @@ if [ "$result" != "0" ]; then
 fi
 
 set -e
-$project_root/dev-env/compile-nostdlib-test.sh "$2/executable.ml"
+$project_root/dev-env/compile-nostdlib-test.sh "$2/executable.ml" "$2/executable.out"

@@ -10,4 +10,4 @@ $project_root/reusec --language ocaml\
                      --nostdlib\
                      --output "$2/executable.ml"\
                      "$2/executable.reuse"
-$project_root/dev-env/compile-nostdlib-test.sh "$2/executable.ml"
+$project_root/dev-env/compile-nostdlib-test.sh "$2/executable.ml" "$2/executable.out"

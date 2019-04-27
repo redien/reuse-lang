@@ -16,4 +16,4 @@ $project_root/reusec --language ocaml\
                      $project_root/parser/parser.reuse\
                      $project_root/parser/main.reuse
 
-$project_root/dev-env/compile-stdin-test.sh $project_root/generated/parser/source.ml
+$project_root/dev-env/compile-stdin-test.sh $project_root/generated/parser/source.ml $project_root/generated/parser/source.out

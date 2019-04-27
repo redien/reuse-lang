@@ -2,4 +2,4 @@
 
 project_root=$(dirname "$0")/..
 
-echo "$2" | $project_root/generated/parser/source.ml.out
+echo "$2" | $project_root/generated/parser/source.out
