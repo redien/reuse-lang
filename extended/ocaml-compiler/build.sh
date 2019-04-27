@@ -17,6 +17,7 @@ $project_root/reusec $extra_flags\
                      --language ocaml\
                      --output $project_root/generated/extended/CompilerOCaml.ml\
                      $project_root/sexp-parser/parser.reuse\
+                     $project_root/parser/ast.reuse\
                      $project_root/parser/parser.strings\
                      $project_root/parser/strings.reuse\
                      $project_root/parser/parser.reuse\

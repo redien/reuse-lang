@@ -12,6 +12,7 @@ $project_root/standard-library/build.sh
 $project_root/reusec --language ocaml\
                      --output $project_root/generated/extended/CompilerMinimal.ml\
                      $project_root/sexp-parser/parser.reuse\
+                     $project_root/parser/ast.reuse\
                      $project_root/parser/parser.strings\
                      $project_root/parser/strings.reuse\
                      $project_root/parser/parser.reuse\

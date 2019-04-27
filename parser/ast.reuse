@@ -1,0 +1,106 @@
+
+(typ (ast-type meta)        (SimpleType           string meta)
+                            (ComplexType          string (list (ast-type meta)) meta)
+                            (FunctionType         (list (ast-type meta)) (ast-type meta) meta))
+(typ (type-parameter meta)  (UniversalParameter   string meta)
+                            (ExistentialParameter string meta))
+(typ (constructor meta)     (SimpleConstructor    string meta)
+                            (ComplexConstructor   string (list (ast-type meta)) meta))
+(typ (pattern meta)         (Capture              string meta)
+                            (IntegerPattern       int32 meta)
+                            (ConstructorPattern   string (list (pattern meta)) meta))
+(typ (expression meta)      (IntegerConstant      int32 meta)
+                            (Identifier           string meta)
+                            (Lambda               (list string)
+                                                  (expression meta)
+                                                  meta)
+                            (Match                (expression meta)
+                                                  (list (pair (pattern meta) (expression meta)))
+                                                  meta)
+                            (Constructor          string (list (expression meta)) meta)
+                            (FunctionApplication  (list (expression meta)) meta))
+(typ (definition a b)       (TypeDefinition       string
+                                                  (list (type-parameter a))
+                                                  (list (constructor a))
+                                                  b)
+                            (FunctionDefinition   string
+                                                  (list string)
+                                                  (expression a)
+                                                  b))
+
+(def definition-meta (definition)
+     (match definition
+            (TypeDefinition _ __ ___ meta)      meta
+            (FunctionDefinition _ __ ___ meta)  meta))
+
+(def over-match-pair-expression (f pair)
+     (match pair
+            (Pair pattern expression)
+                (result-bind   (f expression) (fn (expression)
+                (result-return (Pair pattern expression))))))
+
+(def over-match-pair-expressions (over-subexpressions f pairs)
+     (result-concat (list-map (over-match-pair-expression (pipe f (result-flatmap (over-subexpressions f)))) pairs)))
+
+(def over-subexpressions (f expression)
+     (result-bind (f expression)  (fn (expression)
+     (match expression
+            (Lambda arguments expression range)
+                (result-bind   (f expression)                                             (fn (expression)
+                (result-bind   (over-subexpressions f expression)                         (fn (expression)
+                (result-return (Lambda arguments expression range))))))
+            (Match expression pairs range)
+                (result-bind   (f expression)                                             (fn (expression)
+                (result-bind   (over-subexpressions f expression)                         (fn (expression)
+                (result-bind   (over-match-pair-expressions over-subexpressions f pairs)  (fn (pairs)
+                (result-return (Match expression pairs range))))))))
+            (Constructor name expressions range)
+                (result-bind   (result-concat (list-map (pipe f (result-flatmap (over-subexpressions f))) expressions)) (fn (expressions)
+                (result-return (Constructor name expressions range))))
+            (FunctionApplication expressions range)
+                (result-bind   (result-concat (list-map (pipe f (result-flatmap (over-subexpressions f))) expressions)) (fn (expressions)
+                (result-return (FunctionApplication expressions range))))
+            _
+                (result-return expression)))))
+
+(def over-definition-expressions (f definition)
+     (match definition
+            (FunctionDefinition name arguments expression range)
+                (result-bind   (f expression)  (fn (expression)
+                (result-return (FunctionDefinition name arguments expression range))))
+            _
+                (result-return definition)))
+
+(def over-function-application (f expression)
+     (match expression
+            (FunctionApplication expressions range)
+                (f expressions range)
+            _
+                (result-return expression)))
+
+(def over-identifiers (f expression)
+     (match expression
+            (Identifier name range)
+                (result-bind   (f name)                                (fn (name)
+                (result-return (Identifier name range))))
+            (Lambda arguments expression range)
+                (result-bind   (over-identifiers f expression)         (fn (expression)
+                (result-bind   (result-concat (list-map f arguments))  (fn (arguments)
+                (result-return (Lambda arguments expression range))))))
+            (Constructor name Empty range)
+                (result-bind   (f name)                                (fn (name)
+                (result-return (Constructor name Empty range))))
+            (Constructor name expressions range)
+                (result-bind   (result-concat (list-map (over-identifiers f) expressions))  (fn (expressions)
+                (result-bind   (f name)                                                     (fn (name)
+                (result-return (Constructor name expressions range))))))
+            (FunctionApplication expressions range)
+                (result-bind   (result-concat (list-map (over-identifiers f) expressions))  (fn (expressions)
+                (result-return (FunctionApplication expressions range))))
+            (Match expression rules range)
+                (result-bind   (result-concat (list-map (over-match-pair-expression (over-identifiers f)) rules)) (fn (rules)
+                (result-bind   (over-identifiers f expression)                              (fn (expression)
+                (result-return (Match expression rules range))))))
+            _
+                (result-return expression)))
+

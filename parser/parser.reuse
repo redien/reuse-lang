@@ -53,40 +53,6 @@
             (List _ range)
                 (Error  (MalformedSymbolError range))))
 
-(typ (ast-type meta)        (SimpleType           string meta)
-                            (ComplexType          string (list (ast-type meta)) meta)
-                            (FunctionType         (list (ast-type meta)) (ast-type meta) meta))
-(typ (type-parameter meta)  (UniversalParameter   string meta)
-                            (ExistentialParameter string meta))
-(typ (constructor meta)     (SimpleConstructor    string meta)
-                            (ComplexConstructor   string (list (ast-type meta)) meta))
-(typ (pattern meta)         (Capture              string meta)
-                            (IntegerPattern       int32 meta)
-                            (ConstructorPattern   string (list (pattern meta)) meta))
-(typ (expression meta)      (IntegerConstant      int32 meta)
-                            (Identifier           string meta)
-                            (Lambda               (list string)
-                                                  (expression meta)
-                                                  meta)
-                            (Match                (expression meta)
-                                                  (list (pair (pattern meta) (expression meta)))
-                                                  meta)
-                            (Constructor          string (list (expression meta)) meta)
-                            (FunctionApplication  (list (expression meta)) meta))
-(typ (definition a b)       (TypeDefinition       string
-                                                  (list (type-parameter a))
-                                                  (list (constructor a))
-                                                  b)
-                            (FunctionDefinition   string
-                                                  (list string)
-                                                  (expression a)
-                                                  b))
-
-(def definition-meta (definition)
-     (match definition
-            (TypeDefinition _ __ ___ meta)      meta
-            (FunctionDefinition _ __ ___ meta)  meta))
-
 (def sexp-to-complex-type (sexp-to-types name parameters range)
      (result-bind   (sexp-to-types parameters)  (fn (sub-types)
      (result-return (ComplexType name sub-types range)))))
