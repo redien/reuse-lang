@@ -1,0 +1,35 @@
+
+(typ (array value) (Array (dictionary value)))
+
+(def array-key-to-string'' (key)
+     (string-prepend (% key 256)
+     (string-prepend (/ (% key 65536) 256)
+     (string-prepend (/ (% key 16777216) 65536)
+     (string-prepend (/ key 16777216)
+                     (string-empty))))))
+
+(def array-key-to-string' (key)
+     (match (< key 0)
+            True   (array-key-to-string'' (- 0 key))
+            False  (array-key-to-string'' key)))
+
+(def array-empty ()
+     (Array (dictionary-empty)))
+
+(def array-set (key new-value array)
+     (match array
+            (Array dictionary)
+                (dictionary-set (array-key-to-string' key) new-value dictionary)))
+
+(def array-get (key array)
+     (match array
+            (Array dictionary)
+                (dictionary-get (array-key-to-string' key) dictionary)))
+
+(def array-singleton (value)
+     (array-set 0 value (array-empty)))
+
+(def array-get-or (key default array)
+     (match (array-get key array)
+            (Some value)  value
+            None          default))
