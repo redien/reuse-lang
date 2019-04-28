@@ -224,35 +224,39 @@
      (pipe (list-map (translate-constructor-definition parameters))
            (string-join (data-vertical-bar))))
 
-(def translate-type-parameter-for-definition (parameter)
-     (match parameter
-            (UniversalParameter name _)
-                (prefix-type-variable name)
-            (ExistentialParameter _ __)
-                (string-empty)))
+(def translate-universal-parameters (parameters)
+     (list-foldl (fn (parameter s)
+                     (match parameter
+                            (UniversalParameter name _)
+                                (join (list s
+                                            (data-space)
+                                            (prefix-type-variable name)))
+                            (ExistentialParameter _ __)
+                                s))
+                 (string-empty)
+                 parameters))
 
-(def translate-type-parameters ()
-     (pipe (list-map translate-type-parameter-for-definition)
-           (list-filter not-empty?)
-           (string-join (data-space))))
-
-(def translate-type-name' (name parameters)
-     (match (string-empty? parameters)
-            True
-                (escape-identifier name)
-            False
-                (join (list (escape-identifier name)
-                            (data-space)
-                            parameters))))
-
-(def translate-type-name (name parameters)
-     (translate-type-name' (prefix-type name) ((translate-type-parameters) parameters)))
+(def translate-existential-parameters (parameters)
+     (list-foldl (fn (parameter s)
+                     (match parameter
+                            (UniversalParameter _ __)
+                                s
+                            (ExistentialParameter name __)
+                                (join (list s
+                                            (data-forall)
+                                            (prefix-type-variable name)
+                                            (data-dot)
+                                            (data-space)))))
+                 (string-empty)
+                 parameters))
 
 (def translate-type-definition (name parameters constructors)
      (join (list (data-data)
                  (data-space)
-                 (translate-type-name name parameters)
+                 (escape-identifier (prefix-type name))
+                 (translate-universal-parameters parameters)
                  (data-equals)
+                 (translate-existential-parameters parameters)
                  ((translate-constructor-definitions parameters) constructors))))
 
 (def translate-definition (definition)

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-printf 'import Data.Int\n' > "$1.2.hs"
+printf '{-# LANGUAGE ExistentialQuantification #-}\nimport Data.Int\n' > "$1.2.hs"
 cat "$1" >> "$1.2.hs"
 printf '\nmain = putStrLn (show reuse_45main)\n' >> "$1.2.hs"
 echo "#!/usr/bin/env runghc" > "$2"
