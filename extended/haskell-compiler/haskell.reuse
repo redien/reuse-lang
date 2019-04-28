@@ -2,9 +2,6 @@
 (def prefix-type (string)
      (string-prepend 84 string))
 
-(def prefix-type-variable (string)
-     (string-prepend 39 (string-prepend 84 string)))
-
 (def prefix-constructor (constructor)
      (string-prepend 67 constructor))
 
@@ -24,7 +21,7 @@
         (Pair (data-exception) True) (Pair (data-external) True)
         (Pair (data-false) True) (Pair (data-true) True)
         (Pair (data-for) True) (Pair (data-function) True)
-        (Pair (data-functor) True) (Pair (data-if) True)
+        (Pair (data-functor) True)
         (Pair (data-include) True) (Pair (data-inherit) True)
         (Pair (data-initializer) True) (Pair (data-land) True)
         (Pair (data-lazy) True) (Pair (data-lor) True)
@@ -64,6 +61,9 @@
             (Some translation)  translation
             None                (escape-identifier name)))
 
+(def prefix-type-variable (string)
+     (translate-identifier string))
+
 (def translate-less-than (translate-expression expressions)
      (match expressions
             (Cons a (Cons b (Cons then-case (Cons else-case Empty))))
@@ -85,8 +85,7 @@
 
 (def translate-constructor (translator name)
      (pipe (list-map translator)
-           (string-join (data-comma))
-           wrap-in-brackets
+           (string-join (data-space))
            (fn (parameters)
                (list (prefix-constructor (escape-identifier name))
                      (data-space)
@@ -120,9 +119,7 @@
 (def translate-function-application' (translate-expression expressions)
      (match expressions
             (Cons no-args-function Empty)
-                    (join (list (translate-expression no-args-function)
-                                (data-space)
-                                (wrap-in-brackets (string-empty))))
+                    (translate-expression no-args-function)
             _
                     (string-join (data-space) (list-map translate-expression expressions))))
 
@@ -141,8 +138,7 @@
             False (string-join (data-space) (list-map escape-identifier arguments))))
 
 (def translate-lambda (translate-expression arguments expression)
-     (join (list (data-fun)
-                 (data-space)
+     (join (list (data-backslash)
                  (translate-argument-list arguments)
                  (data-arrow)
                  (translate-expression expression))))
@@ -179,10 +175,9 @@
             True   (prefix-type-variable name)))
 
 (def translate-complex-types (translate-types name)
-     (pipe (translate-types (data-comma))
-           wrap-in-brackets
-           (fn (types) (list types (data-space) (prefix-type (escape-identifier name))))
-           join))
+     (pipe (translate-types (data-space))
+           (string-concat (string-concat (prefix-type (escape-identifier name)) (data-space)))
+           wrap-in-brackets))
 
 (def translate-function-type (translate-types return-type)
      (pipe (fn (argument-types)
@@ -210,22 +205,20 @@
             (ExistentialParameter name _)
                 name))
 
-(def translate-complex-constructor-definition (name type types parameters)
+(def translate-complex-constructor-definition (name types parameters)
      (join (list (prefix-constructor (escape-identifier name))
-                 (data-colon)
-                 ((translate-types (list-map translate-type-parameter parameters) (data-star)) types)
-                 (data-arrow)
-                 type)))
+                 (data-space)
+                 ((translate-types (list-map translate-type-parameter parameters) (data-space)) types))))
 
-(def translate-constructor-definition (type parameters constructor)
+(def translate-constructor-definition (parameters constructor)
      (match constructor
             (SimpleConstructor name _)
                 (prefix-constructor (escape-identifier name))
             (ComplexConstructor name types _)
-                (translate-complex-constructor-definition name type types parameters)))
+                (translate-complex-constructor-definition name types parameters)))
 
-(def translate-constructor-definitions (type parameters)
-     (pipe (list-map (translate-constructor-definition type parameters))
+(def translate-constructor-definitions (parameters)
+     (pipe (list-map (translate-constructor-definition parameters))
            (string-join (data-vertical-bar))))
 
 (def translate-type-parameter-for-definition (parameter)
@@ -238,16 +231,16 @@
 (def translate-type-parameters ()
      (pipe (list-map translate-type-parameter-for-definition)
            (list-filter not-empty?)
-           (string-join (data-comma))))
+           (string-join (data-space))))
 
 (def translate-type-name' (name parameters)
      (match (string-empty? parameters)
             True
                 (escape-identifier name)
             False
-                (join (list (wrap-in-brackets parameters)
+                (join (list (escape-identifier name)
                             (data-space)
-                            (escape-identifier name)))))
+                            parameters))))
 
 (def translate-type-name (name parameters)
      (translate-type-name' (prefix-type name) ((translate-type-parameters) parameters)))
@@ -257,7 +250,7 @@
                  (data-space)
                  (translate-type-name name parameters)
                  (data-equals)
-                 ((translate-constructor-definitions (translate-type-name name parameters) parameters) constructors))))
+                 ((translate-constructor-definitions parameters) constructors))))
 
 (def translate-definition (definition)
      (match definition
