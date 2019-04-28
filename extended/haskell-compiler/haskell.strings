@@ -1,5 +1,5 @@
 compile-error  |*compile error*
-backslash      |\\
+backslash      |\
 arrow          | -> 
 equals         | = 
 vertical-bar   | | 
@@ -7,18 +7,17 @@ pipe-operator  | |>
 colon          | : 
 semicolon      | ; 
 star           | * 
-int32          |int32
+Tint32         |Tint32
+Int32          |Int32
 int32-plus     |(+)
 int32-multiply |(*)
 int32-minus    |(-)
-int32-divide   |(/)
-int32-modulus  |(%)
+int32-divide   |quot
+int32-modulus  |mod
 cempty         |CEmpty
 ccons          |CCons
-int32          |Int32.of_int 
 comma          |,
 with           |with
-let            |let 
 constant       |_constant_
 data           |data
 case           |case

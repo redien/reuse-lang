@@ -1,7 +1,4 @@
 
-(def prefix-type (string)
-     (string-prepend 84 string))
-
 (def prefix-constructor (constructor)
      (string-prepend 67 constructor))
 
@@ -49,6 +46,7 @@
 
 (def special-identifiers ()
      (dictionary-of (list
+        (Pair (data-Tint32) (data-Int32))
         (Pair (data-plus) (data-int32-plus))
         (Pair (data-slash) (data-int32-divide))
         (Pair (data-percent) (data-int32-modulus))
@@ -63,6 +61,9 @@
 
 (def prefix-type-variable (string)
      (translate-identifier string))
+
+(def prefix-type (string)
+     (translate-identifier (string-prepend 84 string)))
 
 (def translate-less-than (translate-expression expressions)
      (match expressions
@@ -154,7 +155,9 @@
             (FunctionApplication expressions _)
                 (wrap-in-brackets (translate-function-application translate-expression expressions))
             (IntegerConstant integer _)
-                (string-from-int32 integer)
+                (match (< integer 0)
+                       True   (wrap-in-brackets (string-from-int32 integer))
+                       False  (string-from-int32 integer))
             (Identifier name _)
                 (translate-identifier name)
             (Match expression rules _)
@@ -171,12 +174,12 @@
 
 (def translate-simple-type (name parameters)
      (match (list-any? (string-equal? name) parameters)
-            False  (prefix-type (escape-identifier name))
+            False  (prefix-type name)
             True   (prefix-type-variable name)))
 
 (def translate-complex-types (translate-types name)
      (pipe (translate-types (data-space))
-           (string-concat (string-concat (prefix-type (escape-identifier name)) (data-space)))
+           (string-concat (string-concat (prefix-type name) (data-space)))
            wrap-in-brackets))
 
 (def translate-function-type (translate-types return-type)
