@@ -9,11 +9,11 @@ semicolon      | ;
 star           | * 
 Tint32         |Tint32
 Int32          |Int32
-int32-plus     |(+)
-int32-multiply |(*)
-int32-minus    |(-)
+int32-plus     |_int32_add
+int32-multiply |_int32_mul
+int32-minus    |_int32_sub
 int32-divide   |quot
-int32-modulus  |mod
+int32-modulus  |rem
 cempty         |CEmpty
 ccons          |CCons
 comma          |,
@@ -21,3 +21,4 @@ with           |with
 constant       |_constant_
 data           |data
 case           |case
+prelude        |_int32_add :: Int32 -> Int32 -> Int32 ; _int32_add a b = a + b ; _int32_mul :: Int32 -> Int32 -> Int32 ; _int32_mul a b = a * b ; _int32_sub :: Int32 -> Int32 -> Int32 ; _int32_sub a b = a - b ;

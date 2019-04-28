@@ -13,6 +13,9 @@ Integers (32-bit signed) should wrap around
 > (- -2147483648 1)
 = 2147483647
 
+> (* 123456 123456)
+= -1938485248
+
 Multiplication
 > (* 2 3)
 = 6
@@ -28,6 +31,9 @@ Division should round toward zero
 Remainder
 > (% 3 2)
 = 1
+
+> (% 2 -3)
+= 2
 
 Comparison
 > (int32-less-than 3 4 1 0)

@@ -271,6 +271,7 @@
      ((pipe (validate-reserved-identifiers-when-not as_minimal)
             local-transforms
             (list-map (result-map translate-definition))
+            (list-cons (Result (data-prelude)))
             result-concat
             (result-map (string-join (string-of-char 10))))
          definitions))
