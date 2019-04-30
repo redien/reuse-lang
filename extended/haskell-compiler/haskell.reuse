@@ -136,15 +136,15 @@
                     (translate-function-application' translate-expression expressions)))
 
 (def translate-argument-list (arguments)
-     (match (list-empty? arguments)
-            True  (wrap-in-brackets (string-empty))
-            False (string-join (data-space) (list-map escape-identifier arguments))))
+     (string-join (data-space) (list-map escape-identifier arguments)))
 
 (def translate-lambda (translate-expression arguments expression)
-     (join (list (data-backslash)
-                 (translate-argument-list arguments)
-                 (data-arrow)
-                 (translate-expression expression))))
+     (match (list-empty? arguments)
+            True   (translate-expression expression)
+            False  (join (list (data-backslash)
+                               (translate-argument-list arguments)
+                               (data-arrow)
+                               (translate-expression expression)))))
 
 (def translate-expression (expression)
      (match expression
