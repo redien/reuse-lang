@@ -250,11 +250,18 @@
             True   (fn (definitions) definitions)
             False  (list-map validate-reserved-identifiers)))
 
+(def data-newline ()
+     (string-of-char 10))
+
 (def to-haskell (definitions source as_minimal)
      ((pipe (validate-reserved-identifiers-when-not as_minimal)
             local-transforms
             (list-map (result-map translate-definition))
             (list-cons (Result (data-prelude)))
             result-concat
-            (result-map (string-join (string-of-char 10))))
+            (result-map (list-concat (list (data-existentials)
+                                           (data-newline)
+                                           (data-import-data)
+                                           (data-newline))))
+            (result-map (string-join (data-newline))))
          definitions))
