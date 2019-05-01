@@ -20,6 +20,6 @@ echo "" | $generated_source.out
 
 result=$?
 
-rm $generated_source{,.ml,.ml.out,.out,.ml.2.cmi,.ml.2.cmo}
+rm $generated_source{,.ml,.out,.ml.2.cmi,.ml.2.cmo}
 
 exit $result
