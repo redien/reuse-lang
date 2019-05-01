@@ -46,7 +46,7 @@ eval_reuse() {
         return
     fi
 
-    $project_root/dev-env/compile-stdin-test.sh $generated_source.ml $generated_source.out
+    $project_root/extended/ocaml-compiler/compile-stdin-test.sh $generated_source.ml $generated_source.out
     if [ -e "$generated_source.out" ]; then
         echo "" | $generated_source.out
         printf "\n"

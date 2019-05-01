@@ -1,3 +1,3 @@
 
-(def main (stdin)
+(def reuse-main (stdin)
      (stringify (definitions-to-sexps (sexps-to-definitions (parse stdin)))))

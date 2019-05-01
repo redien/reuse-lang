@@ -20,4 +20,4 @@ $project_root/reusec --language ocaml\
                      $project_root/type-system/type-from-ast.reuse\
                      $project_root/type-unification/main.reuse
 
-$project_root/dev-env/compile-stdin-test.sh $project_root/generated/type-unification/source.ml $project_root/generated/type-unification/source.out
+$project_root/extended/ocaml-compiler/compile-stdin-test.sh $project_root/generated/type-unification/source.ml $project_root/generated/type-unification/source.out
