@@ -11,6 +11,7 @@
         (Pair (data-let) True) (Pair (data-class) True)
         (Pair (data-do) True) (Pair (data-module) True)
         (Pair (data-data) True) (Pair (data-case) True)
+        (Pair (data-default) True)
      )))
 
 (def string-is-reserved? (name)

@@ -505,6 +505,13 @@ Should allow commonly reserved words as variable names
 > (case' 10)
 = 10
 
+| (typ default MyEmpty)
+| (typ (mytype default) (MyCons default))
+| (def default () 1)
+| (def default' (default) default)
+> (default' 10)
+= 10
+
 Type names should be allowed as capture variables
 | (typ a (B int32))
 > (match (B 11) (B a) a)
