@@ -4,7 +4,6 @@ multiply                  |*
 minus                     |-
 slash                     |/
 percent                   |%
-match                     |match
 pipe                      |pipe
 list                      |list
 int32-less-than           |int32-less-than
