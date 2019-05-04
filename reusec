@@ -8,10 +8,10 @@ REUSE_LANGUAGE="ocaml"
 REUSE_MINIMAL=false
 export REUSE_MINIMAL
 export REUSE_OUTPUT_FILENAME
-REUSE_NOSTDLIB=false
+export REUSE_NOSTDLIB=false
 export REUSE_TIME
 
-LANGUAGES="ocaml or minimal"
+LANGUAGES="ocaml, haskell or minimal"
 
 usage() {
     echo Usage: $(basename $0) [flags] --output [OUTPUT FILE] [FILE]... >&2
@@ -95,6 +95,7 @@ done
 
 case $REUSE_LANGUAGE in
     ocaml) ;;
+    haskell) ;;
     minimal) ;;
     *)
         throw_error Unknown language $REUSE_LANGUAGE. Can be $LANGUAGES.
@@ -105,7 +106,7 @@ if [ "$REUSE_OUTPUT" == "" ]; then
     throw_error No output file specified, please use the --output [file] flag.
 fi
 
-if [ "$REUSE_NOSTDLIB" == "false" ]; then
+if [[ "$REUSE_NOSTDLIB" == "false" && "$REUSE_LANGUAGE" != "haskell" ]]; then
     REUSE_SOURCE="$(cat $root_path/generated/standard-library.reuse)
 $REUSE_SOURCE"
 fi

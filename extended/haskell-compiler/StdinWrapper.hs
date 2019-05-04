@@ -4,9 +4,7 @@ import Data.Maybe
 import Data.Int
 import Data.List
 import Data.Char
-import CompilerHaskell
-
-stdin_string = getContents
+import Reuse
 
 int32_to_char :: Int32 -> Char
 int32_to_char i =
@@ -19,7 +17,7 @@ char_to_int32 :: Char -> Int32
 char_to_int32 c =
         fromInteger (toInteger (fromEnum c))
 
-string_to_reuse_string s = 
+string_to_reuse_string s =
         foldl (\s c -> string_45append (char_to_int32 c) s) string_45empty s
 
 stdin_get :: (Int32 -> a) -> a -> String -> Int32 -> a
@@ -31,4 +29,6 @@ stdin_get succ fail s index =
                 fail
 
 list_to_string = string_45foldl string_cons ""
-stdin_list = (indexed_45iterator_45from stdin_string (stdin_get (\x -> CSome x) CNone))
+stdin_list = do
+        stdin_string <- getContents
+        return (indexed_45iterator_45from stdin_string (stdin_get (\x -> CSome x) CNone))

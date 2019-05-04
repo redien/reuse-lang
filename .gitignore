@@ -26,3 +26,4 @@ build.log
 *.o
 .DS_Store
 TODO.md
+*.hi

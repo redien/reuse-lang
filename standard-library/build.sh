@@ -16,3 +16,8 @@ $(cat $project_root/standard-library/result.reuse)
 $(cat $project_root/standard-library/state.reuse)
 $(cat $project_root/standard-library/dictionary.reuse)
 "
+
+$project_root/reusec --language haskell\
+                     --output $project_root/generated/Reuse.hs\
+                     --nostdlib\
+                     $project_root/generated/standard-library.reuse
