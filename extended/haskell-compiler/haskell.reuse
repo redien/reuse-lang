@@ -267,9 +267,6 @@
             True   (fn (definitions) definitions)
             False  (list-map validate-reserved-identifiers)))
 
-(def data-newline ()
-     (string-of-char 10))
-
 (def to-haskell (output-filename standard-library? definitions source as-minimal)
      ((pipe (validate-reserved-identifiers-when-not as-minimal)
             local-transforms
@@ -278,11 +275,9 @@
             result-concat
             (result-map (list-concat (list (data-existentials)
                                            (translate-module-declaration output-filename)
-                                           (data-newline)
                                            (data-imports)
                                            (match standard-library?
                                                   True   (data-import-stdlib)
-                                                  False  (string-empty))
-                                           (data-newline))))
-            (result-map (string-join (data-newline))))
+                                                  False  (string-empty)))))
+            (result-map (string-join (string-of-char 10))))
          definitions))
