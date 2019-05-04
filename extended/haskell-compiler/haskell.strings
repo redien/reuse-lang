@@ -21,8 +21,18 @@ with           |with
 constant       |_constant_
 data           |data
 case           |case
+deriving       |deriving
+family         |family
 default        |default
-forall         |forall 
+forall         |forall
+foreign        |foreign
+import         |import
+instance       |instance
+infix          |infix
+infixl         |infixl
+infixr         |infixr
+newtype        |newtype
+where          |where
 dot            |.
 prelude        |_int32_add :: Int32 -> Int32 -> Int32 ; _int32_add a b = a + b ; _int32_mul :: Int32 -> Int32 -> Int32 ; _int32_mul a b = a * b ; _int32_sub :: Int32 -> Int32 -> Int32 ; _int32_sub a b = a - b ;
 existentials   |{-# LANGUAGE ExistentialQuantification #-}

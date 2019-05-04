@@ -11,7 +11,12 @@
         (Pair (data-let) True) (Pair (data-class) True)
         (Pair (data-do) True) (Pair (data-module) True)
         (Pair (data-data) True) (Pair (data-case) True)
-        (Pair (data-default) True)
+        (Pair (data-deriving) True) (Pair (data-family) True)
+        (Pair (data-default) True) (Pair (data-forall) True)
+        (Pair (data-foreign) True) (Pair (data-import) True)
+        (Pair (data-instance) True) (Pair (data-infix) True)
+        (Pair (data-infixl) True) (Pair (data-infixr) True)
+        (Pair (data-newtype) True) (Pair (data-where) True)
      )))
 
 (def string-is-reserved? (name)
@@ -224,6 +229,7 @@
                             (ExistentialParameter name __)
                                 (join (list s
                                             (data-forall)
+                                            (data-space)
                                             (prefix-type-variable name)
                                             (data-dot)
                                             (data-space)))))
