@@ -239,7 +239,7 @@
 (def translate-type-definition (name parameters constructors)
      (join (list (data-data)
                  (data-space)
-                 (escape-identifier (prefix-type name))
+                 (prefix-type name)
                  (translate-universal-parameters parameters)
                  (data-equals)
                  (translate-existential-parameters parameters)

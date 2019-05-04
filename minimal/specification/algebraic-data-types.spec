@@ -1,10 +1,10 @@
 Boolean sum type
-| (typ myBoolean MyTrue MyFalse)
+| (typ my-boolean MyTrue MyFalse)
 > (match MyFalse MyTrue 0 MyFalse 1)
 = 1
 
 Linked list
-| (typ (myList a) MyEmpty (MyPair a (myList a)))
+| (typ (my-list a) MyEmpty (MyPair a (my-list a)))
 > (match (MyPair 2 MyEmpty) MyEmpty 0 (MyPair i _) i)
 = 2
 
