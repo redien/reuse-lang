@@ -7,6 +7,7 @@ REUSE_OUTPUT=""
 REUSE_LANGUAGE="ocaml"
 REUSE_MINIMAL=false
 export REUSE_MINIMAL
+export REUSE_OUTPUT_FILENAME
 REUSE_NOSTDLIB=false
 export REUSE_TIME
 
@@ -53,6 +54,7 @@ do
         ;;
         --output)
             REUSE_OUTPUT="$2"
+            REUSE_OUTPUT_FILENAME="${REUSE_OUTPUT##*/}"
             shift
             shift
         ;;

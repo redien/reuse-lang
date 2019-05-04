@@ -3,6 +3,7 @@
 script_path=$(dirname "$0")
 project_root=$script_path/../..
 
+export REUSE_OUTPUT_FILENAME="Test.hs"
 cat "$1" | "$project_root/generated/extended/compiler-haskell" > "$2/executable.hs"
 result=$?
 if [ "$result" != "0" ]; then

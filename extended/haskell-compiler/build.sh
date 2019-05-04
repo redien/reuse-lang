@@ -31,6 +31,7 @@ cat << END_OF_SOURCE >> $project_root/generated/extended/CompilerHaskell.ml
 
 let getenv name = try (Sys.getenv name) with Not_found -> ""
 let as_minimal = if getenv "REUSE_MINIMAL" = "true" then CTrue else CFalse;;
+let output_filename = Seq.fold_left (fun s c -> string_45append (Int32.of_int (Char.code c)) s) (string_45empty ()) (String.to_seq (getenv "REUSE_OUTPUT_FILENAME"));;
 let performance = getenv "REUSE_TIME" = "true";;
 
 let stdin_wrapper_start = Unix.gettimeofday ();;
@@ -49,7 +50,7 @@ let parse_end = Unix.gettimeofday ();;
 let parse_time = parse_end -. parse_start;;
 
 let codegen_start = Unix.gettimeofday ();;
-let codegen_output = (to_45haskell parse_output stdin_list as_minimal);;
+let codegen_output = (to_45haskell output_filename parse_output stdin_list as_minimal);;
 let codegen_end = Unix.gettimeofday ();;
 let codegen_time = codegen_end -. codegen_start;;
 

@@ -252,21 +252,32 @@
             (TypeDefinition name parameters constructors _)
                 (translate-type-definition name parameters constructors)))
 
-(def validate-reserved-identifiers-when-not (as_minimal)
-     (match as_minimal
+(def module-name-from-filename (filename)
+     (string-take (- (string-size filename) 3) filename))
+
+(def translate-module-declaration (filename)
+     (join (list (data-module)
+                 (data-space)
+                 (module-name-from-filename filename)
+                 (data-space)
+                 (data-where))))
+
+(def validate-reserved-identifiers-when-not (as-minimal)
+     (match as-minimal
             True   (fn (definitions) definitions)
             False  (list-map validate-reserved-identifiers)))
 
 (def data-newline ()
      (string-of-char 10))
 
-(def to-haskell (definitions source as_minimal)
-     ((pipe (validate-reserved-identifiers-when-not as_minimal)
+(def to-haskell (output-filename definitions source as-minimal)
+     ((pipe (validate-reserved-identifiers-when-not as-minimal)
             local-transforms
             (list-map (result-map translate-definition))
             (list-cons (Result (data-prelude)))
             result-concat
             (result-map (list-concat (list (data-existentials)
+                                           (translate-module-declaration output-filename)
                                            (data-newline)
                                            (data-import-data)
                                            (data-newline))))
