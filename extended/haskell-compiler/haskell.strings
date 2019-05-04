@@ -17,7 +17,6 @@ int32-modulus  |rem
 cempty         |CEmpty
 ccons          |CCons
 comma          |,
-with           |with
 constant       |_constant_
 data           |data
 case           |case
@@ -33,7 +32,6 @@ infixl         |infixl
 infixr         |infixr
 newtype        |newtype
 where          |where
-module         |module
 dot            |.
 prelude        |_int32_add :: Int32 -> Int32 -> Int32 ; _int32_add a b = a + b ; _int32_mul :: Int32 -> Int32 -> Int32 ; _int32_mul a b = a * b ; _int32_sub :: Int32 -> Int32 -> Int32 ; _int32_sub a b = a - b ;
 existentials   |{-# LANGUAGE ExistentialQuantification #-}
