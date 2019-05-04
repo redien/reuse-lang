@@ -35,7 +35,7 @@ let output_filename = Seq.fold_left (fun s c -> string_45append (Int32.of_int (C
 let performance = getenv "REUSE_TIME" = "true";;
 
 let stdin_wrapper_start = Unix.gettimeofday ();;
-$(cat $script_path/stdin_wrapper.hs)
+$(cat $project_root/extended/ocaml-compiler/stdin_wrapper.ml)
 let stdin_wrapper_end = Unix.gettimeofday ();;
 let stdin_wrapper_time = stdin_wrapper_end -. stdin_wrapper_start;;
 
