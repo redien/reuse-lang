@@ -7,10 +7,11 @@ $project_root/standard-library/build.sh
 
 [ -d $project_root/generated/type-unification ] || mkdir $project_root/generated/type-unification
 
-$project_root/reusec --language ocaml\
-                     --output $project_root/generated/type-unification/source.ml\
+$project_root/reusec --language haskell\
+                     --output $project_root/generated/type-unification/Test.hs\
                      $project_root/sexp-parser/parser.reuse\
                      $project_root/parser/parser.strings\
+                     $project_root/parser/ast.reuse\
                      $project_root/parser/strings.reuse\
                      $project_root/parser/parser.reuse\
                      $project_root/type-system/type.reuse\
@@ -20,4 +21,4 @@ $project_root/reusec --language ocaml\
                      $project_root/type-system/type-from-ast.reuse\
                      $project_root/type-unification/main.reuse
 
-$project_root/extended/ocaml-compiler/compile-stdin-test.sh $project_root/generated/type-unification/source.ml $project_root/generated/type-unification/source.out
+$project_root/extended/haskell-compiler/compile-stdin-test.sh $project_root/generated/type-unification/Test.hs $project_root/generated/type-unification/source.out
