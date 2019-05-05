@@ -4,7 +4,13 @@ import Data.Maybe
 import Data.Int
 import Data.List
 import Data.Char
+import Control.Exception
+import Control.DeepSeq
 import Reuse
+
+read_stdin = do
+        input <- getContents
+        evaluate $ force input
 
 int32_to_char :: Int32 -> Char
 int32_to_char i =
@@ -30,5 +36,5 @@ stdin_get succ fail s index =
 
 list_to_string = string_45foldl string_cons ""
 stdin_list = do
-        stdin_string <- getContents
+        stdin_string <- read_stdin
         return (indexed_45iterator_45from stdin_string (stdin_get (\x -> CSome x) CNone))
