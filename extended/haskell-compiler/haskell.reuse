@@ -80,7 +80,7 @@
 (def translate-pattern (pattern)
      (match pattern
             (Capture name _)
-                (escape-identifier name)
+                (string-prepend 33 (escape-identifier name))
             (IntegerPattern integer _)
                 (match (< integer 0)
                        True   (wrap-in-brackets (string-from-int32 integer))
