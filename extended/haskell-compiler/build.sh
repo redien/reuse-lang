@@ -19,8 +19,8 @@ if [ "$DIAGNOSTICS" == "true" ]; then
 fi
 
 $project_root/reusec $extra_flags\
-                     --language ocaml\
-                     --output $project_root/generated/extended/CompilerHaskell.ml\
+                     --language haskell\
+                     --output $project_root/generated/extended/CompilerHaskell.hs\
                      $project_root/sexp-parser/parser.reuse\
                      $project_root/parser/ast.reuse\
                      $project_root/parser/parser.strings\
@@ -32,53 +32,88 @@ $project_root/reusec $extra_flags\
                      $script_path/haskell.strings\
                      $script_path/haskell.reuse
 
-cat << END_OF_SOURCE >> $project_root/generated/extended/CompilerHaskell.ml
+cat << END_OF_SOURCE > $project_root/generated/extended/cli.hs
 
-let getenv name = try (Sys.getenv name) with Not_found -> ""
-let as_minimal = if getenv "REUSE_MINIMAL" = "true" then CTrue else CFalse;;
-let with_stdlib = if getenv "REUSE_NOSTDLIB" = "false" then CTrue else CFalse;;
-let output_filename = Seq.fold_left (fun s c -> string_45append (Int32.of_int (Char.code c)) s) (string_45empty ()) (String.to_seq (getenv "REUSE_OUTPUT_FILENAME"));;
-let performance = getenv "REUSE_TIME" = "true";;
+import System.Environment
+import System.Exit
+import System.CPUTime
+import System.IO
+import Text.Printf
+import Data.Maybe
+import Data.Int
+import CompilerHaskell
+import StdinWrapper
+import Reuse
 
-let stdin_wrapper_start = Unix.gettimeofday ();;
-$(cat $project_root/extended/ocaml-compiler/stdin_wrapper.ml)
-let stdin_wrapper_end = Unix.gettimeofday ();;
-let stdin_wrapper_time = stdin_wrapper_end -. stdin_wrapper_start;;
+getenv name = do
+    param <- lookupEnv name
+    return (fromMaybe "" param)
 
-let parse_sexp_start = Unix.gettimeofday ();;
-let parse_sexp_output = (parse stdin_list);;
-let parse_sexp_end = Unix.gettimeofday ();;
-let parse_sexp_time = parse_sexp_end -. parse_sexp_start;;
+io_as_minimal = do
+    param <- getenv "REUSE_MINIMAL"
+    return (if param == "true" then CTrue else CFalse)
 
-let parse_start = Unix.gettimeofday ();;
-let parse_output = stringify_45parse_45errors (sexps_45to_45definitions parse_sexp_output);;
-let parse_end = Unix.gettimeofday ();;
-let parse_time = parse_end -. parse_start;;
+io_with_stdlib = do
+    param <- getenv "REUSE_NOSTDLIB"
+    return (if param == "false" then CTrue else CFalse)
 
-let codegen_start = Unix.gettimeofday ();;
-let codegen_output = (to_45haskell output_filename with_stdlib parse_output stdin_list as_minimal);;
-let codegen_end = Unix.gettimeofday ();;
-let codegen_time = codegen_end -. codegen_start;;
+io_output_filename = do
+    param <- getenv "REUSE_OUTPUT_FILENAME"
+    return (StdinWrapper.string_to_reuse_string param)
 
-if performance then
-    match codegen_output with
-        CResult (source) -> Printf.printf "%f %f %f %f %ld" stdin_wrapper_time parse_sexp_time parse_time codegen_time (string_45size source) ; exit 0
-      | CError (error) -> Printf.eprintf "%s" (list_to_string error) ; exit 1
-else
-    match codegen_output with
-        CResult (source) -> Printf.printf "%s" (list_to_string source) ; exit 0
-      | CError (error) -> Printf.eprintf "%s" (list_to_string error) ; exit 1;;
+io_performance = do
+    param <- getenv "REUSE_TIME"
+    return (param == "true")
+
+main = do
+    stdin_wrapper_start <- getCPUTime
+    stdin_list <- StdinWrapper.stdin_list
+    stdin_wrapper_end <- getCPUTime
+    let stdin_wrapper_time = stdin_wrapper_end - stdin_wrapper_start
+
+    parse_sexp_start <- getCPUTime
+    let parse_sexp_output = parse stdin_list
+    parse_sexp_end <- getCPUTime
+    let parse_sexp_time = parse_sexp_end - parse_sexp_start
+
+    parse_start <- getCPUTime
+    let parse_output = stringify_45parse_45errors $ sexps_45to_45definitions parse_sexp_output
+    parse_end <- getCPUTime
+    let parse_time = parse_end - parse_start
+
+    codegen_start <- getCPUTime
+    as_minimal <- io_as_minimal
+    with_stdlib <- io_with_stdlib
+    output_filename <- io_output_filename
+    let codegen_output = to_45haskell output_filename with_stdlib parse_output stdin_list as_minimal
+    codegen_end <- getCPUTime
+    let codegen_time = codegen_end - codegen_start
+
+    performance <- io_performance
+
+    if performance then
+        case codegen_output of
+            CResult source -> do printf "%f %f %f %f %d" stdin_wrapper_time parse_sexp_time parse_time codegen_time (string_45size source)
+                                 exitWith ExitSuccess
+            CError error -> do hPrintf stderr "%s" (list_to_string error)
+                               exitWith (ExitFailure 1)
+    else
+        case codegen_output of
+            CResult source -> do printf "%s" (list_to_string source)
+                                 exitWith ExitSuccess
+            CError error -> do hPrintf stderr "%s" (list_to_string error)
+                               exitWith (ExitFailure 1)
 
 END_OF_SOURCE
 
 compile_binary() {
-    ocamlopt -O3 unix.cmxa $project_root/generated/extended/CompilerHaskell.ml -o $project_root/generated/extended/compiler-haskell
+    ghc $project_root/generated/Reuse.hs $project_root/extended/haskell-compiler/StdinWrapper.hs $project_root/generated/extended/CompilerHaskell.hs $project_root/generated/extended/cli.hs -o $project_root/generated/extended/compiler-haskell
 }
 
 if [ "$1" != "--no-binary" ]; then
     if [ "$1" == "--diagnostics" ]; then
-        2>&1 echo "[build.sh] ocamlopt"
-        echo "Haskell:          " $(echo "time -p ocamlopt -O3 unix.cmxa $project_root/generated/extended/CompilerHaskell.ml -o $project_root/generated/extended/compiler-haskell" | bash 2>&1 | grep "real" | awk '{ print $2; }')s
+        2>&1 echo "[build.sh] ghc"
+        echo "Haskell:          " $(echo "time -p ghc $project_root/generated/Reuse.hs $project_root/extended/haskell-compiler/StdinWrapper.hs $project_root/generated/extended/CompilerHaskell.hs $project_root/generated/extended/cli.hs -o $project_root/generated/extended/compiler-haskell" | bash 2>&1 | grep "real" | awk '{ print $2; }')s
     else
         compile_binary
     fi
