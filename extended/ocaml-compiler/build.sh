@@ -4,13 +4,18 @@ set -e
 script_path=$(dirname "$0")
 project_root=$script_path/../..
 
-$project_root/standard-library/build.sh
-
-[ -d $project_root/generated/extended ] || mkdir $project_root/generated/extended
-
 extra_flags=
 if [ "$1" == "--diagnostics" ]; then
     extra_flags="--diagnostics"
+    DIAGNOSTICS="true"
+fi
+
+$project_root/standard-library/build.sh $extra_flags
+
+[ -d $project_root/generated/extended ] || mkdir $project_root/generated/extended
+
+if [ "$DIAGNOSTICS" == "true" ]; then
+    2>&1 echo "[build.sh] reusec"
 fi
 
 $project_root/reusec $extra_flags\
@@ -70,6 +75,7 @@ compile_binary() {
 
 if [ "$1" != "--no-binary" ]; then
     if [ "$1" == "--diagnostics" ]; then
+        2>&1 echo "[build.sh] ocamlopt"
         echo "OCaml:          " $(echo "time -p ocamlopt -O3 unix.cmxa $project_root/generated/extended/CompilerOCaml.ml -o $project_root/generated/extended/compiler-ocaml" | bash 2>&1 | grep "real" | awk '{ print $2; }')s
     else
         compile_binary

@@ -77,6 +77,10 @@ do
     esac
 done
 
+if [ "$REUSE_TIME" == "true" ]; then
+    2>&1 echo "[reusec] Reading source files"
+fi
+
 STRING_GEN_TOTAL=0
 for arg in $REUSE_SOURCE_FILES; do
     if [[ "$arg" == *".strings" ]]; then
@@ -116,6 +120,7 @@ format_integer() {
 }
 
 if [ "$REUSE_TIME" == "true" ]; then
+    2>&1 echo "[reusec] reuse-$REUSE_LANGUAGE"
     DIAGNOSTICS=$(echo "$REUSE_SOURCE" | $root_path/bin/reuse-$REUSE_LANGUAGE)
     READING=$(echo $DIAGNOSTICS | awk '{print $1}')
     PARSING_SEXPS=$(echo $DIAGNOSTICS | awk '{print $2}')

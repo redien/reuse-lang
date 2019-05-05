@@ -17,6 +17,10 @@ $(cat $project_root/standard-library/state.reuse)
 $(cat $project_root/standard-library/dictionary.reuse)
 "
 
+if [ "$1" == "--diagnostics" ]; then
+    2>&1 echo "[standard-library/build.sh] reusec --language haskell"
+fi
+
 $project_root/reusec --language haskell\
                      --output $project_root/generated/Reuse.hs\
                      --nostdlib\
