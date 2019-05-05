@@ -183,8 +183,9 @@
             (FunctionType argument-types return-type _)
                 ((translate-function-type translate-types return-type) argument-types)))
 
-(def translate-types (parameters separator)
-     (pipe (list-map (translate-type (translate-types parameters) parameters))
+(def translate-types (parameters f separator)
+     (pipe (list-map (pipe (translate-type (translate-types parameters (fn (x) x)) parameters)
+                           f))
            (string-join separator)))
 
 (def translate-type-parameter (parameter)
@@ -197,7 +198,10 @@
 (def translate-complex-constructor-definition (name types parameters)
      (join (list (prefix-constructor (escape-identifier name))
                  (data-space)
-                 ((translate-types (list-map translate-type-parameter parameters) (data-space)) types))))
+                 ((translate-types (list-map translate-type-parameter parameters)
+                                   (string-prepend 33)
+                                   (data-space))
+                    types))))
 
 (def translate-constructor-definition (parameters constructor)
      (match constructor
