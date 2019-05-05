@@ -14,22 +14,20 @@ read_stdin = do
         evaluate $ force input
 
 int32_to_char :: Int32 -> Char
-int32_to_char !i =
-        chr (fromInteger (toInteger i))
+int32_to_char !i = toEnum (fromIntegral i)
 
 string_cons !x !xs =
         concat [xs, [int32_to_char x]]
 
 char_to_int32 :: Char -> Int32
-char_to_int32 !c =
-        fromInteger (toInteger (fromEnum c))
+char_to_int32 !c = fromIntegral (fromEnum c)
 
 string_to_reuse_string !s =
         foldl (\ !s !c -> string_45append (char_to_int32 c) s) string_45empty s
 
 stdin_get :: (Int32 -> a) -> a -> String -> Int32 -> a
 stdin_get !succ !fail !s !index =
-        let !i = fromInteger (toInteger index) in
+        let !i = fromIntegral index in
         if i < (length s) && i >= 0 then
                 succ (char_to_int32 (s !! i))
         else
