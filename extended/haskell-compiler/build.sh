@@ -41,6 +41,7 @@ import System.IO
 import Text.Printf
 import Data.Maybe
 import Data.Int
+import Numeric
 import CompilerHaskell
 import StdinWrapper
 import Reuse
@@ -69,17 +70,17 @@ main = do
     stdin_wrapper_start <- getCPUTime
     stdin_list <- StdinWrapper.stdin_list
     stdin_wrapper_end <- getCPUTime
-    let stdin_wrapper_time = stdin_wrapper_end - stdin_wrapper_start
+    let stdin_wrapper_time = (fromIntegral (stdin_wrapper_end - stdin_wrapper_start)) / (10 ^ 12)
 
     parse_sexp_start <- getCPUTime
     let parse_sexp_output = parse stdin_list
     parse_sexp_end <- getCPUTime
-    let parse_sexp_time = parse_sexp_end - parse_sexp_start
+    let parse_sexp_time = (fromIntegral (parse_sexp_end - parse_sexp_start)) / (10 ^ 12)
 
     parse_start <- getCPUTime
     let parse_output = stringify_45parse_45errors $ sexps_45to_45definitions parse_sexp_output
     parse_end <- getCPUTime
-    let parse_time = parse_end - parse_start
+    let parse_time = (fromIntegral (parse_end - parse_start)) / (10 ^ 12)
 
     codegen_start <- getCPUTime
     as_minimal <- io_as_minimal
@@ -87,13 +88,13 @@ main = do
     output_filename <- io_output_filename
     let codegen_output = to_45haskell output_filename with_stdlib parse_output stdin_list as_minimal
     codegen_end <- getCPUTime
-    let codegen_time = codegen_end - codegen_start
+    let codegen_time = (fromIntegral (codegen_end - codegen_start)) / (10 ^ 12)
 
     performance <- io_performance
 
     if performance then
         case codegen_output of
-            CResult source -> do printf "%f %f %f %f %d" stdin_wrapper_time parse_sexp_time parse_time codegen_time (string_45size source)
+            CResult source -> do printf "%.6f %.6f %.6f %.6f %s" (stdin_wrapper_time :: Double) (parse_sexp_time :: Double) (parse_time :: Double) (codegen_time :: Double) (show (string_45size source))
                                  exitWith ExitSuccess
             CError error -> do hPrintf stderr "%s" (list_to_string error)
                                exitWith (ExitFailure 1)
