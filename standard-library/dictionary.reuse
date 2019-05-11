@@ -39,6 +39,21 @@
             None
                 (dictionary-value' dictionary)))
 
+(def dictionary-entries' (key dictionary)
+     ((pipe dictionary-children'
+            (list-flatmap (fn (child)
+                              (dictionary-entries' (string-append (pair-left child) key) (pair-right child))))
+            (fn (entries)
+                (match (dictionary-value' dictionary)
+                       (Some value)
+                            (Cons (Pair key value) entries)
+                       None
+                            entries)))
+        dictionary))
+
+(def dictionary-entries (dictionary)
+     (dictionary-entries' (string-empty) dictionary))
+
 (def dictionary-of (entries)
      (list-foldl (pair-map dictionary-set) (dictionary-empty) entries))
 
