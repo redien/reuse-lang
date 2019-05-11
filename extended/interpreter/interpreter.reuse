@@ -96,8 +96,8 @@
                        None 
                             (bind (sequence (list-map (eval-expression scope) expressions)) (fn (expressions)
                             (match expressions
-                                   (Cons (Lambda arguments expression scope) values)
-                                        (eval-expression (scope-add (list-zip arguments values) scope) expression)
+                                   (Cons (Lambda arguments expression closed-scope) values)
+                                        (eval-expression (scope-add (list-zip arguments values) (scope-concat scope closed-scope)) expression)
                                    _
                                         (eval-error)))))
             (Match expression cases _)

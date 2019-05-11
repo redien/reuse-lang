@@ -27,3 +27,8 @@ Should be able to apply returned functions with free variables
 | (def f (x) (fn () x))
 > ((f 7))
 = 7
+
+Should resolve both free and bound variables
+| (def f (x) (fn (y) (+ x y)))
+> ((f 3) 5)
+= 8

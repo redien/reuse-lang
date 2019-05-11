@@ -11,7 +11,7 @@
                                        (dictionary-set (definition-name definition)
                                                        (Lambda arguments
                                                                (ast-expression-map-meta (fn (_) (Scope dictionary)) expression)
-                                                               (Scope dictionary))
+                                                               (scope-empty))
                                                        dictionary)
                                    _
                                        dictionary))
@@ -27,6 +27,11 @@
                                                   (dictionary-set argument value dictionary)))
                                    dictionary
                                    variables))))
+
+(def scope-concat (a b)
+     (match a
+            (Scope a)
+                (scope-add (dictionary-entries a) b)))
 
 (def scope-get (name scope)
      (match scope
