@@ -1,0 +1,31 @@
+
+(typ scope (Scope (dictionary (expression scope))))
+
+(def scope-from-definitions (definitions)
+     (Scope (list-foldl (fn (definition dictionary)
+                            (match definition
+                                   (FunctionDefinition _ arguments expression __)
+                                       (dictionary-set (definition-name definition)
+                                                       (Lambda arguments
+                                                               (ast-expression-map-meta (fn (_) (Scope dictionary)) expression)
+                                                               (Scope dictionary))
+                                                       dictionary)
+                                   _
+                                       dictionary))
+                        (dictionary-empty)
+                        definitions)))
+
+(def scope-add (arguments values scope)
+     (match scope
+            (Scope dictionary)
+                (Scope (list-foldl (fn (pair dictionary)
+                                       (match pair
+                                              (Pair argument value)
+                                                  (dictionary-set argument value dictionary)))
+                                   dictionary
+                                   (list-zip arguments values)))))
+
+(def scope-get (name scope)
+     (match scope
+            (Scope dictionary)
+                (dictionary-get name dictionary)))

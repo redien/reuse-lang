@@ -4,7 +4,8 @@ project_root=$(dirname $0)/..
 
 run() {
     case $1 in
-        test)                   run test-string-gen && run test-sexp-parser && run test-parser && run test-compilers && run test-standard-library;;
+        test)                   run test-string-gen && run test-sexp-parser && run test-parser && run test-compilers && run test-interpreter && run test-standard-library;;
+        test-interpreter)       $project_root/extended/interpreter/build.sh && IMPL=extended/interpreter run test-minimal && IMPL=extended/interpreter run test-extended ;;
         test-compilers)         run test-haskell-compiler && run test-ocaml-compiler && run test-minimal-compiler ;;
         test-ocaml-compiler)    $project_root/extended/ocaml-compiler/build.sh && IMPL=extended/ocaml-compiler run test-minimal && IMPL=extended/ocaml-compiler run test-extended ;;
         test-haskell-compiler)  $project_root/extended/haskell-compiler/build.sh && IMPL=extended/haskell-compiler run test-minimal && IMPL=extended/haskell-compiler run test-extended ;;

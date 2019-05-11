@@ -1,0 +1,56 @@
+
+(def return (x) (Result x))
+(def bind (xs f) (result-bind xs f))
+(def let (x f) (f x))
+(def flatmap (f xs) (result-flatmap f xs))
+(def sequence (xs) (result-concat xs))
+(def fmap (f xs) (result-map f xs))
+(def map (f xs) (list-map f xs))
+
+(def eval-error ()
+     (Error (string-of-char 45)))
+
+(def eval-expressions (eval-expression expressions)
+     (sequence (list-map eval-expression expressions)))
+
+(def eval-expression (scope expression)
+     (match expression
+            (IntegerConstant value _)
+                (return (IntegerConstant value scope))
+            (Identifier name _)
+                (match (scope-get name scope)
+                       (Some value)
+                            (return value)
+                       None
+                            (eval-error))
+            (Constructor name arguments _)
+                (bind (eval-expressions (eval-expression scope) arguments) (fn (values)
+                (return (Constructor name values scope))))
+            (Lambda arguments expression _)
+                (return (Lambda arguments expression scope))
+            (FunctionApplication expressions _)
+                (bind (eval-expressions (eval-expression scope) expressions) (fn (expressions)
+                (match expressions
+                       (Cons (Lambda arguments expression scope) values)
+                            (eval-expression (scope-add arguments values scope) expression)
+                       _
+                            (eval-error))))
+            _
+                (eval-error)))
+
+(def eval-main (global-scope)
+     (match (scope-get (data-main) global-scope)
+            (Some (Lambda _ expression __))
+                (eval-expression global-scope expression)
+            _
+                (eval-error)))
+
+(def eval-definitions (definitions)
+     (eval-main (scope-from-definitions definitions)))
+
+(def eval (definitions source)
+     (fmap (pipe (ast-expression-map-meta (fn (_) (Range 0 0)))
+                 expression-to-sexp
+                 list-from
+                 stringify)
+           (flatmap eval-definitions (sequence definitions))))
