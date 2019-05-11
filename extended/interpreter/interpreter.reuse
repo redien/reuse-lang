@@ -10,9 +10,6 @@
 (def eval-error ()
      (Error (string-of-char 45)))
 
-(def eval-expressions (eval-expression expressions)
-     (sequence (list-map eval-expression expressions)))
-
 (def eval-expression (scope expression)
      (match expression
             (IntegerConstant value _)
@@ -24,12 +21,12 @@
                        None
                             (eval-error))
             (Constructor name arguments _)
-                (bind (eval-expressions (eval-expression scope) arguments) (fn (values)
+                (bind (sequence (list-map (eval-expression scope) arguments)) (fn (values)
                 (return (Constructor name values scope))))
             (Lambda arguments expression _)
                 (return (Lambda arguments expression scope))
             (FunctionApplication expressions _)
-                (bind (eval-expressions (eval-expression scope) expressions) (fn (expressions)
+                (bind (sequence (list-map (eval-expression scope) expressions)) (fn (expressions)
                 (match expressions
                        (Cons (Lambda arguments expression scope) values)
                             (eval-expression (scope-add arguments values scope) expression)
@@ -45,12 +42,9 @@
             _
                 (eval-error)))
 
-(def eval-definitions (definitions)
-     (eval-main (scope-from-definitions definitions)))
-
 (def eval (definitions source)
      (fmap (pipe (ast-expression-map-meta (fn (_) (Range 0 0)))
                  expression-to-sexp
                  list-from
                  stringify)
-           (flatmap eval-definitions (sequence definitions))))
+           (flatmap (pipe scope-from-definitions eval-main) (sequence definitions))))
