@@ -33,6 +33,13 @@
             (TypeDefinition _ __ ___ meta)      meta
             (FunctionDefinition _ __ ___ meta)  meta))
 
+(def definition-name (definition)
+     (match definition
+            (TypeDefinition name _ __ ___)
+                name
+            (FunctionDefinition name _ __ ___)
+                name))
+
 (def over-match-pair-expression (f pair)
      (match pair
             (Pair pattern expression)
@@ -104,3 +111,38 @@
             _
                 (result-return expression)))
 
+(def ast-pattern-map-meta (f pattern)
+     (match pattern
+            (ConstructorPattern name patterns meta)
+                (ConstructorPattern name (list-map (ast-pattern-map-meta f) patterns) (f meta))
+            (IntegerPattern value meta)
+                (IntegerPattern value (f meta))
+            (Capture name meta)
+                (Capture name (f meta))))
+
+(def ast-match-pair-map-meta (ast-expression-map-meta f pair)
+     (match pair
+            (Pair pattern expression)
+               (Pair (ast-pattern-map-meta f pattern) (ast-expression-map-meta f expression))))
+
+(def ast-expression-map-meta (f expression)
+     (match expression
+            (IntegerConstant integer meta)
+                (IntegerConstant integer (f meta))
+            (Identifier identifier meta)
+                (Identifier identifier (f meta))
+            (Lambda arguments expression meta)
+                (Lambda arguments
+                        (ast-expression-map-meta f expression)
+                        (f meta))
+            (Match expression pairs meta)
+                (Match (ast-expression-map-meta f expression)
+                       (list-map (ast-match-pair-map-meta ast-expression-map-meta f) pairs)
+                       (f meta))
+            (Constructor name parameters meta)
+                (Constructor name
+                             (list-map (ast-expression-map-meta f) parameters)
+                             (f meta))
+            (FunctionApplication parameters meta)
+                (FunctionApplication (list-map (ast-expression-map-meta f) parameters)
+                                     (f meta))))
