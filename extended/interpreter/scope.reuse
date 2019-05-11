@@ -1,6 +1,9 @@
 
 (typ scope (Scope (dictionary (expression scope))))
 
+(def scope-empty ()
+     (Scope (dictionary-empty)))
+
 (def scope-from-definitions (definitions)
      (Scope (list-foldl (fn (definition dictionary)
                             (match definition

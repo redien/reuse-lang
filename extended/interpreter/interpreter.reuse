@@ -10,6 +10,9 @@
 (def eval-error ()
      (Error (string-of-char 45)))
 
+(def eval-error2 ()
+     (Error (string-of-char 46)))
+
 (def case-matches-expression (expression case)
      (match (Pair expression case)
             (Pair (IntegerConstant a _1) (Pair (IntegerPattern b _2) _3))
@@ -39,6 +42,38 @@
             None
                 (eval-error)))
 
+(def eval-int32-operator (operator arguments)
+     (match arguments
+            (Cons (IntegerConstant a __) (Cons (IntegerConstant b ___) Empty))
+                (return (IntegerConstant (operator a b) (scope-empty)))
+            _
+                (eval-error)))
+
+(def eval-int32-less-than (arguments)
+     (match arguments
+            (Cons (IntegerConstant a __) (Cons (IntegerConstant b ___) (Cons first (Cons second Empty))))
+                (match (< a b)
+                       True   (return first)
+                       False  (return second))
+            _
+                (eval-error)))
+
+(def special-forms ()
+     (dictionary-of (list
+        (Pair (data-int32-less-than)  eval-int32-less-than)
+        (Pair (data-percent)          (eval-int32-operator %))
+        (Pair (data-plus)             (eval-int32-operator +))
+        (Pair (data-minus)            (eval-int32-operator -))
+        (Pair (data-slash)            (eval-int32-operator /))
+        (Pair (data-multiply)         (eval-int32-operator *)))))
+
+(def get-special-form (expressions)
+     (match expressions
+            (Cons (Identifier name _) __)
+                (dictionary-get name (special-forms))
+            _
+                None))
+
 (def eval-expression (scope expression)
      (match expression
             (IntegerConstant value _)
@@ -48,19 +83,23 @@
                        (Some value)
                             (return value)
                        None
-                            (eval-error))
+                            (eval-error2))
             (Constructor name arguments _)
                 (bind (sequence (list-map (eval-expression scope) arguments)) (fn (values)
                 (return (Constructor name values scope))))
             (Lambda arguments expression _)
                 (return (Lambda arguments expression scope))
             (FunctionApplication expressions _)
-                (bind (sequence (list-map (eval-expression scope) expressions)) (fn (expressions)
-                (match expressions
-                       (Cons (Lambda arguments expression scope) values)
-                            (eval-expression (scope-add (list-zip arguments values) scope) expression)
-                       _
-                            (eval-error))))
+                (match (get-special-form expressions)
+                       (Some evaluator)
+                            (bind (sequence (list-map (eval-expression scope) (list-rest expressions))) evaluator)
+                       None 
+                            (bind (sequence (list-map (eval-expression scope) expressions)) (fn (expressions)
+                            (match expressions
+                                   (Cons (Lambda arguments expression scope) values)
+                                        (eval-expression (scope-add (list-zip arguments values) scope) expression)
+                                   _
+                                        (eval-error)))))
             (Match expression cases _)
                 (bind (eval-expression scope expression) (fn (expression)
                 (pattern-match eval-expression scope expression cases)))))
