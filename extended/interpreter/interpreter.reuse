@@ -10,6 +10,35 @@
 (def eval-error ()
      (Error (string-of-char 45)))
 
+(def case-matches-expression (expression case)
+     (match (Pair expression case)
+            (Pair (IntegerConstant a _1) (Pair (IntegerPattern b _2) _3))
+                (= a b)
+            (Pair (Constructor name arguments _1) (Pair (ConstructorPattern name-pattern patterns _2) _3))
+                (string-equal? name name-pattern)
+            (Pair _1 (Pair (Capture _2 _3) _4))
+                True
+            _
+                False))
+
+(def case-capture (pair)
+     (match pair
+            (Pair expression (IntegerPattern _2 _3))
+                Empty
+            (Pair (Constructor _1 arguments _2) (ConstructorPattern _3 patterns _4))
+                (list-flatmap case-capture (list-zip arguments patterns))
+            (Pair expression (Capture name _3))
+                (list (Pair name expression))
+            _
+                Empty))
+
+(def pattern-match (eval-expression scope expression cases)
+     (match (list-find-first (case-matches-expression expression) cases)
+            (Some (Pair pattern branch))
+                (eval-expression (scope-add (case-capture (Pair expression pattern)) scope) branch)
+            None
+                (eval-error)))
+
 (def eval-expression (scope expression)
      (match expression
             (IntegerConstant value _)
@@ -29,11 +58,12 @@
                 (bind (sequence (list-map (eval-expression scope) expressions)) (fn (expressions)
                 (match expressions
                        (Cons (Lambda arguments expression scope) values)
-                            (eval-expression (scope-add arguments values scope) expression)
+                            (eval-expression (scope-add (list-zip arguments values) scope) expression)
                        _
                             (eval-error))))
-            _
-                (eval-error)))
+            (Match expression cases _)
+                (bind (eval-expression scope expression) (fn (expression)
+                (pattern-match eval-expression scope expression cases)))))
 
 (def eval-main (global-scope)
      (match (scope-get (data-main) global-scope)
@@ -47,4 +77,6 @@
                  expression-to-sexp
                  list-from
                  stringify)
-           (flatmap (pipe scope-from-definitions eval-main) (sequence definitions))))
+           (flatmap (pipe scope-from-definitions
+                          eval-main)
+                    (sequence definitions))))

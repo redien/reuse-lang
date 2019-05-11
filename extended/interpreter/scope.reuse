@@ -15,7 +15,7 @@
                         (dictionary-empty)
                         definitions)))
 
-(def scope-add (arguments values scope)
+(def scope-add (variables scope)
      (match scope
             (Scope dictionary)
                 (Scope (list-foldl (fn (pair dictionary)
@@ -23,7 +23,7 @@
                                               (Pair argument value)
                                                   (dictionary-set argument value dictionary)))
                                    dictionary
-                                   (list-zip arguments values)))))
+                                   variables))))
 
 (def scope-get (name scope)
      (match scope
