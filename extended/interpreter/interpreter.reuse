@@ -112,10 +112,12 @@
                 (eval-error)))
 
 (def eval (definitions source)
-     (fmap (pipe (ast-expression-map-meta (fn (_) (Range 0 0)))
-                 expression-to-sexp
-                 list-from
-                 stringify)
-           (flatmap (pipe scope-from-definitions
-                          eval-main)
-                    (sequence definitions))))
+     ((pipe (list-map validate-reserved-identifiers)
+            sequence
+            (flatmap (pipe scope-from-definitions
+                           eval-main))
+            (fmap (pipe (ast-expression-map-meta (fn (_) (Range 0 0)))
+                        expression-to-sexp
+                        list-from
+                        stringify)))
+        definitions))
