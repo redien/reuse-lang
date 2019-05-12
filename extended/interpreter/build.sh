@@ -28,6 +28,7 @@ $project_root/reusec $extra_flags\
                      $project_root/parser/parser.reuse\
                      $script_path/../common.strings\
                      $script_path/../common.reuse\
+                     $script_path/../local-transforms.reuse\
                      $script_path/scope.reuse\
                      $script_path/interpreter.strings\
                      $script_path/interpreter.reuse
