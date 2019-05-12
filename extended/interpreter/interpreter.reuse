@@ -9,9 +9,6 @@
 (def eval-error ()
      (Error (string-of-char 45)))
 
-(def eval-error2 ()
-     (Error (string-of-char 46)))
-
 (def case-matches-expression (expression case)
      (match (Pair expression case)
             (Pair (IntegerConstant a _1) (Pair (IntegerPattern b _2) _3))
@@ -92,7 +89,7 @@
                        (Some value)
                             (return value)
                        None
-                            (eval-error2))
+                            (eval-error))
             (Constructor name arguments _)
                 (bind (sequence (list-map (eval-expression scope) arguments)) (fn (values)
                 (return (Constructor name values scope))))
