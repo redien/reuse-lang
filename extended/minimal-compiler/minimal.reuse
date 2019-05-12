@@ -1,6 +1,6 @@
 
 (def to-reuse (definitions _)
-     ((pipe (list-map validate-reserved-identifiers)
+     ((pipe validate-reserved-identifiers
             local-transforms
             (list-map (result-map definition-to-sexp))
             result-concat

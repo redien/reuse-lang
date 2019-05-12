@@ -270,7 +270,7 @@
 (def validate-reserved-identifiers-when-not (as-minimal)
      (match as-minimal
             True   (fn (definitions) definitions)
-            False  (list-map validate-reserved-identifiers)))
+            False  validate-reserved-identifiers))
 
 (def to-haskell (output-filename standard-library? definitions source as-minimal)
      ((pipe (validate-reserved-identifiers-when-not as-minimal)

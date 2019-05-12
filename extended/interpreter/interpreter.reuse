@@ -112,7 +112,7 @@
                 (eval-error)))
 
 (def eval (definitions source)
-     ((pipe (list-map validate-reserved-identifiers)
+     ((pipe validate-reserved-identifiers
             local-transforms
             sequence
             (flatmap (pipe scope-from-definitions

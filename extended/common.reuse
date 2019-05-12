@@ -37,5 +37,5 @@
             True   (result-error (data-error-reserved-identifier))
             False  (result-lift identifier)))
 
-(def validate-reserved-identifiers (definition)
-     (result-flatmap (over-definition-expressions (over-identifiers validate-identifier)) definition))
+(def validate-reserved-identifiers (definitions)
+     (list-map (result-flatmap (over-definition-expressions (over-identifiers validate-identifier))) definitions))

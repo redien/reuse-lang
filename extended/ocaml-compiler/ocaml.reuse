@@ -264,7 +264,7 @@
 (def validate-reserved-identifiers-when-not (as_minimal)
      (match as_minimal
             True   (fn (definitions) definitions)
-            False  (list-map validate-reserved-identifiers)))
+            False  validate-reserved-identifiers))
 
 (def to-ocaml (definitions source as_minimal)
      ((pipe (validate-reserved-identifiers-when-not as_minimal)
