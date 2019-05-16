@@ -35,6 +35,7 @@ $project_root/reusec $extra_flags\
 
 cat << END_OF_SOURCE >> $project_root/generated/extended/Interpreter.ml
 
+$(cat $script_path/../ocaml-compiler/pervasives.ml)
 $(cat $script_path/../ocaml-compiler/stdin_wrapper.ml)
 let parse_sexp_output = (parse stdin_list);;
 let parse_output = stringify_45parse_45errors (sexps_45to_45definitions parse_sexp_output);;

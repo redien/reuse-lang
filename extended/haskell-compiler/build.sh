@@ -34,6 +34,8 @@ $project_root/reusec $extra_flags\
 
 cat << END_OF_SOURCE >> $project_root/generated/extended/CompilerHaskell.ml
 
+$(cat $project_root/extended/ocaml-compiler/pervasives.ml)
+
 let getenv name = try (Sys.getenv name) with Not_found -> ""
 let as_minimal = if getenv "REUSE_MINIMAL" = "true" then CTrue else CFalse;;
 let with_stdlib = if getenv "REUSE_NOSTDLIB" = "false" then CTrue else CFalse;;

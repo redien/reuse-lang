@@ -11,19 +11,6 @@ let read_lines ic =
     in
         loop [];;
 
-let stdin_string _ =
-    String.concat "\n" (read_lines stdin);;
+let list_to_string = reuse_string_to_ml;;
 
-let string_cons x xs =
-    let string_from_int = (String.make 1 (Char.chr (Int32.to_int x))) in
-    xs ^ string_from_int;;
-
-let stdin_get succ fail s index =
-    let i = (Int32.to_int index) in
-    if i < (String.length s) && i >= 0 then
-            succ (Int32.of_int (Char.code (String.get s i)))
-    else
-            fail ();;
-
-let list_to_string = fun input -> (string_45foldl string_cons "" input);;
-let stdin_list = (indexed_45iterator_45from (stdin_string ()) (stdin_get (fun x -> CSome (x)) (fun _ -> CNone)));;
+let stdin_list = ml_string_to_reuse_iterator (String.concat "\n" (read_lines stdin));;
