@@ -23,7 +23,10 @@ $project_root/reusec --language ocaml\
 
 cat << END_OF_SOURCE >> $project_root/generated/extended/CompilerMinimal.ml
 
+$(cat $script_path/../ocaml-compiler/pervasives.ml)
 $(cat $script_path/../ocaml-compiler/stdin_wrapper.ml)
+
+let stdin_list = read_stdin ();;
 
 let parse' str = stringify_45parse_45errors (sexps_45to_45definitions (parse str));;
 

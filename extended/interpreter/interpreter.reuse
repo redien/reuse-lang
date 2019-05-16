@@ -128,3 +128,38 @@
                        list-from
                        stringify)))
         definitions))
+
+(typ (event state) (EventArguments (list string))
+                   (EventReadStdin (indexed-iterator int32) state)
+                   (EventReadFiles (list (pair string (indexed-iterator int32))) state))
+
+(typ (command state) (CommandError string)
+                     (CommandOutput string)
+                     (CommandReadStdin state)
+                     (CommandReadFiles (list string) state))
+
+(def eval-input (source)
+     (match (eval (stringify-parse-errors (sexps-to-definitions (parse source))) source)
+            (Result output)
+                 (CommandOutput output)
+            (Error error)
+                 (CommandError error)))
+
+(def on-event (event)
+     (match event
+            (EventArguments arguments)
+                (match (parse-arguments arguments)
+                       (CliArguments _ input)
+                           (match input
+                                  Empty (CommandReadStdin 0)
+                                  _     (CommandReadFiles input 0))
+                       (CliErrorMissingValue key)
+                           (CommandError key))
+            (EventReadStdin stdin state)
+                (eval-input stdin)
+            (EventReadFiles file-entries state)
+                (match file-entries
+                       (Cons (Pair _ file) __)
+                            (eval-input file)
+                       _
+                            (CommandError (string-of-char 45)))))

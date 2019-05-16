@@ -35,13 +35,14 @@ $project_root/reusec $extra_flags\
 cat << END_OF_SOURCE >> $project_root/generated/extended/CompilerOCaml.ml
 
 $(cat $script_path/pervasives.ml)
+$(cat $script_path/stdin_wrapper.ml)
 
 let getenv name = try (Sys.getenv name) with Not_found -> ""
 let as_minimal = if getenv "REUSE_MINIMAL" = "true" then CTrue else CFalse;;
 let performance = getenv "REUSE_TIME" = "true";;
 
 let stdin_wrapper_start = Unix.gettimeofday ();;
-$(cat $script_path/stdin_wrapper.ml)
+let stdin_list = read_stdin ();;
 let stdin_wrapper_end = Unix.gettimeofday ();;
 let stdin_wrapper_time = stdin_wrapper_end -. stdin_wrapper_start;;
 

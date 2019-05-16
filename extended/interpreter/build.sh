@@ -26,6 +26,8 @@ $project_root/reusec $extra_flags\
                      $project_root/parser/parser.strings\
                      $project_root/parser/strings.reuse\
                      $project_root/parser/parser.reuse\
+                     $script_path/../../cli/argument-parser.strings\
+                     $script_path/../../cli/argument-parser.reuse\
                      $script_path/../common.strings\
                      $script_path/../common.reuse\
                      $script_path/../local-transforms.reuse\
@@ -37,13 +39,25 @@ cat << END_OF_SOURCE >> $project_root/generated/extended/Interpreter.ml
 
 $(cat $script_path/../ocaml-compiler/pervasives.ml)
 $(cat $script_path/../ocaml-compiler/stdin_wrapper.ml)
-let parse_sexp_output = (parse stdin_list);;
-let parse_output = stringify_45parse_45errors (sexps_45to_45definitions parse_sexp_output);;
-let eval_output = (eval parse_output stdin_list);;
-match eval_output with
-      CResult (source) -> Printf.printf "%s" (list_to_string source) ; exit 0
-    | CError (error) -> Printf.eprintf "%s" (list_to_string error) ; exit 1;;
 
+let argv = ml_list_to_reuse (List.map ml_string_to_reuse (List.tl (Array.to_list Sys.argv)));;
+let read_file filename =
+    let channel = open_in (reuse_string_to_ml filename) in
+    let file = really_input_string channel (in_channel_length channel) in
+    close_in channel;
+    ml_string_to_reuse_iterator file;;
+
+let load_files file_paths = list_45zip file_paths (list_45map read_file file_paths);;
+
+let current = ref (CEventArguments argv);;
+
+while true do
+    match (on_45event !current) with
+          CCommandError (error) -> Printf.eprintf "%s" (list_to_string error) ; exit 1
+        | CCommandOutput (output) -> Printf.printf "%s" (list_to_string output) ; exit 0
+        | CCommandReadStdin (state) -> current := CEventReadStdin (read_stdin (), state)
+        | CCommandReadFiles (file_paths, state) -> current := CEventReadFiles ((load_files file_paths), state)
+done
 END_OF_SOURCE
 
 ocamlopt -O3 unix.cmxa $project_root/generated/extended/Interpreter.ml -o $project_root/generated/extended/interpreter

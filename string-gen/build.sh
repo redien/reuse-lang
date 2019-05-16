@@ -17,7 +17,10 @@ cat << END_OF_SOURCE >> $project_root/generated/string-gen/StringGen.ml
 let getenv name = try (Sys.getenv name) with Not_found -> ""
 let performance = getenv "REUSE_TIME" = "true";;
 
+$(cat $project_root/extended/ocaml-compiler/pervasives.ml)
 $(cat $project_root/extended/ocaml-compiler/stdin_wrapper.ml)
+
+let stdin_list = read_stdin ();;
 
 let string_gen_start = Unix.gettimeofday ();;
 let string_gen_output = string_45gen stdin_list;;

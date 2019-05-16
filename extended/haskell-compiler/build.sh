@@ -35,6 +35,7 @@ $project_root/reusec $extra_flags\
 cat << END_OF_SOURCE >> $project_root/generated/extended/CompilerHaskell.ml
 
 $(cat $project_root/extended/ocaml-compiler/pervasives.ml)
+$(cat $project_root/extended/ocaml-compiler/stdin_wrapper.ml)
 
 let getenv name = try (Sys.getenv name) with Not_found -> ""
 let as_minimal = if getenv "REUSE_MINIMAL" = "true" then CTrue else CFalse;;
@@ -43,7 +44,7 @@ let output_filename = Seq.fold_left (fun s c -> string_45append (Int32.of_int (C
 let performance = getenv "REUSE_TIME" = "true";;
 
 let stdin_wrapper_start = Unix.gettimeofday ();;
-$(cat $project_root/extended/ocaml-compiler/stdin_wrapper.ml)
+let stdin_list = read_stdin ();;
 let stdin_wrapper_end = Unix.gettimeofday ();;
 let stdin_wrapper_time = stdin_wrapper_end -. stdin_wrapper_start;;
 
