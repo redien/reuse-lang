@@ -151,7 +151,7 @@
                 (match (parse-arguments arguments)
                        (CliArguments _ input)
                            (match input
-                                  Empty (CommandReadStdin 0)
+                                  Empty (CommandError (data-no-input-files))
                                   _     (CommandReadFiles input 0))
                        (CliErrorMissingValue key)
                            (CommandError key))
