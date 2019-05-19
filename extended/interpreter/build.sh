@@ -53,7 +53,7 @@ let current = ref (CEventArguments argv);;
 
 while true do
     match (on_45event !current) with
-          CCommandError (error) -> Printf.eprintf "%s" (list_to_string error) ; exit 1
+          CCommandError (error) -> Printf.eprintf "%s\n" (list_to_string error) ; exit 1
         | CCommandOutput (output) -> Printf.printf "%s" (list_to_string output) ; exit 0
         | CCommandReadStdin (state) -> current := CEventReadStdin (read_stdin (), state)
         | CCommandReadFiles (file_paths, state) -> current := CEventReadFiles ((load_files file_paths), state)

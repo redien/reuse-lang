@@ -117,17 +117,29 @@
             _
                 (eval-error)))
 
-(def eval (definitions source)
+(def build-scope (definitions)
      ((pipe validate-reserved-identifiers
             local-transforms
             sequence
-            (flatmap (pipe scope-from-definitions
-                           eval-main))
+            (map scope-from-definitions))
+        definitions))
+
+(def eval (scope arguments)
+     ((pipe eval-main
             (map (pipe (ast-expression-map-meta (fn (_) (Range 0 0)))
                        expression-to-sexp
                        list-from
                        stringify)))
-        definitions))
+        scope))
+
+(def source-to-scope (source)
+     (build-scope (stringify-parse-errors (sexps-to-definitions (parse source)))))
+
+(def main-takes-argument (scope)
+     False)
+
+(def string-to-expression (string scope)
+     (IntegerConstant 0 scope))
 
 (typ (event state) (EventArguments (list string))
                    (EventReadStdin (indexed-iterator int32) state)
@@ -138,12 +150,12 @@
                      (CommandReadStdin state)
                      (CommandReadFiles (list string) state))
 
-(def eval-input (source)
-     (match (eval (stringify-parse-errors (sexps-to-definitions (parse source))) source)
+(def output-result (result)
+     (match result
             (Result output)
-                 (CommandOutput output)
+                (CommandOutput output)
             (Error error)
-                 (CommandError error)))
+                (CommandError error)))
 
 (def on-event (event)
      (match event
@@ -152,14 +164,20 @@
                        (CliArguments _ input)
                            (match input
                                   Empty (CommandError (data-no-input-files))
-                                  _     (CommandReadFiles input 0))
+                                  _     (CommandReadFiles input (scope-empty)))
                        (CliErrorMissingValue key)
                            (CommandError key))
             (EventReadStdin stdin state)
-                (eval-input stdin)
+                (output-result (eval state (list (string-to-expression stdin state))))
             (EventReadFiles file-entries state)
                 (match file-entries
                        (Cons (Pair _ file) __)
-                            (eval-input file)
+                            (match (source-to-scope file)
+                                   (Result scope)
+                                        (match (main-takes-argument scope)
+                                               True   (CommandReadStdin scope)
+                                               False  (output-result (eval scope Empty)))
+                                    (Error error)
+                                        (CommandError error))
                        _
                             (CommandError (string-of-char 45)))))
