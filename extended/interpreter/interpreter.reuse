@@ -136,7 +136,11 @@
      (build-scope (stringify-parse-errors (sexps-to-definitions (parse source)))))
 
 (def main-takes-argument (scope)
-     False)
+     (match (scope-get (data-main) scope)
+            (Some (Lambda (Cons _ __) ___ ____))
+                True
+            _
+                False))
 
 (def string-to-expression (string scope)
      (IntegerConstant 0 scope))
