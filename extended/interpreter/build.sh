@@ -31,9 +31,9 @@ $project_root/reusec $extra_flags\
                      $script_path/../common.strings\
                      $script_path/../common.reuse\
                      $script_path/../local-transforms.reuse\
+                     $script_path/interpreter.strings\
                      $script_path/value.reuse\
                      $script_path/scope.reuse\
-                     $script_path/interpreter.strings\
                      $script_path/interpreter.reuse
 
 cat << END_OF_SOURCE >> $project_root/generated/extended/Interpreter.ml

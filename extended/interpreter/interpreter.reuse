@@ -54,22 +54,6 @@
             _
                 (eval-error)))
 
-(def special-forms ()
-     (dictionary-of (list
-        (Pair (data-int32-less-than)  eval-int32-less-than)
-        (Pair (data-percent)          (eval-int32-operator %))
-        (Pair (data-plus)             (eval-int32-operator +))
-        (Pair (data-minus)            (eval-int32-operator -))
-        (Pair (data-slash)            (eval-int32-operator /))
-        (Pair (data-multiply)         (eval-int32-operator *)))))
-
-(def get-special-form (expressions)
-     (match expressions
-            (Cons (Identifier name _) __)
-                (dictionary-get name (special-forms))
-            _
-                None))
-
 (def eval-function-application (eval-expression arguments values scope expression)
      (match (< (list-size values) (list-size arguments))
             True
@@ -96,16 +80,14 @@
             (Lambda arguments expression _)
                 (return (ValueClosure arguments expression scope))
             (FunctionApplication expressions _)
-                (match (get-special-form expressions)
-                       (Some evaluator)
-                            (bind (sequence (list-map (eval-expression scope) (list-rest expressions))) evaluator)
-                       None 
-                            (bind (sequence (list-map (eval-expression scope) expressions)) (fn (values)
-                            (match values
-                                   (Cons (ValueClosure arguments expression closed-scope) parameters)
-                                        (eval-function-application eval-expression arguments parameters (scope-concat scope closed-scope) expression)
-                                   _
-                                        (eval-error)))))
+                (bind (sequence (list-map (eval-expression scope) expressions)) (fn (values)
+                (match values
+                        (Cons (ValueClosure arguments expression closed-scope) parameters)
+                            (eval-function-application eval-expression arguments parameters (scope-concat scope closed-scope) expression)
+                        (Cons (ValueIntrinsic evaluator) parameters)
+                            (evaluator (list-rest values))
+                        _
+                            (eval-error))))
             (Match expression cases _)
                 (bind (eval-expression scope expression) (fn (expression)
                 (pattern-match eval-expression scope expression cases)))))
@@ -124,8 +106,17 @@
             (map scope-from-definitions))
         definitions))
 
+(def add-intrinsics (scope)
+     (scope-add (list (Pair (data-int32-less-than)  (ValueIntrinsic eval-int32-less-than))
+                      (Pair (data-percent)          (ValueIntrinsic (eval-int32-operator %)))
+                      (Pair (data-plus)             (ValueIntrinsic (eval-int32-operator +)))
+                      (Pair (data-minus)            (ValueIntrinsic (eval-int32-operator -)))
+                      (Pair (data-slash)            (ValueIntrinsic (eval-int32-operator /)))
+                      (Pair (data-multiply)         (ValueIntrinsic (eval-int32-operator *))))
+                scope))
+
 (def source-to-scope (source)
-     (build-scope (stringify-parse-errors (sexps-to-definitions (parse source)))))
+     (map add-intrinsics (build-scope (stringify-parse-errors (sexps-to-definitions (parse source))))))
 
 (def main-takes-argument (scope)
      (match (scope-get (data-main) scope)
