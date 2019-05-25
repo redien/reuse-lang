@@ -135,7 +135,9 @@
      (list-filter (pipe f not) list))
 
 (def list-any? (f list)
-     (not (list-empty? (list-filter f list))))
+     (match (list-find-first f list)
+            (Some _)  True
+            _         False))
 
 (def list-collect-from-indexed-iterator' (predicate iterator initial)
      (match (indexed-iterator-get iterator)
