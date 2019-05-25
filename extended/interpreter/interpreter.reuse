@@ -9,11 +9,11 @@
 (def eval-error ()
      (Error (string-of-char 45)))
 
-(def case-matches-expression (expression case)
-     (match (Pair expression case)
-            (Pair (IntegerConstant a _1) (Pair (IntegerPattern b _2) _3))
+(def case-matches-expression (value case)
+     (match (Pair value case)
+            (Pair (ValueInteger a) (Pair (IntegerPattern b _2) _3))
                 (= a b)
-            (Pair (Constructor name arguments _1) (Pair (ConstructorPattern name-pattern patterns _2) _3))
+            (Pair (ValueConstructor name arguments) (Pair (ConstructorPattern name-pattern patterns _2) _3))
                 (string-equal? name name-pattern)
             (Pair _1 (Pair (Capture _2 _3) _4))
                 True
@@ -22,12 +22,12 @@
 
 (def case-capture (pair)
      (match pair
-            (Pair expression (IntegerPattern _2 _3))
+            (Pair value (IntegerPattern _1 _2))
                 Empty
-            (Pair (Constructor _1 arguments _2) (ConstructorPattern _3 patterns _4))
+            (Pair (ValueConstructor _1 arguments) (ConstructorPattern _2 patterns _3))
                 (list-flatmap case-capture (list-zip arguments patterns))
-            (Pair expression (Capture name _3))
-                (list (Pair name expression))
+            (Pair value (Capture name _1))
+                (list (Pair name value))
             _
                 Empty))
 
@@ -40,14 +40,14 @@
 
 (def eval-int32-operator (operator arguments)
      (match arguments
-            (Cons (IntegerConstant a __) (Cons (IntegerConstant b ___) Empty))
-                (return (IntegerConstant (operator a b) (scope-empty)))
+            (Cons (ValueInteger a) (Cons (ValueInteger b) Empty))
+                (return (ValueInteger (operator a b)))
             _
                 (eval-error)))
 
 (def eval-int32-less-than (arguments)
      (match arguments
-            (Cons (IntegerConstant a __) (Cons (IntegerConstant b ___) (Cons first (Cons second Empty))))
+            (Cons (ValueInteger a) (Cons (ValueInteger b) (Cons first (Cons second Empty))))
                 (match (< a b)
                        True   (return first)
                        False  (return second))
@@ -73,9 +73,9 @@
 (def eval-function-application (eval-expression arguments values scope expression)
      (match (< (list-size values) (list-size arguments))
             True
-                (return (Lambda (list-skip (list-size values) arguments)
-                                expression
-                                (scope-add (list-zip arguments values) scope)))
+                (return (ValueClosure (list-skip (list-size values) arguments)
+                                      expression
+                                      (scope-add (list-zip arguments values) scope)))
             False
                 (eval-expression (scope-add (list-zip arguments values) scope)
                                  expression)))
@@ -83,7 +83,7 @@
 (def eval-expression (scope expression)
      (match expression
             (IntegerConstant value _)
-                (return (IntegerConstant value scope))
+                (return (ValueInteger value))
             (Identifier name _)
                 (match (scope-get name scope)
                        (Some value)
@@ -92,27 +92,27 @@
                             (eval-error))
             (Constructor name arguments _)
                 (bind (sequence (list-map (eval-expression scope) arguments)) (fn (values)
-                (return (Constructor name values scope))))
+                (return (ValueConstructor name values))))
             (Lambda arguments expression _)
-                (return (Lambda arguments expression scope))
+                (return (ValueClosure arguments expression scope))
             (FunctionApplication expressions _)
                 (match (get-special-form expressions)
                        (Some evaluator)
                             (bind (sequence (list-map (eval-expression scope) (list-rest expressions))) evaluator)
                        None 
-                            (bind (sequence (list-map (eval-expression scope) expressions)) (fn (expressions)
-                            (match expressions
-                                   (Cons (Lambda arguments expression closed-scope) values)
-                                        (eval-function-application eval-expression arguments values (scope-concat scope closed-scope) expression)
+                            (bind (sequence (list-map (eval-expression scope) expressions)) (fn (values)
+                            (match values
+                                   (Cons (ValueClosure arguments expression closed-scope) parameters)
+                                        (eval-function-application eval-expression arguments parameters (scope-concat scope closed-scope) expression)
                                    _
                                         (eval-error)))))
             (Match expression cases _)
                 (bind (eval-expression scope expression) (fn (expression)
                 (pattern-match eval-expression scope expression cases)))))
 
-(def eval-main (global-scope)
+(def eval (global-scope _)
      (match (scope-get (data-main) global-scope)
-            (Some (Lambda _ expression __))
+            (Some (ValueClosure _ expression __))
                 (eval-expression global-scope expression)
             _
                 (eval-error)))
@@ -124,26 +124,18 @@
             (map scope-from-definitions))
         definitions))
 
-(def eval (scope arguments)
-     ((pipe eval-main
-            (map (pipe (ast-expression-map-meta (fn (_) (Range 0 0)))
-                       expression-to-sexp
-                       list-from
-                       stringify)))
-        scope))
-
 (def source-to-scope (source)
      (build-scope (stringify-parse-errors (sexps-to-definitions (parse source)))))
 
 (def main-takes-argument (scope)
      (match (scope-get (data-main) scope)
-            (Some (Lambda (Cons _ __) ___ ____))
+            (Some (ValueClosure (Cons _ __) ___ ____))
                 True
             _
                 False))
 
-(def string-to-expression (string scope)
-     (IntegerConstant 0 scope))
+(def string-to-expression (string)
+     (ValueInteger 0))
 
 (typ (event state) (EventArguments (list string))
                    (EventReadStdin (indexed-iterator int32) state)
@@ -156,8 +148,8 @@
 
 (def output-result (result)
      (match result
-            (Result output)
-                (CommandOutput output)
+            (Result value)
+                (CommandOutput (value-to-string value))
             (Error error)
                 (CommandError error)))
 
@@ -172,7 +164,7 @@
                        (CliErrorMissingValue key)
                            (CommandError key))
             (EventReadStdin stdin state)
-                (output-result (eval state (list (string-to-expression stdin state))))
+                (output-result (eval state (list (string-to-expression stdin))))
             (EventReadFiles file-entries state)
                 (match file-entries
                        (Cons (Pair _ file) __)

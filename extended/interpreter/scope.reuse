@@ -1,22 +1,8 @@
 
-(typ scope (Scope (dictionary (expression scope))))
+(typ (scope expression) (Scope (dictionary (value expression (scope expression)))))
 
 (def scope-empty ()
      (Scope (dictionary-empty)))
-
-(def scope-from-definitions (definitions)
-     (Scope (list-foldl (fn (definition dictionary)
-                            (match definition
-                                   (FunctionDefinition _ arguments expression __)
-                                       (dictionary-set (definition-name definition)
-                                                       (Lambda arguments
-                                                               (ast-expression-map-meta (fn (_) (Scope dictionary)) expression)
-                                                               (scope-empty))
-                                                       dictionary)
-                                   _
-                                       dictionary))
-                        (dictionary-empty)
-                        definitions)))
 
 (def scope-add (variables scope)
      (match scope
@@ -37,3 +23,15 @@
      (match scope
             (Scope dictionary)
                 (dictionary-get name dictionary)))
+
+(def scope-from-definitions (definitions)
+     (Scope (list-foldl (fn (definition dictionary)
+                            (match definition
+                                   (FunctionDefinition _ arguments expression __)
+                                       (dictionary-set (definition-name definition)
+                                                       (ValueClosure arguments expression (scope-empty))
+                                                       dictionary)
+                                   _
+                                       dictionary))
+                        (dictionary-empty)
+                        definitions)))

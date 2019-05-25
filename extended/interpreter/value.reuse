@@ -1,0 +1,25 @@
+
+(typ (value expression scope) (ValueInteger int32)
+                              (ValueConstructor string (list (value expression scope)))
+                              (ValueClosure (list string) expression scope))
+
+(def value-to-string (value)
+     (match value
+            (ValueInteger integer)
+                (string-from-int32 integer)
+            (ValueConstructor name values)
+                ((pipe (list-map value-to-string)
+                       (list-cons name)
+                       (string-join (data-space))
+                       wrap-in-brackets)
+                    values)
+            (ValueClosure arguments expression scope)
+                ((pipe expression-to-sexp
+                       list-from
+                       stringify
+                       (string-concat (data-space))
+                       (string-concat (wrap-in-brackets (string-join (data-space) arguments)))
+                       (string-concat (data-space))
+                       (string-concat (data-fn))
+                       wrap-in-brackets)
+                    expression)))
