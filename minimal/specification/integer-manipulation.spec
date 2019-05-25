@@ -52,3 +52,28 @@ Factorial function
 | (def factorial (n) (factorial2 n 1))
 > (factorial 5)
 = 120
+
+Should be possible to pass intrinsics as arguments 
+| (def f (op) (op 1 2))
+> (f +)
+= 3
+
+| (def f (op) (op 1 2))
+> (f -)
+= -1
+
+| (def f (op) (op 1 2))
+> (f *)
+= 2
+
+| (def f (op) (op 1 2))
+> (f /)
+= 0
+
+| (def f (op) (op 1 2))
+> (f %)
+= 1
+
+| (def f (op) (op 1 2))
+> (f /)
+= 0
