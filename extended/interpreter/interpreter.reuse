@@ -92,10 +92,11 @@
                 (bind (eval-expression scope expression) (fn (expression)
                 (pattern-match eval-expression scope expression cases)))))
 
-(def eval (global-scope _)
-     (match (scope-get (data-main) global-scope)
-            (Some (ValueClosure _ expression __))
-                (eval-expression global-scope expression)
+(def eval (scope values)
+     (match (scope-get (data-main) scope)
+            (Some (ValueClosure arguments expression __))
+                (eval-expression (scope-add (list-zip arguments values) scope)
+                                 expression)
             _
                 (eval-error)))
 
@@ -125,8 +126,33 @@
             _
                 False))
 
-(def string-to-expression (string)
-     (ValueInteger 0))
+(def box-maybe (maybe)
+     (match maybe
+            (Some x)  (ValueConstructor (data-Some) (list (ValueInteger x)))
+            None      (ValueConstructor (data-None) Empty)))
+
+(def box-get (collection get arguments)
+     (match arguments
+            (Cons _ (Cons (ValueInteger i) Empty))
+                (return (box-maybe (get collection i)))
+            _
+                (eval-error)))
+
+(def box-next (box-indexed-iterator iterator collection next arguments)
+     (match arguments
+            (Cons _ (Cons (ValueInteger i) Empty))
+                (return (box-indexed-iterator (next iterator collection i)))
+            _
+                (eval-error)))
+
+(def box-indexed-iterator (indexed-iterator)
+     (match indexed-iterator
+            (IndexedIterator collection i get next)
+                (ValueConstructor (data-IndexedIterator)
+                                  (list (ValueInteger 0)
+                                        (ValueInteger i)
+                                        (ValueIntrinsic (box-get collection get))
+                                        (ValueIntrinsic (box-next box-indexed-iterator indexed-iterator collection next))))))
 
 (typ (event state) (EventArguments (list string))
                    (EventReadStdin (indexed-iterator int32) state)
@@ -155,7 +181,7 @@
                        (CliErrorMissingValue key)
                            (CommandError key))
             (EventReadStdin stdin state)
-                (output-result (eval state (list (string-to-expression stdin))))
+                (output-result (eval state (list (box-indexed-iterator stdin))))
             (EventReadFiles file-entries state)
                 (match file-entries
                        (Cons (Pair _ file) __)
