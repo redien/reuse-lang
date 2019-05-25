@@ -83,6 +83,9 @@
 (def list-flatmap (f list)
      (list-foldr (fn (head tail) (list-concat (f head) tail)) Empty list))
 
+(def list-flatten (list)
+     (list-foldr list-concat Empty list))
+
 (def list-skip (count list)
      (match (> count 0)
             True   (list-skip (- count 1) (list-rest list))
