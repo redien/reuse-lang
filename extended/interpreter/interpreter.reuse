@@ -116,8 +116,11 @@
                       (Pair (data-multiply)         (ValueIntrinsic (eval-int32-operator *))))
                 scope))
 
-(def source-to-scope (source)
-     (map add-intrinsics (build-scope (stringify-parse-errors (sexps-to-definitions (parse source))))))
+(def parse-files (files)
+     (list-flatmap (pipe parse sexps-to-definitions) files))
+
+(def source-to-scope (files)
+     (map add-intrinsics (build-scope (stringify-parse-errors (parse-files files)))))
 
 (def main-takes-argument (scope)
      (match (scope-get (data-main) scope)
@@ -174,23 +177,19 @@
      (match event
             (EventArguments arguments)
                 (match (parse-arguments arguments)
-                       (CliArguments _ input)
-                           (match input
-                                  Empty (CommandError (data-no-input-files))
-                                  _     (CommandReadFiles input (scope-empty)))
+                       (CliArguments _ Empty)
+                            (CommandError (data-no-input-files))
+                       (CliArguments arguments input-files)
+                            (CommandReadFiles input-files (scope-empty))
                        (CliErrorMissingValue key)
                            (CommandError key))
             (EventReadStdin stdin state)
                 (output-result (eval state (list (box-indexed-iterator stdin))))
             (EventReadFiles file-entries state)
-                (match file-entries
-                       (Cons (Pair _ file) __)
-                            (match (source-to-scope file)
-                                   (Result scope)
-                                        (match (main-takes-argument scope)
-                                               True   (CommandReadStdin scope)
-                                               False  (output-result (eval scope Empty)))
-                                    (Error error)
-                                        (CommandError error))
-                       _
-                            (CommandError (string-of-char 45)))))
+                (match (source-to-scope (list-map pair-right file-entries))
+                        (Result scope)
+                            (match (main-takes-argument scope)
+                                    True   (CommandReadStdin scope)
+                                    False  (output-result (eval scope Empty)))
+                        (Error error)
+                            (CommandError error))))

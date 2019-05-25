@@ -1,6 +1,6 @@
-main             |main
-no-input-files   |No input files
-intrinsic        |[intrinsic]
-IndexedIterator  |IndexedIterator
-Some             |Some
-None             |None
+main                   |reuse-main
+no-input-files         |No input files
+intrinsic              |[intrinsic]
+IndexedIterator        |IndexedIterator
+Some                   |Some
+None                   |None
