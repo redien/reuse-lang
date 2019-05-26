@@ -32,3 +32,9 @@ Should resolve both free and bound variables
 | (def f (x) (fn (y) (+ x y)))
 > ((f 3) 5)
 = 8
+
+Should not overwrite closed values by binding global scope
+| (def g (x) x)
+| (def f (g) (fn (x) g))
+> ((f 9) 10)
+= 9
