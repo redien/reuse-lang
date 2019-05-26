@@ -68,7 +68,7 @@
                                                                        stringify)
                                                                  cases))
                                           (string-of-char 10)
-                                          (data-error-unmatched-case3)
+                                          (data-error-stack-trace)
                                           (string-of-char 10)
                                           (render-stack-trace stack-trace))))))
 
@@ -108,8 +108,14 @@
                        (Some value)
                             (return value)
                        None
-                            (Error (string-join (data-space)
-                                                (list (data-error-no-symbol) name))))
+                            (Error (string-join (string-empty)
+                                                (list (data-error-no-symbol)
+                                                      (data-space)
+                                                      name
+                                                      (string-of-char 10)
+                                                      (data-error-stack-trace)
+                                                      (string-of-char 10)
+                                                      (render-stack-trace stack-trace)))))
             (Constructor name arguments _)
                 (bind (sequence (list-map (eval-expression scope stack-trace) arguments)) (fn (values)
                 (return (ValueConstructor name values))))
