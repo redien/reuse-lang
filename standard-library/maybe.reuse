@@ -32,3 +32,10 @@
             (Some x)
                 x))
 
+(def maybe-or-else (value maybe)
+     (match maybe
+            None
+                value
+            (Some x)
+                x))
+

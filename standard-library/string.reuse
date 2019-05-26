@@ -332,6 +332,9 @@
 (def string-collect-from-indexed-iterator (predicate iterator)
      (pair-map-right string-from-list (list-collect-from-indexed-iterator predicate iterator)))
 
+(def string-from-indexed-iterator (iterator)
+     (string-from-list (pair-right (list-collect-from-indexed-iterator (fn (_) True) iterator))))
+
 (def string-from-boolean (boolean)
      (match boolean
             True  (string-from-list (list 84 114 117 101))
