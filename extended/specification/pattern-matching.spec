@@ -29,3 +29,7 @@ Should allow integer constants in patterns
 > (match (Some -7) (Some -7) -7 _ 0)
 = -7
 
+Should fail to match nested constructors
+| (typ (list a) (Cons a (list a)) Empty)
+> (match (Cons 9 (Cons 10 Empty)) (Cons y Empty) y _ 8)
+= 8
