@@ -9,13 +9,14 @@
 (def eval-error ()
      (Error (data-error-generic)))
 
-(def case-matches-value (value case)
-     (match (Pair value case)
-            (Pair (ValueInteger a) (Pair (IntegerPattern b _2) _3))
+(def pattern-matches-value (value pattern)
+     (match (Pair value pattern)
+            (Pair (ValueInteger a) (IntegerPattern b _2))
                 (= a b)
-            (Pair (ValueConstructor name arguments) (Pair (ConstructorPattern name-pattern patterns _2) _3))
-                (string-equal? name name-pattern)
-            (Pair _1 (Pair (Capture _2 _3) _4))
+            (Pair (ValueConstructor name arguments) (ConstructorPattern name-pattern patterns _2))
+                (and (string-equal? name name-pattern)
+                     (list-every? (pair-map pattern-matches-value) (list-zip arguments patterns)))
+            (Pair _1 (Capture _2 _3))
                 True
             _
                 False))
@@ -48,7 +49,7 @@
                 expression)))
 
 (def pattern-match (eval-expression scope stack-trace value cases)
-     (match (list-find-first (case-matches-value value) cases)
+     (match (list-find-first (fn (case) (pattern-matches-value value (pair-left case))) cases)
             (Some (Pair pattern branch))
                 (eval-expression (scope-add (case-capture (Pair value pattern)) scope) stack-trace branch)
             None

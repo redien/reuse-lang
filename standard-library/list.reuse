@@ -139,6 +139,11 @@
             (Some _)  True
             _         False))
 
+(def list-every? (f list)
+     (match (list-find-first (fn (x) (not (f x))) list)
+            (Some _)  False
+            _         True))
+
 (def list-collect-from-indexed-iterator' (predicate iterator initial)
      (match (indexed-iterator-get iterator)
             None      (Pair iterator initial)
