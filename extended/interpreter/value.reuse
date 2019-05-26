@@ -21,11 +21,15 @@
             (ValueInteger integer)
                 (string-from-int32 integer)
             (ValueConstructor name values)
-                ((pipe (list-map value-to-string)
-                       (list-cons name)
-                       (string-join (data-space))
-                       wrap-in-brackets)
-                    values)
+                (match values
+                       Empty
+                            name
+                       _
+                            ((pipe (list-map value-to-string)
+                                   (list-cons name)
+                                   (string-join (data-space))
+                                   wrap-in-brackets)
+                                values))
             (ValueClosure arguments expression scope)
                 (value-function-to-string arguments expression)
             (ValueFunction arguments expression)
