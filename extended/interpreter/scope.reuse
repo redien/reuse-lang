@@ -24,14 +24,16 @@
             (Scope dictionary)
                 (dictionary-get name dictionary)))
 
-(def scope-from-definitions (definitions)
-     (Scope (list-foldl (fn (definition dictionary)
-                            (match definition
-                                   (FunctionDefinition _ arguments expression __)
-                                       (dictionary-set (definition-name definition)
-                                                       (ValueClosure arguments expression (scope-empty))
-                                                       dictionary)
-                                   _
-                                       dictionary))
-                        (dictionary-empty)
-                        definitions)))
+(def scope-add-definitions (definitions scope)
+     (match scope
+            (Scope dictionary)
+                (Scope (list-foldl (fn (definition dictionary)
+                                       (match definition
+                                              (FunctionDefinition _ arguments expression __)
+                                                  (dictionary-set (definition-name definition)
+                                                                  (ValueFunction arguments expression)
+                                                                  dictionary)
+                                              _
+                                                  dictionary))
+                                   dictionary
+                                   definitions))))

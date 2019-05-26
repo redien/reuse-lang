@@ -33,13 +33,19 @@
 
 (def render-stack-trace (stack-trace)
      (string-join (string-of-char 10)
-                  (list-map (pipe expression-to-sexp
-                                  list-from
-                                  stringify
+                  (list-map (pipe (string-concat (data-space))
                                   (string-concat (data-space))
                                   (string-concat (data-space))
-                                  (string-concat (data-space))
-                                  (string-concat (data-space))) stack-trace)))
+                                  (string-concat (data-space)))
+                            stack-trace)))
+
+(def add-stack-trace (expression values stack-trace)
+     (maybe-or-else stack-trace
+     (maybe-map (fn (expression)
+                    (Cons (string-concat (string-append 32 (stringify (list-from (expression-to-sexp expression))))
+                                         (string-join (data-space) (list-map value-to-string values)))
+                          stack-trace))
+                expression)))
 
 (def pattern-match (eval-expression scope stack-trace value cases)
      (match (list-find-first (case-matches-value value) cases)
@@ -114,10 +120,17 @@
                 (match values
                         (Cons (ValueClosure arguments body closed-scope) parameters)
                             (eval-function-application eval-expression
-                                                       (Cons expression stack-trace)
+                                                       (add-stack-trace (list-first expressions) parameters stack-trace)
                                                        arguments
                                                        parameters
-                                                       (scope-concat scope closed-scope)
+                                                       closed-scope
+                                                       body)
+                        (Cons (ValueFunction arguments body) parameters)
+                            (eval-function-application eval-expression
+                                                       (add-stack-trace (list-first expressions) parameters stack-trace)
+                                                       arguments
+                                                       parameters
+                                                       scope
                                                        body)
                         (Cons (ValueIntrinsic evaluator) parameters)
                             (evaluator (list-rest values))
@@ -129,19 +142,24 @@
 
 (def eval (scope values)
      (match (scope-get (data-main) scope)
-            (Some (ValueClosure arguments expression __))
+            (Some (ValueFunction arguments expression))
                 (eval-expression (scope-add (list-zip arguments values) scope)
                                  Empty
                                  expression)
             _
                 (eval-error)))
 
-(def build-scope (definitions)
-     ((pipe validate-reserved-identifiers
+(def parse-files (files)
+     (list-flatmap (pipe parse sexps-to-definitions) files))
+
+(def add-definitions (files scope)
+     ((pipe parse-files
+            stringify-parse-errors
+            validate-reserved-identifiers
             local-transforms
             sequence
-            (map scope-from-definitions))
-        definitions))
+            (map (fn (definitions) (scope-add-definitions definitions scope))))
+        files))
 
 (def add-intrinsics (scope)
      (scope-add (list (Pair (data-int32-less-than)  (ValueIntrinsic eval-int32-less-than))
@@ -152,15 +170,12 @@
                       (Pair (data-multiply)         (ValueIntrinsic (eval-int32-operator *))))
                 scope))
 
-(def parse-files (files)
-     (list-flatmap (pipe parse sexps-to-definitions) files))
-
 (def source-to-scope (files)
-     (map add-intrinsics (build-scope (stringify-parse-errors (parse-files files)))))
+     (add-definitions files (add-intrinsics (scope-empty))))
 
 (def main-takes-argument (scope)
      (match (scope-get (data-main) scope)
-            (Some (ValueClosure (Cons _ __) ___ ____))
+            (Some (ValueFunction (Cons _ __) ___))
                 True
             _
                 False))

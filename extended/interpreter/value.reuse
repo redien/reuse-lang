@@ -2,7 +2,19 @@
 (typ (value expression scope) (ValueInteger int32)
                               (ValueConstructor string (list (value expression scope)))
                               (ValueClosure (list string) expression scope)
+                              (ValueFunction (list string) expression)
                               (ValueIntrinsic (fn ((list (value expression scope))) (result (value expression scope) string))))
+
+(def value-function-to-string (arguments expression)
+     ((pipe expression-to-sexp
+            list-from
+            stringify
+            (string-concat (data-space))
+            (string-concat (wrap-in-brackets (string-join (data-space) arguments)))
+            (string-concat (data-space))
+            (string-concat (data-fn))
+            wrap-in-brackets)
+         expression))
 
 (def value-to-string (value)
      (match value
@@ -15,14 +27,8 @@
                        wrap-in-brackets)
                     values)
             (ValueClosure arguments expression scope)
-                ((pipe expression-to-sexp
-                       list-from
-                       stringify
-                       (string-concat (data-space))
-                       (string-concat (wrap-in-brackets (string-join (data-space) arguments)))
-                       (string-concat (data-space))
-                       (string-concat (data-fn))
-                       wrap-in-brackets)
-                    expression)
+                (value-function-to-string arguments expression)
+            (ValueFunction arguments expression)
+                (value-function-to-string arguments expression)
             (ValueIntrinsic _)
                 (data-intrinsic)))
