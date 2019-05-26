@@ -4,3 +4,9 @@ intrinsic              |[intrinsic]
 IndexedIterator        |IndexedIterator
 Some                   |Some
 None                   |None
+error-generic          |Error evaluating expression
+error-int32-op         |Integer operator called with incorrect arguments
+error-unmatched-case   |This value does not match any of the cases in a match expression:
+error-unmatched-case2  |Patterns:
+error-unmatched-case3  |Stack trace:
+error-no-symbol        |This symbol was not defined at this point:

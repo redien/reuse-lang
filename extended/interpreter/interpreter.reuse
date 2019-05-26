@@ -7,9 +7,9 @@
 (def map (f xs) (result-map f xs))
 
 (def eval-error ()
-     (Error (string-of-char 45)))
+     (Error (data-error-generic)))
 
-(def case-matches-expression (value case)
+(def case-matches-value (value case)
      (match (Pair value case)
             (Pair (ValueInteger a) (Pair (IntegerPattern b _2) _3))
                 (= a b)
@@ -31,19 +31,47 @@
             _
                 Empty))
 
-(def pattern-match (eval-expression scope expression cases)
-     (match (list-find-first (case-matches-expression expression) cases)
+(def render-stack-trace (stack-trace)
+     (string-join (string-of-char 10)
+                  (list-map (pipe expression-to-sexp
+                                  list-from
+                                  stringify
+                                  (string-concat (data-space))
+                                  (string-concat (data-space))
+                                  (string-concat (data-space))
+                                  (string-concat (data-space))) stack-trace)))
+
+(def pattern-match (eval-expression scope stack-trace value cases)
+     (match (list-find-first (case-matches-value value) cases)
             (Some (Pair pattern branch))
-                (eval-expression (scope-add (case-capture (Pair expression pattern)) scope) branch)
+                (eval-expression (scope-add (case-capture (Pair value pattern)) scope) stack-trace branch)
             None
-                (eval-error)))
+                (Error (string-join (string-empty)
+                                    (list (data-error-unmatched-case)
+                                          (string-of-char 10)
+                                          (data-space) (data-space) (data-space) (data-space)
+                                          (value-to-string value)
+                                          (string-of-char 10)
+                                          (data-error-unmatched-case2)
+                                          (string-of-char 10)
+                                          (data-space) (data-space) (data-space) (data-space)
+                                          (string-join (data-space)
+                                                       (list-map (pipe pair-left
+                                                                       pattern-to-sexp
+                                                                       list-from
+                                                                       stringify)
+                                                                 cases))
+                                          (string-of-char 10)
+                                          (data-error-unmatched-case3)
+                                          (string-of-char 10)
+                                          (render-stack-trace stack-trace))))))
 
 (def eval-int32-operator (operator arguments)
      (match arguments
             (Cons (ValueInteger a) (Cons (ValueInteger b) Empty))
                 (return (ValueInteger (operator a b)))
             _
-                (eval-error)))
+                (Error (data-error-int32-op))))
 
 (def eval-int32-less-than (arguments)
      (match arguments
@@ -52,9 +80,9 @@
                        True   (return first)
                        False  (return second))
             _
-                (eval-error)))
+                (Error (data-error-int32-op))))
 
-(def eval-function-application (eval-expression arguments values scope expression)
+(def eval-function-application (eval-expression stack-trace arguments values scope expression)
      (match (< (list-size values) (list-size arguments))
             True
                 (return (ValueClosure (list-skip (list-size values) arguments)
@@ -62,9 +90,10 @@
                                       (scope-add (list-zip arguments values) scope)))
             False
                 (eval-expression (scope-add (list-zip arguments values) scope)
+                                 stack-trace
                                  expression)))
 
-(def eval-expression (scope expression)
+(def eval-expression (scope stack-trace expression)
      (match expression
             (IntegerConstant value _)
                 (return (ValueInteger value))
@@ -73,29 +102,36 @@
                        (Some value)
                             (return value)
                        None
-                            (eval-error))
+                            (Error (string-join (data-space)
+                                                (list (data-error-no-symbol) name))))
             (Constructor name arguments _)
-                (bind (sequence (list-map (eval-expression scope) arguments)) (fn (values)
+                (bind (sequence (list-map (eval-expression scope stack-trace) arguments)) (fn (values)
                 (return (ValueConstructor name values))))
             (Lambda arguments expression _)
                 (return (ValueClosure arguments expression scope))
             (FunctionApplication expressions _)
-                (bind (sequence (list-map (eval-expression scope) expressions)) (fn (values)
+                (bind (sequence (list-map (eval-expression scope stack-trace) expressions)) (fn (values)
                 (match values
-                        (Cons (ValueClosure arguments expression closed-scope) parameters)
-                            (eval-function-application eval-expression arguments parameters (scope-concat scope closed-scope) expression)
+                        (Cons (ValueClosure arguments body closed-scope) parameters)
+                            (eval-function-application eval-expression
+                                                       (Cons expression stack-trace)
+                                                       arguments
+                                                       parameters
+                                                       (scope-concat scope closed-scope)
+                                                       body)
                         (Cons (ValueIntrinsic evaluator) parameters)
                             (evaluator (list-rest values))
                         _
                             (eval-error))))
             (Match expression cases _)
-                (bind (eval-expression scope expression) (fn (expression)
-                (pattern-match eval-expression scope expression cases)))))
+                (bind (eval-expression scope stack-trace expression) (fn (expression)
+                (pattern-match eval-expression scope stack-trace expression cases)))))
 
 (def eval (scope values)
      (match (scope-get (data-main) scope)
             (Some (ValueClosure arguments expression __))
                 (eval-expression (scope-add (list-zip arguments values) scope)
+                                 Empty
                                  expression)
             _
                 (eval-error)))
@@ -143,7 +179,7 @@
 
 (def box-next (box-indexed-iterator iterator collection next arguments)
      (match arguments
-            (Cons _ (Cons (ValueInteger i) Empty))
+            (Cons _ (Cons __ (Cons (ValueInteger i) Empty)))
                 (return (box-indexed-iterator (next iterator collection i)))
             _
                 (eval-error)))
