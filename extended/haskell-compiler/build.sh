@@ -75,7 +75,11 @@ else
 END_OF_SOURCE
 
 compile_binary() {
-    ocamlopt -O3 unix.cmxa $project_root/generated/extended/CompilerHaskell.ml -o $project_root/generated/extended/compiler-haskell
+    ocamlopt -O3 unix.cmxa \
+             -I "$project_root/generated" \
+             "$project_root/generated/Reuse.ml" \
+             "$project_root/generated/extended/CompilerHaskell.ml" \
+             -o "$project_root/generated/extended/compiler-haskell"
 }
 
 if [ "$1" != "--no-binary" ]; then

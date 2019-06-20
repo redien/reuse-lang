@@ -36,4 +36,8 @@ else
 
 END_OF_SOURCE
 
-ocamlopt -O3 unix.cmxa $project_root/generated/string-gen/StringGen.ml -o $project_root/generated/string-gen/string-gen
+ocamlopt -O3 unix.cmxa \
+         -I "$project_root/generated" \
+         "$project_root/generated/Reuse.ml" \
+         "$project_root/generated/string-gen/StringGen.ml" \
+         -o "$project_root/generated/string-gen/string-gen"

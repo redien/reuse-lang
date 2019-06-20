@@ -110,11 +110,6 @@ if [ "$REUSE_OUTPUT" == "" ]; then
     throw_error No output file specified, please use the --output [file] flag.
 fi
 
-if [[ "$REUSE_NOSTDLIB" == "false" && "$REUSE_LANGUAGE" != "haskell" ]]; then
-    REUSE_SOURCE="$(cat $root_path/generated/standard-library.reuse)
-$REUSE_SOURCE"
-fi
-
 format_integer() {
     xargs printf "%.f" | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta'
 }

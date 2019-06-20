@@ -39,6 +39,7 @@ $(cat $script_path/stdin_wrapper.ml)
 
 let getenv name = try (Sys.getenv name) with Not_found -> ""
 let as_minimal = if getenv "REUSE_MINIMAL" = "true" then CTrue else CFalse;;
+let with_stdlib = if getenv "REUSE_NOSTDLIB" = "false" then CTrue else CFalse;;
 let performance = getenv "REUSE_TIME" = "true";;
 
 let stdin_wrapper_start = Unix.gettimeofday ();;
@@ -57,7 +58,7 @@ let parse_end = Unix.gettimeofday ();;
 let parse_time = parse_end -. parse_start;;
 
 let codegen_start = Unix.gettimeofday ();;
-let codegen_output = (to_45ocaml parse_output stdin_list as_minimal);;
+let codegen_output = (to_45ocaml with_stdlib parse_output stdin_list as_minimal);;
 let codegen_end = Unix.gettimeofday ();;
 let codegen_time = codegen_end -. codegen_start;;
 
@@ -73,7 +74,11 @@ else
 END_OF_SOURCE
 
 compile_binary() {
-    ocamlopt -O3 unix.cmxa $project_root/generated/extended/CompilerOCaml.ml -o $project_root/generated/extended/compiler-ocaml
+    ocamlopt -O3 unix.cmxa \
+             -I "$project_root/generated" \
+             "$project_root/generated/Reuse.ml" \
+             "$project_root/generated/extended/CompilerOCaml.ml" \
+             -o "$project_root/generated/extended/compiler-ocaml"
 }
 
 if [ "$1" != "--no-binary" ]; then

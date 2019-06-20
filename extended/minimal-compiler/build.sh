@@ -37,4 +37,8 @@ let output = to_45reuse (parse' stdin_list) stdin_list in
 
 END_OF_SOURCE
 
-ocamlopt -O3 $project_root/generated/extended/CompilerMinimal.ml -o $project_root/generated/extended/compiler-minimal
+ocamlopt -O3 \
+         -I "$project_root/generated" \
+         "$project_root/generated/Reuse.ml" \
+         "$project_root/generated/extended/CompilerMinimal.ml" \
+         -o "$project_root/generated/extended/compiler-minimal"

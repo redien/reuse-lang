@@ -266,10 +266,13 @@
             True   (fn (definitions) definitions)
             False  validate-reserved-identifiers))
 
-(def to-ocaml (definitions source as_minimal)
+(def to-ocaml (standard-library? definitions source as_minimal)
      ((pipe (validate-reserved-identifiers-when-not as_minimal)
             local-transforms
             (list-map (result-map translate-definition))
             result-concat
+            (result-map (list-concat (list (match standard-library?
+                                                  True   (data-import-stdlib)
+                                                  False  (string-empty)))))
             (result-map (string-join (string-of-char 10))))
          definitions))

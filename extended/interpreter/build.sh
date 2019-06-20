@@ -61,4 +61,8 @@ while true do
 done
 END_OF_SOURCE
 
-ocamlopt -O3 unix.cmxa $project_root/generated/extended/Interpreter.ml -o $project_root/generated/extended/interpreter
+ocamlopt -O3 unix.cmxa \
+         -I "$project_root/generated" \
+         "$project_root/generated/Reuse.ml" \
+         "$project_root/generated/extended/Interpreter.ml" \
+         -o "$project_root/generated/extended/interpreter"

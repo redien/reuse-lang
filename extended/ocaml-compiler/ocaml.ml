@@ -1,153 +1,4 @@
-type boolean = CTrue | CFalse;;
-let rec not = fun a -> (match a with CTrue -> CFalse | CFalse -> CTrue);;
-let rec _and = fun a b -> (match a with CTrue -> b | CFalse -> CFalse);;
-let rec _or = fun a b -> (match a with CTrue -> CTrue | CFalse -> b);;
-let rec _60 = fun a b -> (if a<b then CTrue else CFalse);;
-let rec _62 = fun a b -> (_60 b a);;
-let rec _61 = fun a b -> (not (_or (_60 a b) (_62 a b)));;
-let rec _60_61 = fun a b -> (_or (_60 a b) (_61 a b));;
-let rec _62_61 = fun a b -> (_or (_62 a b) (_61 a b));;
-type ('Ta,'Tb) pair = CPair : 'Ta * 'Tb -> ('Ta,'Tb) pair;;
-let rec pair_45cons = fun a b -> (CPair (a,b));;
-let rec pair_45left = fun pair -> (match pair with (CPair (x,_95)) -> x);;
-let rec pair_45right = fun pair -> (match pair with (CPair (_95,x)) -> x);;
-let rec pair_45map = fun f pair -> (match pair with (CPair (x,y)) -> (f x y));;
-let rec pair_45map_45left = fun f pair -> (match pair with (CPair (x,y)) -> (CPair ((f x),y)));;
-let rec pair_45map_45right = fun f pair -> (match pair with (CPair (x,y)) -> (CPair (x,(f y))));;
-let rec pair_45swap = fun pair -> (match pair with (CPair (x,y)) -> (CPair (y,x)));;
-type ('Ta) maybe = CSome : 'Ta -> ('Ta) maybe | CNone;;
-let rec maybe_45map = fun f maybe -> (match maybe with (CSome (x)) -> (CSome ((f x))) | CNone -> CNone);;
-let rec maybe_45flatmap = fun f maybe -> (match maybe with (CSome (x)) -> (f x) | CNone -> CNone);;
-let rec maybe_45filter = fun f maybe -> (match maybe with (CSome (x)) -> (match (f x) with CTrue -> maybe | CFalse -> CNone) | CNone -> CNone);;
-let rec maybe_45else = fun f maybe -> (match maybe with CNone -> (f ()) | (CSome (x)) -> x);;
-type ('Telement) indexed_45iterator = CIndexedIterator : 'Tcollection * int32 * ('Tcollection -> int32 -> ('Telement) maybe) * (('Telement) indexed_45iterator -> 'Tcollection -> int32 -> ('Telement) indexed_45iterator) -> ('Telement) indexed_45iterator;;
-let rec indexed_45iterator_45next = fun iterator -> (match iterator with (CIndexedIterator (collection,index,_95,next)) -> (next iterator collection index));;
-let rec indexed_45iterator_45get = fun iterator -> (match iterator with (CIndexedIterator (collection,index,get,_95)) -> (get collection index));;
-let rec indexed_45iterator_45index = fun iterator -> (match iterator with (CIndexedIterator (_95,index,_95_95,_95_95_95)) -> index);;
-let rec indexed_45iterator_45from_45next_39 = fun iterator _95 _95_95 -> (match iterator with (CIndexedIterator (s,i,get,next)) -> (CIndexedIterator (s,(Int32.add i (1l)),get,next)));;
-let rec indexed_45iterator_45from = fun collection get -> (CIndexedIterator (collection,(0l),get,indexed_45iterator_45from_45next_39));;
-type ('Ta) list = CCons : 'Ta * ('Ta) list -> ('Ta) list | CEmpty;;
-let rec list_45cons = fun x xs -> (CCons (x,xs));;
-let rec list_45from = fun x -> (CCons (x,CEmpty));;
-let rec list_45from_45range = fun from _95to -> (match (_60 from _95to) with CTrue -> (CCons (from,(list_45from_45range (Int32.add from (1l)) _95to))) | CFalse -> CEmpty);;
-let rec list_45first = fun list -> (match list with (CCons (x,_95)) -> (CSome (x)) | CEmpty -> CNone);;
-let rec list_45rest = fun list -> (match list with (CCons (_95,rest)) -> rest | CEmpty -> CEmpty);;
-let rec list_45last = fun list -> (match list with CEmpty -> CNone | (CCons (x,CEmpty)) -> (CSome (x)) | (CCons (_95,rest)) -> (list_45last rest));;
-let rec list_45empty_63 = fun list -> (match list with (CCons (_95,_95_95)) -> CFalse | CEmpty -> CTrue);;
-let rec list_45size_39 = fun list size -> (match list with (CCons (_95,rest)) -> (list_45size_39 rest (Int32.add size (1l))) | CEmpty -> size);;
-let rec list_45size = fun list -> (list_45size_39 list (0l));;
-let rec list_45foldrk = fun f initial list continue -> (match list with CEmpty -> (continue initial) | (CCons (x,xs)) -> (list_45foldrk f initial xs (fun _value -> (f x _value continue))));;
-let rec list_45foldlk = fun f initial list continue -> (match list with CEmpty -> (continue initial) | (CCons (x,xs)) -> (f x initial (fun new_45value -> (list_45foldlk f new_45value xs continue))));;
-let rec list_45foldr = fun f initial list -> (list_45foldrk (fun x _value continue -> (continue (f x _value))) initial list (fun x -> x));;
-let rec list_45foldl = fun f initial list -> (match list with CEmpty -> initial | (CCons (x,xs)) -> (list_45foldl f (f x initial) xs));;
-let rec list_45concat = fun a b -> (list_45foldr list_45cons b a);;
-let rec list_45reverse = fun list -> (list_45foldl list_45cons CEmpty list);;
-let rec list_45map = fun f list -> (list_45foldr (fun head tail -> (list_45cons (f head) tail)) CEmpty list);;
-let rec list_45flatmap = fun f list -> (list_45foldr (fun head tail -> (list_45concat (f head) tail)) CEmpty list);;
-let rec list_45skip = fun count list -> (match (_62 count (0l)) with CTrue -> (list_45skip (Int32.sub count (1l)) (list_45rest list)) | CFalse -> list);;
-let rec list_45take_39 = fun count list taken -> (match (_62 count (0l)) with CTrue -> (match list with (CCons (char,rest)) -> (list_45take_39 (Int32.sub count (1l)) rest (CCons (char,taken))) | CEmpty -> taken) | CFalse -> taken);;
-let rec list_45take = fun count list -> (list_45reverse (list_45take_39 count list CEmpty));;
-let rec list_45zip_39 = fun xs ys collected -> (match xs with CEmpty -> collected | (CCons (x,xs)) -> (match ys with CEmpty -> collected | (CCons (y,ys)) -> (list_45zip_39 xs ys (CCons ((CPair (x,y)),collected)))));;
-let rec list_45zip = fun xs ys -> (list_45reverse (list_45zip_39 xs ys CEmpty));;
-let rec list_45pairs = fun xs -> (match xs with (CCons (a,(CCons (b,rest)))) -> (CCons ((CPair (a,b)),(list_45pairs rest))) | _95 -> CEmpty);;
-let rec list_45find_45first = fun predicate list -> (match list with CEmpty -> CNone | (CCons (x,xs)) -> (match (predicate x) with CTrue -> (CSome (x)) | CFalse -> (list_45find_45first predicate xs)));;
-let rec list_45filter = fun f list -> (list_45foldr (fun head tail -> (match (f head) with CTrue -> (CCons (head,tail)) | CFalse -> tail)) CEmpty list);;
-let rec list_45exclude = fun f list -> (list_45filter (fun _226_156_168x -> (not (f _226_156_168x))) list);;
-let rec list_45any_63 = fun f list -> (not (list_45empty_63 (list_45filter f list)));;
-let rec list_45collect_45from_45indexed_45iterator_39 = fun predicate iterator initial -> (match (indexed_45iterator_45get iterator) with CNone -> (CPair (iterator,initial)) | (CSome (x)) -> (match (predicate x) with CTrue -> (list_45collect_45from_45indexed_45iterator_39 predicate (indexed_45iterator_45next iterator) (CCons (x,initial))) | CFalse -> (CPair (iterator,initial))));;
-let rec list_45collect_45from_45indexed_45iterator = fun predicate iterator -> (match (list_45collect_45from_45indexed_45iterator_39 predicate iterator CEmpty) with (CPair (iterator,result)) -> (CPair (iterator,(list_45reverse result))));;
-type string_45node = CFTValue : int32 -> string_45node | CFTNode2 : int32 * string_45node * string_45node -> string_45node | CFTNode3 : int32 * string_45node * string_45node * string_45node -> string_45node;;
-type string = CFTEmpty | CFTSingle : string_45node -> string | CFTDeep : (string_45node) list * string * (string_45node) list -> string;;
-let rec string_45empty = fun () -> CFTEmpty;;
-let rec string_45of_45char = fun character -> (CFTSingle ((CFTValue (character))));;
-let rec string_45node_45size_39 = fun node -> (match node with (CFTValue (_95)) -> (1l) | (CFTNode2 (size,_95,_95_95)) -> size | (CFTNode3 (size,_95,_95_95,_95_95_95)) -> size);;
-let rec string_45node2_39 = fun a b -> (CFTNode2 ((Int32.add (string_45node_45size_39 a) (string_45node_45size_39 b)),a,b));;
-let rec string_45node3_39 = fun a b c -> (CFTNode3 ((Int32.add (string_45node_45size_39 a) (Int32.add (string_45node_45size_39 b) (string_45node_45size_39 c))),a,b,c));;
-let rec string_45prepend_45node_39 = fun a tree -> (match tree with CFTEmpty -> (CFTSingle (a)) | (CFTSingle (x)) -> (CFTDeep ((CCons (a,CEmpty)),CFTEmpty,(CCons (x,CEmpty)))) | (CFTDeep (first,middle,last)) -> (match first with (CCons (b,(CCons (c,(CCons (d,(CCons (e,CEmpty)))))))) -> (CFTDeep ((CCons (a,(CCons (b,CEmpty)))),(string_45prepend_45node_39 (string_45node3_39 c d e) middle),last)) | _95 -> (CFTDeep ((CCons (a,first)),middle,last))));;
-let rec string_45prepend = fun char string -> (string_45prepend_45node_39 (CFTValue (char)) string);;
-let rec string_45append_45node_39 = fun a tree -> (match tree with CFTEmpty -> (CFTSingle (a)) | (CFTSingle (x)) -> (CFTDeep ((CCons (x,CEmpty)),CFTEmpty,(CCons (a,CEmpty)))) | (CFTDeep (first,middle,last)) -> (match last with (CCons (b,(CCons (c,(CCons (d,(CCons (e,CEmpty)))))))) -> (CFTDeep (first,(string_45append_45node_39 (string_45node3_39 e d c) middle),(CCons (a,(CCons (b,CEmpty)))))) | _95 -> (CFTDeep (first,middle,(CCons (a,last))))));;
-let rec string_45append = fun char string -> (string_45append_45node_39 (CFTValue (char)) string);;
-let rec string_45first_45node_39 = fun node -> (match node with (CFTValue (x)) -> x | (CFTNode2 (_95,x,_95_95)) -> (string_45first_45node_39 x) | (CFTNode3 (_95,x,_95_95,_95_95_95)) -> (string_45first_45node_39 x));;
-let rec string_45first = fun string -> (match string with CFTEmpty -> CNone | (CFTSingle (node)) -> (CSome ((string_45first_45node_39 node))) | (CFTDeep (first,middle,last)) -> (maybe_45map string_45first_45node_39 (list_45first first)));;
-let rec string_45rest_45node_39 = fun node -> (match node with (CFTValue (_95)) -> CNone | (CFTNode2 (_95,a,b)) -> (match (string_45rest_45node_39 a) with (CSome (node)) -> (CSome ((string_45node2_39 node b))) | CNone -> (CSome (b))) | (CFTNode3 (_95,a,b,c)) -> (match (string_45rest_45node_39 a) with (CSome (node)) -> (CSome ((string_45node3_39 node b c))) | CNone -> (CSome ((string_45node2_39 b c)))));;
-let rec string_45rest = fun string -> (match string with CFTEmpty -> string | (CFTSingle (node)) -> (match (string_45rest_45node_39 node) with (CSome (node)) -> (CFTSingle (node)) | CNone -> CFTEmpty) | (CFTDeep ((CCons (node,rest)),middle,last)) -> (match (string_45rest_45node_39 node) with (CSome (node)) -> (CFTDeep ((CCons (node,rest)),middle,last)) | CNone -> (match rest with CEmpty -> (list_45foldr string_45append_45node_39 middle last) | _95 -> (CFTDeep (rest,middle,last)))) | _95 -> string);;
-let rec string_45foldr_45node_39 = fun f node identity -> (match node with (CFTValue (a)) -> (f a identity) | (CFTNode2 (_95,a,b)) -> (string_45foldr_45node_39 f a (string_45foldr_45node_39 f b identity)) | (CFTNode3 (_95,a,b,c)) -> (string_45foldr_45node_39 f a (string_45foldr_45node_39 f b (string_45foldr_45node_39 f c identity))));;
-let rec string_45foldr = fun f identity tree -> (match tree with CFTEmpty -> identity | (CFTSingle (x)) -> (string_45foldr_45node_39 f x identity) | (CFTDeep (first,middle,last)) -> (list_45foldr (string_45foldr_45node_39 f) (string_45foldr f (list_45foldl (string_45foldr_45node_39 f) identity last) middle) first));;
-let rec string_45foldl_45node_39 = fun f node identity -> (match node with (CFTValue (a)) -> (f a identity) | (CFTNode2 (_95,b,a)) -> (string_45foldl_45node_39 f a (string_45foldl_45node_39 f b identity)) | (CFTNode3 (_95,c,b,a)) -> (string_45foldl_45node_39 f a (string_45foldl_45node_39 f b (string_45foldl_45node_39 f c identity))));;
-let rec string_45foldl = fun f identity tree -> (match tree with CFTEmpty -> identity | (CFTSingle (x)) -> (string_45foldl_45node_39 f x identity) | (CFTDeep (first,middle,last)) -> (list_45foldr (string_45foldl_45node_39 f) (string_45foldl f (list_45foldl (string_45foldl_45node_39 f) identity first) middle) last));;
-let rec string_45size = fun string -> (match string with CFTEmpty -> (0l) | (CFTSingle (x)) -> (string_45node_45size_39 x) | (CFTDeep (first,middle,last)) -> (Int32.add (list_45foldr Int32.add (0l) (list_45map string_45node_45size_39 first)) (Int32.add (list_45foldr Int32.add (0l) (list_45map string_45node_45size_39 last)) (string_45size middle))));;
-let rec string_45concat_45nodes_39 = fun nodes -> (match nodes with (CCons (a,(CCons (b,CEmpty)))) -> (CCons ((string_45node2_39 a b),CEmpty)) | (CCons (a,(CCons (b,(CCons (c,CEmpty)))))) -> (CCons ((string_45node3_39 a b c),CEmpty)) | (CCons (a,(CCons (b,(CCons (c,(CCons (d,CEmpty)))))))) -> (CCons ((string_45node2_39 a b),(CCons ((string_45node2_39 c d),CEmpty)))) | (CCons (a,(CCons (b,(CCons (c,rest)))))) -> (CCons ((string_45node3_39 a b c),(string_45concat_45nodes_39 rest))) | _95 -> CEmpty);;
-type ('Ta,'Tb,'Tc) triple = CTriple : 'Ta * 'Tb * 'Tc -> ('Ta,'Tb,'Tc) triple;;
-let rec string_45concat_39 = fun a nodes b -> (match (CTriple (a,nodes,b)) with (CTriple (CFTEmpty,nodes,b)) -> (list_45foldr string_45prepend_45node_39 b nodes) | (CTriple (a,nodes,CFTEmpty)) -> (list_45foldl string_45append_45node_39 a nodes) | (CTriple ((CFTSingle (x)),nodes,b)) -> (string_45prepend_45node_39 x (list_45foldr string_45prepend_45node_39 b nodes)) | (CTriple (a,nodes,(CFTSingle (x)))) -> (string_45append_45node_39 x (list_45foldl string_45append_45node_39 a nodes)) | (CTriple ((CFTDeep (first1,middle1,last1)),nodes,(CFTDeep (first2,middle2,last2)))) -> (CFTDeep (first1,(string_45concat_39 middle1 (string_45concat_45nodes_39 (list_45concat (list_45reverse last1) (list_45concat nodes first2))) middle2),last2)));;
-let rec string_45concat = fun a b -> (string_45concat_39 a CEmpty b);;
-let rec string_45empty_63 = fun string -> (match (string_45first string) with (CSome (_95)) -> CFalse | CNone -> CTrue);;
-let rec string_45any_63 = fun predicate string -> (string_45foldl (fun x b -> (_or (predicate x) b)) CFalse string);;
-let rec string_45every_63 = fun predicate string -> (string_45foldl (fun x b -> (_and (predicate x) b)) CTrue string);;
-let rec string_45to_45list = fun string -> (string_45foldr list_45cons CEmpty string);;
-let rec string_45from_45list = fun list -> (list_45foldr string_45prepend (string_45empty ()) list);;
-let rec string_45skip = fun count string -> (match (_62 count (0l)) with CTrue -> (string_45skip (Int32.sub count (1l)) (string_45rest string)) | CFalse -> string);;
-let rec string_45take_39 = fun count string taken -> (match (_62 count (0l)) with CTrue -> (match (string_45first string) with (CSome (char)) -> (string_45take_39 (Int32.sub count (1l)) (string_45rest string) (string_45append char taken)) | CNone -> taken) | CFalse -> taken);;
-let rec string_45take = fun count string -> (string_45take_39 count string (string_45empty ()));;
-let rec string_45reverse = fun string -> (string_45foldl string_45prepend (string_45empty ()) string);;
-let rec string_45substring = fun start size string -> (string_45take size (string_45skip start string));;
-let rec string_45join = fun separator strings -> (match strings with (CCons (first,rest)) -> (list_45foldl (fun string joined -> (string_45concat joined (string_45concat separator string))) first rest) | CEmpty -> (string_45empty ()));;
-let rec string_45flatmap = fun f string -> (string_45foldl (fun x xs -> (string_45concat xs (f x))) (string_45empty ()) string);;
-let rec string_45split_39 = fun separator list current parts -> (match list with CEmpty -> (list_45reverse (CCons ((list_45reverse current),parts))) | (CCons (c,rest)) -> (match (_61 separator c) with CTrue -> (string_45split_39 separator rest CEmpty (CCons ((list_45reverse current),parts))) | CFalse -> (string_45split_39 separator rest (CCons (c,current)) parts)));;
-let rec string_45split = fun separator string -> (list_45map string_45from_45list (string_45split_39 separator (string_45to_45list string) CEmpty CEmpty));;
-let rec string_45trim_45start_39 = fun list -> (match list with (CCons (x,xs)) -> (match (_61 x (32l)) with CTrue -> (string_45trim_45start_39 xs) | CFalse -> list) | CEmpty -> list);;
-let rec string_45trim_45start = fun string -> (string_45from_45list (string_45trim_45start_39 (string_45to_45list string)));;
-let rec string_45trim_45end = fun string -> (string_45reverse (string_45trim_45start (string_45reverse string)));;
-let rec string_45trim = fun string -> (string_45trim_45start (string_45trim_45end string));;
-let rec string_45equal_63 = fun a b -> (match (string_45first a) with (CSome (xa)) -> (match (string_45first b) with (CSome (xb)) -> (_and (_61 xa xb) (string_45equal_63 (string_45rest a) (string_45rest b))) | CNone -> (string_45empty_63 a)) | CNone -> (string_45empty_63 b));;
-let rec string_45point_45is_45digit = fun point -> (_and (_62 point (47l)) (_60 point (58l)));;
-let rec string_45to_45int32_39_39_39 = fun string_45to_45int32_39_39 string accumulator x -> (string_45to_45int32_39_39 string (CSome ((Int32.add (Int32.mul (10l) accumulator) (Int32.sub x (48l))))));;
-let rec string_45to_45int32_39_39 = fun string accumulator -> (match string with CEmpty -> accumulator | (CCons (x,rest)) -> (maybe_45flatmap (fun accumulator -> ((fun _226_156_168x -> ((maybe_45flatmap (string_45to_45int32_39_39_39 string_45to_45int32_39_39 rest accumulator)) ((maybe_45filter string_45point_45is_45digit) _226_156_168x))) (CSome (x)))) accumulator));;
-let rec string_45to_45int32_39 = fun string -> (match string with (CCons (45l,string)) -> (match (list_45empty_63 string) with CTrue -> CNone | CFalse -> (maybe_45map (fun x -> (Int32.mul (-1l) x)) (string_45to_45int32_39 string))) | _95 -> (string_45to_45int32_39_39 string (CSome ((0l)))));;
-let rec string_45to_45int32 = fun string -> (string_45to_45int32_39 (string_45to_45list string));;
-let rec string_45from_45int32_39_39 = fun integer string -> (match (_62 integer (9l)) with CTrue -> (string_45from_45int32_39_39 (Int32.div integer (10l)) (CCons ((Int32.add (Int32.rem integer (10l)) (48l)),string))) | CFalse -> (CCons ((Int32.add integer (48l)),string)));;
-let rec string_45from_45int32_39 = fun integer -> (match (_60 integer (0l)) with CTrue -> (match (_61 integer (-2147483648l)) with CTrue -> (CCons ((45l),(CCons ((50l),(CCons ((49l),(CCons ((52l),(CCons ((55l),(CCons ((52l),(CCons ((56l),(CCons ((51l),(CCons ((54l),(CCons ((52l),(CCons ((56l),CEmpty)))))))))))))))))))))) | CFalse -> (CCons ((45l),(string_45from_45int32_39 (Int32.mul integer (-1l)))))) | CFalse -> (string_45from_45int32_39_39 integer CEmpty));;
-let rec string_45from_45int32 = fun integer -> (string_45from_45list (string_45from_45int32_39 integer));;
-let rec string_45collect_45from_45indexed_45iterator = fun predicate iterator -> (pair_45map_45right string_45from_45list (list_45collect_45from_45indexed_45iterator predicate iterator));;
-let rec string_45from_45boolean = fun boolean -> (match boolean with CTrue -> (string_45from_45list (CCons ((84l),(CCons ((114l),(CCons ((117l),(CCons ((101l),CEmpty))))))))) | CFalse -> (string_45from_45list (CCons ((70l),(CCons ((97l),(CCons ((108l),(CCons ((115l),(CCons ((101l),CEmpty))))))))))));;
-type ('Tv,'Te) result = CResult : 'Tv -> ('Tv,'Te) result | CError : 'Te -> ('Tv,'Te) result;;
-let rec result_45lift = fun result -> (CResult (result));;
-let rec result_45error = fun error -> (CError (error));;
-let rec result_45map = fun f result -> (match result with (CResult (x)) -> (CResult ((f x))) | (CError (error)) -> (CError (error)));;
-let rec result_45map_45error = fun f result -> (match result with (CResult (x)) -> (CResult (x)) | (CError (error)) -> (CError ((f error))));;
-let rec result_45flatmap = fun f result -> (match result with (CResult (x)) -> (f x) | (CError (error)) -> (CError (error)));;
-let rec result_45either = fun f g result -> (match result with (CResult (x)) -> (f x) | (CError (x)) -> (g x));;
-let rec result_45or_45else = fun _value result -> (match result with (CResult (x)) -> x | (CError (x)) -> _value);;
-let rec result_45error_63 = fun result -> (match result with (CError (_95)) -> CTrue | _95 -> CFalse);;
-let rec result_45filter_45list = fun list -> (list_45foldr (fun result new_45list -> (match result with (CResult (x)) -> (CCons (x,new_45list)) | _95 -> new_45list)) CEmpty list);;
-let rec result_45concat = fun list -> (match (list_45filter result_45error_63 list) with (CCons ((CError (error)),_95)) -> (CError (error)) | (CCons ((CResult (_95)),_95_95)) -> (CResult (CEmpty)) | CEmpty -> (CResult ((result_45filter_45list list))));;
-let rec result_45of_45maybe = fun error maybe -> (match maybe with (CSome (x)) -> (CResult (x)) | CNone -> (CError (error)));;
-let rec result_45bind = fun result f -> (result_45flatmap f result);;
-let rec result_45return = fun _value -> (result_45lift _value);;
-type ('Ts,'Tv) state = COperation : ('Ts -> ('Ts,'Tv) pair) -> ('Ts,'Tv) state;;
-let rec state_45run = fun state operation -> (match operation with (COperation (f)) -> (f state));;
-let rec state_45final_45value = fun initial_45state operation -> (match (state_45run initial_45state operation) with (CPair (_95,_value)) -> _value);;
-let rec state_45return = fun _value -> (COperation ((fun state -> (CPair (state,_value)))));;
-let rec state_45bind = fun operation f -> (COperation ((fun state -> (match (state_45run state operation) with (CPair (new_45state,new_45value)) -> (state_45run new_45state (f new_45value))))));;
-let rec state_45get = fun () -> (COperation ((fun state -> (CPair (state,state)))));;
-let rec state_45set = fun state -> (COperation ((fun _95 -> (CPair (state,state)))));;
-let rec state_45modify = fun f -> (state_45bind (state_45get ()) (fun state -> (state_45set (f state))));;
-let rec state_45let = fun _value f -> (state_45bind (state_45return _value) f);;
-let rec state_45foldr = fun f initial_45value operations -> (list_45foldr (fun operation chain -> (state_45bind operation (fun x -> (state_45bind chain (fun xs -> (state_45return (f x xs))))))) (state_45return initial_45value) operations);;
-let rec state_45foreach = fun f xs -> (state_45foldr list_45cons CEmpty (list_45map f xs));;
-let rec state_45flatmap = fun f operation -> (state_45bind operation f);;
-let rec state_45map = fun f operation -> (state_45flatmap (fun _226_156_168x -> (state_45return (f _226_156_168x))) operation);;
-let rec state_45lift = fun _value -> (state_45return _value);;
-type ('Tvalue) dictionary = CTrieNode : ('Tvalue) maybe * ((int32,('Tvalue) dictionary) pair) list -> ('Tvalue) dictionary;;
-let rec dictionary_45empty = fun () -> (CTrieNode (CNone,CEmpty));;
-let rec dictionary_45value_39 = fun dictionary -> (match dictionary with (CTrieNode (_value,_95)) -> _value);;
-let rec dictionary_45children_39 = fun dictionary -> (match dictionary with (CTrieNode (_95,children)) -> children);;
-let rec dictionary_45find_45child_39 = fun char dictionary -> (maybe_45map pair_45right (list_45find_45first (fun _226_156_168x -> ((_61 char) (pair_45left _226_156_168x))) (dictionary_45children_39 dictionary)));;
-let rec dictionary_45remove_45child_39 = fun char dictionary -> (match dictionary with (CTrieNode (_value,children)) -> (CTrieNode (_value,(list_45exclude (fun _226_156_168x -> ((_61 char) (pair_45left _226_156_168x))) children))));;
-let rec dictionary_45set = fun key new_45value dictionary -> (match (string_45first key) with CNone -> (CTrieNode ((CSome (new_45value)),(dictionary_45children_39 dictionary))) | (CSome (char)) -> ((fun _226_156_168x -> ((fun child -> (CTrieNode ((dictionary_45value_39 dictionary),(CCons ((CPair (char,child)),(dictionary_45children_39 (dictionary_45remove_45child_39 char dictionary))))))) ((dictionary_45set (string_45rest key) new_45value) ((maybe_45else dictionary_45empty) ((dictionary_45find_45child_39 char) _226_156_168x))))) dictionary));;
-let rec dictionary_45get = fun key dictionary -> (match (string_45first key) with (CSome (char)) -> (maybe_45flatmap (dictionary_45get (string_45rest key)) (dictionary_45find_45child_39 char dictionary)) | CNone -> (dictionary_45value_39 dictionary));;
-let rec dictionary_45of = fun entries -> (list_45foldl (pair_45map dictionary_45set) (dictionary_45empty ()) entries);;
-let rec dictionary_45singleton = fun key _value -> (dictionary_45set key _value (dictionary_45empty ()));;
-let rec dictionary_45get_45or = fun key default dictionary -> (match (dictionary_45get key dictionary) with (CSome (_value)) -> _value | CNone -> default);;
+open Reuse;;
 let rec whitespace_63 = fun character -> (match character with 32l -> CTrue | 13l -> CTrue | 9l -> CTrue | 10l -> CTrue | _95 -> CFalse);;
 let rec atom_45character_63 = fun character -> (match character with 40l -> CFalse | 41l -> CFalse | _95 -> (not (whitespace_63 character)));;
 type range = CRange : int32 * int32 -> range;;
@@ -170,12 +21,16 @@ type ('Tmeta) pattern = CCapture : string * 'Tmeta -> ('Tmeta) pattern | CIntege
 type ('Tmeta) expression = CIntegerConstant : int32 * 'Tmeta -> ('Tmeta) expression | CIdentifier : string * 'Tmeta -> ('Tmeta) expression | CLambda : (string) list * ('Tmeta) expression * 'Tmeta -> ('Tmeta) expression | CMatch : ('Tmeta) expression * ((('Tmeta) pattern,('Tmeta) expression) pair) list * 'Tmeta -> ('Tmeta) expression | CConstructor : string * (('Tmeta) expression) list * 'Tmeta -> ('Tmeta) expression | CFunctionApplication : (('Tmeta) expression) list * 'Tmeta -> ('Tmeta) expression;;
 type ('Ta,'Tb) definition = CTypeDefinition : string * (('Ta) type_45parameter) list * (('Ta) constructor) list * 'Tb -> ('Ta,'Tb) definition | CFunctionDefinition : string * (string) list * ('Ta) expression * 'Tb -> ('Ta,'Tb) definition;;
 let rec definition_45meta = fun definition -> (match definition with (CTypeDefinition (_95,_95_95,_95_95_95,meta)) -> meta | (CFunctionDefinition (_95,_95_95,_95_95_95,meta)) -> meta);;
+let rec definition_45name = fun definition -> (match definition with (CTypeDefinition (name,_95,_95_95,_95_95_95)) -> name | (CFunctionDefinition (name,_95,_95_95,_95_95_95)) -> name);;
 let rec over_45match_45pair_45expression = fun f pair -> (match pair with (CPair (pattern,expression)) -> (result_45bind (f expression) (fun expression -> (result_45return (CPair (pattern,expression))))));;
 let rec over_45match_45pair_45expressions = fun over_45subexpressions f pairs -> (result_45concat (list_45map (over_45match_45pair_45expression (fun _226_156_168x -> ((result_45flatmap (over_45subexpressions f)) (f _226_156_168x)))) pairs));;
 let rec over_45subexpressions = fun f expression -> (result_45bind (f expression) (fun expression -> (match expression with (CLambda (arguments,expression,range)) -> (result_45bind (f expression) (fun expression -> (result_45bind (over_45subexpressions f expression) (fun expression -> (result_45return (CLambda (arguments,expression,range))))))) | (CMatch (expression,pairs,range)) -> (result_45bind (f expression) (fun expression -> (result_45bind (over_45subexpressions f expression) (fun expression -> (result_45bind (over_45match_45pair_45expressions over_45subexpressions f pairs) (fun pairs -> (result_45return (CMatch (expression,pairs,range))))))))) | (CConstructor (name,expressions,range)) -> (result_45bind (result_45concat (list_45map (fun _226_156_168x -> ((result_45flatmap (over_45subexpressions f)) (f _226_156_168x))) expressions)) (fun expressions -> (result_45return (CConstructor (name,expressions,range))))) | (CFunctionApplication (expressions,range)) -> (result_45bind (result_45concat (list_45map (fun _226_156_168x -> ((result_45flatmap (over_45subexpressions f)) (f _226_156_168x))) expressions)) (fun expressions -> (result_45return (CFunctionApplication (expressions,range))))) | _95 -> (result_45return expression))));;
 let rec over_45definition_45expressions = fun f definition -> (match definition with (CFunctionDefinition (name,arguments,expression,range)) -> (result_45bind (f expression) (fun expression -> (result_45return (CFunctionDefinition (name,arguments,expression,range))))) | _95 -> (result_45return definition));;
 let rec over_45function_45application = fun f expression -> (match expression with (CFunctionApplication (expressions,range)) -> (f expressions range) | _95 -> (result_45return expression));;
 let rec over_45identifiers = fun f expression -> (match expression with (CIdentifier (name,range)) -> (result_45bind (f name) (fun name -> (result_45return (CIdentifier (name,range))))) | (CLambda (arguments,expression,range)) -> (result_45bind (over_45identifiers f expression) (fun expression -> (result_45bind (result_45concat (list_45map f arguments)) (fun arguments -> (result_45return (CLambda (arguments,expression,range))))))) | (CConstructor (name,CEmpty,range)) -> (result_45bind (f name) (fun name -> (result_45return (CConstructor (name,CEmpty,range))))) | (CConstructor (name,expressions,range)) -> (result_45bind (result_45concat (list_45map (over_45identifiers f) expressions)) (fun expressions -> (result_45bind (f name) (fun name -> (result_45return (CConstructor (name,expressions,range))))))) | (CFunctionApplication (expressions,range)) -> (result_45bind (result_45concat (list_45map (over_45identifiers f) expressions)) (fun expressions -> (result_45return (CFunctionApplication (expressions,range))))) | (CMatch (expression,rules,range)) -> (result_45bind (result_45concat (list_45map (over_45match_45pair_45expression (over_45identifiers f)) rules)) (fun rules -> (result_45bind (over_45identifiers f expression) (fun expression -> (result_45return (CMatch (expression,rules,range))))))) | _95 -> (result_45return expression));;
+let rec ast_45pattern_45map_45meta = fun f pattern -> (match pattern with (CConstructorPattern (name,patterns,meta)) -> (CConstructorPattern (name,(list_45map (ast_45pattern_45map_45meta f) patterns),(f meta))) | (CIntegerPattern (_value,meta)) -> (CIntegerPattern (_value,(f meta))) | (CCapture (name,meta)) -> (CCapture (name,(f meta))));;
+let rec ast_45match_45pair_45map_45meta = fun ast_45expression_45map_45meta f pair -> (match pair with (CPair (pattern,expression)) -> (CPair ((ast_45pattern_45map_45meta f pattern),(ast_45expression_45map_45meta f expression))));;
+let rec ast_45expression_45map_45meta = fun f expression -> (match expression with (CIntegerConstant (integer,meta)) -> (CIntegerConstant (integer,(f meta))) | (CIdentifier (identifier,meta)) -> (CIdentifier (identifier,(f meta))) | (CLambda (arguments,expression,meta)) -> (CLambda (arguments,(ast_45expression_45map_45meta f expression),(f meta))) | (CMatch (expression,pairs,meta)) -> (CMatch ((ast_45expression_45map_45meta f expression),(list_45map (ast_45match_45pair_45map_45meta ast_45expression_45map_45meta f) pairs),(f meta))) | (CConstructor (name,parameters,meta)) -> (CConstructor (name,(list_45map (ast_45expression_45map_45meta f) parameters),(f meta))) | (CFunctionApplication (parameters,meta)) -> (CFunctionApplication ((list_45map (ast_45expression_45map_45meta f) parameters),(f meta))));;
 let rec data_45def = fun () -> (string_45from_45list (CCons ((100l),(CCons ((101l),(CCons ((102l),CEmpty)))))));;
 let rec data_45typ = fun () -> (string_45from_45list (CCons ((116l),(CCons ((121l),(CCons ((112l),CEmpty)))))));;
 let rec data_45fn = fun () -> (string_45from_45list (CCons ((102l),(CCons ((110l),CEmpty)))));;
@@ -252,7 +107,6 @@ let rec data_45multiply = fun () -> (string_45from_45list (CCons ((42l),CEmpty))
 let rec data_45minus = fun () -> (string_45from_45list (CCons ((45l),CEmpty)));;
 let rec data_45slash = fun () -> (string_45from_45list (CCons ((47l),CEmpty)));;
 let rec data_45percent = fun () -> (string_45from_45list (CCons ((37l),CEmpty)));;
-let rec data_45match = fun () -> (string_45from_45list (CCons ((109l),(CCons ((97l),(CCons ((116l),(CCons ((99l),(CCons ((104l),CEmpty)))))))))));;
 let rec data_45pipe = fun () -> (string_45from_45list (CCons ((112l),(CCons ((105l),(CCons ((112l),(CCons ((101l),CEmpty)))))))));;
 let rec data_45list = fun () -> (string_45from_45list (CCons ((108l),(CCons ((105l),(CCons ((115l),(CCons ((116l),CEmpty)))))))));;
 let rec data_45int32_45less_45than = fun () -> (string_45from_45list (CCons ((105l),(CCons ((110l),(CCons ((116l),(CCons ((51l),(CCons ((50l),(CCons ((45l),(CCons ((108l),(CCons ((101l),(CCons ((115l),(CCons ((115l),(CCons ((45l),(CCons ((116l),(CCons ((104l),(CCons ((97l),(CCons ((110l),CEmpty)))))))))))))))))))))))))))))));;
@@ -329,7 +183,7 @@ let rec expression_45is_45symbol_63 = fun symbol_45name expression -> (match exp
 let rec first_45expression_45is_45symbol_63 = fun symbol_45name expressions -> ((fun _226_156_168x -> ((maybe_45else (fun () -> CFalse)) ((maybe_45map (expression_45is_45symbol_63 symbol_45name)) _226_156_168x))) (list_45first expressions));;
 let rec symbol_45is_45reserved_63 = fun name -> (string_45equal_63 (string_45substring (0l) (3l) name) (data_45sparkle ()));;
 let rec validate_45identifier = fun identifier -> (match (symbol_45is_45reserved_63 identifier) with CTrue -> (result_45error (data_45error_45reserved_45identifier ())) | CFalse -> (result_45lift identifier));;
-let rec validate_45reserved_45identifiers = fun definition -> (result_45flatmap (over_45definition_45expressions (over_45identifiers validate_45identifier)) definition);;
+let rec validate_45reserved_45identifiers = fun definitions -> (list_45map (result_45flatmap (over_45definition_45expressions (over_45identifiers validate_45identifier))) definitions);;
 let rec transform_45special_45form = fun symbol_45name transformer definition -> (result_45flatmap (over_45definition_45expressions (over_45subexpressions (over_45function_45application (fun expressions range -> (match (first_45expression_45is_45symbol_63 (symbol_45name ()) expressions) with CTrue -> (result_45lift (transformer (list_45rest expressions) range)) | CFalse -> (result_45lift (CFunctionApplication (expressions,range)))))))) definition);;
 let rec transform_45pipe = fun expressions range -> (CLambda ((CCons ((data_45sparkle_45x ()),CEmpty)),(list_45foldl (fun expression composed -> (CFunctionApplication ((CCons (expression,(CCons (composed,CEmpty)))),range))) (CIdentifier ((data_45sparkle_45x ()),range)) expressions),range));;
 let rec transform_45list = fun expressions range -> (list_45foldr (fun expression composed -> (CConstructor ((data_45Cons ()),(CCons (expression,(CCons (composed,CEmpty)))),range))) (CConstructor ((data_45Empty ()),CEmpty,range)) expressions);;
@@ -355,6 +209,7 @@ let rec data_45with = fun () -> (string_45from_45list (CCons ((119l),(CCons ((10
 let rec data_45definition_45end = fun () -> (string_45from_45list (CCons ((59l),(CCons ((59l),CEmpty)))));;
 let rec data_45let_45rec = fun () -> (string_45from_45list (CCons ((108l),(CCons ((101l),(CCons ((116l),(CCons ((32l),(CCons ((114l),(CCons ((101l),(CCons ((99l),(CCons ((32l),CEmpty)))))))))))))))));;
 let rec data_45constant = fun () -> (string_45from_45list (CCons ((95l),(CCons ((99l),(CCons ((111l),(CCons ((110l),(CCons ((115l),(CCons ((116l),(CCons ((97l),(CCons ((110l),(CCons ((116l),(CCons ((95l),CEmpty)))))))))))))))))))));;
+let rec data_45import_45stdlib = fun () -> (string_45from_45list (CCons ((111l),(CCons ((112l),(CCons ((101l),(CCons ((110l),(CCons ((32l),(CCons ((82l),(CCons ((101l),(CCons ((117l),(CCons ((115l),(CCons ((101l),(CCons ((59l),(CCons ((59l),CEmpty)))))))))))))))))))))))));;
 let rec prefix_45type_45variable = fun string -> (string_45prepend (39l) (string_45prepend (84l) string));;
 let rec prefix_45constructor = fun constructor -> (string_45prepend (67l) constructor);;
 let rec reserved_45strings = fun () -> (dictionary_45of (CCons ((CPair ((data_45assert ()),CTrue)),(CCons ((CPair ((data_45asr ()),CTrue)),(CCons ((CPair ((data_45begin ()),CTrue)),(CCons ((CPair ((data_45constraint ()),CTrue)),(CCons ((CPair ((data_45do ()),CTrue)),(CCons ((CPair ((data_45done ()),CTrue)),(CCons ((CPair ((data_45downto ()),CTrue)),(CCons ((CPair ((data_45type ()),CTrue)),(CCons ((CPair ((data_45if ()),CTrue)),(CCons ((CPair ((data_45then ()),CTrue)),(CCons ((CPair ((data_45else ()),CTrue)),(CCons ((CPair ((data_45with ()),CTrue)),(CCons ((CPair ((data_45of ()),CTrue)),(CCons ((CPair ((data_45end ()),CTrue)),(CCons ((CPair ((data_45in ()),CTrue)),(CCons ((CPair ((data_45fun ()),CTrue)),(CCons ((CPair ((data_45let ()),CTrue)),(CCons ((CPair ((data_45open ()),CTrue)),(CCons ((CPair ((data_45and ()),CTrue)),(CCons ((CPair ((data_45or ()),CTrue)),(CCons ((CPair ((data_45as ()),CTrue)),(CCons ((CPair ((data_45class ()),CTrue)),(CCons ((CPair ((data_45exception ()),CTrue)),(CCons ((CPair ((data_45external ()),CTrue)),(CCons ((CPair ((data_45false ()),CTrue)),(CCons ((CPair ((data_45true ()),CTrue)),(CCons ((CPair ((data_45for ()),CTrue)),(CCons ((CPair ((data_45function ()),CTrue)),(CCons ((CPair ((data_45functor ()),CTrue)),(CCons ((CPair ((data_45if ()),CTrue)),(CCons ((CPair ((data_45include ()),CTrue)),(CCons ((CPair ((data_45inherit ()),CTrue)),(CCons ((CPair ((data_45initializer ()),CTrue)),(CCons ((CPair ((data_45land ()),CTrue)),(CCons ((CPair ((data_45lazy ()),CTrue)),(CCons ((CPair ((data_45lor ()),CTrue)),(CCons ((CPair ((data_45lsl ()),CTrue)),(CCons ((CPair ((data_45lsr ()),CTrue)),(CCons ((CPair ((data_45lxor ()),CTrue)),(CCons ((CPair ((data_45method ()),CTrue)),(CCons ((CPair ((data_45mod ()),CTrue)),(CCons ((CPair ((data_45module ()),CTrue)),(CCons ((CPair ((data_45mutable ()),CTrue)),(CCons ((CPair ((data_45new ()),CTrue)),(CCons ((CPair ((data_45nonrec ()),CTrue)),(CCons ((CPair ((data_45object ()),CTrue)),(CCons ((CPair ((data_45private ()),CTrue)),(CCons ((CPair ((data_45rec ()),CTrue)),(CCons ((CPair ((data_45sig ()),CTrue)),(CCons ((CPair ((data_45struct ()),CTrue)),(CCons ((CPair ((data_45try ()),CTrue)),(CCons ((CPair ((data_45val ()),CTrue)),(CCons ((CPair ((data_45virtual ()),CTrue)),(CCons ((CPair ((data_45when ()),CTrue)),(CCons ((CPair ((data_45while ()),CTrue)),(CCons ((CPair ((data_45parser ()),CTrue)),(CCons ((CPair ((data_45value ()),CTrue)),(CCons ((CPair ((data_45to ()),CTrue)),CEmpty)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))));;
@@ -388,13 +243,33 @@ let rec translate_45type_45name_39 = fun name parameters -> (match (string_45emp
 let rec translate_45type_45name = fun name parameters -> (translate_45type_45name_39 name ((translate_45type_45parameters ()) parameters));;
 let rec translate_45type_45definition = fun name parameters constructors -> (join (CCons ((data_45type ()),(CCons ((data_45space ()),(CCons ((translate_45type_45name name parameters),(CCons ((data_45equals ()),(CCons (((translate_45constructor_45definitions (translate_45type_45name name parameters) parameters) constructors),(CCons ((data_45definition_45end ()),CEmpty)))))))))))));;
 let rec translate_45definition = fun definition -> (match definition with (CFunctionDefinition (name,arguments,expression,_95)) -> (translate_45function_45definition (escape_45identifier name) arguments expression) | (CTypeDefinition (name,parameters,constructors,_95)) -> (translate_45type_45definition name parameters constructors));;
-let rec validate_45reserved_45identifiers_45when_45not = fun as_95minimal -> (match as_95minimal with CTrue -> (fun definitions -> definitions) | CFalse -> (list_45map validate_45reserved_45identifiers));;
-let rec to_45ocaml = fun definitions source as_95minimal -> ((fun _226_156_168x -> ((result_45map (string_45join (string_45of_45char (10l)))) (result_45concat ((list_45map (result_45map translate_45definition)) (local_45transforms ((validate_45reserved_45identifiers_45when_45not as_95minimal) _226_156_168x)))))) definitions);;
-let getenv name = try (Sys.getenv name) with Not_found -> ""
-let as_minimal = if getenv "REUSE_MINIMAL" = "true" then CTrue else CFalse;;
-let performance = getenv "REUSE_TIME" = "true";;
+let rec validate_45reserved_45identifiers_45when_45not = fun as_95minimal -> (match as_95minimal with CTrue -> (fun definitions -> definitions) | CFalse -> validate_45reserved_45identifiers);;
+let rec to_45ocaml = fun standard_45library_63 definitions source as_95minimal -> ((fun _226_156_168x -> ((result_45map (string_45join (string_45of_45char (10l)))) ((result_45map (list_45concat (CCons ((match standard_45library_63 with CTrue -> (data_45import_45stdlib ()) | CFalse -> (string_45empty ())),CEmpty)))) (result_45concat ((list_45map (result_45map translate_45definition)) (local_45transforms ((validate_45reserved_45identifiers_45when_45not as_95minimal) _226_156_168x))))))) definitions);;
 
-let stdin_wrapper_start = Unix.gettimeofday ();;
+let ml_string_to_reuse s =
+    Seq.fold_left (fun a b -> string_45append (Int32.of_int (Char.code b)) a)
+                  (string_45empty ())
+                  (String.to_seq s);;
+
+let ml_list_to_reuse l =
+    List.fold_right list_45cons l CEmpty;;
+
+let reuse_string_to_ml s =
+    Buffer.contents (string_45foldl (fun a b -> Buffer.add_char b (Char.chr (Int32.to_int a)); b) (Buffer.create 32) s);;
+
+let reuse_boolean_to_ml b =
+    match b with
+      | CTrue -> true
+      | CFalse -> false;;
+
+let ml_string_get succ fail s index =
+    let i = (Int32.to_int index) in
+    if i < (String.length s) && i >= 0 then
+            succ (Int32.of_int (Char.code (String.get s i)))
+    else
+            fail ();;
+
+let ml_string_to_reuse_iterator s = (indexed_45iterator_45from s (ml_string_get (fun x -> CSome (x)) (fun _ -> CNone)));;
 
 let read_line ic =
     try Some (input_line ic)
@@ -408,22 +283,17 @@ let read_lines ic =
     in
         loop [];;
 
-let stdin_string _ =
-    String.concat "\n" (read_lines stdin);;
+let list_to_string = reuse_string_to_ml;;
 
-let string_cons x xs =
-    let string_from_int = (String.make 1 (Char.chr (Int32.to_int x))) in
-    xs ^ string_from_int;;
+let read_stdin _ = ml_string_to_reuse_iterator (String.concat "\n" (read_lines stdin));;
 
-let stdin_get succ fail s index =
-    let i = (Int32.to_int index) in
-    if i < (String.length s) && i >= 0 then
-            succ (Int32.of_int (Char.code (String.get s i)))
-    else
-            fail ();;
+let getenv name = try (Sys.getenv name) with Not_found -> ""
+let as_minimal = if getenv "REUSE_MINIMAL" = "true" then CTrue else CFalse;;
+let with_stdlib = if getenv "REUSE_NOSTDLIB" = "false" then CTrue else CFalse;;
+let performance = getenv "REUSE_TIME" = "true";;
 
-let list_to_string = fun input -> (string_45foldl string_cons "" input);;
-let stdin_list = (indexed_45iterator_45from (stdin_string ()) (stdin_get (fun x -> CSome (x)) (fun _ -> CNone)));;
+let stdin_wrapper_start = Unix.gettimeofday ();;
+let stdin_list = read_stdin ();;
 let stdin_wrapper_end = Unix.gettimeofday ();;
 let stdin_wrapper_time = stdin_wrapper_end -. stdin_wrapper_start;;
 
@@ -438,7 +308,7 @@ let parse_end = Unix.gettimeofday ();;
 let parse_time = parse_end -. parse_start;;
 
 let codegen_start = Unix.gettimeofday ();;
-let codegen_output = (to_45ocaml parse_output stdin_list as_minimal);;
+let codegen_output = (to_45ocaml with_stdlib parse_output stdin_list as_minimal);;
 let codegen_end = Unix.gettimeofday ();;
 let codegen_time = codegen_end -. codegen_start;;
 
