@@ -22,17 +22,12 @@ do
     esac
 done
 
-if [ "$nostdlib" != "true" ]; then
-    $project_root/standard-library/build.sh
-    additional_sources="$project_root/generated/standard-library.reuse $additional_sources"
-fi
-
 cleanup() {
     rm $generated_source{,.ml,.ml.out,.out,.ml.2.cmi,.ml.2.cmo} 2>/dev/null
 }
 
 eval_reuse() {
-    echo "(def main (_) $1)" > $generated_source
+    echo "(def reuse-main (_) $1)" > $generated_source
 
     $project_root/reusec --language ocaml\
                          --output $generated_source.ml\
