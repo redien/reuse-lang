@@ -25,3 +25,12 @@ $project_root/reusec --language haskell\
                      --output $project_root/generated/Reuse.hs\
                      --nostdlib\
                      $project_root/generated/standard-library.reuse
+
+if [ "$1" == "--diagnostics" ]; then
+    2>&1 echo "[standard-library/build.sh] reusec --language ocaml"
+fi
+
+$project_root/reusec --language ocaml\
+                     --output $project_root/generated/Reuse.ml\
+                     --nostdlib\
+                     $project_root/generated/standard-library.reuse
