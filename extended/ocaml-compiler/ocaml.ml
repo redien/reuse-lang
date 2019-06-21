@@ -245,47 +245,8 @@ let rec translate_45type_45definition = fun name parameters constructors -> (joi
 let rec translate_45definition = fun definition -> (match definition with (CFunctionDefinition (name,arguments,expression,_95)) -> (translate_45function_45definition (escape_45identifier name) arguments expression) | (CTypeDefinition (name,parameters,constructors,_95)) -> (translate_45type_45definition name parameters constructors));;
 let rec validate_45reserved_45identifiers_45when_45not = fun as_95minimal -> (match as_95minimal with CTrue -> (fun definitions -> definitions) | CFalse -> validate_45reserved_45identifiers);;
 let rec to_45ocaml = fun standard_45library_63 definitions source as_95minimal -> ((fun _226_156_168x -> ((result_45map (string_45join (string_45of_45char (10l)))) ((result_45map (list_45concat (CCons ((match standard_45library_63 with CTrue -> (data_45import_45stdlib ()) | CFalse -> (string_45empty ())),CEmpty)))) (result_45concat ((list_45map (result_45map translate_45definition)) (local_45transforms ((validate_45reserved_45identifiers_45when_45not as_95minimal) _226_156_168x))))))) definitions);;
-
-let ml_string_to_reuse s =
-    Seq.fold_left (fun a b -> string_45append (Int32.of_int (Char.code b)) a)
-                  (string_45empty ())
-                  (String.to_seq s);;
-
-let ml_list_to_reuse l =
-    List.fold_right list_45cons l CEmpty;;
-
-let reuse_string_to_ml s =
-    Buffer.contents (string_45foldl (fun a b -> Buffer.add_char b (Char.chr (Int32.to_int a)); b) (Buffer.create 32) s);;
-
-let reuse_boolean_to_ml b =
-    match b with
-      | CTrue -> true
-      | CFalse -> false;;
-
-let ml_string_get succ fail s index =
-    let i = (Int32.to_int index) in
-    if i < (String.length s) && i >= 0 then
-            succ (Int32.of_int (Char.code (String.get s i)))
-    else
-            fail ();;
-
-let ml_string_to_reuse_iterator s = (indexed_45iterator_45from s (ml_string_get (fun x -> CSome (x)) (fun _ -> CNone)));;
-
-let read_line ic =
-    try Some (input_line ic)
-    with End_of_file -> None
-
-let read_lines ic =
-    let rec loop acc =
-        match read_line ic with
-        | Some line -> loop (line :: acc)
-        | None -> List.rev acc
-    in
-        loop [];;
-
-let list_to_string = reuse_string_to_ml;;
-
-let read_stdin _ = ml_string_to_reuse_iterator (String.concat "\n" (read_lines stdin));;
+open Pervasives;;
+open StdinWrapper;;
 
 let getenv name = try (Sys.getenv name) with Not_found -> ""
 let as_minimal = if getenv "REUSE_MINIMAL" = "true" then CTrue else CFalse;;
@@ -315,9 +276,9 @@ let codegen_time = codegen_end -. codegen_start;;
 if performance then
     match codegen_output with
         CResult (source) -> Printf.printf "%f %f %f %f %ld" stdin_wrapper_time parse_sexp_time parse_time codegen_time (string_45size source) ; exit 0
-      | CError (error) -> Printf.eprintf "%s" (list_to_string error) ; exit 1
+      | CError (error) -> Printf.eprintf "%s" (reuse_string_to_ml error) ; exit 1
 else
     match codegen_output with
-        CResult (source) -> Printf.printf "%s" (list_to_string source) ; exit 0
-      | CError (error) -> Printf.eprintf "%s" (list_to_string error) ; exit 1;;
+        CResult (source) -> Printf.printf "%s" (reuse_string_to_ml source) ; exit 0
+      | CError (error) -> Printf.eprintf "%s" (reuse_string_to_ml error) ; exit 1;;
 

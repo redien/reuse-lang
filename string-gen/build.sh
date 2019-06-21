@@ -17,8 +17,8 @@ cat << END_OF_SOURCE >> $project_root/generated/string-gen/StringGen.ml
 let getenv name = try (Sys.getenv name) with Not_found -> ""
 let performance = getenv "REUSE_TIME" = "true";;
 
-$(cat $project_root/extended/ocaml-compiler/pervasives.ml)
-$(cat $project_root/extended/ocaml-compiler/stdin_wrapper.ml)
+open Pervasives;;
+open StdinWrapper;;
 
 let stdin_list = read_stdin ();;
 
@@ -31,13 +31,17 @@ if performance then
     (Printf.printf "%f" string_gen_time ; exit 0)
 else
     match string_gen_output with
-          CResult (result) -> Printf.printf "%s" (list_to_string result) ; exit 0
-        | CError (error) -> Printf.eprintf "%s" (list_to_string error) ; exit 1;;
+          CResult (result) -> Printf.printf "%s" (reuse_string_to_ml result) ; exit 0
+        | CError (error) -> Printf.eprintf "%s" (reuse_string_to_ml error) ; exit 1;;
 
 END_OF_SOURCE
 
 ocamlopt -O3 unix.cmxa \
+         -I "$project_root/extended/ocaml-compiler" \
+         -I "$project_root/generated/extended" \
          -I "$project_root/generated" \
          "$project_root/generated/Reuse.ml" \
+         "$project_root/extended/ocaml-compiler/Pervasives.ml" \
+         "$project_root/extended/ocaml-compiler/StdinWrapper.ml" \
          "$project_root/generated/string-gen/StringGen.ml" \
          -o "$project_root/generated/string-gen/string-gen"

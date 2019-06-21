@@ -10,8 +10,6 @@ echo "$1 (def reuse-main (_) $2)" > $generated_source
 
 $project_root/reusec --language ocaml\
                      --output $generated_source.ml\
-                     --nostdlib\
-                     $project_root/generated/standard-library.reuse\
                      $generated_source
 
 $project_root/extended/ocaml-compiler/compile-stdin-test.sh $generated_source.ml $generated_source.out

@@ -34,8 +34,8 @@ $project_root/reusec $extra_flags\
 
 cat << END_OF_SOURCE >> $project_root/generated/extended/CompilerHaskell.ml
 
-$(cat $project_root/extended/ocaml-compiler/pervasives.ml)
-$(cat $project_root/extended/ocaml-compiler/stdin_wrapper.ml)
+open Pervasives;;
+open StdinWrapper;;
 
 let getenv name = try (Sys.getenv name) with Not_found -> ""
 let as_minimal = if getenv "REUSE_MINIMAL" = "true" then CTrue else CFalse;;
@@ -66,18 +66,22 @@ let codegen_time = codegen_end -. codegen_start;;
 if performance then
     match codegen_output with
         CResult (source) -> Printf.printf "%f %f %f %f %ld" stdin_wrapper_time parse_sexp_time parse_time codegen_time (string_45size source) ; exit 0
-      | CError (error) -> Printf.eprintf "%s" (list_to_string error) ; exit 1
+      | CError (error) -> Printf.eprintf "%s" (reuse_string_to_ml error) ; exit 1
 else
     match codegen_output with
-        CResult (source) -> Printf.printf "%s" (list_to_string source) ; exit 0
-      | CError (error) -> Printf.eprintf "%s" (list_to_string error) ; exit 1;;
+        CResult (source) -> Printf.printf "%s" (reuse_string_to_ml source) ; exit 0
+      | CError (error) -> Printf.eprintf "%s" (reuse_string_to_ml error) ; exit 1;;
 
 END_OF_SOURCE
 
 compile_binary() {
     ocamlopt -O3 unix.cmxa \
+             -I "$project_root/extended/ocaml-compiler" \
+             -I "$project_root/generated/extended" \
              -I "$project_root/generated" \
              "$project_root/generated/Reuse.ml" \
+             "$project_root/extended/ocaml-compiler/Pervasives.ml" \
+             "$project_root/extended/ocaml-compiler/StdinWrapper.ml" \
              "$project_root/generated/extended/CompilerHaskell.ml" \
              -o "$project_root/generated/extended/compiler-haskell"
 }
