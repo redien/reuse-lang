@@ -10,8 +10,7 @@ if [ "$1" == "--diagnostics" ]; then
     DIAGNOSTICS="true"
 fi
 
-$project_root/standard-library/build.sh $extra_flags
-
+[ -d $project_root/generated ] || mkdir $project_root/generated
 [ -d $project_root/generated/extended ] || mkdir $project_root/generated/extended
 
 if [ "$DIAGNOSTICS" == "true" ]; then
@@ -76,10 +75,9 @@ END_OF_SOURCE
 
 compile_binary() {
     ocamlopt -O3 unix.cmxa \
+             -I "$project_root/standard-library" \
              -I "$project_root/extended/ocaml-compiler" \
-             -I "$project_root/generated/extended" \
-             -I "$project_root/generated" \
-             "$project_root/generated/Reuse.ml" \
+             "$project_root/standard-library/Reuse.ml" \
              "$project_root/extended/ocaml-compiler/Pervasives.ml" \
              "$project_root/extended/ocaml-compiler/StdinWrapper.ml" \
              "$project_root/generated/extended/CompilerHaskell.ml" \
