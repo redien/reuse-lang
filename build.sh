@@ -11,7 +11,8 @@ ocamlopt -O3 unix.cmxa \
          "$project_root/standard-library/Reuse.ml" \
          "$project_root/extended/ocaml-compiler/Pervasives.ml" \
          "$project_root/extended/ocaml-compiler/StdinWrapper.ml" \
-         "$project_root/extended/ocaml-compiler/ocaml.ml" \
+         "$project_root/extended/ocaml-compiler/ReuseOcaml.ml" \
+         "$project_root/extended/ocaml-compiler/Compiler.ml" \
          -o "$project_root/bin/reuse-ocaml"
 
 ocamlopt -O3 unix.cmxa \

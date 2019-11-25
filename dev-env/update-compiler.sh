@@ -13,7 +13,7 @@ build_compiler_binary() {
 }
 
 copy_compiler() {
-    cp $project_root/generated/extended/CompilerOCaml.ml $project_root/extended/ocaml-compiler/ocaml.ml
+    cp $project_root/generated/extended/ReuseOcaml.ml $project_root/extended/ocaml-compiler/ReuseOcaml.ml
     cp $project_root/generated/Reuse.ml $project_root/standard-library/Reuse.ml
 }
 
