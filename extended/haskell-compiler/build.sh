@@ -3,6 +3,7 @@ set -e
 
 script_path=$(dirname "$0")
 project_root=$script_path/../..
+build_path=$project_root/generated/extended/haskell-compiler
 
 extra_flags=
 if [ "$1" == "--diagnostics" ]; then
@@ -12,6 +13,7 @@ fi
 
 [ -d $project_root/generated ] || mkdir $project_root/generated
 [ -d $project_root/generated/extended ] || mkdir $project_root/generated/extended
+[ -d $project_root/generated/extended/haskell-compiler ] || mkdir $project_root/generated/extended/haskell-compiler
 
 if [ "$DIAGNOSTICS" == "true" ]; then
     2>&1 echo "[build.sh] reusec"
@@ -19,7 +21,7 @@ fi
 
 $project_root/reusec $extra_flags\
                      --language ocaml\
-                     --output $project_root/generated/extended/CompilerHaskell.ml\
+                     --output $build_path/CompilerHaskell.ml\
                      $project_root/sexp-parser/parser.reuse\
                      $project_root/parser/ast.reuse\
                      $project_root/parser/parser.strings\
@@ -31,7 +33,7 @@ $project_root/reusec $extra_flags\
                      $script_path/haskell.strings\
                      $script_path/haskell.reuse
 
-cat << END_OF_SOURCE >> $project_root/generated/extended/CompilerHaskell.ml
+cat << END_OF_SOURCE >> $build_path/CompilerHaskell.ml
 
 open Pervasives;;
 open StdinWrapper;;
@@ -73,22 +75,20 @@ else
 
 END_OF_SOURCE
 
-compile_binary() {
-    ocamlopt -O3 unix.cmxa \
-             -I "$project_root/standard-library" \
-             -I "$project_root/extended/ocaml-compiler" \
-             "$project_root/standard-library/Reuse.ml" \
-             "$project_root/extended/ocaml-compiler/Pervasives.ml" \
-             "$project_root/extended/ocaml-compiler/StdinWrapper.ml" \
-             "$project_root/generated/extended/CompilerHaskell.ml" \
-             -o "$project_root/generated/extended/compiler-haskell"
-}
-
 if [ "$1" != "--no-binary" ]; then
     if [ "$1" == "--diagnostics" ]; then
         2>&1 echo "[build.sh] ocamlopt"
         echo "Haskell:          " $(echo "time -p ocamlopt -O3 unix.cmxa $project_root/generated/extended/CompilerHaskell.ml -o $project_root/generated/extended/compiler-haskell" | bash 2>&1 | grep "real" | awk '{ print $2; }')s
     else
-        compile_binary
+        cp $project_root/standard-library/Reuse.ml $build_path/Reuse.ml
+        cp $project_root/extended/ocaml-compiler/Pervasives.ml $build_path/Pervasives.ml
+        cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $build_path/StdinWrapper.ml
+        ocamlopt -O3 unix.cmxa \
+                -I "$build_path" \
+                "$build_path/Reuse.ml" \
+                "$build_path/Pervasives.ml" \
+                "$build_path/StdinWrapper.ml" \
+                "$build_path/CompilerHaskell.ml" \
+                -o "$build_path/compiler-haskell"
     fi
 fi

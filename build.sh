@@ -25,4 +25,4 @@ ocamlopt -O3 unix.cmxa \
          -o "$project_root/bin/string-gen"
 
 $project_root/extended/haskell-compiler/build.sh
-cp "$project_root/generated/extended/compiler-haskell" "$project_root/bin/reuse-haskell"
+cp "$project_root/generated/extended/haskell-compiler/compiler-haskell" "$project_root/bin/reuse-haskell"

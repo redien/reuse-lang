@@ -3,14 +3,14 @@ set -e
 
 script_path=$(dirname "$0")
 project_root=$script_path/../..
+build_path=$project_root/generated/extended/minimal-compiler
 
-$script_path/../ocaml-compiler/build.sh
-$project_root/standard-library/build.sh
-
+[ -d $project_root/generated ] || mkdir $project_root/generated
 [ -d $project_root/generated/extended ] || mkdir $project_root/generated/extended
+[ -d $project_root/generated/extended/minimal-compiler ] || mkdir $project_root/generated/extended/minimal-compiler
 
 $project_root/reusec --language ocaml\
-                     --output $project_root/generated/extended/CompilerMinimal.ml\
+                     --output $build_path/CompilerMinimal.ml\
                      $project_root/sexp-parser/parser.reuse\
                      $project_root/parser/ast.reuse\
                      $project_root/parser/parser.strings\
@@ -21,7 +21,7 @@ $project_root/reusec --language ocaml\
                      $script_path/../local-transforms.reuse\
                      $script_path/minimal.reuse
 
-cat << END_OF_SOURCE >> $project_root/generated/extended/CompilerMinimal.ml
+cat << END_OF_SOURCE >> $build_path/CompilerMinimal.ml
 
 open Pervasives;;
 open StdinWrapper;;
@@ -37,12 +37,14 @@ let output = to_45reuse (parse' stdin_list) stdin_list in
 
 END_OF_SOURCE
 
+cp $project_root/standard-library/Reuse.ml $build_path/Reuse.ml
+cp $project_root/extended/ocaml-compiler/Pervasives.ml $build_path/Pervasives.ml
+cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $build_path/StdinWrapper.ml
+
 ocamlopt -O3 \
-         -I "$project_root/extended/ocaml-compiler" \
-         -I "$project_root/generated/extended" \
-         -I "$project_root/generated" \
-         "$project_root/generated/Reuse.ml" \
-         "$project_root/extended/ocaml-compiler/Pervasives.ml" \
-         "$project_root/extended/ocaml-compiler/StdinWrapper.ml" \
-         "$project_root/generated/extended/CompilerMinimal.ml" \
-         -o "$project_root/generated/extended/compiler-minimal"
+         -I "$build_path" \
+         "$build_path/Reuse.ml" \
+         "$build_path/Pervasives.ml" \
+         "$build_path/StdinWrapper.ml" \
+         "$build_path/CompilerMinimal.ml" \
+         -o "$build_path/compiler-minimal"

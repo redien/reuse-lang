@@ -3,6 +3,7 @@ set -e
 
 script_path=$(dirname "$0")
 project_root=$script_path/../..
+build_path=$project_root/generated/extended/interpreter
 
 extra_flags=
 if [ "$1" == "--diagnostics" ]; then
@@ -10,9 +11,9 @@ if [ "$1" == "--diagnostics" ]; then
     DIAGNOSTICS="true"
 fi
 
-$project_root/standard-library/build.sh $extra_flags
-
+[ -d $project_root/generated ] || mkdir $project_root/generated
 [ -d $project_root/generated/extended ] || mkdir $project_root/generated/extended
+[ -d $project_root/generated/extended/interpreter ] || mkdir $project_root/generated/extended/interpreter
 
 if [ "$DIAGNOSTICS" == "true" ]; then
     2>&1 echo "[build.sh] reusec"
@@ -20,7 +21,7 @@ fi
 
 $project_root/reusec $extra_flags\
                      --language ocaml\
-                     --output $project_root/generated/extended/Interpreter.ml\
+                     --output $build_path/Interpreter.ml\
                      $project_root/sexp-parser/parser.reuse\
                      $project_root/parser/ast.reuse\
                      $project_root/parser/parser.strings\
@@ -36,14 +37,17 @@ $project_root/reusec $extra_flags\
                      $script_path/scope.reuse\
                      $script_path/interpreter.reuse
 
+cp $project_root/standard-library/Reuse.ml $build_path/Reuse.ml
+cp $project_root/extended/ocaml-compiler/Pervasives.ml $build_path/Pervasives.ml
+cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $build_path/StdinWrapper.ml
+cp $project_root/extended/interpreter/Main.ml $build_path/Main.ml
+
 ocamlopt.opt -O3 \
              unix.cmxa \
-             -I "$project_root/extended/ocaml-compiler" \
-             -I "$project_root/generated/extended" \
-             -I "$project_root/generated" \
-             "$project_root/generated/Reuse.ml" \
-             "$project_root/extended/ocaml-compiler/Pervasives.ml" \
-             "$project_root/extended/ocaml-compiler/StdinWrapper.ml" \
-             "$project_root/generated/extended/Interpreter.ml" \
-             "$project_root/extended/interpreter/Main.ml" \
-             -o "$project_root/generated/extended/interpreter"
+             -I "$build_path" \
+             "$build_path/Reuse.ml" \
+             "$build_path/Pervasives.ml" \
+             "$build_path/StdinWrapper.ml" \
+             "$build_path/Interpreter.ml" \
+             "$build_path/Main.ml" \
+             -o "$build_path/interpreter"

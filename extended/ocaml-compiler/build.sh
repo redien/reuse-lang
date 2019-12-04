@@ -40,22 +40,18 @@ cp $project_root/extended/ocaml-compiler/Pervasives.ml $build_dir/Pervasives.ml
 cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $build_dir/StdinWrapper.ml
 cp $project_root/extended/ocaml-compiler/Compiler.ml $build_dir/Compiler.ml
 
-compile_binary() {
-    ocamlopt -O3 unix.cmxa \
-             -I "$build_dir" \
-             "$build_dir/Reuse.ml" \
-             "$build_dir/ReuseOcaml.ml" \
-             "$build_dir/Pervasives.ml" \
-             "$build_dir/StdinWrapper.ml" \
-             "$build_dir/Compiler.ml" \
-             -o "$build_dir/compiler-ocaml"
-}
-
 if [ "$1" != "--no-binary" ]; then
     if [ "$1" == "--diagnostics" ]; then
         2>&1 echo "[build.sh] ocamlopt"
         echo "OCaml:          " $(echo "time -p ocamlopt -O3 unix.cmxa $build_dir/CompilerOCaml.ml -o $project_root/generated/extended/compiler-ocaml" | bash 2>&1 | grep "real" | awk '{ print $2; }')s
     else
-        compile_binary
+        ocamlopt -O3 unix.cmxa \
+                -I "$build_dir" \
+                "$build_dir/Reuse.ml" \
+                "$build_dir/ReuseOcaml.ml" \
+                "$build_dir/Pervasives.ml" \
+                "$build_dir/StdinWrapper.ml" \
+                "$build_dir/Compiler.ml" \
+                -o "$build_dir/compiler-ocaml"
     fi
 fi
