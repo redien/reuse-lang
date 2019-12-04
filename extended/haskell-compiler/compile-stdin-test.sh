@@ -16,6 +16,6 @@ main = do
 
 END_OF_SOURCE
 
-ghc "$1" "$project_root/generated/Reuse.hs" "$script_path/StdinWrapper.hs" "$1.2.hs" -o "$2"
+ghc "$1" "$project_root/standard-library/Reuse.hs" "$script_path/StdinWrapper.hs" "$1.2.hs" -o "$2"
 rm "$1.2.hs"
 chmod +x "$2"

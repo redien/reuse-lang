@@ -38,9 +38,8 @@ END_OF_SOURCE
 
 ocamlopt -O3 unix.cmxa \
          -I "$project_root/extended/ocaml-compiler" \
-         -I "$project_root/generated/extended" \
-         -I "$project_root/generated" \
-         "$project_root/generated/Reuse.ml" \
+         -I "$project_root/standard-library" \
+         "$project_root/standard-library/Reuse.ml" \
          "$project_root/extended/ocaml-compiler/Pervasives.ml" \
          "$project_root/extended/ocaml-compiler/StdinWrapper.ml" \
          "$project_root/generated/string-gen/StringGen.ml" \

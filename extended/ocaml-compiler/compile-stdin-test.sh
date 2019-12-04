@@ -13,9 +13,9 @@ open StdinWrapper;;\n\
 let stdin_list = read_stdin ();;\n\
 Printf.printf \"%%s\" (reuse_string_to_ml (reuse_45main stdin_list))\n" > "$1.2.ml"
 
-ocamlc.opt -I "$project_root/generated" \
+ocamlc.opt -I "$project_root/standard-library" \
            -I "$project_root/extended/ocaml-compiler" \
-           "$project_root/generated/Reuse.ml" \
+           "$project_root/standard-library/Reuse.ml" \
            "$project_root/extended/ocaml-compiler/Pervasives.ml" \
            "$project_root/extended/ocaml-compiler/StdinWrapper.ml" \
            "$1.2.ml" \
