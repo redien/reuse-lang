@@ -266,13 +266,47 @@
             True   (fn (definitions) definitions)
             False  validate-reserved-identifiers))
 
-(def to-ocaml (standard-library? definitions source as_minimal)
-     ((pipe (validate-reserved-identifiers-when-not as_minimal)
-            local-transforms
-            (list-map (result-map translate-definition))
+(def to-ocaml (standard-library? definitions)
+     ((pipe (list-map (result-map translate-definition))
             result-concat
             (result-map (list-concat (list (match standard-library?
                                                   True   (data-import-stdlib)
                                                   False  (string-empty)))))
             (result-map (string-join (string-of-char 10))))
          definitions))
+
+
+
+(def parse-files (files)
+     (list-flatmap (pipe parse sexps-to-definitions) files))
+
+(def source-to-definitions (as_minimal files)
+     ((pipe parse-files
+            stringify-parse-errors
+            (validate-reserved-identifiers-when-not as_minimal)
+            local-transforms)
+        files))
+
+(typ (event state) (EventArguments (list string))
+                   (EventReadFiles boolean boolean (list (pair string (indexed-iterator int32))) state))
+
+(typ (command state) (CommandError string)
+                     (CommandOutput string)
+                     (CommandReadFiles (list string) state))
+
+(def on-event (event)
+     (match event
+            (EventArguments arguments)
+                (match (parse-arguments arguments)
+                       (CliArguments _ Empty)
+                            (CommandError (data-no-input-files))
+                       (CliArguments arguments input-files)
+                            (CommandReadFiles input-files arguments)
+                       (CliErrorMissingValue key)
+                            (CommandError key))
+            (EventReadFiles as_minimal standard-library? file-entries arguments)
+                (match (source-to-definitions as_minimal (list-map pair-right file-entries))
+                       definitions
+                            (match (to-ocaml standard-library? definitions)
+                                (Result source)  (CommandOutput source)
+                                (Error error)    (CommandError error)))))

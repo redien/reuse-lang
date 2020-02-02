@@ -20,3 +20,4 @@ definition-end |;;
 let-rec        |let rec 
 constant       |_constant_
 import-stdlib  |open Reuse;;
+no-input-files |No input files

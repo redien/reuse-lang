@@ -29,6 +29,8 @@ $project_root/reusec $extra_flags\
                      $project_root/parser/parser.strings\
                      $project_root/parser/strings.reuse\
                      $project_root/parser/parser.reuse\
+                     $script_path/../../cli/argument-parser.strings\
+                     $script_path/../../cli/argument-parser.reuse\
                      $script_path/../common.strings\
                      $script_path/../common.reuse\
                      $script_path/../local-transforms.reuse\
@@ -38,7 +40,7 @@ $project_root/reusec $extra_flags\
 cp $project_root/standard-library/Reuse.ml $build_dir/Reuse.ml
 cp $project_root/extended/ocaml-compiler/Pervasives.ml $build_dir/Pervasives.ml
 cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $build_dir/StdinWrapper.ml
-cp $project_root/extended/ocaml-compiler/Compiler.ml $build_dir/Compiler.ml
+cp $project_root/extended/CompilerMain.ml $build_dir/CompilerMain.ml
 
 if [ "$1" != "--no-binary" ]; then
     if [ "$1" == "--diagnostics" ]; then
@@ -51,7 +53,7 @@ if [ "$1" != "--no-binary" ]; then
                 "$build_dir/ReuseOcaml.ml" \
                 "$build_dir/Pervasives.ml" \
                 "$build_dir/StdinWrapper.ml" \
-                "$build_dir/Compiler.ml" \
+                "$build_dir/CompilerMain.ml" \
                 -o "$build_dir/compiler-ocaml"
     fi
 fi

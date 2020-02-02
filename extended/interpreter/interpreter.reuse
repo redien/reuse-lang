@@ -156,18 +156,6 @@
             _
                 (eval-error)))
 
-(def parse-files (files)
-     (list-flatmap (pipe parse sexps-to-definitions) files))
-
-(def add-definitions (files scope)
-     ((pipe parse-files
-            stringify-parse-errors
-            validate-reserved-identifiers
-            local-transforms
-            sequence
-            (map (fn (definitions) (scope-add-definitions definitions scope))))
-        files))
-
 (def add-intrinsics (scope)
      (scope-add (list (Pair (data-int32-less-than)  (ValueIntrinsic eval-int32-less-than))
                       (Pair (data-percent)          (ValueIntrinsic (eval-int32-operator %)))
@@ -177,8 +165,8 @@
                       (Pair (data-multiply)         (ValueIntrinsic (eval-int32-operator *))))
                 scope))
 
-(def source-to-scope (files)
-     (add-definitions files (add-intrinsics (scope-empty))))
+(def definitions-to-scope (definitions)
+     (scope-add-definitions definitions (add-intrinsics (scope-empty))))
 
 (def main-takes-argument (scope)
      (match (scope-get (data-main) scope)
@@ -215,6 +203,19 @@
                                         (ValueIntrinsic (box-get collection get))
                                         (ValueIntrinsic (box-next box-indexed-iterator indexed-iterator collection next))))))
 
+
+
+(def parse-files (files)
+     (list-flatmap (pipe parse sexps-to-definitions) files))
+
+(def source-to-definitions (files)
+     ((pipe parse-files
+            stringify-parse-errors
+            validate-reserved-identifiers
+            local-transforms
+            result-concat)
+        files))
+
 (typ (event state) (EventArguments (list string))
                    (EventReadStdin (indexed-iterator int32) state)
                    (EventReadFiles (list (pair string (indexed-iterator int32))) state))
@@ -231,6 +232,11 @@
             (Error error)
                 (CommandError error)))
 
+(def process-definitions (scope)
+     (match (main-takes-argument scope)
+            True   (CommandReadStdin scope)
+            False  (output-result (eval scope Empty))))
+
 (def on-event (event)
      (match event
             (EventArguments arguments)
@@ -240,14 +246,12 @@
                        (CliArguments arguments input-files)
                             (CommandReadFiles input-files (scope-empty))
                        (CliErrorMissingValue key)
-                           (CommandError key))
+                            (CommandError key))
             (EventReadStdin stdin state)
                 (output-result (eval state (list (box-indexed-iterator stdin))))
             (EventReadFiles file-entries state)
-                (match (source-to-scope (list-map pair-right file-entries))
-                        (Result scope)
-                            (match (main-takes-argument scope)
-                                    True   (CommandReadStdin scope)
-                                    False  (output-result (eval scope Empty)))
-                        (Error error)
+                (match (source-to-definitions (list-map pair-right file-entries))
+                       (Result definitions)
+                            (process-definitions (definitions-to-scope definitions))
+                       (Error error)
                             (CommandError error))))
