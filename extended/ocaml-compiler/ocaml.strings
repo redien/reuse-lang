@@ -21,3 +21,5 @@ let-rec        |let rec
 constant       |_constant_
 import-stdlib  |open Reuse;;
 no-input-files |No input files
+output-key     |--output
+no-output-path |No output file specified, please use the --output [file] flag.

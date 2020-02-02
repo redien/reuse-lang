@@ -292,7 +292,13 @@
 
 (typ (command state) (CommandError string)
                      (CommandOutput string)
+                     (CommandWriteFiles (list (pair string string)))
                      (CommandReadFiles (list string) state))
+
+(def write-source (source arguments)
+     (match (dictionary-get (data-output-key) (dictionary-of arguments))
+            (Some path)  (CommandWriteFiles (list (Pair path source)))
+            None         (CommandError (data-no-output-path))))
 
 (def on-event (event)
      (match event
@@ -308,5 +314,5 @@
                 (match (source-to-definitions as_minimal (list-map pair-right file-entries))
                        definitions
                             (match (to-ocaml standard-library? definitions)
-                                (Result source)  (CommandOutput source)
+                                (Result source)  (write-source source arguments)
                                 (Error error)    (CommandError error)))))

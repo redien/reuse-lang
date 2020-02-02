@@ -10,7 +10,7 @@
             (Cons first (Cons second rest))
                 (match (is-key? first)
                        True
-                            (parse-arguments' (list-rest arguments)
+                            (parse-arguments' (list-rest (list-rest arguments))
                                               (Cons (Pair first second) kv-args)
                                               inputs)
                        False
