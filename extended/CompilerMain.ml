@@ -4,10 +4,6 @@ open Pervasives;;
 open StdinWrapper;;
 open ReuseOcaml;;
 
-let getenv name = try (Sys.getenv name) with Not_found -> ""
-let as_minimal = if getenv "REUSE_MINIMAL" = "true" then CTrue else CFalse;;
-let with_stdlib = if getenv "REUSE_NOSTDLIB" = "false" then CTrue else CFalse;;
-
 let argv = ml_list_to_reuse (List.map ml_string_to_reuse (List.tl (Array.to_list Sys.argv)));;
 
 let read_file filename =
@@ -30,5 +26,5 @@ while true do
           CCommandError (error) -> Printf.eprintf "%s\n" (reuse_string_to_ml error) ; exit 1
         | CCommandOutput (output) -> Printf.printf "%s" (reuse_string_to_ml output) ; exit 0
         | CCommandWriteFiles (files) -> write_files files ; exit 0
-        | CCommandReadFiles (file_paths, state) -> current := CEventReadFiles (as_minimal, with_stdlib, (read_files file_paths), state)
+        | CCommandReadFiles (file_paths, state) -> current := CEventReadFiles ((read_files file_paths), state)
 done
