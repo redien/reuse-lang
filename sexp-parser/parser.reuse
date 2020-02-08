@@ -21,46 +21,50 @@
 (typ parse-error         ParseErrorTooFewClosingBrackets
                          ParseErrorTooManyClosingBrackets)
 
-(def symbol-range (start end)
-     (Range (indexed-iterator-index start) (indexed-iterator-index end)))
+(def symbol-range (i start end)
+     (Range (indexed-iterator-index i start) (indexed-iterator-index i end)))
 
-(def parse-symbol (iterator end next)
-     (match (string-collect-from-indexed-iterator atom-character? iterator)
+(def parse-symbol (i iterator end next)
+     (match (string-collect-from-indexed-iterator i atom-character? iterator)
             (Pair next-iterator name)
                      (match (string-empty? name)
                          True  (end iterator)
-                         False (next next-iterator (Symbol name (symbol-range iterator next-iterator))))))
+                         False (next next-iterator (Symbol name (symbol-range i iterator next-iterator))))))
 
-(def list-range (start end)
-     (Range (- (indexed-iterator-index start) 1) (indexed-iterator-index end)))
+(def list-range (i start end)
+     (Range (- (indexed-iterator-index i start) 1) (indexed-iterator-index i end)))
 
-(def parse-list (iterator parse-sexps error next)
+(def parse-list (i iterator parse-sexps error next)
      (parse-sexps iterator Empty error
                   (fn (next-iterator expressions)
-                      (next next-iterator (List expressions (list-range iterator next-iterator))))))
+                      (next next-iterator (List expressions (list-range i iterator next-iterator))))))
 
-(def parse-expression (depth iterator parse-sexps error end next)
-     (match (indexed-iterator-get iterator)
-            None       (match depth
-                              0  (end iterator)
-                              _  (error ParseErrorTooFewClosingBrackets))
-            (Some 40)  (parse-list (indexed-iterator-next iterator) (parse-sexps (+ depth 1)) error next)
-            (Some 41)  (match depth
-                              0  (error ParseErrorTooManyClosingBrackets)
-                              _  (end (indexed-iterator-next iterator)))
-            (Some x)   (match (whitespace? x)
-                              True   (parse-expression depth (indexed-iterator-next iterator) parse-sexps error end next)
-                              False  (parse-symbol iterator end next))))
+(def parse-expression (i depth iterator parse-sexps error end next)
+     (match (indexed-iterator-next i iterator)
+            (Pair None _)
+                (match depth
+                       0  (end iterator)
+                       _  (error ParseErrorTooFewClosingBrackets))
+            (Pair (Some 40) next-iterator)
+                (parse-list i next-iterator (parse-sexps i (+ depth 1)) error next)
+            (Pair (Some 41) next-iterator)
+                (match depth
+                       0  (error ParseErrorTooManyClosingBrackets)
+                       _  (end next-iterator))
+            (Pair (Some x) next-iterator)
+                (match (whitespace? x)
+                       True   (parse-expression i depth next-iterator parse-sexps error end next)
+                       False  (parse-symbol i iterator end next))))
 
-(def parse-sexps (depth iterator expressions error end)
-     (parse-expression depth iterator parse-sexps error
+(def parse-sexps (i depth iterator expressions error end)
+     (parse-expression i depth iterator parse-sexps error
                        (fn (iterator)
                            (end iterator (list-reverse expressions)))
                        (fn (iterator result)
-                           (parse-sexps depth iterator (Cons result expressions) error end))))
+                           (parse-sexps i depth iterator (Cons result expressions) error end))))
 
-(def parse (iterator)
-     (parse-sexps 0 iterator Empty
+(def parse (i iterator)
+     (parse-sexps i 0 iterator Empty
                   (fn (error)
                       (Error error))
                   (fn (_ expressions)

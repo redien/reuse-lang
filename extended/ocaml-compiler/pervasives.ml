@@ -24,4 +24,4 @@ let ml_string_get succ fail s index =
     else
             fail ();;
 
-let ml_string_to_reuse_iterator s = (indexed_45iterator_45from s (ml_string_get (fun x -> CSome (x)) (fun _ -> CNone)));;
+let ml_string_iterator = (indexed_45iterator_45from (ml_string_get (fun x -> CSome (x)) (fun _ -> CNone)));;

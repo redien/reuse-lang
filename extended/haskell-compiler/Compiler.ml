@@ -16,7 +16,7 @@ let stdin_wrapper_end = Unix.gettimeofday ();;
 let stdin_wrapper_time = stdin_wrapper_end -. stdin_wrapper_start;;
 
 let parse_sexp_start = Unix.gettimeofday ();;
-let parse_sexp_output = (parse stdin_list);;
+let parse_sexp_output = (parse ml_string_iterator stdin_list);;
 let parse_sexp_end = Unix.gettimeofday ();;
 let parse_sexp_time = parse_sexp_end -. parse_sexp_start;;
 

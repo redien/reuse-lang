@@ -11,7 +11,7 @@ $(cat $1)\n\
 open Pervasives;;\n\
 open StdinWrapper;;\n\
 let stdin_list = read_stdin ();;\n\
-Printf.printf \"%%s\" (reuse_string_to_ml (reuse_45main stdin_list))\n" > "$1.2.ml"
+Printf.printf \"%%s\" (reuse_string_to_ml (reuse_45main ml_string_iterator stdin_list))\n" > "$1.2.ml"
 
 ocamlc.opt -I "$project_root/standard-library" \
            -I "$project_root/extended/ocaml-compiler" \

@@ -13,4 +13,4 @@ let read_lines ic =
     in
         loop [];;
 
-let read_stdin _ = ml_string_to_reuse_iterator (String.concat "\n" (read_lines stdin));;
+let read_stdin _ = String.concat "\n" (read_lines stdin);;

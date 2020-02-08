@@ -205,20 +205,20 @@
 
 
 
-(def parse-files (files)
-     (list-flatmap (pipe parse sexps-to-definitions) files))
+(def parse-files (i files)
+     (list-flatmap (pipe (parse i) sexps-to-definitions) files))
 
-(def source-to-definitions (files)
-     ((pipe parse-files
+(def source-to-definitions (i files)
+     ((pipe (parse-files i)
             stringify-parse-errors
             validate-reserved-identifiers
             local-transforms
             result-concat)
         files))
 
-(typ (event state) (EventArguments (list string))
-                   (EventReadStdin (indexed-iterator int32) state)
-                   (EventReadFiles (list (pair string (indexed-iterator int32))) state))
+(typ (event iterator state) (EventArguments (list string))
+                            (EventReadStdin iterator state)
+                            (EventReadFiles (list (pair string iterator)) state))
 
 (typ (command state) (CommandError string)
                      (CommandOutput string)
@@ -237,7 +237,7 @@
             True   (CommandReadStdin scope)
             False  (output-result (eval scope Empty))))
 
-(def on-event (event)
+(def on-event (i event)
      (match event
             (EventArguments arguments)
                 (match (parse-arguments arguments)
@@ -250,7 +250,7 @@
             (EventReadStdin stdin state)
                 (output-result (eval state (list (box-indexed-iterator stdin))))
             (EventReadFiles file-entries state)
-                (match (source-to-definitions (list-map pair-right file-entries))
+                (match (source-to-definitions i (list-map pair-right file-entries))
                        (Result definitions)
                             (process-definitions (definitions-to-scope definitions))
                        (Error error)

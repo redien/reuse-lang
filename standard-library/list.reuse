@@ -144,13 +144,13 @@
             (Some _)  False
             _         True))
 
-(def list-collect-from-indexed-iterator' (predicate iterator initial)
-     (match (indexed-iterator-get iterator)
-            None      (Pair iterator initial)
-            (Some x)  (match (predicate x)
-                             True   (list-collect-from-indexed-iterator' predicate (indexed-iterator-next iterator) (Cons x initial))
-                             False  (Pair iterator initial))))
+(def list-collect-from-indexed-iterator' (i predicate iterator initial)
+     (match (indexed-iterator-next i iterator)
+            (Pair None _)         (Pair iterator initial)
+            (Pair (Some x) next)  (match (predicate x)
+                                         True   (list-collect-from-indexed-iterator' i predicate next (Cons x initial))
+                                         False  (Pair iterator initial))))
 
-(def list-collect-from-indexed-iterator (predicate iterator)
-     (match (list-collect-from-indexed-iterator' predicate iterator Empty)
+(def list-collect-from-indexed-iterator (i predicate iterator)
+     (match (list-collect-from-indexed-iterator' i predicate iterator Empty)
             (Pair iterator result) (Pair iterator (list-reverse result))))
