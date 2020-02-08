@@ -277,11 +277,11 @@
 
 
 
-(def parse-files (i files)
-     (list-flatmap (pipe (parse i) sexps-to-definitions) files))
+(def parse-files (files)
+     (list-flatmap (pipe parse sexps-to-definitions) files))
 
-(def source-to-definitions (i as_minimal files)
-     ((pipe (parse-files i)
+(def source-to-definitions (as_minimal files)
+     ((pipe parse-files
             stringify-parse-errors
             (validate-reserved-identifiers-when-not as_minimal)
             local-transforms)
@@ -310,7 +310,7 @@
             (Some value)  (string-equal? value (data-true))
             None          False))
 
-(def on-event (i event)
+(def on-event (event)
      (match event
             (EventArguments arguments)
                 (match (parse-arguments arguments)
@@ -321,7 +321,7 @@
                        (CliErrorMissingValue key)
                             (CommandError key))
             (EventReadFiles file-entries arguments)
-                (match (source-to-definitions i (minimal? arguments) (list-map pair-right file-entries))
+                (match (source-to-definitions (minimal? arguments) (list-map pair-right file-entries))
                        definitions
                             (match (to-ocaml (standard-library? arguments) definitions)
                                 (Result source)  (write-source source arguments)

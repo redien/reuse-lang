@@ -9,16 +9,16 @@ let read_file filename =
     let channel = open_in (reuse_string_to_ml filename) in
     let file = really_input_string channel (in_channel_length channel) in
     close_in channel;
-    file;;
+    ml_string_to_indexed_iterator file;;
 
 let load_files file_paths = list_45zip file_paths (list_45map read_file file_paths);;
 
 let current = ref (CEventArguments argv);;
 
 while true do
-    match (on_45event ml_string_iterator !current) with
+    match (on_45event !current) with
           CCommandError (error) -> Printf.eprintf "%s\n" (reuse_string_to_ml error) ; exit 1
         | CCommandOutput (output) -> Printf.printf "%s" (reuse_string_to_ml output) ; exit 0
-        | CCommandReadStdin (state) -> current := CEventReadStdin (read_stdin (), state)
+        | CCommandReadStdin (state) -> current := CEventReadStdin (ml_string_to_indexed_iterator (read_stdin ()), state)
         | CCommandReadFiles (file_paths, state) -> current := CEventReadFiles ((load_files file_paths), state)
 done

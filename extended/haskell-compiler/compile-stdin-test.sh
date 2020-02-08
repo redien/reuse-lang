@@ -12,7 +12,7 @@ import StdinWrapper
 
 main = do
     stdin_list <- StdinWrapper.stdin_list
-    printf "%s" (list_to_string (reuse_45main stdin_list))
+    printf "%s" (list_to_string (reuse_45main (hs_string_to_indexed_iterator stdin_list)))
 
 END_OF_SOURCE
 

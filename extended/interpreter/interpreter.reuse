@@ -187,29 +187,36 @@
             _
                 (eval-error)))
 
-(def box-next (box-indexed-iterator iterator collection next arguments)
+(def box-next (next arguments)
      (match arguments
-            (Cons _ (Cons __ (Cons (ValueInteger i) Empty)))
-                (return (box-indexed-iterator (next iterator collection i)))
+            (Cons (ValueNativeIterable iterable) Empty)
+                (match (next iterable)
+                       (Pair value next-iterable)
+                            (return (ValueConstructor (data-Pair)
+                                                      (list (box-maybe value)
+                                                            (ValueNativeIterable next-iterable)))))
             _
                 (eval-error)))
 
+(def box-iterable-class (next)
+     (ValueConstructor (data-IterableClass)
+                       (list (ValueIntrinsic (box-next next)))))
+
 (def box-indexed-iterator (indexed-iterator)
      (match indexed-iterator
-            (IndexedIterator collection i get next)
+            (IndexedIterator (IterableClass next) iterable index)
                 (ValueConstructor (data-IndexedIterator)
-                                  (list (ValueInteger 0)
-                                        (ValueInteger i)
-                                        (ValueIntrinsic (box-get collection get))
-                                        (ValueIntrinsic (box-next box-indexed-iterator indexed-iterator collection next))))))
+                                  (list (box-iterable-class next)
+                                        (ValueNativeIterable iterable)
+                                        (ValueInteger index)))))
 
 
 
-(def parse-files (i files)
-     (list-flatmap (pipe (parse i) sexps-to-definitions) files))
+(def parse-files (files)
+     (list-flatmap (pipe parse sexps-to-definitions) files))
 
-(def source-to-definitions (i files)
-     ((pipe (parse-files i)
+(def source-to-definitions (files)
+     ((pipe parse-files
             stringify-parse-errors
             validate-reserved-identifiers
             local-transforms
@@ -237,7 +244,7 @@
             True   (CommandReadStdin scope)
             False  (output-result (eval scope Empty))))
 
-(def on-event (i event)
+(def on-event (event)
      (match event
             (EventArguments arguments)
                 (match (parse-arguments arguments)
@@ -250,7 +257,7 @@
             (EventReadStdin stdin state)
                 (output-result (eval state (list (box-indexed-iterator stdin))))
             (EventReadFiles file-entries state)
-                (match (source-to-definitions i (list-map pair-right file-entries))
+                (match (source-to-definitions (list-map pair-right file-entries))
                        (Result definitions)
                             (process-definitions (definitions-to-scope definitions))
                        (Error error)

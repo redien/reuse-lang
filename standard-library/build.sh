@@ -11,6 +11,7 @@ build_path=$project_root/generated/standard-library
 $(cat $project_root/standard-library/boolean.reuse)
 $(cat $project_root/standard-library/pair.reuse)
 $(cat $project_root/standard-library/maybe.reuse)
+$(cat $project_root/standard-library/iterable.reuse)
 $(cat $project_root/standard-library/indexed-iterator.reuse)
 $(cat $project_root/standard-library/list.reuse)
 $(cat $project_root/standard-library/string.reuse)

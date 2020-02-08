@@ -1,21 +1,17 @@
 
-(typ (indexed-iterator-class collection element)
-     (IndexedIteratorClass (fn (collection) (pair (maybe element) collection))
-                           (fn (collection) int32)))
+(typ (indexed-iterator collection element iterable)
+     (IndexedIterator (iterable-class collection element) iterable int32))
 
-(def indexed-iterator-next (class collection)
-     (match class
-            (IndexedIteratorClass next _)  (next collection)))
+(def indexed-iterator-from-iterable (i iterable)
+     (IndexedIterator i iterable 0))
 
-(def indexed-iterator-index (class collection)
-     (match class
-            (IndexedIteratorClass _ index)  (index collection)))
+(def indexed-iterator-next (iterator)
+     (match iterator
+            (IndexedIterator i iterable index)
+                (match (iterable-next i iterable)
+                       (Pair value next-iterable)
+                           (Pair value (IndexedIterator i next-iterable (+ index 1))))))
 
-(def indexed-iterator-from (get)
-     (IndexedIteratorClass
-        (fn (iterator)
-            (match iterator
-                   (Pair collection i)  (Pair (get collection i) (Pair collection (+ i 1)))))
-        (fn (iterator)
-            (match iterator
-                   (Pair _ i)  i))))
+(def indexed-iterator-index (iterator)
+     (match iterator
+            (IndexedIterator _ __ index)  index))

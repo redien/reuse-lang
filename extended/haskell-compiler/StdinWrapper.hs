@@ -36,4 +36,12 @@ stdin_get !succ !fail !s !index =
 list_to_string = string_45foldl string_cons ""
 stdin_list = do
         stdin_string <- read_stdin
-        return (indexed_45iterator_45from stdin_string (stdin_get (\ !x -> CSome x) CNone))
+        return stdin_string
+
+hs_string_next !iterable =
+    case iterable of
+        (CPair !s !index) -> (CPair
+            (stdin_get (\ !x -> CSome x) CNone s index)
+            (CPair s (index + 1)))
+
+hs_string_to_indexed_iterator s = indexed_45iterator_45from_45iterable (CIterableClass hs_string_next) (CPair s 0)

@@ -2,6 +2,8 @@ main                   |reuse-main
 no-input-files         |No input files
 intrinsic              |[intrinsic]
 IndexedIterator        |IndexedIterator
+IterableClass          |IterableClass
+Pair                   |Pair
 Some                   |Some
 None                   |None
 error-generic          |Error evaluating expression

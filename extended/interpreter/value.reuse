@@ -1,9 +1,11 @@
 
-(typ (value expression scope) (ValueInteger int32)
-                              (ValueConstructor string (list (value expression scope)))
-                              (ValueClosure (list string) expression scope)
-                              (ValueFunction (list string) expression)
-                              (ValueIntrinsic (fn ((list (value expression scope))) (result (value expression scope) string))))
+(typ (value expression scope iterable)
+     (ValueInteger int32)
+     (ValueConstructor string (list (value expression scope iterable)))
+     (ValueClosure (list string) expression scope)
+     (ValueFunction (list string) expression)
+     (ValueIntrinsic (fn ((list (value expression scope iterable))) (result (value expression scope iterable) string)))
+     (ValueNativeIterable iterable))
 
 (def value-function-to-string (arguments expression)
      ((pipe expression-to-sexp
@@ -34,5 +36,7 @@
                 (value-function-to-string arguments expression)
             (ValueFunction arguments expression)
                 (value-function-to-string arguments expression)
+            (ValueNativeIterable _)
+                (data-intrinsic)
             (ValueIntrinsic _)
                 (data-intrinsic)))

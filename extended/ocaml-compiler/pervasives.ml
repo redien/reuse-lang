@@ -24,4 +24,9 @@ let ml_string_get succ fail s index =
     else
             fail ();;
 
-let ml_string_iterator = (indexed_45iterator_45from (ml_string_get (fun x -> CSome (x)) (fun _ -> CNone)));;
+let ml_string_next iterable =
+    match iterable with
+        CPair (s, index) -> CPair (
+            (ml_string_get (fun x -> CSome (x)) (fun _ -> CNone) s index),
+            CPair (s, Int32.add index 1l));;
+let ml_string_to_indexed_iterator s = indexed_45iterator_45from_45iterable (CIterableClass (ml_string_next)) (CPair (s, 0l));;

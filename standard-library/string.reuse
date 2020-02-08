@@ -329,11 +329,16 @@
 (def string-from-int32 (integer)
      (string-from-list (string-from-int32' integer)))
 
-(def string-collect-from-indexed-iterator (i predicate iterator)
-     (pair-map-right string-from-list (list-collect-from-indexed-iterator i predicate iterator)))
+(def string-collect-from-indexed-iterator (predicate iterator)
+     (pair-map-right string-from-list (list-collect-from-indexed-iterator predicate iterator)))
 
-(def string-from-indexed-iterator (i iterator)
-     (string-from-list (pair-right (list-collect-from-indexed-iterator i (fn (_) True) iterator))))
+(def string-from-indexed-iterator (iterator)
+     (string-from-list (pair-right (list-collect-from-indexed-iterator (fn (_) True) iterator))))
+
+(def string-iterable ()
+     (IterableClass
+        (fn (string)
+            (Pair (string-first string) (string-rest string)))))
 
 (def string-from-boolean (boolean)
      (match boolean

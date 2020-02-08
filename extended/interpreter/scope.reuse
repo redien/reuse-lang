@@ -1,5 +1,5 @@
 
-(typ (scope expression) (Scope (dictionary (value expression (scope expression)))))
+(typ (scope expression iterable) (Scope (dictionary (value expression (scope expression iterable) iterable))))
 
 (def scope-empty ()
      (Scope (dictionary-empty)))
