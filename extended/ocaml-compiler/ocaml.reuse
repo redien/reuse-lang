@@ -276,9 +276,20 @@
          definitions))
 
 
+(def transform-strings (path content)
+     (match (string-equal? (string-substring (- (string-size path) 8) 8 path) (data-strings-file-ending))
+            True
+                (match (string-gen content)
+                       (Result string)  (indexed-iterator-from-iterable (string-iterable) string)
+                       (Error error)    (indexed-iterator-from-iterable (string-iterable) (string-empty)))
+            False
+                content))
 
 (def parse-files (files)
-     (list-flatmap (pipe parse sexps-to-definitions) files))
+     (list-flatmap (fn (entry)
+                       (match entry
+                              (Pair path content)  (sexps-to-definitions (parse (transform-strings path content)))))
+                   files))
 
 (def source-to-definitions (as_minimal files)
      ((pipe parse-files
@@ -321,7 +332,7 @@
                        (CliErrorMissingValue key)
                             (CommandError key))
             (EventReadFiles file-entries arguments)
-                (match (source-to-definitions (minimal? arguments) (list-map pair-right file-entries))
+                (match (source-to-definitions (minimal? arguments) file-entries)
                        definitions
                             (match (to-ocaml (standard-library? arguments) definitions)
                                 (Result source)  (write-source source arguments)
