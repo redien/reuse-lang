@@ -1,6 +1,6 @@
 
-(typ (indexed-iterator collection element iterable)
-     (IndexedIterator (iterable-class collection element) iterable int32))
+(typ (indexed-iterator (exists iterable) element)
+     (IndexedIterator (iterable-class iterable element) iterable int32))
 
 (def indexed-iterator-from-iterable (i iterable)
      (IndexedIterator i iterable 0))
