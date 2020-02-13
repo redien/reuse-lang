@@ -2,14 +2,9 @@
 
 set -e
 
-REUSE_SOURCE=""
-REUSE_OUTPUT=""
+REUSE_SOURCE_FILES=""
+REUSE_ARGS=""
 REUSE_LANGUAGE="ocaml"
-REUSE_MINIMAL=false
-export REUSE_MINIMAL
-export REUSE_OUTPUT_FILENAME
-export REUSE_NOSTDLIB=false
-export REUSE_TIME
 
 LANGUAGES="ocaml, haskell or minimal"
 
@@ -23,7 +18,6 @@ usage() {
     echo "       --language [LANG]  Target language to compile to." >&2
     echo "                          Can be $LANGUAGES." >&2
     echo "       --output [FILE]    Write output to FILE" >&2
-    echo "       --diagnostics      Print time diagnostics" >&2
 }
 
 throw_error() {
@@ -45,16 +39,15 @@ do
 
     case $arg in
         --minimal)
-            REUSE_MINIMAL=true
+            REUSE_ARGS="$REUSE_ARGS --minimal true"
             shift
         ;;
         --nostdlib)
-            REUSE_NOSTDLIB=true
+            REUSE_ARGS="$REUSE_ARGS --stdlib false"
             shift
         ;;
         --output)
-            REUSE_OUTPUT="$2"
-            REUSE_OUTPUT_FILENAME="${REUSE_OUTPUT##*/}"
+            REUSE_ARGS="$REUSE_ARGS --output $2"
             shift
             shift
         ;;
@@ -63,38 +56,14 @@ do
             shift
             shift
         ;;
-        --diagnostics)
-            REUSE_TIME=true
-            shift
-        ;;
         --*)
             throw_error Unrecognized flag $arg
         ;;
         *)
-            REUSE_SOURCE_FILES="$REUSE_SOURCE_FILES $arg"
+            REUSE_SOURCE_FILES="$arg $REUSE_SOURCE_FILES"
             shift
         ;;
     esac
-done
-
-if [ "$REUSE_TIME" == "true" ]; then
-    2>&1 echo "[reusec] Reading source files"
-fi
-
-STRING_GEN_TOTAL=0
-for arg in $REUSE_SOURCE_FILES; do
-    if [[ "$arg" == *".strings" ]]; then
-        if [ "$REUSE_TIME" = "true" ]; then
-            STRING_GEN=$(cat $arg | $root_path/bin/string-gen)
-            STRING_GEN_TOTAL=$(awk "BEGIN {print $STRING_GEN_TOTAL+$STRING_GEN; exit}")
-        else
-            REUSE_SOURCE="$REUSE_SOURCE
-$(cat $arg | $root_path/bin/string-gen)"
-        fi
-    else
-        REUSE_SOURCE="$REUSE_SOURCE
-$(cat $arg)"
-    fi
 done
 
 case $REUSE_LANGUAGE in
@@ -106,42 +75,5 @@ case $REUSE_LANGUAGE in
     ;;
 esac
 
-if [ "$REUSE_OUTPUT" == "" ]; then
-    throw_error No output file specified, please use the --output [file] flag.
-fi
 
-format_integer() {
-    xargs printf "%.f" | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta'
-}
-
-if [ "$REUSE_TIME" == "true" ]; then
-    2>&1 echo "[reusec] reuse-$REUSE_LANGUAGE"
-    DIAGNOSTICS=$(echo "$REUSE_SOURCE" | $root_path/bin/reuse-$REUSE_LANGUAGE)
-    READING=$(echo $DIAGNOSTICS | awk '{print $1}')
-    PARSING_SEXPS=$(echo $DIAGNOSTICS | awk '{print $2}')
-    PARSING=$(echo $DIAGNOSTICS | awk '{print $3}')
-    CODE_GEN=$(echo $DIAGNOSTICS | awk '{print $4}')
-    OUTPUT_SIZE=$(echo $DIAGNOSTICS | awk '{print $5}')
-    TOTAL=$(awk "BEGIN {print $READING+$PARSING_SEXPS+$PARSING+$CODE_GEN; exit}")
-
-    LINE_COUNT=$(echo "$REUSE_SOURCE" | wc -l)
-    BYTE_COUNT=$(echo "$REUSE_SOURCE" | wc -c)
-    LINES_PER_SECOND=$(awk "BEGIN {print $LINE_COUNT/$TOTAL; exit}" | format_integer)
-    FORMATTED_BYTE_COUNT=$(echo "$BYTE_COUNT" | format_integer)
-    FORMATTED_OUTPUT_SIZE=$(echo "$OUTPUT_SIZE" | format_integer)
-
-    echo "Reading:         ${READING}s"
-    echo "Parsing (sexps): ${PARSING_SEXPS}s"
-    echo "Parsing:         ${PARSING}s"
-    echo "Code Gen:        ${CODE_GEN}s"
-    echo "Total:           ${TOTAL}s"
-    echo
-    echo "Lines:           ${LINE_COUNT}"
-    echo "Throughput:      $LINES_PER_SECOND lines/s"
-    echo "Input size:      ${FORMATTED_BYTE_COUNT} bytes"
-    echo "Output size:     ${FORMATTED_OUTPUT_SIZE} bytes"
-    echo
-    echo "String Gen:      ${STRING_GEN_TOTAL}s"
-else
-    echo "$REUSE_SOURCE" | $root_path/bin/reuse-$REUSE_LANGUAGE > $REUSE_OUTPUT
-fi
+$root_path/bin/reuse-$REUSE_LANGUAGE $REUSE_ARGS $REUSE_SOURCE_FILES

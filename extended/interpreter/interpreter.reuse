@@ -187,28 +187,29 @@
             _
                 (eval-error)))
 
-(def box-next (next arguments)
+(def box-next' (value iterator)
+     (return (ValueConstructor (data-Pair)
+                               (list (box-maybe value)
+                                     (ValueNativeIterator iterator)))))
+
+(def box-next (arguments)
      (match arguments
-            (Cons (ValueNativeIterable iterable) Empty)
-                (match (next iterable)
-                       (Pair value next-iterable)
-                            (return (ValueConstructor (data-Pair)
-                                                      (list (box-maybe value)
-                                                            (ValueNativeIterable next-iterable)))))
+            (Cons (ValueNativeIterator iterator) Empty)
+                (match (indexed-iterator-next iterator)
+                       (Pair value next-iterator)
+                            (box-next' value next-iterator))
             _
                 (eval-error)))
 
-(def box-iterable-class (next)
+(def box-iterable-class (iterator)
      (ValueConstructor (data-IterableClass)
-                       (list (ValueIntrinsic (box-next next)))))
+                       (list (ValueIntrinsic box-next))))
 
-(def box-indexed-iterator (indexed-iterator)
-     (match indexed-iterator
-            (IndexedIterator (IterableClass next) iterable index)
-                (ValueConstructor (data-IndexedIterator)
-                                  (list (box-iterable-class next)
-                                        (ValueNativeIterable iterable)
-                                        (ValueInteger index)))))
+(def box-indexed-iterator (iterator)
+     (ValueConstructor (data-IndexedIterator)
+                       (list (box-iterable-class)
+                             (ValueNativeIterator iterator)
+                             (ValueInteger (indexed-iterator-index iterator)))))
 
 
 
