@@ -36,7 +36,8 @@ $project_root/reusec $extra_flags\
                      $script_path/../common.reuse\
                      $script_path/../local-transforms.reuse\
                      $script_path/ocaml.strings\
-                     $script_path/ocaml.reuse
+                     $script_path/ocaml.reuse\
+                     $script_path/../compiler.reuse
 
 cp $project_root/standard-library/Reuse.ml $build_dir/Reuse.ml
 cp $project_root/extended/ocaml-compiler/Pervasives.ml $build_dir/Pervasives.ml

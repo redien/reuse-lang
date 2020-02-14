@@ -266,7 +266,7 @@
             True   (fn (definitions) definitions)
             False  validate-reserved-identifiers))
 
-(def to-ocaml (standard-library? definitions)
+(def compile (standard-library? definitions)
      ((pipe (list-map (result-map translate-definition))
             result-concat
             (result-map (list-concat (list (match standard-library?
@@ -284,56 +284,3 @@
                        (Error error)    (indexed-iterator-from-iterable (string-iterable) (string-empty)))
             False
                 content))
-
-(def parse-files (files)
-     (list-flatmap (fn (entry)
-                       (match entry
-                              (Pair path content)  (sexps-to-definitions (parse (transform-strings path content)))))
-                   files))
-
-(def source-to-definitions (as_minimal files)
-     ((pipe parse-files
-            stringify-parse-errors
-            (validate-reserved-identifiers-when-not as_minimal)
-            local-transforms)
-        files))
-
-(typ (event iterator state) (EventArguments (list string))
-                            (EventReadFiles (list (pair string iterator)) state))
-
-(typ (command state) (CommandError string)
-                     (CommandOutput string)
-                     (CommandWriteFiles (list (pair string string)))
-                     (CommandReadFiles (list string) state))
-
-(def write-source (source arguments)
-     (match (dictionary-get (data-output-key) arguments)
-            (Some path)  (CommandWriteFiles (list (Pair path source)))
-            None         (CommandError (data-no-output-path))))
-
-(def standard-library? (arguments)
-     (match (dictionary-get (data-stdlib) arguments)
-            (Some value)  (string-equal? value (data-true))
-            None          True))
-
-(def minimal? (arguments)
-     (match (dictionary-get (data-minimal) arguments)
-            (Some value)  (string-equal? value (data-true))
-            None          False))
-
-(def on-event (event)
-     (match event
-            (EventArguments arguments)
-                (match (parse-arguments arguments)
-                       (CliArguments _ Empty)
-                            (CommandError (data-no-input-files))
-                       (CliArguments arguments input-files)
-                            (CommandReadFiles input-files (dictionary-of arguments))
-                       (CliErrorMissingValue key)
-                            (CommandError key))
-            (EventReadFiles file-entries arguments)
-                (match (source-to-definitions (minimal? arguments) file-entries)
-                       definitions
-                            (match (to-ocaml (standard-library? arguments) definitions)
-                                (Result source)  (write-source source arguments)
-                                (Error error)    (CommandError error)))))
