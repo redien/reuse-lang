@@ -28,14 +28,12 @@ $project_root/reusec --language ocaml\
 
 cp $project_root/standard-library/Reuse.ml $build_path/Reuse.ml
 cp $project_root/extended/ocaml-compiler/Pervasives.ml $build_path/Pervasives.ml
-cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $build_path/StdinWrapper.ml
 cp $project_root/extended/CompilerMain.ml $build_path/CompilerMain.ml
 
 ocamlopt -O3 unix.cmxa \
         -I "$build_path" \
         "$build_path/Reuse.ml" \
         "$build_path/Pervasives.ml" \
-        "$build_path/StdinWrapper.ml" \
         "$build_path/ReuseCompiler.ml" \
         "$build_path/CompilerMain.ml" \
         -o "$build_path/compiler-haskell"

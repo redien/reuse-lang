@@ -1,7 +1,6 @@
 
 open Reuse;;
 open Pervasives;;
-open StdinWrapper;;
 open ReuseCompiler;;
 
 let argv = ml_list_to_reuse (List.map ml_string_to_reuse (List.tl (Array.to_list Sys.argv)));;

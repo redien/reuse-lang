@@ -41,7 +41,6 @@ $project_root/reusec $extra_flags\
 
 cp $project_root/standard-library/Reuse.ml $build_dir/Reuse.ml
 cp $project_root/extended/ocaml-compiler/Pervasives.ml $build_dir/Pervasives.ml
-cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $build_dir/StdinWrapper.ml
 cp $project_root/extended/CompilerMain.ml $build_dir/CompilerMain.ml
 
 if [ "$1" != "--no-binary" ]; then
@@ -50,7 +49,6 @@ if [ "$1" != "--no-binary" ]; then
             "$build_dir/Reuse.ml" \
             "$build_dir/ReuseCompiler.ml" \
             "$build_dir/Pervasives.ml" \
-            "$build_dir/StdinWrapper.ml" \
             "$build_dir/CompilerMain.ml" \
             -o "$build_dir/compiler-ocaml"
 fi
