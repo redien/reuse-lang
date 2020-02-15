@@ -261,12 +261,7 @@
             (TypeDefinition name parameters constructors _)
                 (translate-type-definition name parameters constructors)))
 
-(def validate-reserved-identifiers-when-not (as_minimal)
-     (match as_minimal
-            True   (fn (definitions) definitions)
-            False  validate-reserved-identifiers))
-
-(def compile (standard-library? definitions)
+(def compile (standard-library? definitions module-name)
      ((pipe (list-map (result-map translate-definition))
             result-concat
             (result-map (list-concat (list (match standard-library?
@@ -274,13 +269,3 @@
                                                   False  (string-empty)))))
             (result-map (string-join (string-of-char 10))))
          definitions))
-
-
-(def transform-strings (path content)
-     (match (string-equal? (string-substring (- (string-size path) 8) 8 path) (data-strings-file-ending))
-            True
-                (match (string-gen content)
-                       (Result string)  (indexed-iterator-from-iterable (string-iterable) string)
-                       (Error error)    (indexed-iterator-from-iterable (string-iterable) (string-empty)))
-            False
-                content))

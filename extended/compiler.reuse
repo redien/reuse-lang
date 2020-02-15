@@ -1,4 +1,18 @@
 
+(def validate-reserved-identifiers-when-not (as-minimal)
+     (match as-minimal
+            True   (fn (definitions) definitions)
+            False  validate-reserved-identifiers))
+
+(def transform-strings (path content)
+     (match (string-equal? (string-substring (- (string-size path) 8) 8 path) (data-strings-file-ending))
+            True
+                (match (string-gen content)
+                       (Result string)  (indexed-iterator-from-iterable (string-iterable) string)
+                       (Error error)    (indexed-iterator-from-iterable (string-iterable) (string-empty)))
+            False
+                content))
+
 (def parse-files (files)
      (list-flatmap (fn (entry)
                        (match entry
@@ -20,11 +34,6 @@
                      (CommandWriteFiles (list (pair string string)))
                      (CommandReadFiles (list string) state))
 
-(def write-source (source arguments)
-     (match (dictionary-get (data-output-key) arguments)
-            (Some path)  (CommandWriteFiles (list (Pair path source)))
-            None         (CommandError (data-no-output-path))))
-
 (def standard-library? (arguments)
      (match (dictionary-get (data-stdlib) arguments)
             (Some value)  (string-equal? value (data-true))
@@ -34,6 +43,14 @@
      (match (dictionary-get (data-minimal) arguments)
             (Some value)  (string-equal? value (data-true))
             None          False))
+
+(def module-name-from-filename (filename)
+     (string-take (- (string-size filename) 3) filename))
+
+(def filename-from-path (path)
+     (match (list-last (string-split 47 path))
+            (Some filename)  filename
+            None             path))
 
 (def on-event (event)
      (match event
@@ -46,8 +63,12 @@
                        (CliErrorMissingValue key)
                             (CommandError key))
             (EventReadFiles file-entries arguments)
-                (match (source-to-definitions (minimal? arguments) file-entries)
-                       definitions
-                            (match (compile (standard-library? arguments) definitions)
-                                (Result source)  (write-source source arguments)
-                                (Error error)    (CommandError error)))))
+                (match (dictionary-get (data-output-key) arguments)
+                       (Some output-path)
+                            (match (source-to-definitions (minimal? arguments) file-entries)
+                                   definitions
+                                        (match (compile (standard-library? arguments) definitions (module-name-from-filename (filename-from-path output-path)))
+                                               (Result source)  (CommandWriteFiles (list (Pair output-path source)))
+                                               (Error error)    (CommandError error)))
+                       None
+                            (CommandError (data-no-output-path)))))

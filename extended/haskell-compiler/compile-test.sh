@@ -3,8 +3,7 @@
 script_path=$(dirname "$0")
 project_root=$script_path/../..
 
-export REUSE_OUTPUT_FILENAME="Test.hs"
-cat "$1" | "$project_root/generated/extended/haskell-compiler/compiler-haskell" > "$2/executable.hs"
+"$project_root/generated/extended/haskell-compiler/compiler-haskell" --stdlib false --output "$2/Test.hs" "$1"
 result=$?
 if [ "$result" != "0" ]; then
     >&2 printf "\n in file $1\n"
@@ -12,4 +11,4 @@ if [ "$result" != "0" ]; then
 fi
 
 set -e
-$script_path/compile-nostdlib-test.sh "$2/executable.hs" "$2/executable.out"
+$script_path/compile-nostdlib-test.sh "$2/Test.hs" "$2/executable.out"

@@ -23,7 +23,7 @@ fi
 
 $project_root/reusec $extra_flags\
                      --language ocaml\
-                     --output $build_dir/ReuseOcaml.ml\
+                     --output $build_dir/ReuseCompiler.ml\
                      $project_root/sexp-parser/parser.reuse\
                      $project_root/parser/ast.reuse\
                      $project_root/parser/parser.strings\
@@ -45,17 +45,12 @@ cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $build_dir/StdinWrapper
 cp $project_root/extended/CompilerMain.ml $build_dir/CompilerMain.ml
 
 if [ "$1" != "--no-binary" ]; then
-    if [ "$1" == "--diagnostics" ]; then
-        2>&1 echo "[build.sh] ocamlopt"
-        echo "OCaml:          " $(echo "time -p ocamlopt -O3 unix.cmxa $build_dir/CompilerOCaml.ml -o $project_root/generated/extended/compiler-ocaml" | bash 2>&1 | grep "real" | awk '{ print $2; }')s
-    else
-        ocamlopt -O3 unix.cmxa \
-                -I "$build_dir" \
-                "$build_dir/Reuse.ml" \
-                "$build_dir/ReuseOcaml.ml" \
-                "$build_dir/Pervasives.ml" \
-                "$build_dir/StdinWrapper.ml" \
-                "$build_dir/CompilerMain.ml" \
-                -o "$build_dir/compiler-ocaml"
-    fi
+    ocamlopt -O3 unix.cmxa \
+            -I "$build_dir" \
+            "$build_dir/Reuse.ml" \
+            "$build_dir/ReuseCompiler.ml" \
+            "$build_dir/Pervasives.ml" \
+            "$build_dir/StdinWrapper.ml" \
+            "$build_dir/CompilerMain.ml" \
+            -o "$build_dir/compiler-ocaml"
 fi

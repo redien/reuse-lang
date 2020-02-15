@@ -257,29 +257,20 @@
             (TypeDefinition name parameters constructors _)
                 (translate-type-definition name parameters constructors)))
 
-(def module-name-from-filename (filename)
-     (string-take (- (string-size filename) 3) filename))
-
-(def translate-module-declaration (filename)
+(def translate-module-declaration (module-name)
      (join (list (data-module)
                  (data-space)
-                 (module-name-from-filename filename)
+                 module-name
                  (data-space)
                  (data-where))))
 
-(def validate-reserved-identifiers-when-not (as-minimal)
-     (match as-minimal
-            True   (fn (definitions) definitions)
-            False  validate-reserved-identifiers))
-
-(def to-haskell (output-filename standard-library? definitions source as-minimal)
-     ((pipe (validate-reserved-identifiers-when-not as-minimal)
-            local-transforms
+(def compile (standard-library? definitions module-name)
+     ((pipe local-transforms
             (list-map (result-map translate-definition))
             (list-cons (Result (data-prelude)))
             result-concat
             (result-map (list-concat (list (data-language-exts)
-                                           (translate-module-declaration output-filename)
+                                           (translate-module-declaration module-name)
                                            (data-imports)
                                            (match standard-library?
                                                   True   (data-import-stdlib)
