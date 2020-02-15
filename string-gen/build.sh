@@ -4,6 +4,7 @@ set -e
 script_path=$(dirname "$0")
 project_root=$script_path/..
 
+[ -d $project_root/generated ] || mkdir $project_root/generated
 [ -d $project_root/generated/string-gen ] || mkdir $project_root/generated/string-gen
 
 $project_root/standard-library/build.sh
