@@ -24,11 +24,11 @@ if [ "$1" == "--diagnostics" ]; then
     2>&1 echo "[standard-library/build.sh] reusec --language haskell"
 fi
 
-#$project_root/reusec --language haskell\
-#                     --output $build_path/Reuse.hs\
-#                     --nostdlib\
-#                     $build_path/standard-library.reuse
-#
+$project_root/reusec --language haskell\
+                     --output $build_path/Reuse.hs\
+                     --nostdlib\
+                     $build_path/standard-library.reuse
+
 if [ "$1" == "--diagnostics" ]; then
     2>&1 echo "[standard-library/build.sh] reusec --language ocaml"
 fi

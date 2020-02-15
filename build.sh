@@ -15,5 +15,5 @@ ocamlopt -O3 unix.cmxa \
          "$project_root/extended/CompilerMain.ml" \
          -o "$project_root/bin/reuse-ocaml"
 
-#$project_root/extended/haskell-compiler/build.sh
-#cp "$project_root/generated/extended/haskell-compiler/compiler-haskell" "$project_root/bin/reuse-haskell"
+$project_root/extended/haskell-compiler/build.sh
+cp "$project_root/generated/extended/haskell-compiler/compiler-haskell" "$project_root/bin/reuse-haskell"
