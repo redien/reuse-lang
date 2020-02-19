@@ -53,7 +53,7 @@
             (List _ range)
                 (Error  (MalformedSymbolError range))))
 
-(def sexp-to-complex-type (sexp-to-types name parameters range)
+(def sexp-to-complex-type (sexp-to-types _ name parameters range)
      (result-bind   (sexp-to-types parameters)  (fn (sub-types)
      (result-return (ComplexType name sub-types range)))))
 
@@ -66,15 +66,15 @@
             _
                 (Error (MalformedTypeError range))))
 
-(def sexp-to-complex-or-function-type (sexp-to-types sexp-to-type name parameters range)
+(def sexp-to-complex-or-function-type (name)
      (match (string-equal? name (data-fn))
-            True   (sexp-to-function-type sexp-to-types sexp-to-type name parameters range)
-            False  (sexp-to-complex-type sexp-to-types name parameters range)))
+            True   sexp-to-function-type
+            False  sexp-to-complex-type))
 
 (def sexp-to-type (sexp-to-types type)
      (match type
             (List (Cons (Symbol name _) parameters) range)
-                (sexp-to-complex-or-function-type sexp-to-types (sexp-to-type sexp-to-types) name parameters range)
+                ((sexp-to-complex-or-function-type name) sexp-to-types (sexp-to-type sexp-to-types) name parameters range)
             (Symbol name range)
                 (Result (SimpleType name range))
             (List _ range)
