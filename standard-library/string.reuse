@@ -279,7 +279,12 @@
 
 
 (def string-point-is-digit (point)
-     (and (> point 47) (< point 58)))
+     (match (> point 47)
+            False  False
+            True
+     (match (< point 58)
+            True   True
+            False  False)))
 
 (def string-to-int32''' (string-to-int32'' string accumulator x)
      (string-to-int32'' string (Some (+ (* 10 accumulator) (- x 48))))) 
