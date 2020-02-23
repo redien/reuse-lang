@@ -179,3 +179,10 @@ Use the prepared docker image to launch a bash shell with the necessary tools:
 ```sh
 docker run --rm -it -v $PWD:/home/opam/reuse-lang redien/reuse-lang-dev-env
 ```
+
+#### Todo
+
+- Re-implement a javascript backend to get a debugger for free
+- Do not rely on string operations other than equality when parsing
+- Generate a symbol table after parsing s-expressions.
+- Implement modules by parsing other files and adding them to the symbol table with separate IDs
