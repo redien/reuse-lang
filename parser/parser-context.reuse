@@ -1,0 +1,39 @@
+
+(typ (parser-context definition)
+     (ParserContext (list definition) (dictionary definition)))
+
+(def parser-context-new ()
+     (ParserContext Empty (dictionary-empty)))
+
+(def parser-context-definitions (context)
+     (match context
+            (ParserContext definitions _)
+                (list-reverse definitions)))
+
+(def constructor-name (constructor)
+     (match constructor
+            (ComplexConstructor name _ __)  name
+            (SimpleConstructor name _)      name))
+
+(def parser-context-add-constructors (definition dictionary)
+     (match definition
+            (Result (TypeDefinition _ __ constructors ___))
+                (list-foldl (fn (constructor dictionary)
+                                (dictionary-set (constructor-name constructor) definition dictionary))
+                            dictionary
+                            constructors)
+            _
+                dictionary))
+
+(def parser-context-add (definition context)
+     (match context
+            (ParserContext definitions constructors)
+                (ParserContext (Cons definition definitions)
+                               (parser-context-add-constructors definition constructors))))
+
+(def parser-context-is-name-constructor? (name context)
+     (match context
+            (ParserContext _ constructors)
+                (match (dictionary-get name constructors)
+                       (Some _)  True
+                       None      False)))

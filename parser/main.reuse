@@ -1,3 +1,8 @@
 
 (def reuse-main (stdin)
-     (stringify (definitions-to-sexps (sexps-to-definitions (parse stdin)))))
+     ((pipe parse
+            (fn (expressions) (sexps-to-definitions expressions (parser-context-new)))
+            parser-context-definitions
+            definitions-to-sexps
+            stringify)
+          stdin))

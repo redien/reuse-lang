@@ -214,10 +214,14 @@
 
 
 (def parse-files (files)
-     (list-flatmap (pipe parse sexps-to-definitions) files))
+     (list-foldl (fn (content context)
+                     (sexps-to-definitions (parse content) context))
+                 (parser-context-new)
+                 files))
 
 (def source-to-definitions (files)
      ((pipe parse-files
+            parser-context-definitions
             stringify-parse-errors
             validate-reserved-identifiers
             local-transforms

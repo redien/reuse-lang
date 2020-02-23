@@ -14,13 +14,15 @@
                 content))
 
 (def parse-files (files)
-     (list-flatmap (fn (entry)
-                       (match entry
-                              (Pair path content)  (sexps-to-definitions (parse (transform-strings path content)))))
-                   files))
+     (list-foldl (fn (entry context)
+                     (match entry
+                            (Pair path content)  (sexps-to-definitions (parse (transform-strings path content)) context)))
+                 (parser-context-new)
+                 files))
 
 (def source-to-definitions (as_minimal files)
      ((pipe parse-files
+            parser-context-definitions
             stringify-parse-errors
             (validate-reserved-identifiers-when-not as_minimal)
             local-transforms)
