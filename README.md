@@ -152,17 +152,19 @@ Compiler for the Reuse programming language
 
 ## Design Rationale
 
-- The case for a completely pure language
-  - No more value restriction there is not mutability
+- Keeping the language pure
+  - Pro: No more value restriction there is not mutability
     - https://ocamlverse.github.io/content/weak_type_variables.html
+  - Pro: Easy to translate to pure and non-pure languages
+  - Con: Makes it difficult to avoid heap allocations
 - Keeping the language as small as possible
-  - Reduces the work of implementing new language targets and tools
-  - Fewer features to learn
+  - Pro: Reduces the work of implementing new language targets and tools
+  - Pro: Fewer features to learn
+  - Con: Not as expressive as it could be
 - No let expression
-  - let generalization is [not frequently used](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/tldi10-vytiniotis.pdf).
-  - Encourages smaller functions because variable binding is only done through new function definitions.
-- Limited ad-hoc polymorphism
-  - Should not require type annotations.
+  - Pro: let generalization is [not frequently used](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/tldi10-vytiniotis.pdf).
+  - Pro: A match expression can work just as well as a let expression
+  - Con: Might encourage breaking up functions that would be better understood as just one
 
 #### Minimal and extended
 
