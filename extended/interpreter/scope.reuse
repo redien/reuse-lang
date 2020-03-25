@@ -29,7 +29,7 @@
             (Scope dictionary)
                 (Scope (list-foldl (fn (definition dictionary)
                                        (match definition
-                                              (FunctionDefinition _ arguments expression __)
+                                              (FunctionDefinition _ __ arguments expression ___)
                                                   (dictionary-set (definition-name definition)
                                                                   (ValueFunction arguments expression)
                                                                   dictionary)

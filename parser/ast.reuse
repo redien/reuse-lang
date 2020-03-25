@@ -19,25 +19,29 @@
                                                   meta)
                             (Constructor          string (list (expression meta)) meta)
                             (FunctionApplication  (list (expression meta)) meta))
-(typ (definition a b)       (TypeDefinition       string
+(typ module-reference       (ModulePath string)
+                            ModuleSelf)
+(typ (definition a b)       (TypeDefinition       module-reference
+                                                  string
                                                   (list (type-parameter a))
                                                   (list (constructor a))
                                                   b)
-                            (FunctionDefinition   string
+                            (FunctionDefinition   module-reference
+                                                  string
                                                   (list string)
                                                   (expression a)
                                                   b))
 
 (def definition-meta (definition)
      (match definition
-            (TypeDefinition _ __ ___ meta)      meta
-            (FunctionDefinition _ __ ___ meta)  meta))
+            (TypeDefinition _ __ ___ ____ meta)      meta
+            (FunctionDefinition _ __ ___ ____ meta)  meta))
 
 (def definition-name (definition)
      (match definition
-            (TypeDefinition name _ __ ___)
+            (TypeDefinition _ name __ ___ ____)
                 name
-            (FunctionDefinition name _ __ ___)
+            (FunctionDefinition _ name __ ___ ____)
                 name))
 
 (def over-match-pair-expression (f pair)
@@ -72,9 +76,9 @@
 
 (def over-definition-expressions (f definition)
      (match definition
-            (FunctionDefinition name arguments expression range)
+            (FunctionDefinition module name arguments expression range)
                 (result-bind   (f expression)  (fn (expression)
-                (result-return (FunctionDefinition name arguments expression range))))
+                (result-return (FunctionDefinition module name arguments expression range))))
             _
                 (result-return definition)))
 

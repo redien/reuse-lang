@@ -68,7 +68,7 @@
      (state-let    (TypeAnnotation (ConstType name parameter-types) meta)      (fn (annotation)
      (state-let    (types-from-constructors name parameter-types constructors) (fn (constructor-types)
      (state-bind   (type-inference-context-add-types constructor-types)        (fn (_)
-     (state-return (TypeDefinition name parameters constructors annotation)))))))))))
+     (state-return (TypeDefinition ModuleSelf name parameters constructors annotation)))))))))))
 
 (def constraints-function-definition (constructor name arguments body meta)
      (state-bind   (constraints-function constraints-expression arguments body)   (fn (type)
@@ -81,9 +81,9 @@
 
 (def constraints-definition (definition)
      (match definition
-         (TypeDefinition name parameters constructors meta)
+         (TypeDefinition _ name parameters constructors meta)
              (add-type-constructors-to-context name parameters constructors meta)
-         (FunctionDefinition name arguments body meta)
+         (FunctionDefinition _ name arguments body meta)
              (constraints-function-definition construct-function-definition name arguments body meta)))
 
 (def int32-type ()

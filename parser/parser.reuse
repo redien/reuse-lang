@@ -132,7 +132,7 @@
      (result-bind   (sexp-to-type-name type-name)                   (fn (name)
      (result-bind   (sexp-to-type-parameters type-name)             (fn (parameters)
      (result-bind   (sexp-to-constructor-definitions constructors)  (fn (constructors)
-     (result-return (TypeDefinition name parameters constructors range)))))))))
+     (result-return (TypeDefinition ModuleSelf name parameters constructors range)))))))))
 
 (def sexp-to-arguments (arguments)
      (result-concat (list-map symbol-to-string arguments)))
@@ -262,7 +262,7 @@
      (match (string-equal? kind (data-def))
             True   (sexp-to-function-definition definitions name rest range
                                                 (fn (name arguments expression range)
-                                                    (FunctionDefinition name arguments expression range)))
+                                                    (FunctionDefinition ModuleSelf name arguments expression range)))
             False  (Error (MalformedDefinitionError range)))))
 
 (def specific-malformed-definition-error (kind range)
@@ -409,9 +409,9 @@
 
 (def definition-to-sexp (definition)
      (match definition
-            (TypeDefinition name parameters constructors range)
+            (TypeDefinition _ name parameters constructors range)
                 (type-definition-to-sexp name parameters constructors range)
-            (FunctionDefinition name arguments expression range)
+            (FunctionDefinition _ name arguments expression range)
                 (function-definition-to-sexp name arguments expression range (data-def))))
 
 (def error-to-sexp (error)
