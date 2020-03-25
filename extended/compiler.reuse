@@ -16,7 +16,7 @@
 (def parse-files (files)
      (list-foldl (fn (entry context)
                      (match entry
-                            (Pair path content)  (sexps-to-definitions (parse (transform-strings path content)) context)))
+                            (SourceFile module path content)  (sexps-to-definitions (parse (transform-strings path content)) context)))
                  (parser-context-new)
                  files))
 
@@ -29,12 +29,12 @@
         files))
 
 (typ (event iterator state) (EventArguments (list string))
-                            (EventReadFiles (list (pair string iterator)) state))
+                            (EventReadFiles (list (source-file iterator)) state))
 
 (typ (command state) (CommandError string)
                      (CommandOutput string)
                      (CommandWriteFiles (list (pair string string)))
-                     (CommandReadFiles (list string) state))
+                     (CommandReadFiles (list string) (list string) state))
 
 (def standard-library? (arguments)
      (match (dictionary-get (data-stdlib) arguments)
@@ -54,6 +54,11 @@
             (Some filename)  filename
             None             path))
 
+(def modules-from-arguments (arguments)
+     (match (standard-library? arguments)
+            True   (list (data-stdlib-module))
+            False  Empty))
+
 (def on-event (event)
      (match event
             (EventArguments arguments)
@@ -61,7 +66,9 @@
                        (CliArguments _ Empty)
                             (CommandError (data-no-input-files))
                        (CliArguments arguments input-files)
-                            (CommandReadFiles input-files (dictionary-of arguments))
+                            (match (dictionary-of arguments)
+                                   arguments
+                                        (CommandReadFiles input-files (modules-from-arguments arguments) arguments))
                        (CliErrorMissingValue key)
                             (CommandError key))
             (EventReadFiles file-entries arguments)

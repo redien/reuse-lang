@@ -1,0 +1,17 @@
+
+(typ (source-file iterator)  (SourceFile module-reference string iterator))
+
+(def source-file-module (file)
+     (match file
+            (SourceFile module _ __)
+                module))
+
+(def source-file-path (file)
+     (match file
+            (SourceFile _ path __)
+                path))
+
+(def source-file-content (file)
+     (match file
+            (SourceFile _ __ content)
+                content))

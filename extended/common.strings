@@ -77,3 +77,4 @@ no-output-path            |No output file specified, please use the --output [fi
 stdlib                    |--stdlib
 minimal                   |--minimal
 strings-file-ending       |.strings
+stdlib-module             |stdlib

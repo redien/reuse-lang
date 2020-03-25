@@ -10,7 +10,7 @@ let read_file filename =
     let file = really_input_string channel (in_channel_length channel) in
     close_in channel;
     ml_string_to_indexed_iterator file;;
-let read_files file_paths = list_45zip file_paths (list_45map read_file file_paths);;
+let read_files file_paths = list_45map (fun path -> (CSourceFile CModuleSelf path (read_file path))) file_paths;;
 
 let write_file filename content =
     let channel = open_out (reuse_string_to_ml filename) in
@@ -25,5 +25,5 @@ while true do
           CCommandError (error) -> Printf.eprintf "%s\n" (reuse_string_to_ml error) ; exit 1
         | CCommandOutput (output) -> Printf.printf "%s" (reuse_string_to_ml output) ; exit 0
         | CCommandWriteFiles (files) -> write_files files ; exit 0
-        | CCommandReadFiles (file_paths, state) -> current := CEventReadFiles ((read_files file_paths), state)
+        | CCommandReadFiles (file_paths, modules, state) -> current := CEventReadFiles ((read_files file_paths), state)
 done
