@@ -6,13 +6,12 @@ project_root=$(dirname $0)
 [ -d $project_root/bin ] || mkdir $project_root/bin
 
 ocamlopt -O3 unix.cmxa \
-         -I "$project_root/standard-library" \
-         -I "$project_root/extended/ocaml-compiler" \
-         "$project_root/standard-library/Reuse.ml" \
-         "$project_root/extended/ocaml-compiler/Pervasives.ml" \
-         "$project_root/extended/ocaml-compiler/StdinWrapper.ml" \
-         "$project_root/extended/ocaml-compiler/ReuseCompiler.ml" \
-         "$project_root/extended/CompilerMain.ml" \
+         -I "$project_root/bootstrap" \
+         "$project_root/bootstrap/Reuse.ml" \
+         "$project_root/bootstrap/Pervasives.ml" \
+         "$project_root/bootstrap/StdinWrapper.ml" \
+         "$project_root/bootstrap/ReuseCompiler.ml" \
+         "$project_root/bootstrap/CompilerMain.ml" \
          -o "$project_root/bin/reuse-ocaml"
 
 $project_root/extended/haskell-compiler/build.sh

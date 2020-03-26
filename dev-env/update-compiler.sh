@@ -13,9 +13,11 @@ build_compiler_binary() {
 }
 
 copy_compiler() {
-    cp $project_root/generated/extended/ocaml-compiler/ReuseCompiler.ml $project_root/extended/ocaml-compiler/ReuseCompiler.ml
-    cp $project_root/generated/standard-library/Reuse.ml $project_root/standard-library/Reuse.ml
-    cp $project_root/generated/standard-library/Reuse.hs $project_root/standard-library/Reuse.hs
+    cp $project_root/generated/extended/ocaml-compiler/ReuseCompiler.ml $project_root/bootstrap/
+    cp $project_root/generated/extended/ocaml-compiler/pervasives.ml $project_root/bootstrap/
+    cp $project_root/generated/extended/ocaml-compiler/StdinWrapper.ml $project_root/bootstrap/
+    cp $project_root/generated/standard-library/Reuse.ml $project_root/bootstrap/
+    cp $project_root/generated/standard-library/Reuse.hs $project_root/standard-library/
 }
 
 >&2 echo First stage: Build new compiler source
