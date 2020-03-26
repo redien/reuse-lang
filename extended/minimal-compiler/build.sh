@@ -23,7 +23,7 @@ $project_root/reusec --language ocaml\
                      $script_path/../source-file.reuse\
                      $script_path/minimal.reuse
 
-cp $project_root/standard-library/Reuse.ml $build_path/Reuse.ml
+cp $project_root/bootstrap/Reuse.ml $build_path/Reuse.ml
 cp $project_root/extended/ocaml-compiler/Pervasives.ml $build_path/Pervasives.ml
 cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $build_path/StdinWrapper.ml
 cp $project_root/extended/minimal-compiler/Compiler.ml $build_path/Compiler.ml

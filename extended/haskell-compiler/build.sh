@@ -28,7 +28,7 @@ $project_root/reusec --language ocaml\
                      $script_path/haskell.reuse\
                      $script_path/../compiler.reuse
 
-cp $project_root/standard-library/Reuse.ml $build_path/Reuse.ml
+cp $project_root/bootstrap/Reuse.ml $build_path/Reuse.ml
 cp $project_root/extended/ocaml-compiler/Pervasives.ml $build_path/Pervasives.ml
 cp $project_root/extended/CompilerMain.ml $build_path/CompilerMain.ml
 

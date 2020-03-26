@@ -8,7 +8,7 @@ build_source() {
 }
 
 copy_result() {
-    cp $project_root/generated/standard-library/Reuse.ml $project_root/standard-library/Reuse.ml
+    cp $project_root/generated/standard-library/Reuse.ml $project_root/bootstrap/Reuse.ml
     cp $project_root/generated/standard-library/Reuse.hs $project_root/standard-library/Reuse.hs
 }
 

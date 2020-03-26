@@ -38,7 +38,7 @@ $project_root/reusec $extra_flags\
                      $script_path/scope.reuse\
                      $script_path/interpreter.reuse
 
-cp $project_root/standard-library/Reuse.ml $build_path/Reuse.ml
+cp $project_root/bootstrap/Reuse.ml $build_path/Reuse.ml
 cp $project_root/extended/ocaml-compiler/Pervasives.ml $build_path/Pervasives.ml
 cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $build_path/StdinWrapper.ml
 cp $project_root/extended/interpreter/Main.ml $build_path/Main.ml

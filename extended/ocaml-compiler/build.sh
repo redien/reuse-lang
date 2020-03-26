@@ -41,7 +41,7 @@ $project_root/reusec $extra_flags\
                      $script_path/ocaml.reuse\
                      $script_path/../compiler.reuse
 
-cp $project_root/standard-library/Reuse.ml $build_dir/Reuse.ml
+cp $project_root/bootstrap/Reuse.ml $build_dir/Reuse.ml
 cp $project_root/extended/ocaml-compiler/Pervasives.ml $build_dir/Pervasives.ml
 cp $project_root/extended/CompilerMain.ml $build_dir/CompilerMain.ml
 
