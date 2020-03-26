@@ -5,7 +5,7 @@ set -e
 script_path=$(dirname "$0")
 project_root=$script_path/../..
 
-cat << END_OF_SOURCE > "$1.2.hs"
+cat << END_OF_SOURCE > "$1/$2.2.hs"
 import Text.Printf
 import Test
 import StdinWrapper
@@ -16,6 +16,10 @@ main = do
 
 END_OF_SOURCE
 
-ghc "$1" "$project_root/standard-library/Reuse.hs" "$script_path/StdinWrapper.hs" "$1.2.hs" -o "$2"
-rm "$1.2.hs"
-chmod +x "$2"
+
+cp $project_root/standard-library/Reuse.hs $1
+cp $script_path/StdinWrapper.hs $1
+
+ghc "$1/$2" "$1/Reuse.hs" "$1/StdinWrapper.hs" "$1/$2.2.hs" -o "$1/$3"
+rm "$1/$2.2.hs"
+chmod +x "$1/$3"

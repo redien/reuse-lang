@@ -5,14 +5,18 @@ project_root=$(dirname $0)
 
 [ -d $project_root/bin ] || mkdir $project_root/bin
 
+build_dir=$($project_root/dev-env/builddir.sh bootstrap)
+
+cp -R $project_root/bootstrap/* $build_dir
+
 ocamlopt -O3 unix.cmxa \
-         -I "$project_root/bootstrap" \
-         "$project_root/bootstrap/Reuse.ml" \
-         "$project_root/bootstrap/Pervasives.ml" \
-         "$project_root/bootstrap/StdinWrapper.ml" \
-         "$project_root/bootstrap/ReuseCompiler.ml" \
-         "$project_root/bootstrap/CompilerMain.ml" \
+         -I "$build_dir" \
+         "$build_dir/Reuse.ml" \
+         "$build_dir/pervasives.ml" \
+         "$build_dir/StdinWrapper.ml" \
+         "$build_dir/ReuseCompiler.ml" \
+         "$build_dir/CompilerMain.ml" \
          -o "$project_root/bin/reuse-ocaml"
 
 $project_root/extended/haskell-compiler/build.sh
-cp "$project_root/generated/extended/haskell-compiler/compiler-haskell" "$project_root/bin/reuse-haskell"
+cp "$($project_root/dev-env/builddir.sh haskell-compiler)/compiler-haskell" "$project_root/bin/reuse-haskell"

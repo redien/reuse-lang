@@ -2,12 +2,9 @@
 set -e
 
 project_root=$(dirname "$0")/..
-build_path=$project_root/generated/standard-library
+build_dir=$($project_root/dev-env/builddir.sh standard-library)
 
-[ -d $project_root/generated ] || mkdir $project_root/generated
-[ -d $project_root/generated/standard-library ] || mkdir $project_root/generated/standard-library
-
->$build_path/standard-library.reuse echo "
+>$build_dir/standard-library.reuse echo "
 $(cat $project_root/standard-library/boolean.reuse)
 $(cat $project_root/standard-library/pair.reuse)
 $(cat $project_root/standard-library/maybe.reuse)
@@ -25,15 +22,15 @@ if [ "$1" == "--diagnostics" ]; then
 fi
 
 $project_root/reusec --language haskell\
-                     --output $build_path/Reuse.hs\
+                     --output $build_dir/Reuse.hs\
                      --nostdlib\
-                     $build_path/standard-library.reuse
+                     $build_dir/standard-library.reuse
 
 if [ "$1" == "--diagnostics" ]; then
     2>&1 echo "[standard-library/build.sh] reusec --language ocaml"
 fi
 
 $project_root/reusec --language ocaml\
-                     --output $build_path/Reuse.ml\
+                     --output $build_dir/Reuse.ml\
                      --nostdlib\
-                     $build_path/standard-library.reuse
+                     $build_dir/standard-library.reuse

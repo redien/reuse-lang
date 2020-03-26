@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
-script_path=$(dirname "$0")
-mkdir -p $script_path/../generated/tests
-
-generated_folder=$(mktemp -d -p $script_path/../generated/tests)
-test_source=$generated_folder/test_source.reuse
+project_root=$(dirname "$0")/..
+build_dir=$($project_root/dev-env/tempdir.sh extended-tests)
+test_source=$build_dir/test_source.reuse
 
 echo "$1 (def reuse-main () $2)" > $test_source
-$script_path/$IMPL/compile-test.sh $test_source $generated_folder
-./$generated_folder/executable.out
+$project_root/extended/$IMPL/compile-test.sh $test_source $build_dir
+./$build_dir/executable.out
 
 exit $?

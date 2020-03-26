@@ -3,14 +3,10 @@ set -e
 
 script_path=$(dirname "$0")
 project_root=$script_path/../..
-build_path=$project_root/generated/extended/minimal-compiler
-
-[ -d $project_root/generated ] || mkdir $project_root/generated
-[ -d $project_root/generated/extended ] || mkdir $project_root/generated/extended
-[ -d $project_root/generated/extended/minimal-compiler ] || mkdir $project_root/generated/extended/minimal-compiler
+build_dir=$($project_root/dev-env/builddir.sh minimal-compiler)
 
 $project_root/reusec --language ocaml\
-                     --output $build_path/ReuseMinimal.ml\
+                     --output $build_dir/ReuseMinimal.ml\
                      $project_root/sexp-parser/parser.reuse\
                      $project_root/parser/ast.reuse\
                      $project_root/parser/parser.strings\
@@ -23,16 +19,16 @@ $project_root/reusec --language ocaml\
                      $script_path/../source-file.reuse\
                      $script_path/minimal.reuse
 
-cp $project_root/bootstrap/Reuse.ml $build_path/Reuse.ml
-cp $project_root/extended/ocaml-compiler/Pervasives.ml $build_path/Pervasives.ml
-cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $build_path/StdinWrapper.ml
-cp $project_root/extended/minimal-compiler/Compiler.ml $build_path/Compiler.ml
+cp $project_root/bootstrap/Reuse.ml $build_dir/Reuse.ml
+cp $project_root/extended/ocaml-compiler/Pervasives.ml $build_dir/Pervasives.ml
+cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $build_dir/StdinWrapper.ml
+cp $project_root/extended/minimal-compiler/Compiler.ml $build_dir/Compiler.ml
 
 ocamlopt -O3 \
-         -I "$build_path" \
-         "$build_path/Reuse.ml" \
-         "$build_path/Pervasives.ml" \
-         "$build_path/StdinWrapper.ml" \
-         "$build_path/ReuseMinimal.ml" \
-         "$build_path/Compiler.ml" \
-         -o "$build_path/compiler-minimal"
+         -I "$build_dir" \
+         "$build_dir/Reuse.ml" \
+         "$build_dir/Pervasives.ml" \
+         "$build_dir/StdinWrapper.ml" \
+         "$build_dir/ReuseMinimal.ml" \
+         "$build_dir/Compiler.ml" \
+         -o "$build_dir/compiler-minimal"

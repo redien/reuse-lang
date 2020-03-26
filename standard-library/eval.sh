@@ -2,22 +2,16 @@
 set -e
 
 project_root=$(dirname "$0")/..
+build_dir=$($project_root/dev-env/tempdir.sh standard-library)
 
-mkdir -p $project_root/generated/tests
-generated_source=$(mktemp -p $project_root/generated/tests 'standardlibraryXXXXXX')
-
-echo "$1 (def reuse-main (_) $2)" > $generated_source
+echo "$1 (def reuse-main (_) $2)" > $build_dir/test.reuse
 
 $project_root/reusec --language ocaml\
-                     --output $generated_source.ml\
+                     --output $build_dir/test.ml\
                      $generated_source
 
-$project_root/extended/ocaml-compiler/compile-stdin-test.sh $generated_source.ml $generated_source.out
+$project_root/extended/ocaml-compiler/compile-stdin-test.sh $build_dir test.ml test.out
 
-echo "" | $generated_source.out
-
+echo "" | $build_dir/test.out
 result=$?
-
-rm $generated_source{,.ml,.out,.ml.2.cmi,.ml.2.cmo}
-
 exit $result

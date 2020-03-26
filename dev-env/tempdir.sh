@@ -5,14 +5,11 @@ project_root="$script_path/.."
 
 name="$1"
 date=$(date -u +"%Y-%m-%d-%H-%M")
-random=$(cat /dev/random | base32 | head -c 8)
+random=$(cat /dev/random | base32 | head -c 4)
 
 basedir="$project_root/generated/$name"
 
 [ -d $basedir ] || mkdir $basedir
-[ -d $basedir/$date ] || mkdir $basedir/$date
+[ -d $basedir/$date-$random ] || mkdir $basedir/$date-$random
 
-generated=$basedir/$date/$random
-
-mkdir $generated
-echo "$generated"
+echo "$basedir/$date-$random"

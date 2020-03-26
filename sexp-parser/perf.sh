@@ -6,7 +6,7 @@ project_root=$script_path/..
 
 $project_root/standard-library/build.sh
 
-[ -d $project_root/generated/sexp-parser ] || mkdir $project_root/generated/sexp-parser
+build_dir=$($project_root/dev-env/builddir.sh parser)
 
 if [ "$1" == "haskell" ]; then
     SOURCEFILE="Test.hs"
@@ -18,10 +18,10 @@ else
 fi
 
 $project_root/reusec --language $1\
-                     --output $project_root/generated/sexp-parser/$SOURCEFILE\
+                     --output $build_dir/$SOURCEFILE\
                      $project_root/sexp-parser/parser.reuse\
                      $project_root/sexp-parser/main.reuse
 
-$project_root/extended/$1-compiler/compile-stdin-test.sh $project_root/generated/sexp-parser/$SOURCEFILE $project_root/generated/sexp-parser/source.out
+$project_root/extended/$1-compiler/compile-stdin-test.sh $build_dir $SOURCEFILE source.out
 
-time cat $script_path/perf.txt | ./$project_root/generated/sexp-parser/source.out > /dev/null
+time cat $script_path/perf.txt | ./$build_dir/source.out > /dev/null

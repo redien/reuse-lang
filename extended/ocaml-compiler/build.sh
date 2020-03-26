@@ -3,7 +3,7 @@ set -e
 
 script_path=$(dirname "$0")
 project_root=$script_path/../..
-build_dir=$project_root/generated/extended/ocaml-compiler
+build_dir=$($project_root/dev-env/builddir.sh ocaml-compiler)
 
 extra_flags=
 if [ "$1" == "--diagnostics" ]; then
@@ -12,10 +12,6 @@ if [ "$1" == "--diagnostics" ]; then
 fi
 
 $project_root/standard-library/build.sh $extra_flags
-
-[ -d $project_root/generated ] || mkdir $project_root/generated
-[ -d $project_root/generated/extended ] || mkdir $project_root/generated/extended
-[ -d $project_root/generated/extended/ocaml-compiler ] || mkdir $project_root/generated/extended/ocaml-compiler
 
 if [ "$DIAGNOSTICS" == "true" ]; then
     2>&1 echo "[build.sh] reusec"

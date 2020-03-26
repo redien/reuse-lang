@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 project_root=$(dirname $0)/..
-generated_source=$project_root/generated/repl.reuse
+build_dir=$($project_root/dev-env/builddir.sh repl)
 
 while [[ $# -gt 0 ]]
 do
@@ -22,18 +22,14 @@ do
     esac
 done
 
-cleanup() {
-    rm $generated_source{,.ml,.ml.out,.out,.ml.2.cmi,.ml.2.cmo} 2>/dev/null
-}
-
 eval_reuse() {
-    echo "(def reuse-main (_) $1)" > $generated_source
+    echo "(def reuse-main (_) $1)" > $build_dir/repl.reuse
 
     $project_root/reusec --language ocaml\
-                         --output $generated_source.ml\
+                         --output $build_dir/repl.ml\
                          --nostdlib\
                          $additional_sources\
-                         $generated_source
+                         $build_dir/repl.reuse
 
     if [ "$?" != "0" ]; then
         echo
@@ -41,9 +37,9 @@ eval_reuse() {
         return
     fi
 
-    $project_root/extended/ocaml-compiler/compile-stdin-test.sh $generated_source.ml $generated_source.out
-    if [ -e "$generated_source.out" ]; then
-        echo "" | $generated_source.out
+    $project_root/extended/ocaml-compiler/compile-stdin-test.sh $build_dir repl.ml repl.out
+    if [ -e "$build_dir/repl.out" ]; then
+        echo "" | $build_dir/repl.out
         printf "\n"
     fi
     cleanup
