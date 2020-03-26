@@ -8,6 +8,8 @@ let ml_string_list_to_reuse list = ml_list_to_reuse (List.map ml_string_to_reuse
 let stdlib_paths = List.map (fun name ->
     (Filename.dirname Sys.executable_name) ^
     Filename.dir_sep ^
+    ".." ^
+    Filename.dir_sep ^
     "standard-library" ^
     Filename.dir_sep ^
     name)
