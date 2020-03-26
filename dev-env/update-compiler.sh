@@ -14,8 +14,9 @@ build_compiler_binary() {
 
 copy_compiler() {
     cp $($project_root/dev-env/builddir.sh ocaml-compiler)/ReuseCompiler.ml $project_root/bootstrap/
-    cp $($project_root/dev-env/builddir.sh ocaml-compiler)/pervasives.ml $project_root/bootstrap/
-    cp $($project_root/dev-env/builddir.sh ocaml-compiler)/StdinWrapper.ml $project_root/bootstrap/
+    cp $project_root/extended/ocaml-compiler/pervasives.ml $project_root/bootstrap/
+    cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $project_root/bootstrap/
+    cp $project_root/extended/CompilerMain.ml $project_root/bootstrap/
     cp $($project_root/dev-env/builddir.sh standard-library)/Reuse.ml $project_root/bootstrap/
     cp $($project_root/dev-env/builddir.sh standard-library)/Reuse.hs $project_root/standard-library/
 }
