@@ -1,13 +1,18 @@
 
 (typ (parser-context definition)
-     (ParserContext (list definition) (dictionary definition)))
+     (ParserContext module-reference (list definition) (dictionary definition)))
 
 (def parser-context-new ()
-     (ParserContext Empty (dictionary-empty)))
+     (ParserContext ModuleSelf Empty (dictionary-empty)))
+
+(def parser-context-with-module (module context)
+     (match context
+            (ParserContext _ definitions constructors)
+                (ParserContext module definitions constructors)))
 
 (def parser-context-definitions (context)
      (match context
-            (ParserContext definitions _)
+            (ParserContext _ definitions __)
                 (list-reverse definitions)))
 
 (def constructor-name (constructor)
@@ -27,13 +32,14 @@
 
 (def parser-context-add (definition context)
      (match context
-            (ParserContext definitions constructors)
-                (ParserContext (Cons definition definitions)
+            (ParserContext module definitions constructors)
+                (ParserContext module
+                               (Cons (result-map (definition-with-module module) definition) definitions)
                                (parser-context-add-constructors definition constructors))))
 
 (def parser-context-is-name-constructor? (name context)
      (match context
-            (ParserContext _ constructors)
+            (ParserContext _ __ constructors)
                 (match (dictionary-get name constructors)
                        (Some _)  True
                        None      False)))

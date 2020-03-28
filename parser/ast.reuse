@@ -32,6 +32,13 @@
                                                   (expression a)
                                                   b))
 
+(def definition-with-module (module definition)
+     (match definition
+            (TypeDefinition _ name parameters constructors meta)
+                (TypeDefinition module name parameters constructors meta)
+            (FunctionDefinition _ name parameters body meta)
+                (FunctionDefinition module name parameters body meta)))
+
 (def definition-meta (definition)
      (match definition
             (TypeDefinition _ __ ___ ____ meta)      meta

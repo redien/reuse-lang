@@ -8,7 +8,7 @@ echo "$1 (def reuse-main (_) $2)" > $build_dir/test.reuse
 
 $project_root/reusec --language ocaml\
                      --output $build_dir/test.ml\
-                     $generated_source
+                     $build_dir/test.reuse
 
 $project_root/extended/ocaml-compiler/compile-stdin-test.sh $build_dir test.ml test.out
 

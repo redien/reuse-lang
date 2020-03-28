@@ -25,6 +25,7 @@ let stdlib_paths = List.map (fun name ->
     "state.reuse";
     "dictionary.reuse";
 ] |> ml_string_list_to_reuse;;
+let stdlib_module = CModulePath (ml_string_to_reuse "stdlib");;
 
 let argv = ml_string_list_to_reuse (List.tl (Array.to_list Sys.argv));;
 
@@ -33,8 +34,8 @@ let read_file filename =
     let file = really_input_string channel (in_channel_length channel) in
     close_in channel;
     ml_string_to_indexed_iterator file;;
-let read_files file_paths = list_45map (fun path -> CSourceFile (CModuleSelf, path, (read_file path))) file_paths;;
-let read_modules modules = if (list_45size modules) > 0l then read_files stdlib_paths else CEmpty;;
+let read_files m file_paths = list_45map (fun path -> CSourceFile (m, path, (read_file path))) file_paths;;
+let read_modules modules = if (list_45size modules) > 0l then read_files stdlib_module stdlib_paths else CEmpty;;
 
 let write_file filename content =
     let channel = open_out (reuse_string_to_ml filename) in
@@ -49,5 +50,5 @@ while true do
           CCommandError (error) -> Printf.eprintf "%s\n" (reuse_string_to_ml error) ; exit 1
         | CCommandOutput (output) -> Printf.printf "%s" (reuse_string_to_ml output) ; exit 0
         | CCommandWriteFiles (files) -> write_files files ; exit 0
-        | CCommandReadFiles (file_paths, modules, state) -> current := CEventReadFiles (list_45concat (read_files file_paths) (read_modules modules), state)
+        | CCommandReadFiles (file_paths, modules, state) -> current := CEventReadFiles (list_45concat (read_modules modules) (read_files CModuleSelf file_paths), state)
 done

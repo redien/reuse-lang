@@ -16,7 +16,7 @@
 (def parse-files (files)
      (list-foldl (fn (entry context)
                      (match entry
-                            (SourceFile module path content)  (sexps-to-definitions (parse (transform-strings path content)) context)))
+                            (SourceFile module path content)  (sexps-to-definitions (parse (transform-strings path content)) (parser-context-with-module module context))))
                  (parser-context-new)
                  files))
 

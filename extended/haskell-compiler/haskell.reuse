@@ -265,7 +265,8 @@
                  (data-where))))
 
 (def compile (standard-library? definitions module-name)
-     ((pipe local-transforms
+     ((pipe (list-filter definition-in-current-module?)
+            local-transforms
             (list-map (result-map translate-definition))
             (list-cons (Result (data-prelude)))
             result-concat

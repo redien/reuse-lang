@@ -262,7 +262,8 @@
                 (translate-type-definition name parameters constructors)))
 
 (def compile (standard-library? definitions module-name)
-     ((pipe (list-map (result-map translate-definition))
+     ((pipe (list-filter definition-in-current-module?)
+            (list-map (result-map translate-definition))
             result-concat
             (result-map (list-concat (list (match standard-library?
                                                   True   (data-import-stdlib)
