@@ -28,56 +28,10 @@
             local-transforms)
         files))
 
-(typ (event iterator state) (EventArguments (list string))
-                            (EventReadFiles (list (source-file iterator)) state))
+(typ compiler-parameters (CompilerParameters boolean boolean))
 
-(typ (command state) (CommandError string)
-                     (CommandOutput string)
-                     (CommandWriteFiles (list (pair string string)))
-                     (CommandReadFiles (list string) (list string) state))
-
-(def standard-library? (arguments)
-     (match (dictionary-get (data-stdlib) arguments)
-            (Some value)  (string-equal? value (data-true))
-            None          True))
-
-(def minimal? (arguments)
-     (match (dictionary-get (data-minimal) arguments)
-            (Some value)  (string-equal? value (data-true))
-            None          False))
-
-(def module-name-from-filename (filename)
-     (string-take (- (string-size filename) 3) filename))
-
-(def filename-from-path (path)
-     (match (list-last (string-split 47 path))
-            (Some filename)  filename
-            None             path))
-
-(def modules-from-arguments (arguments)
-     (match (standard-library? arguments)
-            True   (list (data-stdlib-module))
-            False  Empty))
-
-(def on-event (event)
-     (match event
-            (EventArguments arguments)
-                (match (parse-arguments arguments)
-                       (CliArguments _ Empty)
-                            (CommandError (data-no-input-files))
-                       (CliArguments arguments input-files)
-                            (match (dictionary-of arguments)
-                                   arguments
-                                        (CommandReadFiles input-files (modules-from-arguments arguments) arguments))
-                       (CliErrorMissingValue key)
-                            (CommandError key))
-            (EventReadFiles file-entries arguments)
-                (match (dictionary-get (data-output-key) arguments)
-                       (Some output-path)
-                            (match (source-to-definitions (minimal? arguments) file-entries)
-                                   definitions
-                                        (match (compile (standard-library? arguments) definitions (module-name-from-filename (filename-from-path output-path)))
-                                               (Result source)  (CommandWriteFiles (list (Pair output-path source)))
-                                               (Error error)    (CommandError error)))
-                       None
-                            (CommandError (data-no-output-path)))))
+(def compile (file-entries module-name parameters)
+     (match parameters
+            (CompilerParameters compile-as-minimal use-stdlib)
+                (match (source-to-definitions compile-as-minimal file-entries)
+                       definitions  (generate-source use-stdlib definitions module-name))))

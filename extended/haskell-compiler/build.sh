@@ -22,16 +22,17 @@ $project_root/reusec --language ocaml\
                      $script_path/../source-file.reuse\
                      $script_path/haskell.strings\
                      $script_path/haskell.reuse\
-                     $script_path/../compiler.reuse
+                     $script_path/../compiler.reuse\
+                     $script_path/../../cli/cli.reuse
 
 cp $project_root/bootstrap/Reuse.ml $build_dir/Reuse.ml
 cp $project_root/extended/ocaml-compiler/Pervasives.ml $build_dir/Pervasives.ml
-cp $project_root/extended/CompilerMain.ml $build_dir/CompilerMain.ml
+cp $project_root/cli/Cli.ml $build_dir/Cli.ml
 
 ocamlopt -O3 unix.cmxa \
         -I "$build_dir" \
         "$build_dir/Reuse.ml" \
         "$build_dir/Pervasives.ml" \
         "$build_dir/ReuseCompiler.ml" \
-        "$build_dir/CompilerMain.ml" \
+        "$build_dir/Cli.ml" \
         -o "$build_dir/compiler-haskell"

@@ -15,7 +15,7 @@ ocamlopt -O3 unix.cmxa \
          "$build_dir/pervasives.ml" \
          "$build_dir/StdinWrapper.ml" \
          "$build_dir/ReuseCompiler.ml" \
-         "$build_dir/CompilerMain.ml" \
+         "$build_dir/Cli.ml" \
          -o "$project_root/bin/reuse-ocaml"
 
 $project_root/extended/haskell-compiler/build.sh
