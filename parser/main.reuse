@@ -1,8 +1,23 @@
 
+(def stringify-error (error)
+     (match error
+            (MalformedDefinitionError            _) (data-MalformedDefinitionError            )
+            (MalformedTypeDefinitionError        _) (data-MalformedTypeDefinitionError        )
+            (MalformedFunctionDefinitionError    _) (data-MalformedFunctionDefinitionError    )
+            (MalformedFunctionNameError          _) (data-MalformedFunctionNameError          )
+            (MalformedExpressionError            _) (data-MalformedExpressionError            )
+            (MalformedMatchExpressionError       _) (data-MalformedMatchExpressionError       )
+            (MalformedSymbolError                _) (data-MalformedSymbolError                )
+            (MalformedConstructorError           _) (data-MalformedConstructorError           )
+            (MalformedTypeError                  _) (data-MalformedTypeError                  )
+             MalformedSexpTooFewClosingBrackets     (data-MalformedSexpTooFewClosingBrackets  )
+             MalformedSexpTooManyClosingBrackets    (data-MalformedSexpTooManyClosingBrackets )))
+
 (def reuse-main (stdin)
      ((pipe parse
             (fn (expressions) (sexps-to-definitions expressions (parser-context-new)))
             parser-context-definitions
-            definitions-to-sexps
-            stringify)
+            result-concat
+            (result-either (. stringify definitions-to-sexps)
+                           stringify-error))
           stdin))

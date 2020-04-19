@@ -11,31 +11,6 @@
             MalformedSexpTooFewClosingBrackets
             MalformedSexpTooManyClosingBrackets)
 
-(def error-to-string (error)
-     (match error
-            (MalformedDefinitionError range)
-                (i18n-malformed-definition-error English range)
-            (MalformedFunctionDefinitionError range)
-                (i18n-malformed-function-definition-error English range)
-            (MalformedTypeDefinitionError range)
-                (i18n-malformed-type-definition-error English range)
-            (MalformedFunctionNameError range)
-                (i18n-malformed-function-name-error English range)
-            (MalformedExpressionError range)
-                (i18n-malformed-expression-error English range)
-            (MalformedMatchExpressionError range)
-                (i18n-malformed-match-expression-error English range)
-            (MalformedSymbolError range)
-                (i18n-malformed-symbol-error English range)
-            (MalformedConstructorError range)
-                (i18n-malformed-constructor-error English range)
-            (MalformedTypeError range)
-                (i18n-malformed-type-error English range)
-            MalformedSexpTooFewClosingBrackets
-                (i18n-malformed-sexp-too-few-closing-brackets English)
-            MalformedSexpTooManyClosingBrackets
-                (i18n-malformed-sexp-too-many-closing-brackets English)))
-
 (def symbol-to-string (symbol)
      (match symbol
             (Symbol name _)
@@ -414,18 +389,5 @@
             (FunctionDefinition _ name arguments expression range)
                 (function-definition-to-sexp name arguments expression range (data-def))))
 
-(def error-to-sexp (error)
-     (Symbol (error-to-string error) (Range 0 0)))
-
-(def render-result (result)
-     (match result
-            (Result sexp)
-                sexp
-            (Error sexp)
-                sexp))
-
 (def definitions-to-sexps (definitions)
-     (list-map (pipe (result-map definition-to-sexp)
-                     (result-map-error error-to-sexp)
-                     render-result)
-               definitions))
+     (list-map definition-to-sexp definitions))

@@ -21,12 +21,12 @@ $project_root/reusec $extra_flags\
                      $project_root/sexp-parser/parser.reuse\
                      $project_root/parser/ast.reuse\
                      $project_root/parser/parser.strings\
-                     $project_root/parser/strings.reuse\
                      $project_root/parser/parser-context.reuse\
                      $project_root/parser/parser.reuse\
                      $script_path/../../cli/argument-parser.strings\
                      $script_path/../../cli/argument-parser.reuse\
                      $script_path/../common.strings\
+                     $script_path/../strings.reuse\
                      $script_path/../common.reuse\
                      $script_path/../local-transforms.reuse\
                      $script_path/interpreter.strings\

@@ -1,4 +1,9 @@
 
+let rec id = fun x -> x;;
+let rec const = fun a b -> a;;
+let rec flip = fun f -> (fun b a -> (f a b));;
+let rec _46 = fun f g x -> (f (g x));;
+let rec fix = fun f -> (f (fix f));;
 type boolean = CTrue | CFalse;;
 let rec not = fun a -> (match a with CTrue -> CFalse | CFalse -> CTrue);;
 let rec _and = fun a b -> (match a with CTrue -> b | CFalse -> CFalse);;
@@ -118,10 +123,10 @@ let rec string_45from_45boolean = fun boolean -> (match boolean with CTrue -> (s
 type ('Tv,'Te) result = CResult : 'Tv -> ('Tv,'Te) result | CError : 'Te -> ('Tv,'Te) result;;
 let rec result_45lift = fun result -> (CResult (result));;
 let rec result_45error = fun error -> (CError (error));;
-let rec result_45map = fun f result -> (match result with (CResult (x)) -> (CResult ((f x))) | (CError (error)) -> (CError (error)));;
-let rec result_45map_45error = fun f result -> (match result with (CResult (x)) -> (CResult (x)) | (CError (error)) -> (CError ((f error))));;
-let rec result_45flatmap = fun f result -> (match result with (CResult (x)) -> (f x) | (CError (error)) -> (CError (error)));;
+let rec result_45bimap = fun f g result -> (match result with (CResult (x)) -> (CResult ((f x))) | (CError (y)) -> (CError ((g y))));;
 let rec result_45either = fun f g result -> (match result with (CResult (x)) -> (f x) | (CError (x)) -> (g x));;
+let rec result_45map = fun f result -> (result_45bimap f id result);;
+let rec result_45flatmap = fun f result -> (match result with (CResult (x)) -> (f x) | (CError (error)) -> (CError (error)));;
 let rec result_45or_45else = fun _value result -> (match result with (CResult (x)) -> x | (CError (x)) -> _value);;
 let rec result_45error_63 = fun result -> (match result with (CError (_95)) -> CTrue | _95 -> CFalse);;
 let rec result_45filter_45list = fun list -> (list_45foldr (fun result new_45list -> (match result with (CResult (x)) -> (CCons (x,new_45list)) | _95 -> new_45list)) CEmpty list);;

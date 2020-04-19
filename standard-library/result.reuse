@@ -7,25 +7,23 @@
 (def result-error (error)
      (Error error))
 
-(def result-map (f result)
-    (match result
-           (Result x)     (Result (f x))
-           (Error error)  (Error error)))
-
-(def result-map-error (f result)
-    (match result
-           (Result x)     (Result x)
-           (Error error)  (Error (f error))))
-
-(def result-flatmap (f result)
-    (match result
-           (Result x)     (f x)
-           (Error error)  (Error error)))
+(def result-bimap (f g result)
+     (match result
+            (Result x)     (Result (f x))
+            (Error y)      (Error (g y))))
 
 (def result-either (f g result)
      (match result
-            (Result x) (f x)
-            (Error x)  (g x)))
+            (Result x)     (f x)
+            (Error x)      (g x)))
+
+(def result-map (f result)
+     (result-bimap f id result))
+
+(def result-flatmap (f result)
+     (match result
+            (Result x)     (f x)
+            (Error error)  (Error error)))
 
 (def result-or-else (value result)
      (match result

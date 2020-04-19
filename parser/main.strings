@@ -1,0 +1,11 @@
+MalformedDefinitionError            |MalformedDefinitionError
+MalformedTypeDefinitionError        |MalformedTypeDefinitionError
+MalformedFunctionDefinitionError    |MalformedFunctionDefinitionError
+MalformedFunctionNameError          |MalformedFunctionNameError
+MalformedExpressionError            |MalformedExpressionError
+MalformedMatchExpressionError       |MalformedMatchExpressionError
+MalformedSymbolError                |MalformedSymbolError
+MalformedConstructorError           |MalformedConstructorError
+MalformedTypeError                  |MalformedTypeError
+MalformedSexpTooFewClosingBrackets  |MalformedSexpTooFewClosingBrackets
+MalformedSexpTooManyClosingBrackets |MalformedSexpTooManyClosingBrackets

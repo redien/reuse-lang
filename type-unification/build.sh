@@ -12,7 +12,7 @@ $project_root/reusec --language haskell\
                      $project_root/sexp-parser/parser.reuse\
                      $project_root/parser/parser.strings\
                      $project_root/parser/ast.reuse\
-                     $project_root/parser/strings.reuse\
+                     $project_root/extended/strings.reuse\
                      $project_root/parser/parser.reuse\
                      $project_root/type-system/type.reuse\
                      $project_root/type-system/rename-type.reuse\

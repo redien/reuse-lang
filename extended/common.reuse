@@ -14,8 +14,33 @@
             True   (string-of-char char)
             False  (string-prepend 95 (string-from-int32 char))))
 
+(def error-to-string (error)
+     (match error
+            (MalformedDefinitionError range)
+                (i18n-malformed-definition-error English range)
+            (MalformedFunctionDefinitionError range)
+                (i18n-malformed-function-definition-error English range)
+            (MalformedTypeDefinitionError range)
+                (i18n-malformed-type-definition-error English range)
+            (MalformedFunctionNameError range)
+                (i18n-malformed-function-name-error English range)
+            (MalformedExpressionError range)
+                (i18n-malformed-expression-error English range)
+            (MalformedMatchExpressionError range)
+                (i18n-malformed-match-expression-error English range)
+            (MalformedSymbolError range)
+                (i18n-malformed-symbol-error English range)
+            (MalformedConstructorError range)
+                (i18n-malformed-constructor-error English range)
+            (MalformedTypeError range)
+                (i18n-malformed-type-error English range)
+            MalformedSexpTooFewClosingBrackets
+                (i18n-malformed-sexp-too-few-closing-brackets English)
+            MalformedSexpTooManyClosingBrackets
+                (i18n-malformed-sexp-too-many-closing-brackets English)))
+
 (def stringify-parse-errors (definitions)
-     (list-map (result-map-error error-to-string) definitions))
+     (list-map (result-bimap id error-to-string) definitions))
 
 (def expression-is-symbol? (symbol-name expression)
      (match expression

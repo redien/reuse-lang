@@ -3,6 +3,11 @@ module Reuse where
 import Data.Int ; import Prelude hiding (not, and, or, mod)
 
 _int32_add :: Int32 -> Int32 -> Int32 ; _int32_add a b = a + b ; _int32_mul :: Int32 -> Int32 -> Int32 ; _int32_mul a b = a * b ; _int32_sub :: Int32 -> Int32 -> Int32 ; _int32_sub a b = a - b ;
+id = \ !x -> x
+const = \ !a !b -> a
+flip = \ !f -> (\ !b !a -> (f a b))
+_46 = \ !f !g !x -> (f (g x))
+fix = \ !f -> (f (fix f))
 data Tboolean = CTrue | CFalse
 not = \ !a -> (case a of CTrue -> CFalse ; CFalse -> CTrue)
 and = \ !a !b -> (case a of CTrue -> b ; CFalse -> CFalse)
@@ -122,10 +127,10 @@ string_45from_45boolean = \ !boolean -> (case boolean of CTrue -> (string_45from
 data Tresult v e = CResult !v | CError !e
 result_45lift = \ !result -> (CResult result)
 result_45error = \ !error -> (CError error)
-result_45map = \ !f !result -> (case result of (CResult !x) -> (CResult (f x)) ; (CError !error) -> (CError error))
-result_45map_45error = \ !f !result -> (case result of (CResult !x) -> (CResult x) ; (CError !error) -> (CError (f error)))
-result_45flatmap = \ !f !result -> (case result of (CResult !x) -> (f x) ; (CError !error) -> (CError error))
+result_45bimap = \ !f !g !result -> (case result of (CResult !x) -> (CResult (f x)) ; (CError !y) -> (CError (g y)))
 result_45either = \ !f !g !result -> (case result of (CResult !x) -> (f x) ; (CError !x) -> (g x))
+result_45map = \ !f !result -> (result_45bimap f id result)
+result_45flatmap = \ !f !result -> (case result of (CResult !x) -> (f x) ; (CError !error) -> (CError error))
 result_45or_45else = \ !value !result -> (case result of (CResult !x) -> x ; (CError !x) -> value)
 result_45error_63 = \ !result -> (case result of (CError !_95) -> CTrue ; !_95 -> CFalse)
 result_45filter_45list = \ !list -> (list_45foldr (\ !result !new_45list -> (case result of (CResult !x) -> (CCons x new_45list) ; !_95 -> new_45list)) CEmpty list)
