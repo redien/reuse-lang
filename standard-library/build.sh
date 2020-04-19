@@ -5,6 +5,7 @@ project_root=$(dirname "$0")/..
 build_dir=$($project_root/dev-env/builddir.sh standard-library)
 
 >$build_dir/standard-library.reuse echo "
+$(cat $project_root/standard-library/combinators.reuse)
 $(cat $project_root/standard-library/boolean.reuse)
 $(cat $project_root/standard-library/pair.reuse)
 $(cat $project_root/standard-library/maybe.reuse)
