@@ -19,18 +19,18 @@
                                                   meta)
                             (Constructor          string (list (expression meta)) meta)
                             (FunctionApplication  (list (expression meta)) meta))
-(typ module-reference       (ModulePath string)
+(typ module-reference       (ModulePath           string)
                             ModuleSelf)
-(typ (definition a b)       (TypeDefinition       module-reference
+(typ (definition meta)      (TypeDefinition       module-reference
                                                   string
-                                                  (list (type-parameter a))
-                                                  (list (constructor a))
-                                                  b)
+                                                  (list (type-parameter meta))
+                                                  (list (constructor meta))
+                                                  meta)
                             (FunctionDefinition   module-reference
                                                   string
                                                   (list string)
-                                                  (expression a)
-                                                  b))
+                                                  (expression meta)
+                                                  meta))
 
 (def definition-with-module (module definition)
      (match definition
