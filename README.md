@@ -143,8 +143,8 @@ Usage: reusec [flags] --output [OUTPUT FILE] [FILE]...
 
 Compiler for the Reuse programming language
 
-       --minimal true     Source language should be treated as Minimal Reuse, default: false
-       --nostdlib true    Do not include the standard library, default: false
+       --minimal [BOOL]   Source language should be treated as Minimal Reuse, default: false
+       --stdlib [BOOL]    Include the standard library, default: true
        --language [LANG]  Target language to compile to.
                           Can be ocaml or minimal.
        --output [FILE]    Write output to FILE

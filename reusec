@@ -13,8 +13,8 @@ usage() {
     echo >&2
     echo Compiler for the Reuse programming language>&2
     echo >&2
-    echo "       --minimal true     Source language should be treated as Minimal Reuse, default: false" >&2
-    echo "       --nostdlib true    Do not include the standard library, default: false" >&2
+    echo "       --minimal [BOOL]   Source language should be treated as Minimal Reuse, default: false" >&2
+    echo "       --stdlib [BOOL]    Include the standard library, default: true" >&2
     echo "       --language [LANG]  Target language to compile to." >&2
     echo "                          Can be $LANGUAGES." >&2
     echo "       --output [FILE]    Write output to FILE" >&2
@@ -43,7 +43,7 @@ do
             shift
             shift
         ;;
-        --nostdlib)
+        --stdlib)
             REUSE_ARGS="$REUSE_ARGS --stdlib $2"
             shift
             shift
@@ -76,6 +76,5 @@ case $REUSE_LANGUAGE in
         throw_error Unknown language $REUSE_LANGUAGE. Can be $LANGUAGES.
     ;;
 esac
-
 
 $root_path/bin/reuse-$REUSE_LANGUAGE $REUSE_ARGS $REUSE_SOURCE_FILES

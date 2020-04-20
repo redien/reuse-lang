@@ -20,11 +20,11 @@ $(cat $project_root/standard-library/dictionary.reuse)
 
 $project_root/reusec --language haskell\
                      --output $build_dir/Reuse.hs\
-                     --nostdlib true\
+                     --stdlib false\
                      $build_dir/standard-library.reuse
 
 
 $project_root/reusec --language ocaml\
                      --output $build_dir/Reuse.ml\
-                     --nostdlib true\
+                     --stdlib false\
                      $build_dir/standard-library.reuse

@@ -27,7 +27,7 @@ eval_reuse() {
 
     $project_root/reusec --language ocaml\
                          --output $build_dir/repl.ml\
-                         --nostdlib true\
+                         --stdlib false\
                          $additional_sources\
                          $build_dir/repl.reuse
 
