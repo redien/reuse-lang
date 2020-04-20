@@ -2,7 +2,6 @@
 
 set -e
 
-REUSE_SOURCE_FILES=""
 REUSE_ARGS=""
 REUSE_LANGUAGE="ocaml"
 
@@ -38,31 +37,13 @@ do
     arg="$1"
 
     case $arg in
-        --minimal)
-            REUSE_ARGS="$REUSE_ARGS --minimal $2"
-            shift
-            shift
-        ;;
-        --stdlib)
-            REUSE_ARGS="$REUSE_ARGS --stdlib $2"
-            shift
-            shift
-        ;;
-        --output)
-            REUSE_ARGS="$REUSE_ARGS --output $2"
-            shift
-            shift
-        ;;
         --language)
             REUSE_LANGUAGE="$2"
             shift
             shift
         ;;
-        --*)
-            throw_error Unrecognized flag $arg
-        ;;
         *)
-            REUSE_SOURCE_FILES="$REUSE_SOURCE_FILES $arg"
+            REUSE_ARGS="$REUSE_ARGS $arg"
             shift
         ;;
     esac
@@ -77,4 +58,4 @@ case $REUSE_LANGUAGE in
     ;;
 esac
 
-$root_path/bin/reuse-$REUSE_LANGUAGE $REUSE_ARGS $REUSE_SOURCE_FILES
+$root_path/bin/reuse-$REUSE_LANGUAGE $REUSE_ARGS
