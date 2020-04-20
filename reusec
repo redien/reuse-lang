@@ -62,7 +62,7 @@ do
             throw_error Unrecognized flag $arg
         ;;
         *)
-            REUSE_SOURCE_FILES="$arg $REUSE_SOURCE_FILES"
+            REUSE_SOURCE_FILES="$REUSE_SOURCE_FILES $arg"
             shift
         ;;
     esac

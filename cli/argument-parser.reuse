@@ -22,9 +22,9 @@
                        True
                             (CliErrorMissingValue first)
                        False
-                            (CliArguments kv-args (Cons first inputs)))
+                            (CliArguments (list-reverse kv-args) (list-reverse (Cons first inputs))))
             Empty
-                (CliArguments kv-args inputs)))
+                (CliArguments (list-reverse kv-args) (list-reverse inputs))))
 
 (def parse-arguments (arguments)
      (parse-arguments' arguments Empty Empty))
