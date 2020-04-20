@@ -186,3 +186,49 @@ docker run --rm -it -v $PWD:/home/opam/reuse-lang redien/reuse-lang-dev-env
 - Do not rely on string operations other than equality when parsing
 - Generate a symbol table after parsing s-expressions.
 - Implement modules by parsing other files and adding them to the symbol table with separate IDs
+
+### Thoughts on a parens-less syntax
+
+```
+type sexp
+     Symbol   string       range
+     Integer  int32        range
+     List     (list sexp)  range
+
+type parse-error
+     ParseErrorTooFewClosingBrackets
+     ParseErrorTooManyClosingBrackets
+
+func symbol-range start end
+     Range (indexed-iterator-index start) (indexed-iterator-index end)
+
+func parse-symbol iterator end next
+     case string-collect-from-indexed-iterator atom-character? iterator
+          Pair next-iterator name ->
+               case string-to-int32 name
+                    Some integer ->  next next-iterator (Integer integer (symbol-range iterator next-iterator))
+                    None         ->
+               case string-empty? name
+                    False ->  next next-iterator (Symbol name (symbol-range iterator next-iterator))
+                    True  ->  end iterator
+
+...
+
+
+func sexp-to-function-type sexp-to-types sexp-to-type name parameters range
+     case parameters
+          Cons (List arg-types _) (Cons return-type Empty) ->
+                result-bind   (sexp-to-types arg-types)   func arg-types
+                result-bind   (sexp-to-type return-type)  func return-type
+                result-return (FunctionType arg-types return-type range)
+          _ ->
+                Error (MalformedTypeError range)
+```
+
+- Indentation is not significant
+- All keywords are 4 characters wide to make indenting easier
+- type expects a type name, arguments and then a constructor on each new line
+- func expects a name (only top-level), arguments and then the body on a new line
+- case expects an expression and patterns on each line with a `->` followed by an expression
+- function application cannot span several lines unless the line is broken up by a func or case expression
+- sub-expressions need parens
