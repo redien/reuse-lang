@@ -13,8 +13,8 @@ usage() {
     echo >&2
     echo Compiler for the Reuse programming language>&2
     echo >&2
-    echo "       --minimal          Source language should be treated as Minimal Reuse" >&2
-    echo "       --nostdlib         Do not include the standard library" >&2
+    echo "       --minimal true     Source language should be treated as Minimal Reuse, default: false" >&2
+    echo "       --nostdlib true    Do not include the standard library, default: false" >&2
     echo "       --language [LANG]  Target language to compile to." >&2
     echo "                          Can be $LANGUAGES." >&2
     echo "       --output [FILE]    Write output to FILE" >&2
@@ -39,11 +39,13 @@ do
 
     case $arg in
         --minimal)
-            REUSE_ARGS="$REUSE_ARGS --minimal true"
+            REUSE_ARGS="$REUSE_ARGS --minimal $2"
+            shift
             shift
         ;;
         --nostdlib)
-            REUSE_ARGS="$REUSE_ARGS --stdlib false"
+            REUSE_ARGS="$REUSE_ARGS --stdlib $2"
+            shift
             shift
         ;;
         --output)

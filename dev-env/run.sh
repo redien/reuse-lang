@@ -18,7 +18,6 @@ run() {
         test-string-gen)        $project_root/string-gen/build.sh && $project_root/dev-env/spec-runner/run.sh string-gen/specification $project_root/string-gen/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
         test-minimal)           $project_root/dev-env/spec-runner/run.sh minimal/specification $project_root/$IMPL/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
         test-extended)          $project_root/dev-env/spec-runner/run.sh extended/specification $project_root/$IMPL/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
-        diagnostics)            $project_root/extended/ocaml-compiler/diagnostics.sh ;;
         line-count)             (cd $project_root ; git ls-files | grep -E '\.(reuse|strings)' | xargs wc -l) ;;
         line-count-with-spec)   (cd $project_root ; git ls-files | grep -E '\.(reuse|strings|spec)' | xargs wc -l) ;;
         vscode-install)         ln -s $PWD/$project_root/dev-env/editor-support/vs-code-reuse ~/.vscode/extensions/vs-code-reuse ;;

@@ -5,20 +5,9 @@ script_path=$(dirname "$0")
 project_root=$script_path/../..
 build_dir=$($project_root/dev-env/builddir.sh ocaml-compiler)
 
-extra_flags=
-if [ "$1" == "--diagnostics" ]; then
-    extra_flags="--diagnostics"
-    DIAGNOSTICS="true"
-fi
+$project_root/standard-library/build.sh
 
-$project_root/standard-library/build.sh $extra_flags
-
-if [ "$DIAGNOSTICS" == "true" ]; then
-    2>&1 echo "[build.sh] reusec"
-fi
-
-$project_root/reusec $extra_flags\
-                     --language ocaml\
+$project_root/reusec --language ocaml\
                      --output $build_dir/ReuseCompiler.ml\
                      $project_root/sexp-parser/parser.reuse\
                      $project_root/parser/ast.reuse\
