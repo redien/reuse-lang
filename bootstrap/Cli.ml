@@ -1,19 +1,12 @@
 
-open Reuse;;
-open Pervasives;;
 open ReuseCompiler;;
 
 let ml_string_list_to_reuse list = ml_list_to_reuse (List.map ml_string_to_reuse list);;
 
-let stdlib_paths = List.map (fun name ->
-    (Filename.dirname Sys.executable_name) ^
-    Filename.dir_sep ^
-    ".." ^
-    Filename.dir_sep ^
-    "standard-library" ^
-    Filename.dir_sep ^
-    name)
-[
+let data_path = (Filename.dirname Sys.executable_name) ^ Filename.dir_sep ^ "data" ^ Filename.dir_sep;;
+
+let stdlib_paths = List.map (fun name -> data_path ^ name) [
+    "combinators.reuse";
     "boolean.reuse";
     "pair.reuse";
     "maybe.reuse";
@@ -24,6 +17,7 @@ let stdlib_paths = List.map (fun name ->
     "result.reuse";
     "state.reuse";
     "dictionary.reuse";
+    reuse_string_to_ml (data_45pervasives_45filename ());
 ] |> ml_string_list_to_reuse;;
 let stdlib_module = CModulePath (ml_string_to_reuse "stdlib");;
 

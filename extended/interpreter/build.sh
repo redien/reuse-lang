@@ -23,17 +23,13 @@ $project_root/reusec --language ocaml\
                      $script_path/scope.reuse\
                      $script_path/interpreter.reuse
 
-cp $project_root/bootstrap/Reuse.ml $build_dir/Reuse.ml
-cp $project_root/extended/ocaml-compiler/Pervasives.ml $build_dir/Pervasives.ml
 cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $build_dir/StdinWrapper.ml
 cp $project_root/extended/interpreter/Main.ml $build_dir/Main.ml
 
 ocamlopt.opt -O3 \
              unix.cmxa \
              -I "$build_dir" \
-             "$build_dir/Reuse.ml" \
-             "$build_dir/Pervasives.ml" \
-             "$build_dir/StdinWrapper.ml" \
              "$build_dir/Interpreter.ml" \
+             "$build_dir/StdinWrapper.ml" \
              "$build_dir/Main.ml" \
              -o "$build_dir/interpreter"

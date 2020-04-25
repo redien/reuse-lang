@@ -2,10 +2,10 @@
 set -e
 
 project_root=$(dirname "$0")/..
+build_dir=$($project_root/dev-env/builddir.sh ocaml-compiler)
 
 build_compiler_source() {
     $project_root/extended/ocaml-compiler/build.sh --no-binary
-    $project_root/standard-library/build.sh
 }
 
 build_compiler_binary() {
@@ -13,12 +13,9 @@ build_compiler_binary() {
 }
 
 copy_compiler() {
-    cp $($project_root/dev-env/builddir.sh ocaml-compiler)/ReuseCompiler.ml $project_root/bootstrap/
-    cp $project_root/extended/ocaml-compiler/pervasives.ml $project_root/bootstrap/
-    cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $project_root/bootstrap/
-    cp $project_root/cli/Cli.ml $project_root/bootstrap/
-    cp $($project_root/dev-env/builddir.sh standard-library)/Reuse.ml $project_root/bootstrap/
-    cp $($project_root/dev-env/builddir.sh standard-library)/Reuse.hs $project_root/standard-library/
+    cp $build_dir/*.ml $project_root/bootstrap
+    [ -d $project_root/bootstrap/data ] || mkdir $project_root/bootstrap/data
+    cp $build_dir/data/* $project_root/bootstrap/data
 }
 
 >&2 echo First stage: Build new compiler source

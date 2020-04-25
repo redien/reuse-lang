@@ -1,8 +1,6 @@
 
-open Reuse;;
-open Pervasives;;
-open StdinWrapper;;
 open Interpreter;;
+open StdinWrapper;;
 
 let argv = ml_list_to_reuse (List.map ml_string_to_reuse (List.tl (Array.to_list Sys.argv)));;
 let read_file filename =

@@ -1,0 +1,7 @@
+
+(typ (iterable-class collection element)
+     (IterableClass (fn (collection) (pair (maybe element) collection))))
+
+(def iterable-next (class collection)
+     (match class
+            (IterableClass next)  (next collection)))

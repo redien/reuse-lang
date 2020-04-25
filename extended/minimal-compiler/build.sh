@@ -19,16 +19,12 @@ $project_root/reusec --language ocaml\
                      $script_path/../source-file.reuse\
                      $script_path/minimal.reuse
 
-cp $project_root/bootstrap/Reuse.ml $build_dir/Reuse.ml
-cp $project_root/extended/ocaml-compiler/Pervasives.ml $build_dir/Pervasives.ml
 cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $build_dir/StdinWrapper.ml
 cp $project_root/extended/minimal-compiler/Compiler.ml $build_dir/Compiler.ml
 
 ocamlopt -O3 \
          -I "$build_dir" \
-         "$build_dir/Reuse.ml" \
-         "$build_dir/Pervasives.ml" \
-         "$build_dir/StdinWrapper.ml" \
          "$build_dir/ReuseMinimal.ml" \
+         "$build_dir/StdinWrapper.ml" \
          "$build_dir/Compiler.ml" \
          -o "$build_dir/compiler-minimal"

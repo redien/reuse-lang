@@ -1,6 +1,4 @@
 
-open Reuse;;
-
 let ml_string_to_reuse s =
     Seq.fold_left (fun a b -> string_45append (Int32.of_int (Char.code b)) a)
                   (string_45empty ())

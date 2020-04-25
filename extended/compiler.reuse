@@ -5,20 +5,29 @@
             False  validate-reserved-identifiers))
 
 (def transform-strings (path content)
-     (match (string-equal? (string-substring (- (string-size path) 8) 8 path) (data-strings-file-ending))
-            True
-                (match (string-gen content)
-                       (Result string)  (indexed-iterator-from-iterable (string-iterable) string)
-                       (Error error)    (indexed-iterator-from-iterable (string-iterable) (string-empty)))
-            False
-                content))
+     (match (string-gen content)
+            (Result string)  (indexed-iterator-from-iterable (string-iterable) string)
+            (Error error)    (indexed-iterator-from-iterable (string-iterable) (string-empty))))
+
+(def parse-reuse-file (file context)
+     (match file
+            (SourceFile module path content)
+                (sexps-to-definitions (parse content)
+                                      (parser-context-with-module module context))))
+
+(def parse-strings-file (file context)
+     (match file
+            (SourceFile module path content)
+                (sexps-to-definitions (parse (transform-strings path content))
+                                      (parser-context-with-module module context))))
+
+(def translate-source-file (file context)
+     (match (source-file-type file)
+            SourceFileTypeStrings  (parse-strings-file file context)
+            _                      (parse-reuse-file file context)))
 
 (def parse-files (files)
-     (list-foldl (fn (entry context)
-                     (match entry
-                            (SourceFile module path content)  (sexps-to-definitions (parse (transform-strings path content)) (parser-context-with-module module context))))
-                 (parser-context-new)
-                 files))
+     (list-foldl translate-source-file (parser-context-new) files))
 
 (def source-to-definitions (as_minimal files)
      ((pipe parse-files
@@ -28,10 +37,19 @@
             local-transforms)
         files))
 
+(def target-language? (file)
+     (= (source-file-type file) SourceFileTypeTargetLanguage))
+
+(def split-source-files (files)
+     (Pair (list-filter target-language? files)
+           (list-filter (. not target-language?) files)))
+
 (typ compiler-parameters (CompilerParameters boolean boolean))
 
 (def compile (file-entries module-name parameters)
-     (match parameters
-            (CompilerParameters compile-as-minimal use-stdlib)
-                (match (source-to-definitions compile-as-minimal file-entries)
-                       definitions  (generate-source use-stdlib definitions module-name))))
+     (match (Pair (split-source-files file-entries) parameters)
+            (Pair (Pair target-language-files source-files) (CompilerParameters as-minimal use-stdlib))
+                  (match (source-to-definitions as-minimal source-files)
+                         definitions
+                              (result-map ((flip string-concat) (string-join (string-empty) (list-map (. string-from-indexed-iterator source-file-content) target-language-files)))
+                                          (generate-source definitions module-name)))))

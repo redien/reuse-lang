@@ -261,12 +261,8 @@
             (TypeDefinition module name parameters constructors _)
                 (translate-type-definition name parameters constructors)))
 
-(def generate-source (standard-library? definitions module-name)
-     ((pipe (list-filter definition-in-current-module?)
-            (list-map (result-map translate-definition))
+(def generate-source (definitions module-name)
+     ((pipe (list-map (result-map translate-definition))
             result-concat
-            (result-map (list-concat (list (match standard-library?
-                                                  True   (data-import-stdlib)
-                                                  False  (string-empty)))))
             (result-map (string-join (string-of-char 10))))
          definitions))

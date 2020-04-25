@@ -1,0 +1,156 @@
+(typ (list a) (Cons a (list a)) Empty)
+
+(def list-cons (x xs)
+     (Cons x xs))
+
+(def list-from (x)
+     (Cons x Empty))
+
+(def list-from-range (from _to)
+     (match (< from _to)
+            True   (Cons from (list-from-range (+ from 1) _to))
+            False  Empty))
+
+(def list-first (list)
+     (match list
+            (Cons x _)
+                (Some x)
+            Empty
+                None))
+
+(def list-rest (list)
+     (match list
+            (Cons _ rest)
+                rest
+            Empty
+                Empty)) 
+
+(def list-last (list)
+    (match list
+           Empty           None
+           (Cons x Empty)  (Some x)
+           (Cons _ rest)   (list-last rest)))
+
+(def list-empty? (list)
+     (match list
+            (Cons _ __)
+                False
+            Empty
+                True))
+
+(def list-size' (list size)
+     (match list
+            (Cons _ rest)
+                (list-size' rest (+ size 1))
+            Empty
+                size))
+
+(def list-size (list)
+     (list-size' list 0))
+
+(def list-foldrk (f initial list continue)
+     (match list
+            Empty       (continue initial)
+            (Cons x xs) (list-foldrk f initial xs (fn (value) (f x value continue)))))
+
+(def list-foldlk (f initial list continue)
+     (match list
+            Empty       (continue initial)
+            (Cons x xs) (f x initial (fn (new-value)
+                                         (list-foldlk f new-value xs continue)))))
+
+(def list-foldr (f initial list)
+     (list-foldrk (fn (x value continue)
+                      (continue (f x value)))
+                  initial
+                  list
+                  (fn (x) x)))
+
+(def list-foldl (f initial list)
+     (match list
+            Empty       initial
+            (Cons x xs) (list-foldl f (f x initial) xs)))
+
+(def list-concat (a b)
+     (list-foldr list-cons b a))
+
+(def list-reverse (list)
+     (list-foldl list-cons Empty list))
+
+(def list-map (f list)
+     (list-foldr (fn (head tail) (list-cons (f head) tail)) Empty list))
+
+(def list-flatmap (f list)
+     (list-foldr (fn (head tail) (list-concat (f head) tail)) Empty list))
+
+(def list-flatten (list)
+     (list-foldr list-concat Empty list))
+
+(def list-skip (count list)
+     (match (> count 0)
+            True   (list-skip (- count 1) (list-rest list))
+            False  list))
+
+(def list-take' (count list taken)
+     (match (> count 0)
+            True   (match list
+                          (Cons char rest)  (list-take' (- count 1) rest (Cons char taken))
+                          Empty             taken)
+            False  taken))
+
+(def list-take (count list)
+     (list-reverse (list-take' count list Empty)))
+
+(def list-zip' (xs ys collected)
+     (match xs
+            Empty        collected
+            (Cons x xs)  (match ys
+                                Empty        collected
+                                (Cons y ys)  (list-zip' xs ys (Cons (Pair x y) collected)))))
+
+(def list-zip (xs ys)
+     (list-reverse (list-zip' xs ys Empty)))
+
+(def list-pairs (xs)
+     (match xs
+            (Cons a (Cons b rest))  (Cons (Pair a b) (list-pairs rest))
+            _                       Empty))
+
+(def list-find-first (predicate list)
+     (match list
+            Empty        None
+            (Cons x xs)  (match (predicate x)
+                                True   (Some x)
+                                False  (list-find-first predicate xs))))
+
+(def list-filter (f list)
+     (list-foldr (fn (head tail)
+                     (match (f head)
+                            True  (Cons head tail)
+                            False tail))
+                 Empty
+                 list))
+
+(def list-exclude (f list)
+     (list-filter (pipe f not) list))
+
+(def list-any? (f list)
+     (match (list-find-first f list)
+            (Some _)  True
+            _         False))
+
+(def list-every? (f list)
+     (match (list-find-first (fn (x) (not (f x))) list)
+            (Some _)  False
+            _         True))
+
+(def list-collect-from-indexed-iterator' (predicate iterator initial)
+     (match (indexed-iterator-next iterator)
+            (Pair None _)         (Pair iterator initial)
+            (Pair (Some x) next)  (match (predicate x)
+                                         True   (list-collect-from-indexed-iterator' predicate next (Cons x initial))
+                                         False  (Pair iterator initial))))
+
+(def list-collect-from-indexed-iterator (predicate iterator)
+     (match (list-collect-from-indexed-iterator' predicate iterator Empty)
+            (Pair iterator result) (Pair iterator (list-reverse result))))

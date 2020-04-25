@@ -1,5 +1,8 @@
 
 (typ (source-file iterator)  (SourceFile module-reference string iterator))
+(typ source-file-type SourceFileTypeReuse
+                      SourceFileTypeStrings
+                      SourceFileTypeTargetLanguage)
 
 (def source-file-module (file)
      (match file
@@ -15,3 +18,14 @@
      (match file
             (SourceFile _ __ content)
                 content))
+
+(def last-n-chars (n path)
+     (string-substring (- (string-size path) n) n path))
+
+(def source-file-type (file)
+     (match (string-equal? (last-n-chars 6 (source-file-path file)) (data-reuse-file-ending))
+            True   SourceFileTypeReuse
+            False
+     (match (string-equal? (last-n-chars 8 (source-file-path file)) (data-strings-file-ending))
+            True   SourceFileTypeStrings
+            False  SourceFileTypeTargetLanguage)))

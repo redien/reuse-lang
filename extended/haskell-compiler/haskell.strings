@@ -1,39 +1,40 @@
-compile-error  |*compile error*
-backslash      |\
-arrow          | -> 
-equals         | = 
-vertical-bar   | | 
-pipe-operator  | |> 
-colon          | : 
-semicolon      | ; 
-star           | * 
-Tint32         |Tint32
-Int32          |Int32
-int32-plus     |_int32_add
-int32-multiply |_int32_mul
-int32-minus    |_int32_sub
-int32-divide   |quot
-int32-modulus  |rem
-cempty         |CEmpty
-ccons          |CCons
-comma          |,
-constant       |_constant_
-data           |data
-case           |case
-deriving       |deriving
-family         |family
-default        |default
-forall         |forall
-foreign        |foreign
-import         |import
-instance       |instance
-infix          |infix
-infixl         |infixl
-infixr         |infixr
-newtype        |newtype
-where          |where
-dot            |.
-prelude        |_int32_add :: Int32 -> Int32 -> Int32 ; _int32_add a b = a + b ; _int32_mul :: Int32 -> Int32 -> Int32 ; _int32_mul a b = a * b ; _int32_sub :: Int32 -> Int32 -> Int32 ; _int32_sub a b = a - b ;
-language-exts  |{-# LANGUAGE ExistentialQuantification, BangPatterns #-}
-imports        |import Data.Int ; import Prelude hiding (not, and, or, mod)
-import-stdlib  |import Reuse hiding (_int32_add, _int32_sub, _int32_mul)
+compile-error       |*compile error*
+backslash           |\
+arrow               | -> 
+equals              | = 
+vertical-bar        | | 
+pipe-operator       | |> 
+colon               | : 
+semicolon           | ; 
+star                | * 
+Tint32              |Tint32
+Int32               |Int32
+int32-plus          |_int32_add
+int32-multiply      |_int32_mul
+int32-minus         |_int32_sub
+int32-divide        |quot
+int32-modulus       |rem
+cempty              |CEmpty
+ccons               |CCons
+comma               |,
+constant            |_constant_
+data                |data
+case                |case
+deriving            |deriving
+family              |family
+default             |default
+forall              |forall
+foreign             |foreign
+import              |import
+instance            |instance
+infix               |infix
+infixl              |infixl
+infixr              |infixr
+newtype             |newtype
+where               |where
+dot                 |.
+prelude             |_int32_add :: Int32 -> Int32 -> Int32 ; _int32_add a b = a + b ; _int32_mul :: Int32 -> Int32 -> Int32 ; _int32_mul a b = a * b ; _int32_sub :: Int32 -> Int32 -> Int32 ; _int32_sub a b = a - b ;
+language-exts       |{-# LANGUAGE ExistentialQuantification, BangPatterns #-}
+imports             |import Data.Int ; import Prelude hiding (not, and, or, mod)
+import-stdlib       |import Reuse hiding (_int32_add, _int32_sub, _int32_mul)
+pervasives-filename |Pervasives.hs

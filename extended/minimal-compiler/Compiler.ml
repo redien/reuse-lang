@@ -1,6 +1,5 @@
 
 open ReuseMinimal;;
-open Pervasives;;
 open StdinWrapper;;
 
 let stdin_list = read_stdin ();;

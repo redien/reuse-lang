@@ -6,8 +6,6 @@ project_root=$script_path/..
 
 build_dir=$($project_root/dev-env/builddir.sh string-gen)
 
-$project_root/standard-library/build.sh
-
 $project_root/reusec --language ocaml\
                      --output $build_dir/StringGen.ml\
                      $script_path/string-gen.reuse
@@ -17,7 +15,6 @@ cat << END_OF_SOURCE >> $build_dir/StringGen.ml
 let getenv name = try (Sys.getenv name) with Not_found -> ""
 let performance = getenv "REUSE_TIME" = "true";;
 
-open Pervasives;;
 open StdinWrapper;;
 
 let stdin_list = read_stdin ();;
@@ -36,14 +33,10 @@ else
 
 END_OF_SOURCE
 
-cp $project_root/bootstrap/Reuse.ml $build_dir
-cp $project_root/bootstrap/pervasives.ml $build_dir
-cp $project_root/bootstrap/StdinWrapper.ml $build_dir
+cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $build_dir
 
 ocamlopt -O3 unix.cmxa \
          -I "$build_dir" \
-         "$build_dir/Reuse.ml" \
-         "$build_dir/Pervasives.ml" \
          "$build_dir/StdinWrapper.ml" \
          "$build_dir/StringGen.ml" \
          -o "$build_dir/string-gen"

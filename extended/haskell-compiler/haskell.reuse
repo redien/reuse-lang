@@ -264,17 +264,13 @@
                  (data-space)
                  (data-where))))
 
-(def generate-source (standard-library? definitions module-name)
-     ((pipe (list-filter definition-in-current-module?)
-            local-transforms
+(def generate-source (definitions module-name)
+     ((pipe local-transforms
             (list-map (result-map translate-definition))
             (list-cons (Result (data-prelude)))
             result-concat
             (result-map (list-concat (list (data-language-exts)
                                            (translate-module-declaration module-name)
-                                           (data-imports)
-                                           (match standard-library?
-                                                  True   (data-import-stdlib)
-                                                  False  (string-empty)))))
+                                           (data-imports))))
             (result-map (string-join (string-of-char 10))))
          definitions))

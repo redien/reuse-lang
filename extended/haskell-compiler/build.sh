@@ -5,6 +5,7 @@ script_path=$(dirname "$0")
 project_root=$script_path/../..
 build_dir=$($project_root/dev-env/builddir.sh haskell-compiler)
 
+# Build compiler
 $project_root/reusec --language ocaml\
                      --output $build_dir/ReuseCompiler.ml\
                      $project_root/sexp-parser/parser.reuse\
@@ -25,14 +26,15 @@ $project_root/reusec --language ocaml\
                      $script_path/../compiler.reuse\
                      $script_path/../../cli/cli.reuse
 
-cp $project_root/bootstrap/Reuse.ml $build_dir/Reuse.ml
-cp $project_root/extended/ocaml-compiler/Pervasives.ml $build_dir/Pervasives.ml
 cp $project_root/cli/Cli.ml $build_dir/Cli.ml
 
 ocamlopt -O3 unix.cmxa \
         -I "$build_dir" \
-        "$build_dir/Reuse.ml" \
-        "$build_dir/Pervasives.ml" \
         "$build_dir/ReuseCompiler.ml" \
         "$build_dir/Cli.ml" \
         -o "$build_dir/compiler-haskell"
+
+# Copy run-time dependencies
+[ -d $build_dir/data ] || mkdir $build_dir/data
+cp $script_path/Pervasives.hs $build_dir/data/Pervasives.hs
+cp $project_root/standard-library/*.reuse $build_dir/data
