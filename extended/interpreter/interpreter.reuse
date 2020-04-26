@@ -162,7 +162,8 @@
                       (Pair (data-plus)             (ValueIntrinsic (eval-int32-operator +)))
                       (Pair (data-minus)            (ValueIntrinsic (eval-int32-operator -)))
                       (Pair (data-slash)            (ValueIntrinsic (eval-int32-operator /)))
-                      (Pair (data-multiply)         (ValueIntrinsic (eval-int32-operator *))))
+                      (Pair (data-multiply)         (ValueIntrinsic (eval-int32-operator *)))
+                      (Pair (data-ampersand)        (ValueIntrinsic (eval-int32-operator &))))
                 scope))
 
 (def definitions-to-scope (definitions)

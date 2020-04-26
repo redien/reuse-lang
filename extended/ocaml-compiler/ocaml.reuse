@@ -53,6 +53,7 @@
         (Pair (data-percent) (data-int32-modulus))
         (Pair (data-minus) (data-int32-minus))
         (Pair (data-multiply) (data-int32-multiply))
+        (Pair (data-ampersand) (data-int32-and))
      )))
 
 (def translate-identifier (name)

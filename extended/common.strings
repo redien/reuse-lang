@@ -4,6 +4,7 @@ multiply                  |*
 minus                     |-
 slash                     |/
 percent                   |%
+ampersand                 |&
 pipe                      |pipe
 list                      |list
 int32-less-than           |int32-less-than

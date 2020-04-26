@@ -35,6 +35,10 @@ Remainder
 > (% 2 -3)
 = 2
 
+Bitwise and
+> (& 7 14)
+= 6
+
 Comparison
 > (int32-less-than 3 4 1 0)
 = 1
