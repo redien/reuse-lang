@@ -64,10 +64,3 @@
 
 (def validate-reserved-identifiers (definitions)
      (list-map (result-flatmap (over-definition-expressions (over-identifiers validate-identifier))) definitions))
-
-(def definition-in-current-module? (definition)
-     (match definition
-            (Result (FunctionDefinition ModuleSelf _ __ ___ ____))  True
-            (Result (TypeDefinition ModuleSelf _ __ ___ ____))      True
-            (Result _)                                              False
-            _                                                       True))
