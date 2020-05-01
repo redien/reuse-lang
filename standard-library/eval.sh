@@ -21,6 +21,8 @@ $project_root/reusec --language ocaml\
                      $script_path/result.reuse\
                      $script_path/state.reuse\
                      $script_path/dictionary.reuse\
+                     $script_path/array.reuse\
+                     $project_root/bootstrap/data/pervasives.ml\
                      $build_dir/test.reuse
 
 $project_root/extended/ocaml-compiler/compile-stdin-test.sh $build_dir test.ml test.out

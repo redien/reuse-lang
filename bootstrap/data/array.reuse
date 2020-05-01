@@ -1,0 +1,33 @@
+
+(typ (array value) (Array (dictionary value)))
+
+(def array-empty () (Array (dictionary-empty)))
+
+(def array-split-index' (index)
+     (string-append (& index 255) (string-append (& index 65280) (string-append (& index 16711680) (string-append (& index 4278190080) (string-empty))))))
+
+(def array-set (index new-value array)
+     (match array
+            (Array dictionary)
+                (Array (dictionary-set (array-split-index' index) new-value dictionary))))
+
+(def array-get (index array)
+     (match array
+            (Array dictionary)
+                (dictionary-get (array-split-index' index) dictionary)))
+
+(def array-entries (array)
+     (match array
+            (Array dictionary)
+                (dictionary-entries dictionary)))
+
+(def array-of (entries)
+     (Array (dictionary-of (list-map (pair-map-left array-split-index') entries))))
+
+(def array-singleton (index value)
+     (Array (dictionary-singleton (array-split-index' index) value)))
+
+(def array-get-or (index default array)
+     (match array
+            (Array dictionary)
+                (dictionary-get-or (array-split-index' index) default dictionary)))

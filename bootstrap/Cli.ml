@@ -17,6 +17,7 @@ let stdlib_paths = List.map (fun name -> data_path ^ name) [
     "result.reuse";
     "state.reuse";
     "dictionary.reuse";
+    "array.reuse";
     reuse_string_to_ml (data_45pervasives_45filename ());
 ] |> ml_string_list_to_reuse;;
 let stdlib_module = CModulePath (ml_string_to_reuse "stdlib");;
