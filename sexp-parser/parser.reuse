@@ -15,7 +15,7 @@
 
 (typ range               (Range int32 int32))
 
-(typ sexp                (Symbol  string            range)
+(typ sexp                (Symbol  int32  string     range)
                          (Integer int32             range)
                          (List    (list sexp)       range))
 
@@ -25,63 +25,71 @@
 (def symbol-range (start end)
      (Range (indexed-iterator-index start) (indexed-iterator-index end)))
 
-(def parse-symbol (iterator end next)
+(def intern-string (iterator next-iterator name symbols next)
+     (match (dictionary-get name symbols)
+          (Some (Pair id name))
+               (next next-iterator symbols (Symbol id name (symbol-range iterator next-iterator)))
+          None
+               (match (indexed-iterator-index iterator)
+                      id  (next next-iterator (dictionary-set name (Pair id name) symbols) (Symbol id name (symbol-range iterator next-iterator))))))
+
+(def parse-symbol (iterator symbols next end)
      (match (string-collect-from-indexed-iterator atom-character? iterator)
             (Pair next-iterator name)
                     (match (string-to-int32 name)
-                           (Some integer)   (next next-iterator (Integer integer (symbol-range iterator next-iterator)))
+                           (Some integer)   (next next-iterator symbols (Integer integer (symbol-range iterator next-iterator)))
                            None
                     (match (string-empty? name)
-                           False  (next next-iterator (Symbol name (symbol-range iterator next-iterator)))
+                           False  (intern-string iterator next-iterator name symbols next)
                            True   (end iterator)))))
 
 (def list-range (start end)
      (Range (- (indexed-iterator-index start) 1) (indexed-iterator-index end)))
 
-(def parse-list (iterator parse-sexps error next)
-     (parse-sexps iterator Empty error
-                  (fn (next-iterator expressions)
-                      (next next-iterator (List expressions (list-range iterator next-iterator))))))
+(def parse-list (iterator parse-sexps symbols error next)
+     (parse-sexps iterator symbols Empty error
+                  (fn (next-iterator symbols expressions)
+                      (next next-iterator symbols (List expressions (list-range iterator next-iterator))))))
 
-(def parse-expression (depth iterator parse-sexps error end next)
+(def parse-expression (depth iterator parse-sexps symbols error next end)
      (match (indexed-iterator-next iterator)
             (Pair None _)
                 (match depth
                        0  (end iterator)
                        _  (error ParseErrorTooFewClosingBrackets))
             (Pair (Some 40) next-iterator)
-                (parse-list next-iterator (parse-sexps (+ depth 1)) error next)
+                (parse-list next-iterator (parse-sexps (+ depth 1)) symbols error next)
             (Pair (Some 41) next-iterator)
                 (match depth
                        0  (error ParseErrorTooManyClosingBrackets)
                        _  (end next-iterator))
             (Pair (Some x) next-iterator)
                 (match (whitespace? x)
-                       True   (parse-expression depth next-iterator parse-sexps error end next)
-                       False  (parse-symbol iterator end next))))
+                       True   (parse-expression depth next-iterator parse-sexps symbols error next end)
+                       False  (parse-symbol iterator symbols next end))))
 
-(def parse-sexps (depth iterator expressions error end)
-     (parse-expression depth iterator parse-sexps error
+(def parse-sexps (depth iterator symbols expressions error end)
+     (parse-expression depth iterator parse-sexps symbols error
+                       (fn (iterator symbols expression)
+                           (parse-sexps depth iterator symbols (Cons expression expressions) error end))
                        (fn (iterator)
-                           (end iterator (list-reverse expressions)))
-                       (fn (iterator result)
-                           (parse-sexps depth iterator (Cons result expressions) error end))))
+                           (end iterator symbols (list-reverse expressions)))))
 
 (def parse (iterator)
-     (parse-sexps 0 iterator Empty
+     (parse-sexps 0 iterator (dictionary-empty) Empty
                   (fn (error)
                       (Error error))
-                  (fn (_ expressions)
-                      (Result expressions))))
+                  (fn (_ symbols expressions)
+                      (Result (Pair symbols expressions)))))
 
 (def wrap-in-brackets (string)
      (string-concat (string-of-char 40) (string-concat string (string-of-char 41))))
 
-(def stringify-sexp (stringify expression)
+(def stringify-sexp (stringify symbols expression)
      (match expression
-            (Symbol name _)      name
+            (Symbol id name _)   name
             (Integer integer _)  (string-from-int32 integer)
-            (List expressions _) (wrap-in-brackets (stringify expressions))))
+            (List expressions _) (wrap-in-brackets (stringify symbols expressions))))
 
-(def stringify (expressions)
-     (string-join (string-of-char 32) (list-map (stringify-sexp stringify) expressions)))
+(def stringify (symbols expressions)
+     (string-join (string-of-char 32) (list-map (stringify-sexp stringify symbols) expressions)))
