@@ -1,4 +1,16 @@
 
+(def sym-def ()   -1)
+(def sym-typ ()   -2)
+(def sym-fn ()    -3)
+(def sym-match () -4)
+
+(def keywords ()
+     (dictionary-of (list
+          (Pair (data-def)   (Pair (sym-def) (data-def)))
+          (Pair (data-typ)   (Pair (sym-typ) (data-typ)))
+          (Pair (data-fn)    (Pair (sym-fn) (data-fn)))
+          (Pair (data-match) (Pair (sym-match) (data-match))))))
+
 (typ error  (MalformedDefinitionError range)
             (MalformedTypeDefinitionError range)
             (MalformedFunctionDefinitionError range)
@@ -13,7 +25,7 @@
 
 (def symbol-to-string (symbol)
      (match symbol
-            (Symbol name _)
+            (Symbol _ name __)
                 (Result name)
             (Integer _ range)
                 (Error  (MalformedSymbolError range))
@@ -40,9 +52,9 @@
 
 (def sexp-to-type (sexp-to-types type)
      (match type
-            (List (Cons (Symbol name _) parameters) range)
+            (List (Cons (Symbol _ name __) parameters) range)
                 ((sexp-to-complex-or-function-type name) sexp-to-types (sexp-to-type sexp-to-types) name parameters range)
-            (Symbol name range)
+            (Symbol _ name range)
                 (Result (SimpleType name range))
             (Integer _ range)
                 (Error (MalformedTypeError range))
@@ -58,9 +70,9 @@
 
 (def sexp-to-constructor-definition (constructor)
      (match constructor
-            (Symbol name range)
+            (Symbol _ name range)
                 (Result (SimpleConstructor name range))
-            (List (Cons (Symbol name _) types) range)
+            (List (Cons (Symbol _ name __) types) range)
                 (sexp-to-complex-constructor name types range)
             (Integer _ range)
                 (Error (MalformedConstructorError range))
@@ -72,9 +84,9 @@
 
 (def sexp-to-type-parameter (sexp)
      (match sexp
-            (List (Cons _ (Cons (Symbol name range) Empty)) __)
+            (List (Cons _ (Cons (Symbol __ name range) Empty)) ___)
                 (Result (ExistentialParameter name range))
-            (Symbol name range)
+            (Symbol _ name range)
                 (Result (UniversalParameter name range))
             (Integer _ range)
                 (Error (MalformedDefinitionError range))
@@ -83,9 +95,9 @@
 
 (def sexp-to-type-parameters (type-name)
      (match type-name
-            (List (Cons (Symbol _ __) parameters) ___)
+            (List (Cons (Symbol _ __ ___) parameters) ____)
                 (result-concat (list-map sexp-to-type-parameter parameters))
-            (Symbol _ __)
+            (Symbol _ __ ___)
                 (Result Empty)
             (Integer _ range)
                 (Error (MalformedTypeError range))
@@ -94,9 +106,9 @@
 
 (def sexp-to-type-name (type-name)
      (match type-name
-            (List (Cons (Symbol name _) __) ___)
+            (List (Cons (Symbol _ name __) ___) ____)
                 (Result name)
-            (Symbol name _)
+            (Symbol _ name __)
                 (Result name)
             (Integer _ range)
                 (Error (MalformedTypeError range))
@@ -147,7 +159,7 @@
                 (Error (MalformedExpressionError range))
             (Integer integer range)
                 (Result (IntegerPattern integer range))
-            (Symbol name range)
+            (Symbol _ name range)
                 (to-constructor-or-capture definitions range name)))
 
 (def sexp-to-match-pair (sexp-to-expression definitions pair)
@@ -193,18 +205,18 @@
 
 (def sexp-to-list-expression (sexp-to-expression definitions expressions range)
      (match expressions
-            (Cons (Symbol symbol _) rest) 
-                  (match (string-equal? symbol (data-fn))
+            (Cons (Symbol id symbol-name __) rest) 
+                  (match (= id (sym-fn))
                          True
                              (sexp-to-lambda (sexp-to-expression definitions) rest range)
                          False
-                  (match (string-equal? symbol (data-match))
+                  (match (= id (sym-match))
                          True
                              (sexp-to-match sexp-to-expression definitions range rest)
                          False
-                  (match (parser-context-is-name-constructor? symbol definitions)
+                  (match (parser-context-is-name-constructor? symbol-name definitions)
                          True
-                             (sexp-to-constructor (sexp-to-expression definitions) range symbol rest)
+                             (sexp-to-constructor (sexp-to-expression definitions) range symbol-name rest)
                          False
                              (sexp-to-function-application (sexp-to-expression definitions) range expressions))))
             _
@@ -214,7 +226,7 @@
      (match sexp
             (Integer integer range)
                 (Result (IntegerConstant integer range))
-            (Symbol symbol-name range)
+            (Symbol _ symbol-name range)
                 (match (parser-context-is-name-constructor? symbol-name definitions)
                        True   (Result (Constructor symbol-name Empty range))
                        False  (Result (Identifier symbol-name range)))
@@ -231,38 +243,38 @@
      (result-return (constructor name arguments expression range)))))))))))
 
 (def sexp-to-definition' (definitions name rest range kind)
-     (match (string-equal? kind (data-typ))
+     (match (= kind (sym-typ))
             True   (sexp-to-type-definition name rest range)
             False
-     (match (string-equal? kind (data-def))
+     (match (= kind (sym-def))
             True   (sexp-to-function-definition definitions name rest range
                                                 (fn (name arguments expression range)
                                                     (FunctionDefinition ModuleSelf name arguments expression range)))
             False  (Error (MalformedDefinitionError range)))))
 
 (def specific-malformed-definition-error (kind range)
-     (match (string-equal? kind (data-typ))
+     (match (= kind (sym-typ))
             True   (Error (MalformedTypeDefinitionError range))
             False
-     (match (string-equal? kind (data-def))
+     (match (= kind (sym-def))
             True   (Error (MalformedFunctionDefinitionError range))
             False  (Error (MalformedDefinitionError range)))))
 
 (def sexp-to-definition (expression definitions)
      (match expression
-            (List (Cons (Symbol kind _) Empty) range)
+            (List (Cons (Symbol kind _ __) Empty) range)
                 (specific-malformed-definition-error kind range)
-            (List (Cons (Symbol kind _) (Cons __ Empty)) range)
+            (List (Cons (Symbol kind _ __) (Cons ___ Empty)) range)
                 (specific-malformed-definition-error kind range)
-            (List (Cons kind (Cons name rest)) range)
-                (result-flatmap (sexp-to-definition' definitions name rest range) (symbol-to-string kind))
+            (List (Cons (Symbol kind _ __) (Cons name rest)) range)
+                (sexp-to-definition' definitions name rest range kind)
             (List (Cons (List _ range) Empty) __)
                 (Error (MalformedDefinitionError range))
             (List _ range)
                 (Error (MalformedDefinitionError range))
             (Integer _ range)
                 (Error (MalformedDefinitionError range))
-            (Symbol _ range)
+            (Symbol _ __ range)
                 (Error (MalformedDefinitionError range))))
 
 (def sexp-error-to-ast-error (error)
@@ -276,10 +288,10 @@
                  context
                  expressions))
 
-(def sexps-to-definitions (expressions context)
-     (match expressions
-            (Result expressions)  (sexps-to-definitions' expressions context)
-            (Error error)         (parser-context-add (Error (sexp-error-to-ast-error error)) context)))
+(def sexps-to-definitions (sexp-result context)
+     (match sexp-result
+            (Result (Pair symbols expressions))  (sexps-to-definitions' expressions context)
+            (Error error)                        (parser-context-add (Error (sexp-error-to-ast-error error)) context)))
 
 
 
@@ -288,14 +300,14 @@
 (def type-to-sexp (types-to-sexp type)
      (match type
             (SimpleType name range)
-                (Symbol name range)
+                (Symbol 0 name range)
             (FunctionType arg-types return-type range)
-                (List (list (Symbol (data-fn) range)
+                (List (list (Symbol 0 (data-fn) range)
                             (List (types-to-sexp arg-types) range)
                             (type-to-sexp types-to-sexp return-type))
                       range)
             (ComplexType name types range)
-                (List (Cons (Symbol name range) (types-to-sexp types)) range)))
+                (List (Cons (Symbol 0 name range) (types-to-sexp types)) range)))
 
 (def types-to-sexp (types)
      (list-map (type-to-sexp types-to-sexp) types))
@@ -303,9 +315,9 @@
 (def constructor-to-sexp (constructor)
      (match constructor
             (SimpleConstructor name range)
-                (Symbol name range)
+                (Symbol 0 name range)
             (ComplexConstructor name types range)
-                (List (Cons (Symbol name range) (types-to-sexp types)) range)))
+                (List (Cons (Symbol 0 name range) (types-to-sexp types)) range)))
 
 (def constructors-to-sexp (constructors)
      (list-map constructor-to-sexp constructors))
@@ -313,38 +325,38 @@
 (def type-parameter-to-sexp (parameter)
      (match parameter
             (ExistentialParameter name range)
-                (List (list (Symbol (data-exists) range) (Symbol name range)) range)
+                (List (list (Symbol 0 (data-exists) range) (Symbol 0 name range)) range)
             (UniversalParameter name range)
-                (Symbol name range)))
+                (Symbol 0 name range)))
 
 (def type-name-to-sexp (range name parameters)
      (match parameters
             Empty
-                (Symbol name range) 
+                (Symbol 0 name range) 
             _
-                (List (Cons (Symbol name range)
+                (List (Cons (Symbol 0 name range)
                             (list-map type-parameter-to-sexp parameters))
                       range)))
 
 (def type-definition-to-sexp (name parameters constructors range)
-     (List (list-concat (list (Symbol (data-typ) range)
+     (List (list-concat (list (Symbol 0 (data-typ) range)
                               (type-name-to-sexp range name parameters))
                         (constructors-to-sexp constructors))
            range))
 
 (def function-arguments-to-sexp (arguments range)
-     (List (list-map (fn (name) (Symbol name range)) arguments) range))
+     (List (list-map (fn (name) (Symbol 0 name range)) arguments) range))
 
 (def pattern-to-sexp (pattern)
      (match pattern
             (ConstructorPattern name Empty range)
-                (Symbol name range)
+                (Symbol 0 name range)
             (ConstructorPattern name patterns range)
-                (List (Cons (Symbol name range) (list-map pattern-to-sexp patterns)) range)
+                (List (Cons (Symbol 0 name range) (list-map pattern-to-sexp patterns)) range)
             (IntegerPattern value range)
                 (Integer value range)
             (Capture name range)
-                (Symbol name range)))
+                (Symbol 0 name range)))
 
 (def match-pair-to-sexp (expression-to-sexp pair)
      (match pair
@@ -356,28 +368,28 @@
             (IntegerConstant integer range)
                 (Integer integer range)
             (Identifier string range)
-                (Symbol string range)
+                (Symbol 0 string range)
             (Lambda arguments expression range)
-                (List (list (Symbol (data-fn) range)
+                (List (list (Symbol 0 (data-fn) range)
                             (function-arguments-to-sexp arguments range)
                             (expression-to-sexp expression))
                       range)
             (Match expression pairs range)
-                (List (Cons (Symbol (data-match) range)
+                (List (Cons (Symbol 0 (data-match) range)
                       (Cons (expression-to-sexp expression)
                             (list-flatmap (match-pair-to-sexp expression-to-sexp) pairs))) range)
             (Constructor name expressions range)
                 (match expressions
                        Empty
-                            (Symbol name range)
+                            (Symbol 0 name range)
                        _
-                            (List (Cons (Symbol name range) (list-map expression-to-sexp expressions)) range))
+                            (List (Cons (Symbol 0 name range) (list-map expression-to-sexp expressions)) range))
             (FunctionApplication expressions range)
                 (List (list-map expression-to-sexp expressions) range)))
 
 (def function-definition-to-sexp (name arguments expression range kind)
-    (List (list (Symbol kind range)
-                (Symbol name range)
+    (List (list (Symbol 0 kind range)
+                (Symbol 0 name range)
                 (function-arguments-to-sexp arguments range)
                 (expression-to-sexp expression))
           range))
