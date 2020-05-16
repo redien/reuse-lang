@@ -12,13 +12,13 @@
 (def parse-reuse-file (file context)
      (match file
             (SourceFile module path content)
-                (sexps-to-definitions (parse content)
+                (sexps-to-definitions (parse (keywords) content)
                                       (parser-context-with-module module context))))
 
 (def parse-strings-file (file context)
      (match file
             (SourceFile module path content)
-                (sexps-to-definitions (parse (transform-strings path content))
+                (sexps-to-definitions (parse (keywords) (transform-strings path content))
                                       (parser-context-with-module module context))))
 
 (def translate-source-file (file context)
