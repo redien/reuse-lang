@@ -284,7 +284,7 @@
 
 (def sexps-to-definitions' (expressions context)
      (list-foldl (fn (expression context)
-                     (parser-context-add (sexp-to-definition expression context) context))
+                     (parser-context-add (parser-run (sexp-to-definition expression context)) context))
                  context
                  expressions))
 

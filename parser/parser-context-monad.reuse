@@ -1,4 +1,7 @@
 
+(def parser-run (parser)
+     parser)
+
 (def parser-return (value)
      (result-return value))
 
