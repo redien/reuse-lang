@@ -1,9 +1,4 @@
 
-(def result-prod (return result)
-     (match result
-            (Result m)     m
-            (Error error)  (return (Error error))))
-
 (def parser-run (parser)
      (match (state-run Empty parser)
             (Pair _ result)  result))

@@ -7,6 +7,11 @@
 (def result-error (error)
      (Error error))
 
+(def result-prod (return result)
+     (match result
+            (Result m)     m
+            (Error error)  (return (Error error))))
+
 (def result-bimap (f g result)
      (match result
             (Result x)     (Result (f x))
