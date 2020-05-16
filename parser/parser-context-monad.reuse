@@ -8,9 +8,6 @@
 (def parser-bind (parser f)
      (result-bind parser f))
 
-(def parser-concat (list)
-     (result-concat list))
-
 (def parser-of-maybe (error maybe)
      (result-of-maybe error maybe))
 
@@ -24,4 +21,5 @@
                      (parser-bind a (fn (a')
                      (parser-bind b (fn (b')
                      (parser-return (Cons a' b')))))))
-                 (parser-return Empty)))
+                 (parser-return Empty)
+                 list))
