@@ -1,15 +1,25 @@
 
+(def result-prod (return result)
+     (match result
+            (Result m)     m
+            (Error error)  (return (Error error))))
+
 (def parser-run (parser)
-     parser)
+     (match (state-run Empty parser)
+            (Pair _ result)  result))
 
 (def parser-return (value)
-     (result-return value))
+     (state-return (result-return value)))
 
 (def parser-error (error)
-     (result-error error))
+     (state-return (result-error error)))
 
 (def parser-bind (parser f)
-     (result-bind parser f))
+     (state-bind parser (fn (result)
+     (result-prod state-return
+     (result-bind result (fn (value)
+     (result-return (f value))))))))
+
 
 (def parser-sequence (list)
      (list-foldr (fn (a b)
