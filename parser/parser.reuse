@@ -186,8 +186,8 @@
                                (Some Empty)  None
                                other         other))
             (parser-of-maybe (MalformedMatchExpressionError range))
-            (parser-flatmap  (pipe (list-map (sexp-to-match-pair sexp-to-expression definitions))
-                                   parser-sequence)))
+            ((flip parser-bind)  (pipe (list-map (sexp-to-match-pair sexp-to-expression definitions))
+                                       parser-sequence)))
         pairs))
 
 (def sexp-to-match (sexp-to-expression definitions range rest)

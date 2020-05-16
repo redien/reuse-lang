@@ -13,9 +13,6 @@
 
 
 
-(def parser-flatmap (f parser)
-     (parser-bind parser f))
-
 (def parser-sequence (list)
      (list-foldr (fn (a b)
                      (parser-bind a (fn (a')
