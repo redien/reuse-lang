@@ -22,7 +22,7 @@
 
 (def parser-context-add-constructors (definition dictionary)
      (match definition
-            (Result (TypeDefinition _ __ ___ constructors ____))
+            (TypeDefinition _ __ ___ constructors ____)
                 (list-foldl (fn (constructor dictionary)
                                 (dictionary-set (constructor-name constructor) definition dictionary))
                             dictionary
@@ -34,7 +34,7 @@
      (match context
             (ParserContext module definitions constructors)
                 (ParserContext module
-                               (Cons (result-map (definition-with-module module) definition) definitions)
+                               (Cons (definition-with-module module definition) definitions)
                                (parser-context-add-constructors definition constructors))))
 
 (def parser-context-is-name-constructor? (name context)

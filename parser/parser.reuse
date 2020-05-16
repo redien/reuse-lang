@@ -275,21 +275,20 @@
             (Symbol _ __ range)
                 (parser-error (MalformedDefinitionError range))))
 
+(def parse-definition! (expression)
+     (parser-bind (sexp-to-definition expression) (fn (definition)
+     (parser-bind (parser-add-definition! definition) (fn (_)
+     (parser-return definition))))))
+
 (def sexp-error-to-ast-error (error)
      (match error
             ParseErrorTooFewClosingBrackets   MalformedSexpTooFewClosingBrackets
             ParseErrorTooManyClosingBrackets  MalformedSexpTooManyClosingBrackets))
 
-(def sexps-to-definitions' (expressions context)
-     (list-foldl (fn (expression context)
-                     (parser-context-add (parser-run context (sexp-to-definition expression)) context))
-                 context
-                 expressions))
-
-(def sexps-to-definitions (sexp-result context)
+(def sexps-to-definitions (sexp-result)
      (match sexp-result
-            (Result (Pair symbols expressions))  (sexps-to-definitions' expressions context)
-            (Error error)                        (parser-context-add (parser-run context (parser-error (sexp-error-to-ast-error error))) context)))
+            (Result (Pair symbols expressions))  (parser-sequence (list-map parse-definition! expressions))
+            (Error error)                        (parser-error (sexp-error-to-ast-error error))))
 
 
 

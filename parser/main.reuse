@@ -15,9 +15,8 @@
 
 (def reuse-main (stdin)
      ((pipe (parse (keywords))
-            ((flip sexps-to-definitions) (parser-context-new))
-            parser-context-definitions
-            result-concat
+            sexps-to-definitions
+            parser-run
             (result-either (. stringify definitions-to-sexps)
                            stringify-error))
           stdin))

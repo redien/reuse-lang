@@ -1,6 +1,6 @@
 
-(def parser-run (context parser)
-     (match (state-run context parser)
+(def parser-run (parser)
+     (match (state-run (parser-context-new) parser)
             (Pair _ result)  result))
 
 (def parser-return (value)
@@ -18,6 +18,10 @@
 (def parser-constructor? (name)
      (state-bind (state-get) (fn (context)
      (parser-return (parser-context-is-name-constructor? name context)))))
+
+(def parser-add-definition! (definition)
+     (state-bind (state-modify (parser-context-add definition)) (fn (_)
+     (parser-return definition))))
 
 
 (def parser-sequence (list)
