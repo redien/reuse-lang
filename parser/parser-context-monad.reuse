@@ -1,0 +1,27 @@
+
+(def parser-return (value)
+     (result-return value))
+
+(def parser-error (error)
+     (result-error error))
+
+(def parser-bind (parser f)
+     (result-bind parser f))
+
+(def parser-concat (list)
+     (result-concat list))
+
+(def parser-of-maybe (error maybe)
+     (result-of-maybe error maybe))
+
+
+
+(def parser-flatmap (f parser)
+     (parser-bind parser f))
+
+(def parser-sequence (list)
+     (list-foldr (fn (a b)
+                     (parser-bind a (fn (a')
+                     (parser-bind b (fn (b')
+                     (parser-return (Cons a' b')))))))
+                 (parser-return Empty)))

@@ -26,24 +26,24 @@
 (def symbol-to-string (symbol)
      (match symbol
             (Symbol _ name __)
-                (result-return name)
+                (parser-return name)
             (Integer _ range)
-                (result-error  (MalformedSymbolError range))
+                (parser-error  (MalformedSymbolError range))
             (List _ range)
-                (result-error  (MalformedSymbolError range))))
+                (parser-error  (MalformedSymbolError range))))
 
 (def sexp-to-complex-type (sexp-to-types _ name parameters range)
-     (result-bind   (sexp-to-types parameters)  (fn (sub-types)
-     (result-return (ComplexType name sub-types range)))))
+     (parser-bind   (sexp-to-types parameters)  (fn (sub-types)
+     (parser-return (ComplexType name sub-types range)))))
 
 (def sexp-to-function-type (sexp-to-types sexp-to-type name parameters range)
      (match parameters
             (Cons (List arg-types _) (Cons return-type Empty))
-                (result-bind   (sexp-to-types arg-types)   (fn (arg-types)
-                (result-bind   (sexp-to-type return-type)  (fn (return-type)
-                (result-return (FunctionType arg-types return-type range))))))
+                (parser-bind   (sexp-to-types arg-types)   (fn (arg-types)
+                (parser-bind   (sexp-to-type return-type)  (fn (return-type)
+                (parser-return (FunctionType arg-types return-type range))))))
             _
-                (result-error (MalformedTypeError range))))
+                (parser-error (MalformedTypeError range))))
 
 (def sexp-to-complex-or-function-type (name)
      (match (string-equal? name (data-fn))
@@ -55,119 +55,119 @@
             (List (Cons (Symbol _ name __) parameters) range)
                 ((sexp-to-complex-or-function-type name) sexp-to-types (sexp-to-type sexp-to-types) name parameters range)
             (Symbol _ name range)
-                (result-return (SimpleType name range))
+                (parser-return (SimpleType name range))
             (Integer _ range)
-                (result-error (MalformedTypeError range))
+                (parser-error (MalformedTypeError range))
             (List _ range)
-                (result-error (MalformedTypeError range))))
+                (parser-error (MalformedTypeError range))))
 
 (def sexp-to-types (types)
-     (result-concat (list-map (sexp-to-type sexp-to-types) types)))
+     (parser-concat (list-map (sexp-to-type sexp-to-types) types)))
 
 (def sexp-to-complex-constructor (name types range)
-     (result-bind   (sexp-to-types types)  (fn (types)
-     (result-return (ComplexConstructor name types range)))))
+     (parser-bind   (sexp-to-types types)  (fn (types)
+     (parser-return (ComplexConstructor name types range)))))
 
 (def sexp-to-constructor-definition (constructor)
      (match constructor
             (Symbol _ name range)
-                (result-return (SimpleConstructor name range))
+                (parser-return (SimpleConstructor name range))
             (List (Cons (Symbol _ name __) types) range)
                 (sexp-to-complex-constructor name types range)
             (Integer _ range)
-                (result-error (MalformedConstructorError range))
+                (parser-error (MalformedConstructorError range))
             (List _ range)
-                (result-error (MalformedConstructorError range))))
+                (parser-error (MalformedConstructorError range))))
 
 (def sexp-to-constructor-definitions (constructors)
-     (result-concat (list-map sexp-to-constructor-definition constructors)))
+     (parser-concat (list-map sexp-to-constructor-definition constructors)))
 
 (def sexp-to-type-parameter (sexp)
      (match sexp
             (List (Cons _ (Cons (Symbol __ name range) Empty)) ___)
-                (result-return (ExistentialParameter name range))
+                (parser-return (ExistentialParameter name range))
             (Symbol _ name range)
-                (result-return (UniversalParameter name range))
+                (parser-return (UniversalParameter name range))
             (Integer _ range)
-                (result-error (MalformedDefinitionError range))
+                (parser-error (MalformedDefinitionError range))
             (List _ range)
-                (result-error (MalformedDefinitionError range))))
+                (parser-error (MalformedDefinitionError range))))
 
 (def sexp-to-type-parameters (type-name)
      (match type-name
             (List (Cons (Symbol _ __ ___) parameters) ____)
-                (result-concat (list-map sexp-to-type-parameter parameters))
+                (parser-concat (list-map sexp-to-type-parameter parameters))
             (Symbol _ __ ___)
-                (result-return Empty)
+                (parser-return Empty)
             (Integer _ range)
-                (result-error (MalformedTypeError range))
+                (parser-error (MalformedTypeError range))
             (List _ range)
-                (result-error (MalformedTypeError range))))
+                (parser-error (MalformedTypeError range))))
 
 (def sexp-to-type-name (type-name)
      (match type-name
             (List (Cons (Symbol _ name __) ___) ____)
-                (result-return name)
+                (parser-return name)
             (Symbol _ name __)
-                (result-return name)
+                (parser-return name)
             (Integer _ range)
-                (result-error (MalformedTypeError range))
+                (parser-error (MalformedTypeError range))
             (List _ range)
-                (result-error (MalformedTypeError range))))
+                (parser-error (MalformedTypeError range))))
 
 (def sexp-to-type-definition (type-name constructors range)
-     (result-bind   (sexp-to-type-name type-name)                   (fn (name)
-     (result-bind   (sexp-to-type-parameters type-name)             (fn (parameters)
-     (result-bind   (sexp-to-constructor-definitions constructors)  (fn (constructors)
-     (result-return (TypeDefinition ModuleSelf name parameters constructors range)))))))))
+     (parser-bind   (sexp-to-type-name type-name)                   (fn (name)
+     (parser-bind   (sexp-to-type-parameters type-name)             (fn (parameters)
+     (parser-bind   (sexp-to-constructor-definitions constructors)  (fn (constructors)
+     (parser-return (TypeDefinition ModuleSelf name parameters constructors range)))))))))
 
 (def sexp-to-arguments (arguments)
-     (result-concat (list-map symbol-to-string arguments)))
+     (parser-concat (list-map symbol-to-string arguments)))
 
 (def sexp-to-function-body (range rest)
      (match rest
             (Cons (List arguments _) (Cons expression Empty))
-                (result-return (Pair arguments expression))
+                (parser-return (Pair arguments expression))
             _
-                (result-error (MalformedFunctionDefinitionError range))))
+                (parser-error (MalformedFunctionDefinitionError range))))
  
 (def sexp-to-lambda (sexp-to-expression rest range)
-     (result-bind   (sexp-to-function-body range rest)      (fn (body)
-     (result-bind   (sexp-to-arguments (pair-left body))    (fn (arguments)
-     (result-bind   (sexp-to-expression (pair-right body))  (fn (expression)
-     (result-return (Lambda arguments expression range)))))))))
+     (parser-bind   (sexp-to-function-body range rest)      (fn (body)
+     (parser-bind   (sexp-to-arguments (pair-left body))    (fn (arguments)
+     (parser-bind   (sexp-to-expression (pair-right body))  (fn (expression)
+     (parser-return (Lambda arguments expression range)))))))))
 
 (def sexp-to-function-application (sexp-to-expression range expressions)
      ((pipe (list-map sexp-to-expression) 
-            result-concat
-            (result-map (fn (expressions)
-                            (FunctionApplication expressions range))))
+            parser-concat
+            ((flip parser-bind) (fn (expressions)
+                                    (parser-return (FunctionApplication expressions range)))))
          expressions))
 
 (def to-constructor-or-capture (definitions range name)
      (match (parser-context-is-name-constructor? name definitions)
-            True  (result-return (ConstructorPattern name Empty range))
-            False (result-return (Capture name range))))
+            True  (parser-return (ConstructorPattern name Empty range))
+            False (parser-return (Capture name range))))
 
 (def sexp-to-pattern (definitions sexp)
      (match sexp
             (List (Cons name rest) range)
-                (result-bind   (result-concat (list-map (sexp-to-pattern definitions) rest)) (fn (patterns)
-                (result-bind   (symbol-to-string name)                                       (fn (name)
-                (result-return (ConstructorPattern name patterns range))))))
+                (parser-bind   (parser-concat (list-map (sexp-to-pattern definitions) rest)) (fn (patterns)
+                (parser-bind   (symbol-to-string name)                                       (fn (name)
+                (parser-return (ConstructorPattern name patterns range))))))
             (List Empty range)
-                (result-error (MalformedExpressionError range))
+                (parser-error (MalformedExpressionError range))
             (Integer integer range)
-                (result-return (IntegerPattern integer range))
+                (parser-return (IntegerPattern integer range))
             (Symbol _ name range)
                 (to-constructor-or-capture definitions range name)))
 
 (def sexp-to-match-pair (sexp-to-expression definitions pair)
      (match pair
             (Pair pattern expression)
-                (result-bind   (sexp-to-pattern definitions pattern)        (fn (pattern)
-                (result-bind   (sexp-to-expression definitions expression)  (fn (expression)
-                (result-return (Pair pattern expression))))))))
+                (parser-bind   (sexp-to-pattern definitions pattern)        (fn (pattern)
+                (parser-bind   (sexp-to-expression definitions expression)  (fn (expression)
+                (parser-return (Pair pattern expression))))))))
 
 (def collect-pairs (list)
      (match list
@@ -185,23 +185,23 @@
             (fn (pairs) (match pairs
                                (Some Empty)  None
                                other         other))
-            (result-of-maybe (MalformedMatchExpressionError range))
-            (result-flatmap  (pipe (list-map (sexp-to-match-pair sexp-to-expression definitions))
-                                   result-concat)))
+            (parser-of-maybe (MalformedMatchExpressionError range))
+            (parser-flatmap  (pipe (list-map (sexp-to-match-pair sexp-to-expression definitions))
+                                   parser-concat)))
         pairs))
 
 (def sexp-to-match (sexp-to-expression definitions range rest)
      (match rest
             (Cons expression rest)
-                (result-bind   (sexp-to-expression definitions expression)                      (fn (expression)
-                (result-bind   (sexp-to-match-pairs sexp-to-expression definitions range rest)  (fn (pairs)
-                (result-return (Match expression pairs range))))))
+                (parser-bind   (sexp-to-expression definitions expression)                      (fn (expression)
+                (parser-bind   (sexp-to-match-pairs sexp-to-expression definitions range rest)  (fn (pairs)
+                (parser-return (Match expression pairs range))))))
             _
-                (result-error (MalformedExpressionError range))))
+                (parser-error (MalformedExpressionError range))))
 
 (def sexp-to-constructor (sexp-to-expression range name rest)
-     (result-bind   (result-concat (list-map sexp-to-expression rest)) (fn (expressions)
-     (result-return (Constructor name expressions range)))))
+     (parser-bind   (parser-concat (list-map sexp-to-expression rest)) (fn (expressions)
+     (parser-return (Constructor name expressions range)))))
 
 (def sexp-to-list-expression (sexp-to-expression definitions expressions range)
      (match expressions
@@ -225,22 +225,22 @@
 (def sexp-to-expression (definitions sexp)
      (match sexp
             (Integer integer range)
-                (result-return (IntegerConstant integer range))
+                (parser-return (IntegerConstant integer range))
             (Symbol _ symbol-name range)
                 (match (parser-context-is-name-constructor? symbol-name definitions)
-                       True   (result-return (Constructor symbol-name Empty range))
-                       False  (result-return (Identifier symbol-name range)))
+                       True   (parser-return (Constructor symbol-name Empty range))
+                       False  (parser-return (Identifier symbol-name range)))
             (List expressions range)
                 (match expressions
-                       Empty  (result-error (MalformedExpressionError range))
+                       Empty  (parser-error (MalformedExpressionError range))
                        _      (sexp-to-list-expression sexp-to-expression definitions expressions range))))
 
 (def sexp-to-function-definition (definitions name-symbol rest range constructor)
-     (result-bind   (sexp-to-function-body range rest)                  (fn (body)
-     (result-bind   (sexp-to-arguments (pair-left body))                (fn (arguments)
-     (result-bind   (sexp-to-expression definitions (pair-right body))  (fn (expression)
-     (result-bind   (symbol-to-string name-symbol)                      (fn (name)
-     (result-return (constructor name arguments expression range)))))))))))
+     (parser-bind   (sexp-to-function-body range rest)                  (fn (body)
+     (parser-bind   (sexp-to-arguments (pair-left body))                (fn (arguments)
+     (parser-bind   (sexp-to-expression definitions (pair-right body))  (fn (expression)
+     (parser-bind   (symbol-to-string name-symbol)                      (fn (name)
+     (parser-return (constructor name arguments expression range)))))))))))
 
 (def sexp-to-definition' (definitions name rest range kind)
      (match (= kind (sym-typ))
@@ -250,15 +250,15 @@
             True   (sexp-to-function-definition definitions name rest range
                                                 (fn (name arguments expression range)
                                                     (FunctionDefinition ModuleSelf name arguments expression range)))
-            False  (result-error (MalformedDefinitionError range)))))
+            False  (parser-error (MalformedDefinitionError range)))))
 
 (def specific-malformed-definition-error (kind range)
      (match (= kind (sym-typ))
-            True   (result-error (MalformedTypeDefinitionError range))
+            True   (parser-error (MalformedTypeDefinitionError range))
             False
      (match (= kind (sym-def))
-            True   (result-error (MalformedFunctionDefinitionError range))
-            False  (result-error (MalformedDefinitionError range)))))
+            True   (parser-error (MalformedFunctionDefinitionError range))
+            False  (parser-error (MalformedDefinitionError range)))))
 
 (def sexp-to-definition (expression definitions)
      (match expression
@@ -269,13 +269,13 @@
             (List (Cons (Symbol kind _ __) (Cons name rest)) range)
                 (sexp-to-definition' definitions name rest range kind)
             (List (Cons (List _ range) Empty) __)
-                (result-error (MalformedDefinitionError range))
+                (parser-error (MalformedDefinitionError range))
             (List _ range)
-                (result-error (MalformedDefinitionError range))
+                (parser-error (MalformedDefinitionError range))
             (Integer _ range)
-                (result-error (MalformedDefinitionError range))
+                (parser-error (MalformedDefinitionError range))
             (Symbol _ __ range)
-                (result-error (MalformedDefinitionError range))))
+                (parser-error (MalformedDefinitionError range))))
 
 (def sexp-error-to-ast-error (error)
      (match error
@@ -291,7 +291,7 @@
 (def sexps-to-definitions (sexp-result context)
      (match sexp-result
             (Result (Pair symbols expressions))  (sexps-to-definitions' expressions context)
-            (Error error)                        (parser-context-add (result-error (sexp-error-to-ast-error error)) context)))
+            (Error error)                        (parser-context-add (parser-error (sexp-error-to-ast-error error)) context)))
 
 
 
