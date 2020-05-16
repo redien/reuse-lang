@@ -11,6 +11,7 @@ $project_root/reusec --language ocaml\
                      $project_root/parser/ast.reuse\
                      $project_root/parser/parser.strings\
                      $project_root/parser/parser-context.reuse\
+                     $project_root/parser/parser-context-monad.reuse\
                      $project_root/parser/parser.reuse\
                      $script_path/../../cli/argument-parser.strings\
                      $script_path/../../cli/argument-parser.reuse\
