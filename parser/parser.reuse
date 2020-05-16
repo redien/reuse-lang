@@ -183,9 +183,9 @@
 (def sexp-to-match-pairs (sexp-to-expression definitions range pairs)
      ((pipe collect-pairs
             (fn (pairs) (match pairs
-                               (Some Empty)  None
-                               other         other))
-            (parser-of-maybe (MalformedMatchExpressionError range))
+                               (Some Empty)  (result-error (MalformedMatchExpressionError range))
+                               (Some other)  (result-return other)
+                               None          (result-error (MalformedMatchExpressionError range))))
             ((flip parser-bind)  (pipe (list-map (sexp-to-match-pair sexp-to-expression definitions))
                                        parser-sequence)))
         pairs))

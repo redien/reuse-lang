@@ -8,11 +8,6 @@
 (def parser-bind (parser f)
      (result-bind parser f))
 
-(def parser-of-maybe (error maybe)
-     (result-of-maybe error maybe))
-
-
-
 (def parser-sequence (list)
      (list-foldr (fn (a b)
                      (parser-bind a (fn (a')
