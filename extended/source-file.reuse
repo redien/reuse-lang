@@ -4,6 +4,9 @@
                       SourceFileTypeStrings
                       SourceFileTypeTargetLanguage)
 
+(def source-file-of (module path iterator)
+     (SourceFile module path iterator))
+
 (def source-file-module (file)
      (match file
             (SourceFile module _ __)

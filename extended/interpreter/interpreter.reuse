@@ -214,29 +214,14 @@
 
 
 
-(def parse-files (files)
-     (list-foldl (fn (content context)
-                     (sexps-to-definitions (parse content) context))
-                 (parser-context-new)
-                 files))
-
-(def source-to-definitions (files)
-     ((pipe parse-files
-            parser-context-definitions
-            stringify-parse-errors
-            validate-reserved-identifiers
-            local-transforms
-            result-concat)
-        files))
-
 (typ (event iterator state) (EventArguments (list string))
                             (EventReadStdin iterator state)
-                            (EventReadFiles (list (pair string iterator)) state))
+                            (EventReadFiles (list (source-file iterator)) state))
 
 (typ (command state) (CommandError string)
                      (CommandOutput string)
                      (CommandReadStdin state)
-                     (CommandReadFiles (list string) state))
+                     (CommandReadFiles (list string) (list string) state))
 
 (def output-result (result)
      (match result
@@ -257,13 +242,13 @@
                        (CliArguments _ Empty)
                             (CommandError (data-no-input-files))
                        (CliArguments arguments input-files)
-                            (CommandReadFiles input-files (scope-empty))
+                            (CommandReadFiles input-files Empty (scope-empty))
                        (CliErrorMissingValue key)
                             (CommandError key))
             (EventReadStdin stdin state)
                 (output-result (eval state (list (box-indexed-iterator stdin))))
-            (EventReadFiles file-entries state)
-                (match (source-to-definitions (list-map pair-right file-entries))
+            (EventReadFiles source-files state)
+                (match (parse-source-files False source-files)
                        (Result definitions)
                             (process-definitions (definitions-to-scope definitions))
                        (Error error)
