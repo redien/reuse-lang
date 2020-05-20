@@ -52,3 +52,35 @@
 
 (def validate-reserved-identifiers (definitions)
      (result-flatmap (. result-concat (list-map (over-definition-expressions (over-identifiers validate-identifier)))) definitions))
+
+(def transform-strings (path content)
+     (match (string-gen content)
+            (Result string)  (indexed-iterator-from-iterable (string-iterable) string)
+            (Error error)    (indexed-iterator-from-iterable (string-iterable) (string-empty))))
+
+(def parse-reuse-file (file)
+     (match file
+            (SourceFile module path content)
+                (sexps-to-definitions module (parse (keywords) content))))
+
+(def parse-strings-file (file)
+     (match file
+            (SourceFile module path content)
+                (sexps-to-definitions module (parse (keywords) (transform-strings path content)))))
+
+(def parse-source-file (file)
+     (match (source-file-type file)
+            SourceFileTypeStrings  (parse-strings-file file)
+            _                      (parse-reuse-file file)))
+
+(def parse-source-files (minimal? files)
+     ((pipe (list-map parse-source-file)
+            parser-sequence
+            parser-run
+            (result-map list-flatten)
+            stringify-parse-errors
+            (match minimal?
+                   True   id
+                   False  validate-reserved-identifiers)
+            local-transforms)
+        files))

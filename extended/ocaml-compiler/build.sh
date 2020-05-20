@@ -17,12 +17,13 @@ $project_root/reusec --language ocaml\
                      $script_path/../../cli/argument-parser.strings\
                      $script_path/../../cli/argument-parser.reuse\
                      $script_path/../../string-gen/string-gen.reuse\
+                     $script_path/../local-transforms.strings\
+                     $script_path/../local-transforms.reuse\
+                     $script_path/../source-file.strings\
+                     $script_path/../source-file.reuse\
                      $script_path/../common.strings\
                      $script_path/../strings.reuse\
                      $script_path/../common.reuse\
-                     $script_path/../local-transforms.strings\
-                     $script_path/../local-transforms.reuse\
-                     $script_path/../source-file.reuse\
                      $script_path/ocaml.strings\
                      $script_path/ocaml.reuse\
                      $script_path/../compiler.reuse\
