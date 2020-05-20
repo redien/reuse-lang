@@ -5,8 +5,6 @@ minus                     |-
 slash                     |/
 percent                   |%
 ampersand                 |&
-pipe                      |pipe
-list                      |list
 int32-less-than           |int32-less-than
 parse-error               |parse error 
 fun                       |fun
@@ -68,10 +66,7 @@ parser                    |parser
 value                     |value
 to                        |to
 error-reserved-identifier |Symbols prefixed with ✨ are reserved
-sparkle-x                 |✨x
 sparkle                   |✨
-Empty                     |Empty
-Cons                      |Cons
 no-input-files            |No input files
 output-key                |--output
 no-output-path            |No output file specified, please use the --output [file] flag.

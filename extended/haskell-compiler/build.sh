@@ -20,6 +20,7 @@ $project_root/reusec --language ocaml\
                      $script_path/../common.strings\
                      $script_path/../strings.reuse\
                      $script_path/../common.reuse\
+                     $script_path/../local-transforms.strings\
                      $script_path/../local-transforms.reuse\
                      $script_path/../source-file.reuse\
                      $script_path/haskell.strings\

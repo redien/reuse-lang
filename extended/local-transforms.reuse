@@ -1,4 +1,16 @@
 
+(def expression-is-symbol? (symbol-name expression)
+     (match expression
+            (Identifier name __)
+                (string-equal? symbol-name name)
+            _
+                False))
+
+(def first-expression-is-symbol? (symbol-name expressions)
+     ((pipe (maybe-map (expression-is-symbol? symbol-name))
+            (maybe-else (fn () False)))
+        (list-first expressions)))
+
 (def transform-special-form (symbol-name transformer definition)
      (over-definition-expressions
      (over-subexpressions
