@@ -262,7 +262,7 @@
             (TypeDefinition module name parameters constructors _)
                 (translate-type-definition name parameters constructors)))
 
-(def generate-source (definitions module-name)
-     (result-map (pipe (list-map translate-definition)
-                       (string-join (string-of-char 10)))
-                 definitions))
+(def generate-source (module-name definitions)
+     ((pipe (list-map translate-definition)
+            (string-join (string-of-char 10)))
+        definitions))

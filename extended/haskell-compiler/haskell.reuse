@@ -265,13 +265,11 @@
                  (data-space)
                  (data-where))))
 
-(def generate-source (definitions module-name)
-     ((pipe local-transforms
-            (list-map (result-map translate-definition))
-            (list-cons (Result (data-prelude)))
-            result-concat
-            (result-map (list-concat (list (data-language-exts)
-                                           (translate-module-declaration module-name)
-                                           (data-imports))))
-            (result-map (string-join (string-of-char 10))))
+(def generate-source (module-name definitions)
+     ((pipe (list-map translate-definition)
+            (list-cons (data-prelude))
+            (list-concat (list (data-language-exts)
+                               (translate-module-declaration module-name)
+                               (data-imports)))
+            (string-join (string-of-char 10)))
          definitions))

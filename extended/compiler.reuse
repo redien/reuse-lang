@@ -42,10 +42,15 @@
 
 (typ compiler-parameters (CompilerParameters boolean boolean))
 
+(def join-files (files)
+     (string-join (string-empty) (list-map (. string-from-indexed-iterator source-file-content) files)))
+
 (def compile (file-entries module-name parameters)
      (match (Pair (split-source-files file-entries) parameters)
             (Pair (Pair target-language-files source-files) (CompilerParameters as-minimal use-stdlib))
                   (match (source-to-definitions as-minimal source-files)
-                         definitions
-                              (result-map ((flip string-concat) (string-join (string-empty) (list-map (. string-from-indexed-iterator source-file-content) target-language-files)))
-                                          (generate-source definitions module-name)))))
+                         (Result definitions)
+                              (result-return (string-concat (generate-source module-name definitions)
+                                                            (join-files target-language-files)))
+                         (Error error)
+                              (result-error error))))
