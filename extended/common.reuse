@@ -40,7 +40,7 @@
                 (i18n-malformed-sexp-too-many-closing-brackets English)))
 
 (def stringify-parse-errors (definitions)
-     (list-map (result-bimap id error-to-string) definitions))
+    (result-bimap id error-to-string definitions))
 
 (def expression-is-symbol? (symbol-name expression)
      (match expression
@@ -63,4 +63,4 @@
             False  (result-lift identifier)))
 
 (def validate-reserved-identifiers (definitions)
-     (list-map (result-flatmap (over-definition-expressions (over-identifiers validate-identifier))) definitions))
+     (result-flatmap (. result-concat (list-map (over-definition-expressions (over-identifiers validate-identifier)))) definitions))

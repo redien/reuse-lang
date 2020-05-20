@@ -1,39 +1,35 @@
 
-(def validate-reserved-identifiers-when-not (as-minimal)
-     (match as-minimal
-            True   (fn (definitions) definitions)
-            False  validate-reserved-identifiers))
-
 (def transform-strings (path content)
      (match (string-gen content)
             (Result string)  (indexed-iterator-from-iterable (string-iterable) string)
             (Error error)    (indexed-iterator-from-iterable (string-iterable) (string-empty))))
 
-(def parse-reuse-file (file context)
+(def parse-reuse-file (file)
      (match file
             (SourceFile module path content)
-                (sexps-to-definitions (parse (keywords) content)
-                                      (parser-context-with-module module context))))
+                (sexps-to-definitions module (parse (keywords) content))))
 
-(def parse-strings-file (file context)
+(def parse-strings-file (file)
      (match file
             (SourceFile module path content)
-                (sexps-to-definitions (parse (keywords) (transform-strings path content))
-                                      (parser-context-with-module module context))))
+                (sexps-to-definitions module (parse (keywords) (transform-strings path content)))))
 
-(def translate-source-file (file context)
+(def parse-source-file (file)
      (match (source-file-type file)
-            SourceFileTypeStrings  (parse-strings-file file context)
-            _                      (parse-reuse-file file context)))
+            SourceFileTypeStrings  (parse-strings-file file)
+            _                      (parse-reuse-file file)))
 
 (def parse-files (files)
-     (list-foldl translate-source-file (parser-context-new) files))
+     (parser-sequence (list-map parse-source-file files)))
 
-(def source-to-definitions (as_minimal files)
+(def source-to-definitions (minimal? files)
      ((pipe parse-files
-            parser-context-definitions
+            parser-run
+            (result-map list-flatten)
             stringify-parse-errors
-            (validate-reserved-identifiers-when-not as_minimal)
+            (match minimal?
+                   True   id
+                   False  validate-reserved-identifiers)
             local-transforms)
         files))
 

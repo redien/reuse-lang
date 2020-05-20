@@ -263,7 +263,6 @@
                 (translate-type-definition name parameters constructors)))
 
 (def generate-source (definitions module-name)
-     ((pipe (list-map (result-map translate-definition))
-            result-concat
-            (result-map (string-join (string-of-char 10))))
-         definitions))
+     (result-map (pipe (list-map translate-definition)
+                       (string-join (string-of-char 10)))
+                 definitions))

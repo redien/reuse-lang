@@ -15,7 +15,7 @@
 
 (def reuse-main (stdin)
      ((pipe (parse (keywords))
-            sexps-to-definitions
+            (sexps-to-definitions ModuleSelf)
             parser-run
             (result-either (. stringify definitions-to-sexps)
                            stringify-error))

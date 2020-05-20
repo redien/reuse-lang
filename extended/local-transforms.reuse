@@ -1,14 +1,16 @@
 
 (def transform-special-form (symbol-name transformer definition)
-     (result-flatmap
      (over-definition-expressions
      (over-subexpressions
      (over-function-application
          (fn (expressions range)
-             (match (first-expression-is-symbol? (symbol-name) expressions)
-                 True   (result-lift (transformer (list-rest expressions) range))
-                 False  (result-lift (FunctionApplication expressions range)))))))
+             (result-return (match (first-expression-is-symbol? (symbol-name) expressions)
+                                   True   (transformer (list-rest expressions) range)
+                                   False  (FunctionApplication expressions range))))))
          definition))
+
+(def transform-special-forms (symbol-name transformer definitions)
+     (result-concat (list-map (transform-special-form symbol-name transformer) definitions)))
 
 (def transform-pipe (expressions range)
      (Lambda (list (data-sparkle-x))
@@ -25,6 +27,7 @@
                  expressions))
 
 (def local-transforms (definitions)
-     (list-map (pipe (transform-special-form data-pipe transform-pipe)
-                     (transform-special-form data-list transform-list))
-               definitions))
+     (result-bind definitions (fn (definitions)
+     (result-bind (transform-special-forms data-pipe transform-pipe definitions) (fn (definitions)
+     (result-bind (transform-special-forms data-list transform-list definitions) (fn (definitions)
+     (result-return definitions))))))))
