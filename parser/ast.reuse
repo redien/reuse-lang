@@ -51,6 +51,11 @@
             (FunctionDefinition _ name __ ___ ____)
                 name))
 
+(def constructor-name (constructor)
+     (match constructor
+            (ComplexConstructor name _ __)  name
+            (SimpleConstructor name _)      name))
+
 (def over-match-pair-expression (f pair)
      (match pair
             (Pair pattern expression)

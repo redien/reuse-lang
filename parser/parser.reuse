@@ -276,10 +276,9 @@
                 (parser-error (MalformedDefinitionError range))))
 
 (def parse-definition! (module expression)
-     (parser-bind (parser-set-module! module) (fn (_)
-     (parser-bind (sexp-to-definition expression) (fn (definition)
-     (parser-bind (parser-add-definition! definition) (fn (_)
-     (parser-return definition))))))))
+     (parser-bind (sexp-to-definition expression)                                     (fn (definition)
+     (parser-bind (parser-add-definition! (definition-with-module module definition)) (fn (definition)
+     (parser-return definition))))))
 
 (def sexp-error-to-ast-error (error)
      (match error

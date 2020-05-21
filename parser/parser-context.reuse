@@ -1,24 +1,6 @@
 
 (typ (parser-context definition)
-     (ParserContext module-reference (list definition) (dictionary definition)))
-
-(def parser-context-new ()
-     (ParserContext ModuleSelf Empty (dictionary-empty)))
-
-(def parser-context-with-module (module context)
-     (match context
-            (ParserContext _ definitions constructors)
-                (ParserContext module definitions constructors)))
-
-(def parser-context-definitions (context)
-     (match context
-            (ParserContext _ definitions __)
-                (list-reverse definitions)))
-
-(def constructor-name (constructor)
-     (match constructor
-            (ComplexConstructor name _ __)  name
-            (SimpleConstructor name _)      name))
+     (ParserContext (dictionary definition)))
 
 (def parser-context-add-constructors (definition dictionary)
      (match definition
@@ -32,14 +14,46 @@
 
 (def parser-context-add (definition context)
      (match context
-            (ParserContext module definitions constructors)
-                (ParserContext module
-                               (Cons (definition-with-module module definition) definitions)
-                               (parser-context-add-constructors definition constructors))))
+            (ParserContext constructors)
+                (ParserContext (parser-context-add-constructors definition constructors))))
 
 (def parser-context-is-name-constructor? (name context)
      (match context
-            (ParserContext _ __ constructors)
+            (ParserContext constructors)
                 (match (dictionary-get name constructors)
                        (Some _)  True
                        None      False)))
+
+
+(def parser-run (parser)
+     (match (state-run (ParserContext (dictionary-empty)) parser)
+            (Pair _ result)  result))
+
+(def parser-return (value)
+     (state-return (result-return value)))
+
+(def parser-error (error)
+     (state-return (result-error error)))
+
+(def parser-bind (parser f)
+     (state-bind parser (fn (result)
+     (result-prod state-return
+     (result-bind result (fn (value)
+     (result-return (f value))))))))
+
+(def parser-constructor? (name)
+     (state-bind (state-get) (fn (context)
+     (parser-return (parser-context-is-name-constructor? name context)))))
+
+(def parser-add-definition! (definition)
+     (state-bind (state-modify (parser-context-add definition)) (fn (_)
+     (parser-return definition))))
+
+
+(def parser-sequence (list)
+     (list-foldr (fn (a b)
+                     (parser-bind a (fn (a')
+                     (parser-bind b (fn (b')
+                     (parser-return (Cons a' b')))))))
+                 (parser-return Empty)
+                 list))
