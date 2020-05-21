@@ -1,8 +1,0 @@
-
-(def to-reuse (definitions _)
-     ((pipe validate-reserved-identifiers
-            local-transforms
-            (list-map (result-map definition-to-sexp))
-            result-concat
-            (result-map stringify))
-         definitions))
