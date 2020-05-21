@@ -32,28 +32,25 @@
             (List _ range)
                 (parser-error  (MalformedSymbolError range))))
 
-(def sexp-to-complex-type (sexp-to-types _ name parameters range)
-     (parser-bind   (sexp-to-types parameters)  (fn (sub-types)
+(def sexp-to-complex-type (sexp-to-type name parameters range)
+     (parser-bind   (parser-sequence (list-map sexp-to-type parameters))  (fn (sub-types)
      (parser-return (ComplexType name sub-types range)))))
 
-(def sexp-to-function-type (sexp-to-types sexp-to-type name parameters range)
+(def sexp-to-function-type (sexp-to-type parameters range)
      (match parameters
             (Cons (List arg-types _) (Cons return-type Empty))
-                (parser-bind   (sexp-to-types arg-types)   (fn (arg-types)
-                (parser-bind   (sexp-to-type return-type)  (fn (return-type)
+                (parser-bind   (parser-sequence (list-map sexp-to-type arg-types))   (fn (arg-types)
+                (parser-bind   (sexp-to-type return-type)                            (fn (return-type)
                 (parser-return (FunctionType arg-types return-type range))))))
             _
                 (parser-error (MalformedTypeError range))))
 
-(def sexp-to-complex-or-function-type (name)
-     (match (string-equal? name (data-fn))
-            True   sexp-to-function-type
-            False  sexp-to-complex-type))
-
-(def sexp-to-type (sexp-to-types type)
+(def sexp-to-type (type)
      (match type
-            (List (Cons (Symbol _ name __) parameters) range)
-                ((sexp-to-complex-or-function-type name) sexp-to-types (sexp-to-type sexp-to-types) name parameters range)
+            (List (Cons (Symbol id name __) parameters) range)
+                (match (= id (sym-fn))
+                        True   (sexp-to-function-type sexp-to-type parameters range)
+                        False  (sexp-to-complex-type sexp-to-type name parameters range))
             (Symbol _ name range)
                 (parser-return (SimpleType name range))
             (Integer _ range)
@@ -61,11 +58,8 @@
             (List _ range)
                 (parser-error (MalformedTypeError range))))
 
-(def sexp-to-types (types)
-     (parser-sequence (list-map (sexp-to-type sexp-to-types) types)))
-
 (def sexp-to-complex-constructor (name types range)
-     (parser-bind   (sexp-to-types types)  (fn (types)
+     (parser-bind   (parser-sequence (list-map sexp-to-type types))  (fn (types)
      (parser-return (ComplexConstructor name types range)))))
 
 (def sexp-to-constructor-definition (constructor)
