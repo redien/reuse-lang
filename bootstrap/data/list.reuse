@@ -86,20 +86,29 @@
 (def list-flatten (list)
      (list-foldr list-concat Empty list))
 
-(def list-skip (count list)
-     (match (> count 0)
-            True   (list-skip (- count 1) (list-rest list))
-            False  list))
+(def list-split-at' (n a b)
+     (match (> n 0)
+            True   (match b
+                          (Cons x xs)  (list-split-at' (- n 1) (Cons x a) xs)
+                          Empty        (Pair (list-reverse a) b))
+            False  (Pair (list-reverse a) b)))
 
-(def list-take' (count list taken)
-     (match (> count 0)
-            True   (match list
-                          (Cons char rest)  (list-take' (- count 1) rest (Cons char taken))
-                          Empty             taken)
-            False  taken))
+(def list-split-at (n xs)
+     (list-split-at' n Empty xs))
+
+(def list-partition' (n xs partitions)
+     (match (list-split-at n xs)
+            (Pair Empty _)       partitions
+            (Pair partition xs)  (list-partition' n xs (Cons partition partitions))))
+
+(def list-partition (n xs)
+     (list-reverse (list-partition' n xs Empty)))
+
+(def list-skip (count list)
+     (pair-right (list-split-at count list)))
 
 (def list-take (count list)
-     (list-reverse (list-take' count list Empty)))
+     (pair-left (list-split-at count list)))
 
 (def list-zip' (xs ys collected)
      (match xs
