@@ -61,12 +61,12 @@
 (def parse-reuse-file (file)
      (match file
             (SourceFile module path content)
-                (sexps-to-definitions module (parse (keywords) content))))
+                (parse-definitions! module (parse (keywords) content))))
 
 (def parse-strings-file (file)
      (match file
             (SourceFile module path content)
-                (sexps-to-definitions module (parse (keywords) (transform-strings path content)))))
+                (parse-definitions! module (parse (keywords) (transform-strings path content)))))
 
 (def parse-source-file (file)
      (match (source-file-type file)
