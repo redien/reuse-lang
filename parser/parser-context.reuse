@@ -4,7 +4,7 @@
 
 (def parser-context-add-constructors (definition dictionary)
      (match definition
-            (TypeDefinition _ __ ___ constructors ____)
+            (TypeDefinition _ __ ___ ____ constructors _____)
                 (list-foldl (fn (constructor dictionary)
                                 (dictionary-set (constructor-name constructor) definition dictionary))
                             dictionary

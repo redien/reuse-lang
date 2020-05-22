@@ -10,7 +10,7 @@
                             (IntegerPattern       int32 meta)
                             (ConstructorPattern   string (list (pattern meta)) meta))
 (typ (expression meta)      (IntegerConstant      int32 meta)
-                            (Identifier           string meta)
+                            (Identifier           int32 string meta)
                             (Lambda               (list string)
                                                   (expression meta)
                                                   meta)
@@ -21,12 +21,14 @@
                             (FunctionApplication  (list (expression meta)) meta))
 (typ module-reference       (ModulePath           string)
                             ModuleSelf)
-(typ (definition meta)      (TypeDefinition       module-reference
+(typ (definition meta)      (TypeDefinition       int32
+                                                  module-reference
                                                   string
                                                   (list (type-parameter meta))
                                                   (list (constructor meta))
                                                   meta)
-                            (FunctionDefinition   module-reference
+                            (FunctionDefinition   int32
+                                                  module-reference
                                                   string
                                                   (list string)
                                                   (expression meta)
@@ -34,21 +36,21 @@
 
 (def definition-with-module (module definition)
      (match definition
-            (TypeDefinition _ name parameters constructors meta)
-                (TypeDefinition module name parameters constructors meta)
-            (FunctionDefinition _ name parameters body meta)
-                (FunctionDefinition module name parameters body meta)))
+            (TypeDefinition id _ name parameters constructors meta)
+                (TypeDefinition id module name parameters constructors meta)
+            (FunctionDefinition id _ name parameters body meta)
+                (FunctionDefinition id module name parameters body meta)))
 
 (def definition-meta (definition)
      (match definition
-            (TypeDefinition _ __ ___ ____ meta)      meta
-            (FunctionDefinition _ __ ___ ____ meta)  meta))
+            (TypeDefinition _ __ ___ ____ _____ meta)      meta
+            (FunctionDefinition _ __ ___ ____ _____ meta)  meta))
 
 (def definition-name (definition)
      (match definition
-            (TypeDefinition _ name __ ___ ____)
+            (TypeDefinition _ __ name ___ ____ _____)
                 name
-            (FunctionDefinition _ name __ ___ ____)
+            (FunctionDefinition _ __ name ___ ____ _____)
                 name))
 
 (def constructor-name (constructor)
@@ -88,9 +90,9 @@
 
 (def over-definition-expressions (f definition)
      (match definition
-            (FunctionDefinition module name arguments expression range)
+            (FunctionDefinition id module name arguments expression range)
                 (result-bind   (f expression)  (fn (expression)
-                (result-return (FunctionDefinition module name arguments expression range))))
+                (result-return (FunctionDefinition id module name arguments expression range))))
             _
                 (result-return definition)))
 
@@ -103,9 +105,9 @@
 
 (def over-identifiers (f expression)
      (match expression
-            (Identifier name range)
+            (Identifier id name range)
                 (result-bind   (f name)                                (fn (name)
-                (result-return (Identifier name range))))
+                (result-return (Identifier id name range))))
             (Lambda arguments expression range)
                 (result-bind   (over-identifiers f expression)         (fn (expression)
                 (result-bind   (result-concat (list-map f arguments))  (fn (arguments)

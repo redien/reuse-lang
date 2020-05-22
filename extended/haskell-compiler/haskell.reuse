@@ -112,7 +112,7 @@
 
 (def translate-function-application (translate-expression expressions)
      (match expressions
-            (Cons (Identifier name _) rest)
+            (Cons (Identifier id name _) rest)
                     (match (string-equal? name (data-int32-less-than))
                            True  (translate-less-than translate-expression rest)
                            False (translate-function-application' translate-expression expressions))
@@ -145,7 +145,7 @@
                 (match (< integer 0)
                        True   (wrap-in-brackets (string-from-int32 integer))
                        False  (string-from-int32 integer))
-            (Identifier name _)
+            (Identifier id name _)
                 (translate-identifier name)
             (Match expression rules _)
                 (wrap-in-brackets ((translate-match-expression translate-expression expression) rules))))
@@ -253,9 +253,9 @@
 
 (def translate-definition (definition)
      (match definition
-            (FunctionDefinition module name arguments expression _)
+            (FunctionDefinition id module name arguments expression _)
                 (translate-function-definition (escape-identifier name) arguments expression)
-            (TypeDefinition module name parameters constructors _)
+            (TypeDefinition id module name parameters constructors _)
                 (translate-type-definition name parameters constructors)))
 
 (def translate-module-declaration (module-name)

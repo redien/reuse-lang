@@ -1,7 +1,9 @@
 
+(def sym-sparkle-x () -1000)
+
 (def expression-is-symbol? (symbol-name expression)
      (match expression
-            (Identifier name __)
+            (Identifier id name __)
                 (string-equal? symbol-name name)
             _
                 False))
@@ -28,7 +30,7 @@
      (Lambda (list (data-sparkle-x))
              (list-foldl (fn (expression composed)
                              (FunctionApplication (list expression composed) range))
-                         (Identifier (data-sparkle-x) range)
+                         (Identifier (sym-sparkle-x) (data-sparkle-x) range)
                          expressions)
              range))
 

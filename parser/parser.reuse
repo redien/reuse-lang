@@ -32,6 +32,15 @@
             (List _ range)
                 (parser-error  (MalformedSymbolError range))))
 
+(def symbol-to-id (symbol)
+     (match symbol
+            (Symbol id _ __)
+                (parser-return id)
+            (Integer _ range)
+                (parser-error  (MalformedSymbolError range))
+            (List _ range)
+                (parser-error  (MalformedSymbolError range))))
+
 (def sexp-to-complex-type (sexp-to-type name parameters range)
      (parser-bind   (parser-sequence (list-map sexp-to-type parameters))  (fn (sub-types)
      (parser-return (ComplexType name sub-types range)))))
@@ -109,11 +118,23 @@
             (List _ range)
                 (parser-error (MalformedTypeError range))))
 
+(def sexp-to-type-id (type-name)
+     (match type-name
+            (List (Cons (Symbol id _ __) ___) ____)
+                (parser-return id)
+            (Symbol id _ __)
+                (parser-return id)
+            (Integer _ range)
+                (parser-error (MalformedTypeError range))
+            (List _ range)
+                (parser-error (MalformedTypeError range))))
+
 (def sexp-to-type-definition (type-name constructors range)
+     (parser-bind   (sexp-to-type-id type-name)                     (fn (id)
      (parser-bind   (sexp-to-type-name type-name)                   (fn (name)
      (parser-bind   (sexp-to-type-parameters type-name)             (fn (parameters)
      (parser-bind   (sexp-to-constructor-definitions constructors)  (fn (constructors)
-     (parser-return (TypeDefinition ModuleSelf name parameters constructors range)))))))))
+     (parser-return (TypeDefinition id ModuleSelf name parameters constructors range)))))))))))
 
 (def sexp-to-arguments (arguments)
      (parser-sequence (list-map symbol-to-string arguments)))
@@ -200,11 +221,11 @@
      (match sexp
             (Integer integer range)
                 (parser-return (IntegerConstant integer range))
-            (Symbol _ symbol-name range)
+            (Symbol id symbol-name range)
                 (parser-bind (parser-constructor? symbol-name) (fn (constructor?)
                 (parser-return (match constructor?
                                       True   (Constructor symbol-name Empty range)
-                                      False  (Identifier symbol-name range)))))
+                                      False  (Identifier id symbol-name range)))))
             (List expressions range)
                 (match expressions
                        Empty  (parser-error (MalformedExpressionError range))
@@ -215,7 +236,8 @@
      (parser-bind   (sexp-to-arguments (pair-left body))                (fn (arguments)
      (parser-bind   (sexp-to-expression (pair-right body))              (fn (expression)
      (parser-bind   (symbol-to-string name-symbol)                      (fn (name)
-     (parser-return (constructor name arguments expression range)))))))))))
+     (parser-bind   (symbol-to-id name-symbol)                          (fn (id)
+     (parser-return (constructor id name arguments expression range)))))))))))))
 
 (def sexp-to-definition' (name rest range kind)
      (match (= kind (sym-typ))
@@ -223,8 +245,8 @@
             False
      (match (= kind (sym-def))
             True   (sexp-to-function-definition name rest range
-                                                (fn (name arguments expression range)
-                                                    (FunctionDefinition ModuleSelf name arguments expression range)))
+                                                (fn (id name arguments expression range)
+                                                    (FunctionDefinition id ModuleSelf name arguments expression range)))
             False  (parser-error (MalformedDefinitionError range)))))
 
 (def specific-malformed-definition-error (kind range)
@@ -302,18 +324,18 @@
             (UniversalParameter name range)
                 (Symbol 0 name range)))
 
-(def type-name-to-sexp (range name parameters)
+(def type-name-to-sexp (id range name parameters)
      (match parameters
             Empty
-                (Symbol 0 name range) 
+                (Symbol id name range) 
             _
-                (List (Cons (Symbol 0 name range)
+                (List (Cons (Symbol id name range)
                             (list-map type-parameter-to-sexp parameters))
                       range)))
 
-(def type-definition-to-sexp (name parameters constructors range)
+(def type-definition-to-sexp (id name parameters constructors range)
      (List (list-concat (list (Symbol 0 (data-typ) range)
-                              (type-name-to-sexp range name parameters))
+                              (type-name-to-sexp id range name parameters))
                         (constructors-to-sexp constructors))
            range))
 
@@ -340,8 +362,8 @@
      (match expression
             (IntegerConstant integer range)
                 (Integer integer range)
-            (Identifier string range)
-                (Symbol 0 string range)
+            (Identifier id string range)
+                (Symbol id string range)
             (Lambda arguments expression range)
                 (List (list (Symbol 0 (data-fn) range)
                             (function-arguments-to-sexp arguments range)
@@ -360,19 +382,19 @@
             (FunctionApplication expressions range)
                 (List (list-map expression-to-sexp expressions) range)))
 
-(def function-definition-to-sexp (name arguments expression range kind)
+(def function-definition-to-sexp (id name arguments expression range kind)
     (List (list (Symbol 0 kind range)
-                (Symbol 0 name range)
+                (Symbol id name range)
                 (function-arguments-to-sexp arguments range)
                 (expression-to-sexp expression))
           range))
 
 (def definition-to-sexp (definition)
      (match definition
-            (TypeDefinition _ name parameters constructors range)
-                (type-definition-to-sexp name parameters constructors range)
-            (FunctionDefinition _ name arguments expression range)
-                (function-definition-to-sexp name arguments expression range (data-def))))
+            (TypeDefinition id _ name parameters constructors range)
+                (type-definition-to-sexp id name parameters constructors range)
+            (FunctionDefinition id _ name arguments expression range)
+                (function-definition-to-sexp id name arguments expression range (data-def))))
 
 (def definitions-to-sexps (definitions)
      (list-map definition-to-sexp definitions))
