@@ -183,9 +183,14 @@ docker run --rm -it -v $PWD:/home/opam/reuse-lang redien/reuse-lang-dev-env
 #### Todo
 
 - Re-implement a javascript backend to get a debugger for free
-- Do not rely on string operations other than equality when parsing
-- Generate a symbol table after parsing s-expressions.
+  - Implement source maps to improve debugging experience
+- Generate new IDs for symbols that shadow others
+- Eliminate allocations when looking up an associative array
+  - Use a binary tree instead of a prefix tree?
 - Implement modules by parsing other files and adding them to the symbol table with separate IDs
+- Handle division by zero safely
+  - Return INT32_MAX?
+  - Return Maybe?
 
 ### Thoughts on a parens-less syntax
 
