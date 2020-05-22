@@ -43,7 +43,7 @@
 (def add-stack-trace (expression values stack-trace)
      (maybe-or-else stack-trace
      (maybe-map (fn (expression)
-                    (Cons (string-concat (string-append 32 (stringify (list-from (expression-to-sexp expression))))
+                    (Cons (string-concat (string-append 32 (stringify-sexps (list-from (expression-to-sexp expression))))
                                          (string-join (data-space) (list-map value-to-string values)))
                           stack-trace))
                 expression)))
@@ -66,7 +66,7 @@
                                                        (list-map (pipe pair-left
                                                                        pattern-to-sexp
                                                                        list-from
-                                                                       stringify)
+                                                                       stringify-sexps)
                                                                  cases))
                                           (string-of-char 10)
                                           (data-error-stack-trace)

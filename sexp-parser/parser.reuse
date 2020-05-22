@@ -51,45 +51,47 @@
                   (fn (next-iterator symbols expressions)
                       (next next-iterator symbols (List expressions (list-range iterator next-iterator))))))
 
-(def parse-expression (depth iterator parse-sexps symbols error next end)
+(def parse-expression (depth iterator parse-sexps' symbols error next end)
      (match (indexed-iterator-next iterator)
             (Pair None _)
                 (match depth
                        0  (end iterator)
                        _  (error ParseErrorTooFewClosingBrackets))
             (Pair (Some 40) next-iterator)
-                (parse-list next-iterator (parse-sexps (+ depth 1)) symbols error next)
+                (parse-list next-iterator (parse-sexps' (+ depth 1)) symbols error next)
             (Pair (Some 41) next-iterator)
                 (match depth
                        0  (error ParseErrorTooManyClosingBrackets)
                        _  (end next-iterator))
             (Pair (Some x) next-iterator)
                 (match (whitespace? x)
-                       True   (parse-expression depth next-iterator parse-sexps symbols error next end)
+                       True   (parse-expression depth next-iterator parse-sexps' symbols error next end)
                        False  (parse-symbol iterator symbols next end))))
 
-(def parse-sexps (depth iterator symbols expressions error end)
-     (parse-expression depth iterator parse-sexps symbols error
+(def parse-sexps' (depth iterator symbols expressions error end)
+     (parse-expression depth iterator parse-sexps' symbols error
                        (fn (iterator symbols expression)
-                           (parse-sexps depth iterator symbols (Cons expression expressions) error end))
+                           (parse-sexps' depth iterator symbols (Cons expression expressions) error end))
                        (fn (iterator)
                            (end iterator symbols (list-reverse expressions)))))
 
-(def parse (symbols iterator)
-     (parse-sexps 0 iterator symbols Empty
-                  (fn (error)
-                      (Error error))
-                  (fn (_ symbols expressions)
-                      (Result (Pair symbols expressions)))))
+(def parse-sexps (symbols iterator)
+     (parse-sexps' 0 iterator symbols Empty
+                   (fn (error)
+                       (Error error))
+                   (fn (_ symbols expressions)
+                       (Result (Pair symbols expressions)))))
+
+
 
 (def wrap-in-brackets (string)
      (string-concat (string-of-char 40) (string-concat string (string-of-char 41))))
 
-(def stringify-sexp (stringify expression)
+(def stringify-sexp (stringify-sexps expression)
      (match expression
             (Symbol _ name __)   name
             (Integer integer _)  (string-from-int32 integer)
-            (List expressions _) (wrap-in-brackets (stringify expressions))))
+            (List expressions _) (wrap-in-brackets (stringify-sexps expressions))))
 
-(def stringify (expressions)
-     (string-join (string-of-char 32) (list-map (stringify-sexp stringify) expressions)))
+(def stringify-sexps (expressions)
+     (string-join (string-of-char 32) (list-map (stringify-sexp stringify-sexps) expressions)))

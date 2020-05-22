@@ -10,7 +10,7 @@
 (def value-function-to-string (arguments expression)
      ((pipe expression-to-sexp
             list-from
-            stringify
+            stringify-sexps
             (string-concat (data-space))
             (string-concat (wrap-in-brackets (string-join (data-space) arguments)))
             (string-concat (data-space))
