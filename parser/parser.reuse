@@ -96,45 +96,17 @@
             (List _ range)
                 (parser-error (MalformedDefinitionError range))))
 
-(def sexp-to-type-parameters (type-name)
-     (match type-name
-            (List (Cons (Symbol _ __ ___) parameters) ____)
-                (parser-sequence (list-map sexp-to-type-parameter parameters))
-            (Symbol _ __ ___)
-                (parser-return Empty)
-            (Integer _ range)
-                (parser-error (MalformedTypeError range))
-            (List _ range)
-                (parser-error (MalformedTypeError range))))
-
-(def sexp-to-type-name (type-name)
-     (match type-name
-            (List (Cons (Symbol _ name __) ___) ____)
-                (parser-return name)
-            (Symbol _ name __)
-                (parser-return name)
-            (Integer _ range)
-                (parser-error (MalformedTypeError range))
-            (List _ range)
-                (parser-error (MalformedTypeError range))))
-
-(def sexp-to-type-id (type-name)
-     (match type-name
-            (List (Cons (Symbol id _ __) ___) ____)
-                (parser-return id)
-            (Symbol id _ __)
-                (parser-return id)
-            (Integer _ range)
-                (parser-error (MalformedTypeError range))
-            (List _ range)
-                (parser-error (MalformedTypeError range))))
-
 (def sexp-to-type-definition (type-name constructors range)
-     (parser-bind   (sexp-to-type-id type-name)                     (fn (id)
-     (parser-bind   (sexp-to-type-name type-name)                   (fn (name)
-     (parser-bind   (sexp-to-type-parameters type-name)             (fn (parameters)
-     (parser-bind   (sexp-to-constructor-definitions constructors)  (fn (constructors)
-     (parser-return (TypeDefinition id ModuleSelf name parameters constructors range)))))))))))
+     (match type-name
+            (List (Cons (Symbol id name __) parameters) ____)
+                (parser-bind   (parser-sequence (list-map sexp-to-type-parameter parameters))  (fn (parameters)
+                (parser-return (TypeDefinition id ModuleSelf name parameters constructors range))))
+            (Symbol id name __)
+                (parser-return (TypeDefinition id ModuleSelf name Empty constructors range))
+            (Integer _ range)
+                (parser-error (MalformedTypeError range))
+            (List _ range)
+                (parser-error (MalformedTypeError range))))
 
 (def sexp-to-arguments (arguments)
      (parser-sequence (list-map symbol-to-string arguments)))
@@ -241,7 +213,9 @@
 
 (def sexp-to-definition' (name rest range kind)
      (match (= kind (sym-typ))
-            True   (sexp-to-type-definition name rest range)
+            True
+                (parser-bind (sexp-to-constructor-definitions rest) (fn (constructors)
+                (sexp-to-type-definition name constructors range)))
             False
      (match (= kind (sym-def))
             True   (sexp-to-function-definition name rest range
