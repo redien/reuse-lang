@@ -1,5 +1,13 @@
 
 (def sym-sparkle-x () -1000)
+(def sym-cons () -1001)
+(def sym-empty () -1002)
+
+(def with-local-transform-keywords (dictionary)
+     (dictionary-set (data-sparkle-x) (Pair (sym-sparkle-x) (data-sparkle-x))
+     (dictionary-set (data-Cons) (Pair (sym-cons) (data-Cons))
+     (dictionary-set (data-Empty) (Pair (sym-empty) (data-Empty))
+     dictionary))))
 
 (def expression-is-symbol? (symbol-name expression)
      (match expression
@@ -36,8 +44,8 @@
 
 (def transform-list (expressions range)
      (list-foldr (fn (expression composed)
-                     (Constructor (data-Cons) (list expression composed) range))
-                 (Constructor (data-Empty) Empty range)
+                     (Constructor (sym-cons) (data-Cons) (list expression composed) range))
+                 (Constructor (sym-empty) (data-Empty) Empty range)
                  expressions))
 
 (def local-transforms (definitions)

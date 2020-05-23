@@ -58,7 +58,7 @@
                 (constraints-function-application constraints-expression function arguments)
             (FunctionApplication Empty _)
                 (constraints-error)
-            (Constructor name arguments _)
+            (Constructor _ name arguments __)
                 (constraints-constructor-application constraints-expression name arguments)
             (Match expression rules _)
                 (constraints-match constraints-expression expression rules)))

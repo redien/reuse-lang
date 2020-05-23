@@ -76,7 +76,7 @@
 (def parse-source-files (minimal? files)
      ((pipe (list-map parse-source-file)
             parser-sequence
-            (parser-run (keywords))
+            (parser-run (with-local-transform-keywords (keywords)))
             (result-map list-flatten)
             stringify-parse-errors
             (match minimal?

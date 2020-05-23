@@ -117,7 +117,7 @@
                                                       (data-error-stack-trace)
                                                       (string-of-char 10)
                                                       (render-stack-trace stack-trace)))))
-            (Constructor name arguments _)
+            (Constructor _ name arguments __)
                 (bind (sequence (list-map (eval-expression scope stack-trace) arguments)) (fn (values)
                 (return (ValueConstructor name values))))
             (Lambda arguments expression _)

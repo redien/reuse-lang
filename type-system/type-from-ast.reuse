@@ -23,8 +23,8 @@
 
 (def type-from-constructor (return-type parameters constructor)
      (match constructor
-            (SimpleConstructor name _)             (Pair name (FnType Empty return-type))
-            (ComplexConstructor name ast-types _)  (Pair name (FnType (list-map (type-from-ast-type parameters) ast-types) return-type))))
+            (SimpleConstructor _ name __)             (Pair name (FnType Empty return-type))
+            (ComplexConstructor _ name ast-types __)  (Pair name (FnType (list-map (type-from-ast-type parameters) ast-types) return-type))))
 
 (def type-from-parameter (parameter)
      (match parameter

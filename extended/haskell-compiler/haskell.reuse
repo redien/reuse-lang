@@ -135,9 +135,9 @@
      (match expression
             (Lambda arguments expression _)
                 (wrap-in-brackets (translate-lambda translate-expression arguments expression))
-            (Constructor name Empty _)
+            (Constructor _ name Empty __)
                 (prefix-constructor (escape-identifier name))
-            (Constructor name expressions _)
+            (Constructor _ name expressions __)
                 ((translate-constructor translate-expression name) expressions)
             (FunctionApplication expressions _)
                 (wrap-in-brackets (translate-function-application translate-expression expressions))
@@ -206,9 +206,9 @@
 
 (def translate-constructor-definition (parameters constructor)
      (match constructor
-            (SimpleConstructor name _)
+            (SimpleConstructor _ name __)
                 (prefix-constructor (escape-identifier name))
-            (ComplexConstructor name types _)
+            (ComplexConstructor _ name types __)
                 (translate-complex-constructor-definition name types parameters)))
 
 (def translate-constructor-definitions (parameters)

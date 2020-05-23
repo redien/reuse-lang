@@ -67,16 +67,16 @@
             (List _ range)
                 (parser-error (MalformedTypeError range))))
 
-(def sexp-to-complex-constructor (name types range)
+(def sexp-to-complex-constructor (id name types range)
      (parser-bind   (parser-sequence (list-map sexp-to-type types))  (fn (types)
-     (parser-return (ComplexConstructor name types range)))))
+     (parser-return (ComplexConstructor id name types range)))))
 
 (def sexp-to-constructor-definition (constructor)
      (match constructor
-            (Symbol _ name range)
-                (parser-return (SimpleConstructor name range))
-            (List (Cons (Symbol _ name __) types) range)
-                (sexp-to-complex-constructor name types range)
+            (Symbol id name range)
+                (parser-return (SimpleConstructor id name range))
+            (List (Cons (Symbol id name __) types) range)
+                (sexp-to-complex-constructor id name types range)
             (Integer _ range)
                 (parser-error (MalformedConstructorError range))
             (List _ range)
@@ -170,9 +170,9 @@
             _
                 (parser-error (MalformedExpressionError range))))
 
-(def sexp-to-constructor (sexp-to-expression range name rest)
+(def sexp-to-constructor (sexp-to-expression range id name rest)
      (parser-bind   (parser-sequence (list-map sexp-to-expression rest)) (fn (expressions)
-     (parser-return (Constructor name expressions range)))))
+     (parser-return (Constructor id name expressions range)))))
 
 (def sexp-to-list-expression (sexp-to-expression expressions range)
      (match expressions
@@ -185,7 +185,7 @@
                          False
                   (parser-bind (parser-constructor? symbol-name) (fn (constructor?)
                   (match constructor?
-                         True   (sexp-to-constructor sexp-to-expression range symbol-name rest)
+                         True   (sexp-to-constructor sexp-to-expression range id symbol-name rest)
                          False  (sexp-to-function-application sexp-to-expression range expressions))))))
             _  (sexp-to-function-application sexp-to-expression range expressions)))
 
@@ -196,7 +196,7 @@
             (Symbol id symbol-name range)
                 (parser-bind (parser-constructor? symbol-name) (fn (constructor?)
                 (parser-return (match constructor?
-                                      True   (Constructor symbol-name Empty range)
+                                      True   (Constructor id symbol-name Empty range)
                                       False  (Identifier id symbol-name range)))))
             (List expressions range)
                 (match expressions
@@ -287,10 +287,10 @@
 
 (def constructor-to-sexp (constructor)
      (match constructor
-            (SimpleConstructor name range)
-                (Symbol 0 name range)
-            (ComplexConstructor name types range)
-                (List (Cons (Symbol 0 name range) (types-to-sexp types)) range)))
+            (SimpleConstructor id name range)
+                (Symbol id name range)
+            (ComplexConstructor id name types range)
+                (List (Cons (Symbol id name range) (types-to-sexp types)) range)))
 
 (def constructors-to-sexp (constructors)
      (list-map constructor-to-sexp constructors))
@@ -351,12 +351,12 @@
                 (List (Cons (Symbol 0 (data-match) range)
                       (Cons (expression-to-sexp expression)
                             (list-flatmap (match-pair-to-sexp expression-to-sexp) pairs))) range)
-            (Constructor name expressions range)
+            (Constructor id name expressions range)
                 (match expressions
                        Empty
-                            (Symbol 0 name range)
+                            (Symbol id name range)
                        _
-                            (List (Cons (Symbol 0 name range) (list-map expression-to-sexp expressions)) range))
+                            (List (Cons (Symbol id name range) (list-map expression-to-sexp expressions)) range))
             (FunctionApplication expressions range)
                 (List (list-map expression-to-sexp expressions) range)))
 
