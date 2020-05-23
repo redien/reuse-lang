@@ -257,9 +257,9 @@
 
 (def translate-definition (definition)
      (match definition
-            (FunctionDefinition id module name arguments expression _)
+            (FunctionDefinition (Sym _ name __ ___) arguments expression ____)
                 (translate-function-definition (escape-identifier name) arguments expression)
-            (TypeDefinition id module name parameters constructors _)
+            (TypeDefinition (Sym _ name __ ___) parameters constructors ____)
                 (translate-type-definition name parameters constructors)))
 
 (def generate-source (module-name definitions)

@@ -1,4 +1,7 @@
 
+(typ module-reference       (ModulePath           string)
+                            ModuleSelf)
+(typ ast-sym                (Sym                  int32 string module-reference range))
 (typ (ast-type meta)        (SimpleType           string meta)
                             (ComplexType          string (list (ast-type meta)) meta)
                             (FunctionType         (list (ast-type meta)) (ast-type meta) meta))
@@ -19,38 +22,32 @@
                                                   meta)
                             (Constructor          int32 string (list (expression meta)) meta)
                             (FunctionApplication  (list (expression meta)) meta))
-(typ module-reference       (ModulePath           string)
-                            ModuleSelf)
-(typ (definition meta)      (TypeDefinition       int32
-                                                  module-reference
-                                                  string
+(typ (definition meta)      (TypeDefinition       ast-sym
                                                   (list (type-parameter meta))
                                                   (list (constructor meta))
                                                   meta)
-                            (FunctionDefinition   int32
-                                                  module-reference
-                                                  string
+                            (FunctionDefinition   ast-sym
                                                   (list string)
                                                   (expression meta)
                                                   meta))
 
 (def definition-with-module (module definition)
      (match definition
-            (TypeDefinition id _ name parameters constructors meta)
-                (TypeDefinition id module name parameters constructors meta)
-            (FunctionDefinition id _ name parameters body meta)
-                (FunctionDefinition id module name parameters body meta)))
+            (TypeDefinition (Sym id name _ range) parameters constructors meta)
+                (TypeDefinition (Sym id name module range) parameters constructors meta)
+            (FunctionDefinition (Sym id name _ range) parameters body meta)
+                (FunctionDefinition (Sym id name module range) parameters body meta)))
 
 (def definition-meta (definition)
      (match definition
-            (TypeDefinition _ __ ___ ____ _____ meta)      meta
-            (FunctionDefinition _ __ ___ ____ _____ meta)  meta))
+            (TypeDefinition _ __ ___ meta)      meta
+            (FunctionDefinition _ __ ___ meta)  meta))
 
 (def definition-name (definition)
      (match definition
-            (TypeDefinition _ __ name ___ ____ _____)
+            (TypeDefinition (Sym _ name __ ___) ____ _____ ______)
                 name
-            (FunctionDefinition _ __ name ___ ____ _____)
+            (FunctionDefinition (Sym _ name __ ___) ____ _____ ______)
                 name))
 
 (def constructor-id (constructor)
@@ -90,9 +87,9 @@
 
 (def over-definition-expressions (f definition)
      (match definition
-            (FunctionDefinition id module name arguments expression range)
+            (FunctionDefinition sym arguments expression range)
                 (result-bind   (f expression)  (fn (expression)
-                (result-return (FunctionDefinition id module name arguments expression range))))
+                (result-return (FunctionDefinition sym arguments expression range))))
             _
                 (result-return definition)))
 
