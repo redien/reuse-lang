@@ -283,10 +283,14 @@
             ParseErrorTooFewClosingBrackets   MalformedSexpTooFewClosingBrackets
             ParseErrorTooManyClosingBrackets  MalformedSexpTooManyClosingBrackets))
 
-(def parse-definitions! (module sexp-result)
-     (match sexp-result
-            (Result (Pair symbols expressions))  (parser-sequence (list-map (parse-definition! module) expressions))
-            (Error error)                        (parser-error (sexp-error-to-ast-error error))))
+(def parse-definitions! (module iterator)
+     (parser-bind (parser-get-symbols) (fn (symbols)
+     (match (parse-sexps symbols iterator)
+            (Result (Pair symbols expressions))
+                (parser-bind (parser-set-symbols! symbols) (fn (_)
+                (parser-sequence (list-map (parse-definition! module) expressions))))
+            (Error error)
+                (parser-error (sexp-error-to-ast-error error))))))
 
 
 

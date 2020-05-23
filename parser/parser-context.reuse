@@ -1,6 +1,6 @@
 
 (typ (parser-context definition)
-     (ParserContext (dictionary definition)))
+     (ParserContext (pair int32 (dictionary (pair int32 string))) (dictionary definition)))
 
 (def parser-context-add-constructors (definition dictionary)
      (match definition
@@ -14,19 +14,29 @@
 
 (def parser-context-add (definition context)
      (match context
-            (ParserContext constructors)
-                (ParserContext (parser-context-add-constructors definition constructors))))
+            (ParserContext symbols constructors)
+                (ParserContext symbols (parser-context-add-constructors definition constructors))))
 
 (def parser-context-is-name-constructor? (name context)
      (match context
-            (ParserContext constructors)
+            (ParserContext _ constructors)
                 (match (dictionary-get name constructors)
                        (Some _)  True
                        None      False)))
 
+(def parser-context-symbols (context)
+     (match context
+            (ParserContext symbols _)
+                symbols))
 
-(def parser-run (parser)
-     (match (state-run (ParserContext (dictionary-empty)) parser)
+(def parser-context-with-symbols (symbols context)
+     (match context
+            (ParserContext _ constructors)
+                (ParserContext symbols constructors)))
+
+
+(def parser-run (symbols parser)
+     (match (state-run (ParserContext (Pair 0 symbols) (dictionary-empty)) parser)
             (Pair _ result)  result))
 
 (def parser-return (value)
@@ -48,6 +58,14 @@
 (def parser-add-definition! (definition)
      (state-bind (state-modify (parser-context-add definition)) (fn (_)
      (parser-return definition))))
+
+(def parser-get-symbols ()
+     (state-bind (state-get) (fn (state)
+     (parser-return (parser-context-symbols state)))))
+
+(def parser-set-symbols! (symbols)
+     (state-bind (state-modify (parser-context-with-symbols symbols)) (fn (_)
+     (parser-return symbols))))
 
 
 (def parser-sequence (list)
