@@ -67,23 +67,17 @@
             (List _ range)
                 (parser-error (MalformedTypeError range))))
 
-(def sexp-to-complex-constructor (id name types range)
-     (parser-bind   (parser-sequence (list-map sexp-to-type types))  (fn (types)
-     (parser-return (ComplexConstructor id name types range)))))
-
 (def sexp-to-constructor-definition (constructor)
      (match constructor
             (Symbol id name range)
                 (parser-return (SimpleConstructor id name range))
-            (List (Cons (Symbol id name __) types) range)
-                (sexp-to-complex-constructor id name types range)
+            (List (Cons (Symbol id name _) types) range)
+                (parser-bind   (parser-sequence (list-map sexp-to-type types)) (fn (types)
+                (parser-return (ComplexConstructor id name types range))))
             (Integer _ range)
                 (parser-error (MalformedConstructorError range))
             (List _ range)
                 (parser-error (MalformedConstructorError range))))
-
-(def sexp-to-constructor-definitions (constructors)
-     (parser-sequence (list-map sexp-to-constructor-definition constructors)))
 
 (def sexp-to-type-parameter (sexp)
      (match sexp
@@ -108,21 +102,14 @@
             (List _ range)
                 (parser-error (MalformedTypeError range))))
 
-(def sexp-to-arguments (arguments)
-     (parser-sequence (list-map symbol-to-string arguments)))
-
-(def sexp-to-function-body (range rest)
+(def sexp-to-lambda (sexp-to-expression rest range)
      (match rest
             (Cons (List arguments _) (Cons expression Empty))
-                (parser-return (Pair arguments expression))
+                (parser-bind   (parser-sequence (list-map symbol-to-string arguments))  (fn (arguments)
+                (parser-bind   (sexp-to-expression expression)                          (fn (expression)
+                (parser-return (Lambda arguments expression range))))))
             _
                 (parser-error (MalformedFunctionDefinitionError range))))
- 
-(def sexp-to-lambda (sexp-to-expression rest range)
-     (parser-bind   (sexp-to-function-body range rest)      (fn (body)
-     (parser-bind   (sexp-to-arguments (pair-left body))    (fn (arguments)
-     (parser-bind   (sexp-to-expression (pair-right body))  (fn (expression)
-     (parser-return (Lambda arguments expression range)))))))))
 
 (def sexp-to-function-application (sexp-to-expression range expressions)
      (parser-bind (parser-sequence (list-map sexp-to-expression expressions)) (fn (expressions)
@@ -204,17 +191,18 @@
                        _      (sexp-to-list-expression sexp-to-expression expressions range))))
 
 (def sexp-to-function-definition (name-symbol rest range constructor)
-     (parser-bind   (sexp-to-function-body range rest)                  (fn (body)
-     (parser-bind   (sexp-to-arguments (pair-left body))                (fn (arguments)
-     (parser-bind   (sexp-to-expression (pair-right body))              (fn (expression)
-     (parser-bind   (symbol-to-string name-symbol)                      (fn (name)
-     (parser-bind   (symbol-to-id name-symbol)                          (fn (id)
-     (parser-return (constructor id name arguments expression range)))))))))))))
+     (match (Pair name-symbol rest)
+            (Pair (Symbol id name _) (Cons (List arguments __) (Cons expression Empty)))
+                  (parser-bind   (parser-sequence (list-map symbol-to-string arguments))  (fn (arguments)
+                  (parser-bind   (sexp-to-expression expression)                          (fn (expression)
+                  (parser-return (constructor id name arguments expression range))))))
+            _
+                  (parser-error (MalformedFunctionDefinitionError range))))
 
 (def sexp-to-definition' (name rest range kind)
      (match (= kind (sym-typ))
             True
-                (parser-bind (sexp-to-constructor-definitions rest) (fn (constructors)
+                (parser-bind (parser-sequence (list-map sexp-to-constructor-definition rest))  (fn (constructors)
                 (sexp-to-type-definition name constructors range)))
             False
      (match (= kind (sym-def))
