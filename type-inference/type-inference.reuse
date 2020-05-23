@@ -48,7 +48,7 @@
 
 (def constraints-expression (expression)
      (match expression
-            (Identifier name _)
+            (Identifier name)
                 (constraints-identifier name)
             (IntegerConstant integer _)
                 (constraints-integer-constant integer)

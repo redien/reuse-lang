@@ -13,7 +13,7 @@
                             (IntegerPattern       int32 meta)
                             (ConstructorPattern   string (list (pattern meta)) meta))
 (typ (expression meta)      (IntegerConstant      int32 meta)
-                            (Identifier           int32 string meta)
+                            (Identifier           ast-sym)
                             (Lambda               (list string)
                                                   (expression meta)
                                                   meta)
@@ -49,6 +49,13 @@
                 name
             (FunctionDefinition (Sym _ name __ ___) ____ _____ ______)
                 name))
+
+(def definition-module (definition)
+     (match definition
+            (TypeDefinition (Sym _ __ module ___) ____ _____ ______)
+                module
+            (FunctionDefinition (Sym _ __ module ___) ____ _____ ______)
+                module))
 
 (def constructor-id (constructor)
      (match constructor
@@ -102,9 +109,9 @@
 
 (def over-identifiers (f expression)
      (match expression
-            (Identifier id name range)
+            (Identifier (Sym id name module range))
                 (result-bind   (f name)                                (fn (name)
-                (result-return (Identifier id name range))))
+                (result-return (Identifier (Sym id name module range)))))
             (Lambda arguments expression range)
                 (result-bind   (over-identifiers f expression)         (fn (expression)
                 (result-bind   (result-concat (list-map f arguments))  (fn (arguments)

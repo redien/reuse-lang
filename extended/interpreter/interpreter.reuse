@@ -104,7 +104,7 @@
      (match expression
             (IntegerConstant value _)
                 (return (ValueInteger value))
-            (Identifier id name _)
+            (Identifier (Sym id name _ __))
                 (match (scope-get name scope)
                        (Some value)
                             (return value)

@@ -176,7 +176,7 @@
                          False  (sexp-to-function-application sexp-to-expression range expressions))))))
             _  (sexp-to-function-application sexp-to-expression range expressions)))
 
-(def sexp-to-expression (sexp)
+(def sexp-to-expression (module sexp)
      (match sexp
             (Integer integer range)
                 (parser-return (IntegerConstant integer range))
@@ -184,17 +184,17 @@
                 (parser-bind (parser-constructor? id) (fn (constructor?)
                 (parser-return (match constructor?
                                       True   (Constructor id symbol-name Empty range)
-                                      False  (Identifier id symbol-name range)))))
+                                      False  (Identifier (Sym id symbol-name module range))))))
             (List expressions range)
                 (match expressions
                        Empty  (parser-error (MalformedExpressionError range))
-                       _      (sexp-to-list-expression sexp-to-expression expressions range))))
+                       _      (sexp-to-list-expression (sexp-to-expression module) expressions range))))
 
 (def sexp-to-function-definition (module name-symbol rest range)
      (match (Pair name-symbol rest)
             (Pair (Symbol id name sym-range) (Cons (List arguments __) (Cons expression Empty)))
                   (parser-bind   (parser-sequence (list-map symbol-to-string arguments))  (fn (arguments)
-                  (parser-bind   (sexp-to-expression expression)                          (fn (expression)
+                  (parser-bind   (sexp-to-expression module expression)                   (fn (expression)
                   (parser-return (FunctionDefinition (Sym id name module sym-range) arguments expression range))))))
             _
                   (parser-error (MalformedFunctionDefinitionError range))))
@@ -326,7 +326,7 @@
      (match expression
             (IntegerConstant integer range)
                 (Integer integer range)
-            (Identifier id string range)
+            (Identifier (Sym id string _ range))
                 (Symbol id string range)
             (Lambda arguments expression range)
                 (List (list (Symbol 0 (data-fn) range)
