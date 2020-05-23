@@ -14,7 +14,7 @@
              MalformedSexpTooManyClosingBrackets    (data-MalformedSexpTooManyClosingBrackets )))
 
 (def reuse-main (stdin)
-     ((pipe (parse-sexps (keywords))
+     ((pipe (parse-sexps (Pair 0 (keywords)))
             (parse-definitions! ModuleSelf)
             parser-run
             (result-either (. stringify-sexps definitions-to-sexps)

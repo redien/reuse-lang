@@ -25,13 +25,18 @@
 (def symbol-range (start end)
      (Range (indexed-iterator-index start) (indexed-iterator-index end)))
 
-(def intern-string (iterator next-iterator name symbols next)
-     (match (dictionary-get name symbols)
-          (Some (Pair id name))
-               (next next-iterator symbols (Symbol id name (symbol-range iterator next-iterator)))
-          None
-               (match (indexed-iterator-index iterator)
-                      id  (next next-iterator (dictionary-set name (Pair id name) symbols) (Symbol id name (symbol-range iterator next-iterator))))))
+(def intern-string (iterator next-iterator name symbol-state next)
+     (match symbol-state
+            (Pair id symbols)
+                  (match (dictionary-get name symbols)
+                         (Some (Pair id name))
+                               (next next-iterator
+                                     symbol-state
+                                     (Symbol id name (symbol-range iterator next-iterator)))
+                         None
+                               (next next-iterator
+                                     (Pair (+ id 1) (dictionary-set name (Pair id name) symbols))
+                                     (Symbol id name (symbol-range iterator next-iterator))))))
 
 (def parse-symbol (iterator symbols next end)
      (match (string-collect-from-indexed-iterator atom-character? iterator)
