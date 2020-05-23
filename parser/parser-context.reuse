@@ -1,26 +1,27 @@
 
 (typ (parser-context definition)
-     (ParserContext (pair int32 (dictionary (pair int32 string))) (dictionary definition)))
+     (ParserContext (pair int32 (dictionary (pair int32 string)))
+                    (array definition)))
 
-(def parser-context-add-constructors (definition dictionary)
+(def parser-context-add-constructors (definition array)
      (match definition
             (TypeDefinition _ __ ___ ____ constructors _____)
-                (list-foldl (fn (constructor dictionary)
-                                (dictionary-set (constructor-name constructor) definition dictionary))
-                            dictionary
+                (list-foldl (fn (constructor array)
+                                (array-set (constructor-id constructor) definition array))
+                            array
                             constructors)
             _
-                dictionary))
+                array))
 
 (def parser-context-add (definition context)
      (match context
             (ParserContext symbols constructors)
                 (ParserContext symbols (parser-context-add-constructors definition constructors))))
 
-(def parser-context-is-name-constructor? (name context)
+(def parser-context-constructor? (id context)
      (match context
             (ParserContext _ constructors)
-                (match (dictionary-get name constructors)
+                (match (array-get id constructors)
                        (Some _)  True
                        None      False)))
 
@@ -36,7 +37,7 @@
 
 
 (def parser-run (symbols parser)
-     (match (state-run (ParserContext (Pair 0 symbols) (dictionary-empty)) parser)
+     (match (state-run (ParserContext (Pair 0 symbols) (array-empty)) parser)
             (Pair _ result)  result))
 
 (def parser-return (value)
@@ -53,7 +54,7 @@
 
 (def parser-constructor? (name)
      (state-bind (state-get) (fn (context)
-     (parser-return (parser-context-is-name-constructor? name context)))))
+     (parser-return (parser-context-constructor? name context)))))
 
 (def parser-add-definition! (definition)
      (state-bind (state-modify (parser-context-add definition)) (fn (_)

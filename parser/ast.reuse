@@ -53,10 +53,10 @@
             (FunctionDefinition _ __ name ___ ____ _____)
                 name))
 
-(def constructor-name (constructor)
+(def constructor-id (constructor)
      (match constructor
-            (ComplexConstructor _ name __ ___)  name
-            (SimpleConstructor _ name __)       name))
+            (ComplexConstructor id _ __ ___)  id
+            (SimpleConstructor id _ __)       id))
 
 (def over-match-pair-expression (f pair)
      (match pair

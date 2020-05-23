@@ -115,8 +115,8 @@
      (parser-bind (parser-sequence (list-map sexp-to-expression expressions)) (fn (expressions)
      (parser-return (FunctionApplication expressions range)))))
 
-(def to-constructor-or-capture (range name)
-     (parser-bind (parser-constructor? name) (fn (constructor?)
+(def to-constructor-or-capture (range id name)
+     (parser-bind (parser-constructor? id) (fn (constructor?)
      (parser-return (match constructor?
                            True  (ConstructorPattern name Empty range)
                            False (Capture name range))))))
@@ -131,8 +131,8 @@
                 (parser-error (MalformedExpressionError range))
             (Integer integer range)
                 (parser-return (IntegerPattern integer range))
-            (Symbol _ name range)
-                (to-constructor-or-capture range name)))
+            (Symbol id name range)
+                (to-constructor-or-capture range id name)))
 
 (def sexp-to-match-pair (sexp-to-expression range pair)
      (match pair
@@ -170,7 +170,7 @@
                   (match (= id (sym-match))
                          True   (sexp-to-match sexp-to-expression range rest)
                          False
-                  (parser-bind (parser-constructor? symbol-name) (fn (constructor?)
+                  (parser-bind (parser-constructor? id) (fn (constructor?)
                   (match constructor?
                          True   (sexp-to-constructor sexp-to-expression range id symbol-name rest)
                          False  (sexp-to-function-application sexp-to-expression range expressions))))))
@@ -181,7 +181,7 @@
             (Integer integer range)
                 (parser-return (IntegerConstant integer range))
             (Symbol id symbol-name range)
-                (parser-bind (parser-constructor? symbol-name) (fn (constructor?)
+                (parser-bind (parser-constructor? id) (fn (constructor?)
                 (parser-return (match constructor?
                                       True   (Constructor id symbol-name Empty range)
                                       False  (Identifier id symbol-name range)))))
