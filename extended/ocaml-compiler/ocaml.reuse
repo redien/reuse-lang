@@ -187,10 +187,10 @@
 
 (def translate-type (translate-types parameters type)
      (match type
-            (SimpleType name _)
-                (translate-simple-type name parameters)
-            (ComplexType name types _)
-                ((translate-complex-types translate-types name) types)
+            (SimpleType sym)
+                (translate-simple-type (symbol-name sym) parameters)
+            (ComplexType sym types _)
+                ((translate-complex-types translate-types (symbol-name sym)) types)
             (FunctionType argument-types return-type _)
                 ((translate-function-type translate-types return-type) argument-types)))
 

@@ -51,9 +51,9 @@
             (List _ range)
                 (parser-error  (MalformedSymbolError range))))
 
-(def sexp-to-complex-type (sexp-to-type name parameters range)
+(def sexp-to-complex-type (sexp-to-type sym parameters range)
      (parser-bind   (parser-sequence (list-map sexp-to-type parameters))  (fn (sub-types)
-     (parser-return (ComplexType name sub-types range)))))
+     (parser-return (ComplexType sym sub-types range)))))
 
 (def sexp-to-function-type (sexp-to-type parameters range)
      (match parameters
@@ -66,16 +66,18 @@
 
 (def sexp-to-type (type)
      (match type
-            (List (Cons (Symbol id name __) parameters) range)
-                (match (= id (sym-fn))
+            (List (Cons symbol parameters) range)
+                (parser-bind   (symbol-to-sym symbol)  (fn (sym)
+                (match (= (symbol-id sym) (sym-fn))
                         True   (sexp-to-function-type sexp-to-type parameters range)
-                        False  (sexp-to-complex-type sexp-to-type name parameters range))
-            (Symbol _ name range)
-                (parser-return (SimpleType name range))
+                        False  (sexp-to-complex-type sexp-to-type sym parameters range))))
             (Integer _ range)
                 (parser-error (MalformedTypeError range))
             (List _ range)
-                (parser-error (MalformedTypeError range))))
+                (parser-error (MalformedTypeError range))
+            symbol
+                (parser-bind (symbol-to-sym symbol) (fn (sym)
+                (parser-return (SimpleType sym))))))
 
 (def sexp-to-constructor-definition (constructor)
      (match constructor
@@ -282,15 +284,15 @@
 
 (def type-to-sexp (types-to-sexp type)
      (match type
-            (SimpleType name range)
-                (Symbol 0 name range)
+            (SimpleType sym)
+                (sym-to-symbol sym)
             (FunctionType arg-types return-type range)
                 (List (list (Symbol 0 (data-fn) range)
                             (List (types-to-sexp arg-types) range)
                             (type-to-sexp types-to-sexp return-type))
                       range)
-            (ComplexType name types range)
-                (List (Cons (Symbol 0 name range) (types-to-sexp types)) range)))
+            (ComplexType sym types range)
+                (List (Cons (sym-to-symbol sym) (types-to-sexp types)) range)))
 
 (def types-to-sexp (types)
      (list-map (type-to-sexp types-to-sexp) types))

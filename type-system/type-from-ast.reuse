@@ -13,10 +13,10 @@
 
 (def type-from-ast-type (parameters ast-type)
      (match ast-type
-            (SimpleType name _)
-                                                         (match (lookup-type-parameter name parameters)
-                                                                (Some type)  type
-                                                                None         (ConstType name Empty))
+            (SimpleType sym)
+                        (match (lookup-type-parameter (symbol-name sym) parameters)
+                               (Some type)  type
+                               None         (ConstType (symbol-name sym) Empty))
             (ComplexType name ast-types _)               (ConstType name (list-map (type-from-ast-type parameters) ast-types))
             (FunctionType argument-types return-type _)  (FnType (list-map (type-from-ast-type parameters) argument-types)
                                                                  (type-from-ast-type parameters return-type))))
