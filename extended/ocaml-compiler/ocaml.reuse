@@ -125,7 +125,7 @@
 
 (def translate-function-application (translate-expression expressions)
      (match expressions
-            (Cons (Identifier (Sym id name _ __)) rest)
+            (Cons (Variable (Sym id name _ __)) rest)
                     (match (string-equal? name (data-int32-less-than))
                            True  (translate-less-than translate-expression rest)
                            False (translate-function-application' translate-expression expressions))
@@ -156,7 +156,7 @@
                 (wrap-in-brackets (translate-function-application translate-expression expressions))
             (IntegerConstant integer _)
                 (wrap-in-brackets (string-concat (string-from-int32 integer) (string-of-char 108)))
-            (Identifier (Sym id name _ __))
+            (Variable (Sym id name _ __))
                 (translate-identifier name)
             (Match expression rules _)
                 (wrap-in-brackets ((translate-match-expression translate-expression expression) rules))))

@@ -203,7 +203,7 @@
                 (parser-bind (parser-get-module)      (fn (module)
                 (parser-return (match constructor?
                                       True   (Constructor (Sym id symbol-name module range) Empty range)
-                                      False  (Identifier (Sym id symbol-name module range))))))))
+                                      False  (Variable (Sym id symbol-name module range))))))))
             (List expressions range)
                 (match expressions
                        Empty  (parser-error (MalformedExpressionError range))
@@ -352,7 +352,7 @@
      (match expression
             (IntegerConstant integer range)
                 (Integer integer range)
-            (Identifier (Sym id string _ range))
+            (Variable (Sym id string _ range))
                 (Symbol id string range)
             (Lambda arguments expression range)
                 (List (list (Symbol 0 (data-fn) range)

@@ -13,7 +13,7 @@
                             (IntegerPattern       int32 range)
                             (ConstructorPattern   ast-sym (list pattern) range))
 (typ expression             (IntegerConstant      int32 range)
-                            (Identifier           ast-sym)
+                            (Variable             ast-sym)
                             (Lambda               (list ast-sym)
                                                   expression
                                                   range)
@@ -114,9 +114,9 @@
 
 (def over-identifiers (f expression)
      (match expression
-            (Identifier name)
+            (Variable name)
                 (result-bind   (f name)                                (fn (name)
-                (result-return (Identifier name))))
+                (result-return (Variable name))))
             (Lambda arguments expression range)
                 (result-bind   (over-identifiers f expression)         (fn (expression)
                 (result-bind   (result-concat (list-map f arguments))  (fn (arguments)

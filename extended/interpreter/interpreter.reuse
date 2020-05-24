@@ -104,7 +104,7 @@
      (match expression
             (IntegerConstant value _)
                 (return (ValueInteger value))
-            (Identifier sym)
+            (Variable sym)
                 (match (scope-get (symbol-name sym) scope)
                        (Some value)
                             (return value)

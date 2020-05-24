@@ -15,7 +15,7 @@
 
 (def expression-is-symbol? (symbol-id expression)
      (match expression
-            (Identifier (Sym id _ __ ___))
+            (Variable (Sym id _ __ ___))
                 (= symbol-id id)
             _
                 False))
@@ -42,7 +42,7 @@
      (Lambda (list (Sym (sym-sparkle-x) (data-sparkle-x) module range))
              (list-foldl (fn (expression composed)
                              (FunctionApplication (list expression composed) range))
-                         (Identifier (Sym (sym-sparkle-x) (data-sparkle-x) module range))
+                         (Variable (Sym (sym-sparkle-x) (data-sparkle-x) module range))
                          expressions)
              range))
 
