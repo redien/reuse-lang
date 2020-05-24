@@ -14,6 +14,13 @@
             True   (string-of-char char)
             False  (string-prepend 95 (string-from-int32 char))))
 
+(def add-identifiers (identifiers offset dictionary)
+     (match identifiers
+            (Cons identifier rest)
+                (add-identifiers rest (- offset 1) (dictionary-set (identifier) (Pair offset (identifier)) dictionary))
+            Empty
+                dictionary))
+
 (def error-to-string (error)
      (match error
             (MalformedDefinitionError range)

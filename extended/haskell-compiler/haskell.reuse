@@ -5,28 +5,17 @@
 (def prefix-constructor (constructor)
      (string-prepend 67 constructor))
 
-(def reserved-strings ()
-     (dictionary-of (list
-        (Pair (data-if) True) (Pair (data-then) True)
-        (Pair (data-else) True) (Pair (data-with) True)
-        (Pair (data-of) True) (Pair (data-end) True)
-        (Pair (data-in) True) (Pair (data-type) True)
-        (Pair (data-let) True) (Pair (data-class) True)
-        (Pair (data-do) True) (Pair (data-module) True)
-        (Pair (data-data) True) (Pair (data-case) True)
-        (Pair (data-deriving) True) (Pair (data-family) True)
-        (Pair (data-default) True) (Pair (data-forall) True)
-        (Pair (data-foreign) True) (Pair (data-import) True)
-        (Pair (data-instance) True) (Pair (data-infix) True)
-        (Pair (data-infixl) True) (Pair (data-infixr) True)
-        (Pair (data-newtype) True) (Pair (data-where) True)
-     )))
+(def reserved-identifiers ()
+     (list data-if data-then data-else data-with data-of data-end data-in data-type data-let
+           data-class data-do data-module data-data data-case data-deriving data-family data-default
+           data-forall data-foreign data-import data-instance data-infix data-infixl data-infixr
+           data-newtype data-where))
 
-(def identifier-is-reserved? (identifier)
-     (dictionary-get-or (symbol-name identifier) False (reserved-strings)))
+(def identifier-is-reserved? (id)
+     (and (<= id -2000) (> id -3000)))
 
 (def escape-identifier (identifier)
-     (match (identifier-is-reserved? identifier)
+     (match (identifier-is-reserved? (symbol-id identifier))
             True   (string-prepend 95 (symbol-name identifier))
             False  (string-flatmap escape-char (symbol-name identifier))))
 
@@ -281,4 +270,5 @@
 (def internal-symbols ()
      (dictionary-set (data-int32-less-than) (Pair (sym-int32-less-than) (data-int32-less-than))
      (dictionary-set (data-int32) (Pair (sym-int32) (data-int32))
-     (with-local-transform-keywords (keywords)))))
+     (add-identifiers (reserved-identifiers) -2000
+     (with-local-transform-keywords (keywords))))))
