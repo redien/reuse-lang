@@ -1,6 +1,7 @@
 
 (typ (parser-context definition)
-     (ParserContext (pair int32 (dictionary (pair int32 string)))
+     (ParserContext module-reference
+                    (pair int32 (dictionary (pair int32 string)))
                     (array definition)))
 
 (def parser-context-add-constructors (definition array)
@@ -15,29 +16,39 @@
 
 (def parser-context-add (definition context)
      (match context
-            (ParserContext symbols constructors)
-                (ParserContext symbols (parser-context-add-constructors definition constructors))))
+            (ParserContext module symbols constructors)
+                (ParserContext module symbols (parser-context-add-constructors definition constructors))))
 
 (def parser-context-constructor? (id context)
      (match context
-            (ParserContext _ constructors)
+            (ParserContext _ __ constructors)
                 (match (array-get id constructors)
                        (Some _)  True
                        None      False)))
 
 (def parser-context-symbols (context)
      (match context
-            (ParserContext symbols _)
+            (ParserContext _ symbols __)
                 symbols))
 
 (def parser-context-with-symbols (symbols context)
      (match context
-            (ParserContext _ constructors)
-                (ParserContext symbols constructors)))
+            (ParserContext module _ constructors)
+                (ParserContext module symbols constructors)))
+
+(def parser-context-module (context)
+     (match context
+            (ParserContext module _ __)
+                module))
+
+(def parser-context-with-module (module context)
+     (match context
+            (ParserContext _ symbols constructors)
+                (ParserContext module symbols constructors)))
 
 
 (def parser-run (symbols parser)
-     (match (state-run (ParserContext (Pair 0 symbols) (array-empty)) parser)
+     (match (state-run (ParserContext ModuleSelf (Pair 0 symbols) (array-empty)) parser)
             (Pair _ result)  result))
 
 (def parser-return (value)
@@ -68,6 +79,13 @@
      (state-bind (state-modify (parser-context-with-symbols symbols)) (fn (_)
      (parser-return symbols))))
 
+(def parser-get-module ()
+     (state-bind (state-get) (fn (state)
+     (parser-return (parser-context-module state)))))
+
+(def parser-set-module! (module)
+     (state-bind (state-modify (parser-context-with-module module)) (fn (_)
+     (parser-return module))))
 
 (def parser-sequence (list)
      (list-foldr (fn (a b)
