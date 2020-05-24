@@ -41,6 +41,16 @@
             (List _ range)
                 (parser-error  (MalformedSymbolError range))))
 
+(def symbol-to-sym (symbol)
+     (match symbol
+            (Symbol id name range)
+                (parser-bind (parser-get-module) (fn (module)
+                (parser-return (Sym id name module range))))
+            (Integer _ range)
+                (parser-error  (MalformedSymbolError range))
+            (List _ range)
+                (parser-error  (MalformedSymbolError range))))
+
 (def sexp-to-complex-type (sexp-to-type name parameters range)
      (parser-bind   (parser-sequence (list-map sexp-to-type parameters))  (fn (sub-types)
      (parser-return (ComplexType name sub-types range)))))
@@ -119,24 +129,25 @@
      (parser-bind (parser-sequence (list-map sexp-to-expression expressions)) (fn (expressions)
      (parser-return (FunctionApplication expressions range)))))
 
-(def to-constructor-or-capture (range id name)
-     (parser-bind (parser-constructor? id) (fn (constructor?)
+(def to-constructor-or-capture (symbol)
+     (parser-bind (symbol-to-sym symbol)                 (fn (sym)
+     (parser-bind (parser-constructor? (symbol-id sym))  (fn (constructor?)
      (parser-return (match constructor?
-                           True  (ConstructorPattern name Empty range)
-                           False (Capture name range))))))
+                           True  (ConstructorPattern sym Empty (symbol-range sym))
+                           False (Capture sym))))))))
 
 (def sexp-to-pattern (sexp)
      (match sexp
             (List (Cons name rest) range)
                 (parser-bind   (parser-sequence (list-map sexp-to-pattern rest)) (fn (patterns)
-                (parser-bind   (symbol-to-string name)                           (fn (name)
-                (parser-return (ConstructorPattern name patterns range))))))
+                (parser-bind   (symbol-to-sym name)                              (fn (sym)
+                (parser-return (ConstructorPattern sym patterns range))))))
             (List Empty range)
                 (parser-error (MalformedExpressionError range))
             (Integer integer range)
                 (parser-return (IntegerPattern integer range))
-            (Symbol id name range)
-                (to-constructor-or-capture range id name)))
+            symbol
+                (to-constructor-or-capture symbol)))
 
 (def sexp-to-match-pair (sexp-to-expression range pair)
      (match pair
@@ -321,14 +332,14 @@
 
 (def pattern-to-sexp (pattern)
      (match pattern
-            (ConstructorPattern name Empty range)
-                (Symbol 0 name range)
-            (ConstructorPattern name patterns range)
-                (List (Cons (Symbol 0 name range) (list-map pattern-to-sexp patterns)) range)
+            (ConstructorPattern sym Empty _)
+                (sym-to-symbol sym)
+            (ConstructorPattern sym patterns range)
+                (List (Cons (sym-to-symbol sym) (list-map pattern-to-sexp patterns)) range)
             (IntegerPattern value range)
                 (Integer value range)
-            (Capture name range)
-                (Symbol 0 name range)))
+            (Capture sym)
+                (sym-to-symbol sym)))
 
 (def match-pair-to-sexp (expression-to-sexp pair)
      (match pair

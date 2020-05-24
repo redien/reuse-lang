@@ -93,14 +93,14 @@
 
 (def translate-pattern (pattern)
      (match pattern
-            (Capture name _)
-                (escape-identifier name)
+            (Capture sym)
+                (escape-identifier (symbol-name sym))
             (IntegerPattern integer _)
                 (join (list (string-from-int32 integer) (string-of-char 108)))
-            (ConstructorPattern name Empty _)
-                (prefix-constructor (escape-identifier name))
-            (ConstructorPattern name patterns _)
-                ((translate-constructor translate-pattern name) patterns)))
+            (ConstructorPattern sym Empty _)
+                (prefix-constructor (escape-identifier (symbol-name sym)))
+            (ConstructorPattern sym patterns _)
+                ((translate-constructor translate-pattern (symbol-name sym)) patterns)))
 
 (def translate-rule (translate-expression rule)
      (match rule

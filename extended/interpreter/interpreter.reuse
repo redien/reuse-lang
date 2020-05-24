@@ -13,10 +13,10 @@
      (match (Pair value pattern)
             (Pair (ValueInteger a) (IntegerPattern b _2))
                 (= a b)
-            (Pair (ValueConstructor name arguments) (ConstructorPattern name-pattern patterns _2))
-                (and (string-equal? name name-pattern)
+            (Pair (ValueConstructor name arguments) (ConstructorPattern pattern-symbol patterns _2))
+                (and (string-equal? name (symbol-name pattern-symbol))
                      (list-every? (pair-map pattern-matches-value) (list-zip arguments patterns)))
-            (Pair _1 (Capture _2 _3))
+            (Pair _1 (Capture _2))
                 True
             _
                 False))
@@ -27,8 +27,8 @@
                 Empty
             (Pair (ValueConstructor _1 arguments) (ConstructorPattern _2 patterns _3))
                 (list-flatmap case-capture (list-zip arguments patterns))
-            (Pair value (Capture name _1))
-                (list (Pair name value))
+            (Pair value (Capture sym))
+                (list (Pair (symbol-name sym) value))
             _
                 Empty))
 
