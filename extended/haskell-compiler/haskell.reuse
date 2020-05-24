@@ -274,3 +274,6 @@
                                (data-imports)))
             (string-join (string-of-char 10)))
          definitions))
+
+(def internal-symbols ()
+     (with-local-transform-keywords (keywords)))

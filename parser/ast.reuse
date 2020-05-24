@@ -47,6 +47,9 @@
      (match sym
             (Sym _ __ ___ range)  range))
 
+(def symbol-equal? (a b)
+     (= (symbol-id a) (symbol-id b)))
+
 (def definition-range (definition)
      (match definition
             (TypeDefinition _ __ ___ range)      range
@@ -66,6 +69,11 @@
      (match constructor
             (ComplexConstructor sym _ __)  (symbol-id sym)
             (SimpleConstructor sym)        (symbol-id sym)))
+
+(def type-parameter-symbol (parameter)
+     (match parameter
+            (UniversalParameter sym)    sym
+            (ExistentialParameter sym)  sym))
 
 (def over-match-pair-expression (f pair)
      (match pair

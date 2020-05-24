@@ -14,7 +14,7 @@
 (def compile (file-entries module-name parameters)
      (match (Pair (split-source-files file-entries) parameters)
             (Pair (Pair target-language-files source-files) (CompilerParameters as-minimal use-stdlib))
-                  (match (parse-source-files as-minimal source-files)
+                  (match (parse-source-files (internal-symbols) as-minimal source-files)
                          (Result definitions)
                               (result-return (string-concat (generate-source module-name definitions)
                                                             (join-files target-language-files)))

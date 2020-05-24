@@ -1,6 +1,8 @@
 
-(def prefix-type-variable (string)
-     (string-prepend 39 (string-prepend 84 string)))
+(def sym-int32-less-than () -10000)
+
+(def prefix-type-variable (identifier)
+     (string-prepend 39 (string-prepend 84 (symbol-name identifier))))
 
 (def prefix-constructor (constructor)
      (string-prepend 67 constructor))
@@ -125,8 +127,8 @@
 
 (def translate-function-application (translate-expression expressions)
      (match expressions
-            (Cons (Variable (Sym id name _ __)) rest)
-                    (match (string-equal? name (data-int32-less-than))
+            (Cons (Variable sym) rest)
+                    (match (= (symbol-id sym) (sym-int32-less-than))
                            True  (translate-less-than translate-expression rest)
                            False (translate-function-application' translate-expression expressions))
             _
@@ -161,54 +163,50 @@
             (Match expression rules _)
                 (wrap-in-brackets ((translate-match-expression translate-expression expression) rules))))
 
-(def translate-function-definition (name arguments expression)
+(def translate-function-definition (identifier arguments expression)
      (join (list (data-let-rec)
-                 name
+                 (escape-identifier identifier)
                  (data-equals)
                  (translate-lambda translate-expression arguments expression)
                  (data-definition-end))))
 
 (def translate-simple-type (identifier parameters)
-     (match (list-any? (string-equal? (symbol-name identifier)) parameters)
+     (match (list-any? (. (symbol-equal? identifier) type-parameter-symbol) parameters)
             False  (escape-identifier identifier)
-            True   (prefix-type-variable (symbol-name identifier))))
+            True   (prefix-type-variable identifier)))
 
-(def translate-complex-types (translate-types name)
-     (pipe (translate-types (data-comma))
-           wrap-in-brackets
-           (fn (types) (list types (data-space) (escape-identifier name)))
-           join))
+(def translate-complex-types (translate-types name types)
+     ((pipe (translate-types (data-comma))
+            wrap-in-brackets
+            (fn (types) (list types (data-space) (escape-identifier name)))
+            join)
+        types))
 
-(def translate-function-type (translate-types return-type)
-     (pipe (fn (argument-types)
-               (list-concat argument-types (list return-type)))
-           (translate-types (data-arrow))
-           wrap-in-brackets))
+(def translate-function-type (translate-types return-type argument-types)
+     ((pipe (fn (argument-types)
+                (list-concat argument-types (list return-type)))
+            (translate-types (data-arrow))
+            wrap-in-brackets)
+        argument-types))
 
 (def translate-type (translate-types parameters type)
      (match type
             (SimpleType sym)
                 (translate-simple-type sym parameters)
             (ComplexType sym types _)
-                ((translate-complex-types translate-types sym) types)
+                (translate-complex-types translate-types sym types)
             (FunctionType argument-types return-type _)
-                ((translate-function-type translate-types return-type) argument-types)))
+                (translate-function-type translate-types return-type argument-types)))
 
-(def translate-types (parameters separator)
-     (pipe (list-map (translate-type (translate-types parameters) parameters))
-           (string-join separator)))
-
-(def translate-type-parameter (parameter)
-     (match parameter
-            (UniversalParameter sym)
-                (symbol-name sym)
-            (ExistentialParameter sym)
-                (symbol-name sym)))
+(def translate-types (parameters separator types)
+     ((pipe (list-map (translate-type (translate-types parameters) parameters))
+            (string-join separator))
+        types))
 
 (def translate-complex-constructor-definition (name type types parameters)
      (join (list (prefix-constructor (escape-identifier name))
                  (data-colon)
-                 ((translate-types (list-map translate-type-parameter parameters) (data-star)) types)
+                 (translate-types parameters (data-star) types)
                  (data-arrow)
                  type)))
 
@@ -219,50 +217,56 @@
             (ComplexConstructor sym types _)
                 (translate-complex-constructor-definition sym type types parameters)))
 
-(def translate-constructor-definitions (type parameters)
-     (pipe (list-map (translate-constructor-definition type parameters))
-           (string-join (data-vertical-bar))))
+(def translate-constructor-definitions (type parameters constructors)
+     ((pipe (list-map (translate-constructor-definition type parameters))
+            (string-join (data-vertical-bar)))
+        constructors))
 
 (def translate-type-parameter-for-definition (parameter)
      (match parameter
             (UniversalParameter sym)
-                (prefix-type-variable (symbol-name sym))
+                (prefix-type-variable sym)
             (ExistentialParameter _)
                 (string-empty)))
 
-(def translate-type-parameters ()
-     (pipe (list-map translate-type-parameter-for-definition)
-           (list-filter not-empty?)
-           (string-join (data-comma))))
+(def translate-type-parameters (parameters)
+     ((pipe (list-map translate-type-parameter-for-definition)
+            (list-filter not-empty?)
+            (string-join (data-comma)))
+        parameters))
 
-(def translate-type-name' (name parameters)
-     (match (string-empty? parameters)
+(def translate-type-name' (name parameter-string)
+     (match (string-empty? parameter-string)
             True
                 (escape-identifier name)
             False
-                (join (list (wrap-in-brackets parameters)
+                (join (list (wrap-in-brackets parameter-string)
                             (data-space)
                             (escape-identifier name)))))
 
 (def translate-type-name (name parameters)
-     (translate-type-name' name ((translate-type-parameters) parameters)))
+     (translate-type-name' name (translate-type-parameters parameters)))
 
 (def translate-type-definition (name parameters constructors)
      (join (list (data-type)
                  (data-space)
                  (translate-type-name name parameters)
                  (data-equals)
-                 ((translate-constructor-definitions (translate-type-name name parameters) parameters) constructors)
+                 (translate-constructor-definitions (translate-type-name name parameters) parameters constructors)
                  (data-definition-end))))
 
 (def translate-definition (definition)
      (match definition
-            (FunctionDefinition identifier arguments expression ____)
-                (translate-function-definition (escape-identifier identifier) arguments expression)
-            (TypeDefinition name parameters constructors ____)
+            (FunctionDefinition identifier arguments expression _)
+                (translate-function-definition identifier arguments expression)
+            (TypeDefinition name parameters constructors _)
                 (translate-type-definition name parameters constructors)))
 
 (def generate-source (module-name definitions)
      ((pipe (list-map translate-definition)
             (string-join (string-of-char 10)))
         definitions))
+
+(def internal-symbols ()
+     (dictionary-set (data-int32-less-than) (Pair (sym-int32-less-than) (data-int32-less-than))
+     (with-local-transform-keywords (keywords))))

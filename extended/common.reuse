@@ -73,10 +73,10 @@
             SourceFileTypeStrings  (parse-strings-file file)
             _                      (parse-reuse-file file)))
 
-(def parse-source-files (minimal? files)
+(def parse-source-files (internal-symbols minimal? files)
      ((pipe (list-map parse-source-file)
             parser-sequence
-            (parser-run (with-local-transform-keywords (keywords)))
+            (parser-run internal-symbols)
             (result-map list-flatten)
             stringify-parse-errors
             (match minimal?
