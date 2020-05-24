@@ -1,4 +1,7 @@
 
+(def sym-int32 () -10000)
+(def sym-int32-less-than () -10001)
+
 (def prefix-constructor (constructor)
      (string-prepend 67 constructor))
 
@@ -46,7 +49,7 @@
      (translate-identifier identifier))
 
 (def prefix-type (identifier)
-     (match (string-equal? (symbol-name identifier) (data-int32))
+     (match (= (symbol-id identifier) (sym-int32))
             True   (data-Int32)
             False  (string-prepend 84 (translate-identifier identifier))))
 
@@ -113,8 +116,8 @@
 
 (def translate-function-application (translate-expression expressions)
      (match expressions
-            (Cons (Variable (Sym id name _ __)) rest)
-                    (match (string-equal? name (data-int32-less-than))
+            (Cons (Variable sym) rest)
+                    (match (= (symbol-id sym) (sym-int32-less-than))
                            True  (translate-less-than translate-expression rest)
                            False (translate-function-application' translate-expression expressions))
             _
@@ -161,34 +164,37 @@
                               (translate-lambda translate-expression arguments expression)))))
 
 (def translate-simple-type (identifier parameters)
-     (match (list-any? (string-equal? (symbol-name identifier)) parameters)
+     (match (list-any? (. (symbol-equal? identifier) type-parameter-symbol) parameters)
             False  (prefix-type identifier)
             True   (prefix-type-variable identifier)))
 
-(def translate-complex-types (translate-types name)
-     (pipe (translate-types (data-space))
-           (string-concat (string-concat (prefix-type name) (data-space)))
-           wrap-in-brackets))
+(def translate-complex-types (translate-types name types)
+     ((pipe (translate-types (data-space))
+            (string-concat (string-concat (prefix-type name) (data-space)))
+            wrap-in-brackets)
+        types))
 
-(def translate-function-type (translate-types return-type)
-     (pipe (fn (argument-types)
-               (list-concat argument-types (list return-type)))
-           (translate-types (data-arrow))
-           wrap-in-brackets))
+(def translate-function-type (translate-types return-type argument-types)
+     ((pipe (fn (argument-types)
+                (list-concat argument-types (list return-type)))
+            (translate-types (data-arrow))
+            wrap-in-brackets)
+        argument-types))
 
 (def translate-type (translate-types parameters type)
      (match type
             (SimpleType sym)
                 (translate-simple-type sym parameters)
             (ComplexType sym types _)
-                ((translate-complex-types translate-types sym) types)
+                (translate-complex-types translate-types sym types)
             (FunctionType argument-types return-type _)
-                ((translate-function-type translate-types return-type) argument-types)))
+                (translate-function-type translate-types return-type argument-types)))
 
-(def translate-types (parameters f separator)
-     (pipe (list-map (pipe (translate-type (translate-types parameters (fn (x) x)) parameters)
-                           f))
-           (string-join separator)))
+(def translate-types (parameters f separator types)
+     ((pipe (list-map (pipe (translate-type (translate-types parameters id) parameters)
+                            f))
+            (string-join separator))
+        types))
 
 (def translate-type-parameter (parameter)
      (match parameter
@@ -200,10 +206,7 @@
 (def translate-complex-constructor-definition (name types parameters)
      (join (list (prefix-constructor (escape-identifier name))
                  (data-space)
-                 ((translate-types (list-map translate-type-parameter parameters)
-                                   (string-prepend 33)
-                                   (data-space))
-                    types))))
+                 (translate-types parameters (string-prepend 33) (data-space) types))))
 
 (def translate-constructor-definition (parameters constructor)
      (match constructor
@@ -276,4 +279,6 @@
          definitions))
 
 (def internal-symbols ()
-     (with-local-transform-keywords (keywords)))
+     (dictionary-set (data-int32-less-than) (Pair (sym-int32-less-than) (data-int32-less-than))
+     (dictionary-set (data-int32) (Pair (sym-int32) (data-int32))
+     (with-local-transform-keywords (keywords)))))
