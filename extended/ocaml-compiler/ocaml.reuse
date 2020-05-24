@@ -38,13 +38,13 @@
         (Pair (data-value) True) (Pair (data-to) True)
      )))
 
-(def string-is-reserved? (name)
-     (dictionary-get-or name False (reserved-strings)))
+(def identifier-is-reserved? (identifier)
+     (dictionary-get-or (symbol-name identifier) False (reserved-strings)))
 
-(def escape-identifier (name)
-     (match (string-is-reserved? name)
-            True   (string-prepend 95 name)
-            False  (string-flatmap escape-char name)))
+(def escape-identifier (identifier)
+     (match (identifier-is-reserved? identifier)
+            True   (string-prepend 95 (symbol-name identifier))
+            False  (string-flatmap escape-char (symbol-name identifier))))
 
 (def special-identifiers ()
      (dictionary-of (list
@@ -56,10 +56,10 @@
         (Pair (data-ampersand) (data-int32-and))
      )))
 
-(def translate-identifier (name)
-     (match (dictionary-get name (special-identifiers))
+(def translate-identifier (identifier)
+     (match (dictionary-get (symbol-name identifier) (special-identifiers))
             (Some translation)  translation
-            None                (escape-identifier name)))
+            None                (escape-identifier identifier)))
 
 (def translate-less-than (translate-expression expressions)
      (match expressions
@@ -80,12 +80,12 @@
             _
                 (data-compile-error)))
 
-(def translate-constructor (translator name)
+(def translate-constructor (translator identifier)
      (pipe (list-map translator)
            (string-join (data-comma))
            wrap-in-brackets
            (fn (parameters)
-               (list (prefix-constructor (escape-identifier name))
+               (list (prefix-constructor (escape-identifier identifier))
                      (data-space)
                      parameters))
            join
@@ -94,13 +94,13 @@
 (def translate-pattern (pattern)
      (match pattern
             (Capture sym)
-                (escape-identifier (symbol-name sym))
+                (escape-identifier sym)
             (IntegerPattern integer _)
                 (join (list (string-from-int32 integer) (string-of-char 108)))
             (ConstructorPattern sym Empty _)
-                (prefix-constructor (escape-identifier (symbol-name sym)))
+                (prefix-constructor (escape-identifier sym))
             (ConstructorPattern sym patterns _)
-                ((translate-constructor translate-pattern (symbol-name sym)) patterns)))
+                ((translate-constructor translate-pattern sym) patterns)))
 
 (def translate-rule (translate-expression rule)
      (match rule
@@ -135,7 +135,7 @@
 (def translate-argument-list (arguments)
      (match (list-empty? arguments)
             True  (wrap-in-brackets (string-empty))
-            False (string-join (data-space) (list-map (pipe symbol-name escape-identifier) arguments))))
+            False (string-join (data-space) (list-map escape-identifier arguments))))
 
 (def translate-lambda (translate-expression arguments expression)
      (join (list (data-fun)
@@ -149,15 +149,15 @@
             (Lambda arguments expression _)
                 (wrap-in-brackets (translate-lambda translate-expression arguments expression))
             (Constructor sym Empty _)
-                (prefix-constructor (escape-identifier (symbol-name sym)))
+                (prefix-constructor (escape-identifier sym))
             (Constructor sym expressions _)
-                ((translate-constructor translate-expression (symbol-name sym)) expressions)
+                ((translate-constructor translate-expression sym) expressions)
             (FunctionApplication expressions _)
                 (wrap-in-brackets (translate-function-application translate-expression expressions))
             (IntegerConstant integer _)
                 (wrap-in-brackets (string-concat (string-from-int32 integer) (string-of-char 108)))
-            (Variable (Sym id name _ __))
-                (translate-identifier name)
+            (Variable sym)
+                (translate-identifier sym)
             (Match expression rules _)
                 (wrap-in-brackets ((translate-match-expression translate-expression expression) rules))))
 
@@ -168,10 +168,10 @@
                  (translate-lambda translate-expression arguments expression)
                  (data-definition-end))))
 
-(def translate-simple-type (name parameters)
-     (match (list-any? (string-equal? name) parameters)
-            False  (escape-identifier name)
-            True   (prefix-type-variable name)))
+(def translate-simple-type (identifier parameters)
+     (match (list-any? (string-equal? (symbol-name identifier)) parameters)
+            False  (escape-identifier identifier)
+            True   (prefix-type-variable (symbol-name identifier))))
 
 (def translate-complex-types (translate-types name)
      (pipe (translate-types (data-comma))
@@ -188,9 +188,9 @@
 (def translate-type (translate-types parameters type)
      (match type
             (SimpleType sym)
-                (translate-simple-type (symbol-name sym) parameters)
+                (translate-simple-type sym parameters)
             (ComplexType sym types _)
-                ((translate-complex-types translate-types (symbol-name sym)) types)
+                ((translate-complex-types translate-types sym) types)
             (FunctionType argument-types return-type _)
                 ((translate-function-type translate-types return-type) argument-types)))
 
@@ -215,9 +215,9 @@
 (def translate-constructor-definition (type parameters constructor)
      (match constructor
             (SimpleConstructor sym)
-                (prefix-constructor (escape-identifier (symbol-name sym)))
+                (prefix-constructor (escape-identifier sym))
             (ComplexConstructor sym types _)
-                (translate-complex-constructor-definition (symbol-name sym) type types parameters)))
+                (translate-complex-constructor-definition sym type types parameters)))
 
 (def translate-constructor-definitions (type parameters)
      (pipe (list-map (translate-constructor-definition type parameters))
@@ -257,9 +257,9 @@
 
 (def translate-definition (definition)
      (match definition
-            (FunctionDefinition (Sym _ name __ ___) arguments expression ____)
-                (translate-function-definition (escape-identifier name) arguments expression)
-            (TypeDefinition (Sym _ name __ ___) parameters constructors ____)
+            (FunctionDefinition identifier arguments expression ____)
+                (translate-function-definition (escape-identifier identifier) arguments expression)
+            (TypeDefinition name parameters constructors ____)
                 (translate-type-definition name parameters constructors)))
 
 (def generate-source (module-name definitions)

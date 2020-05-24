@@ -7,7 +7,7 @@ pipe-operator       | |>
 colon               | : 
 semicolon           | ; 
 star                | * 
-Tint32              |Tint32
+int32               |int32
 Int32               |Int32
 int32-plus          |_int32_add
 int32-multiply      |_int32_mul
