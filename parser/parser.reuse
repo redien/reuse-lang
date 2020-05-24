@@ -81,12 +81,12 @@
             (List _ range)
                 (parser-error (MalformedConstructorError range))))
 
-(def sexp-to-type-parameter (sexp)
+(def sexp-to-type-parameter (module sexp)
      (match sexp
-            (List (Cons _ (Cons (Symbol __ name range) Empty)) ___)
-                (parser-return (ExistentialParameter name range))
-            (Symbol _ name range)
-                (parser-return (UniversalParameter name range))
+            (List (Cons _ (Cons (Symbol id name range) Empty)) ___)
+                (parser-return (ExistentialParameter (Sym id name module range)))
+            (Symbol id name range)
+                (parser-return (UniversalParameter (Sym id name module range)))
             (Integer _ range)
                 (parser-error (MalformedDefinitionError range))
             (List _ range)
@@ -95,8 +95,8 @@
 (def sexp-to-type-definition (type-name constructors range)
      (match type-name
             (List (Cons (Symbol id name sym-range) parameters) ____)
-                (parser-bind   (parser-get-module)                                             (fn (module)
-                (parser-bind   (parser-sequence (list-map sexp-to-type-parameter parameters))  (fn (parameters)
+                (parser-bind   (parser-get-module)                                                      (fn (module)
+                (parser-bind   (parser-sequence (list-map (sexp-to-type-parameter module) parameters))  (fn (parameters)
                 (parser-return (TypeDefinition (Sym id name module sym-range) parameters constructors range))))))
             (Symbol id name sym-range)
                 (parser-bind   (parser-get-module)                                             (fn (module)
@@ -296,10 +296,10 @@
 
 (def type-parameter-to-sexp (parameter)
      (match parameter
-            (ExistentialParameter name range)
-                (List (list (Symbol 0 (data-exists) range) (Symbol 0 name range)) range)
-            (UniversalParameter name range)
-                (Symbol 0 name range)))
+            (ExistentialParameter sym)
+                (List (list (Symbol 0 (data-exists) (symbol-range sym)) (sym-to-symbol sym)) (symbol-range sym))
+            (UniversalParameter sym)
+                (sym-to-symbol sym)))
 
 (def type-name-to-sexp (id range name parameters)
      (match parameters

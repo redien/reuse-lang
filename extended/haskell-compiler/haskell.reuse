@@ -191,10 +191,10 @@
 
 (def translate-type-parameter (parameter)
      (match parameter
-            (UniversalParameter name _)
-                name
-            (ExistentialParameter name _)
-                name))
+            (UniversalParameter sym)
+                (symbol-name sym)
+            (ExistentialParameter sym)
+                (symbol-name sym)))
 
 (def translate-complex-constructor-definition (name types parameters)
      (join (list (prefix-constructor (escape-identifier name))
@@ -218,11 +218,11 @@
 (def translate-universal-parameters (parameters)
      (list-foldl (fn (parameter s)
                      (match parameter
-                            (UniversalParameter name _)
+                            (UniversalParameter sym)
                                 (join (list s
                                             (data-space)
-                                            (prefix-type-variable name)))
-                            (ExistentialParameter _ __)
+                                            (prefix-type-variable (symbol-name sym))))
+                            (ExistentialParameter _)
                                 s))
                  (string-empty)
                  parameters))
@@ -230,13 +230,13 @@
 (def translate-existential-parameters (parameters)
      (list-foldl (fn (parameter s)
                      (match parameter
-                            (UniversalParameter _ __)
+                            (UniversalParameter _)
                                 s
-                            (ExistentialParameter name __)
+                            (ExistentialParameter sym)
                                 (join (list s
                                             (data-forall)
                                             (data-space)
-                                            (prefix-type-variable name)
+                                            (prefix-type-variable (symbol-name sym))
                                             (data-dot)
                                             (data-space)))))
                  (string-empty)

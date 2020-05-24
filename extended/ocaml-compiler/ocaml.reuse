@@ -200,10 +200,10 @@
 
 (def translate-type-parameter (parameter)
      (match parameter
-            (UniversalParameter name _)
-                name
-            (ExistentialParameter name _)
-                name))
+            (UniversalParameter sym)
+                (symbol-name sym)
+            (ExistentialParameter sym)
+                (symbol-name sym)))
 
 (def translate-complex-constructor-definition (name type types parameters)
      (join (list (prefix-constructor (escape-identifier name))
@@ -225,9 +225,9 @@
 
 (def translate-type-parameter-for-definition (parameter)
      (match parameter
-            (UniversalParameter name _)
-                (prefix-type-variable name)
-            (ExistentialParameter _ __)
+            (UniversalParameter sym)
+                (prefix-type-variable (symbol-name sym))
+            (ExistentialParameter _)
                 (string-empty)))
 
 (def translate-type-parameters ()

@@ -5,8 +5,8 @@
 (typ (ast-type meta)        (SimpleType           string meta)
                             (ComplexType          string (list (ast-type meta)) meta)
                             (FunctionType         (list (ast-type meta)) (ast-type meta) meta))
-(typ (type-parameter meta)  (UniversalParameter   string meta)
-                            (ExistentialParameter string meta))
+(typ type-parameter         (UniversalParameter   ast-sym)
+                            (ExistentialParameter ast-sym))
 (typ (constructor meta)     (SimpleConstructor    ast-sym)
                             (ComplexConstructor   ast-sym (list (ast-type meta)) range))
 (typ (pattern meta)         (Capture              string meta)
@@ -23,7 +23,7 @@
                             (Constructor          ast-sym (list (expression meta)) meta)
                             (FunctionApplication  (list (expression meta)) meta))
 (typ (definition meta)      (TypeDefinition       ast-sym
-                                                  (list (type-parameter meta))
+                                                  (list type-parameter)
                                                   (list (constructor meta))
                                                   meta)
                             (FunctionDefinition   ast-sym
@@ -42,6 +42,10 @@
 (def symbol-module (sym)
      (match sym
             (Sym _ __ module ___)  module))
+
+(def symbol-range (sym)
+     (match sym
+            (Sym _ __ ___ range)  range))
 
 (def definition-with-module (module definition)
      (match definition
