@@ -14,7 +14,7 @@
                             (ConstructorPattern   ast-sym (list pattern) range))
 (typ expression             (IntegerConstant      int32 range)
                             (Identifier           ast-sym)
-                            (Lambda               (list string)
+                            (Lambda               (list ast-sym)
                                                   expression
                                                   range)
                             (Match                expression
@@ -27,7 +27,7 @@
                                                   (list constructor)
                                                   range)
                             (FunctionDefinition   ast-sym
-                                                  (list string)
+                                                  (list ast-sym)
                                                   expression
                                                   range))
 
@@ -114,20 +114,20 @@
 
 (def over-identifiers (f expression)
      (match expression
-            (Identifier (Sym id name module range))
+            (Identifier name)
                 (result-bind   (f name)                                (fn (name)
-                (result-return (Identifier (Sym id name module range)))))
+                (result-return (Identifier name))))
             (Lambda arguments expression range)
                 (result-bind   (over-identifiers f expression)         (fn (expression)
                 (result-bind   (result-concat (list-map f arguments))  (fn (arguments)
                 (result-return (Lambda arguments expression range))))))
-            (Constructor (Sym id name module sym-range) Empty range)
+            (Constructor name Empty range)
                 (result-bind   (f name)                                (fn (name)
-                (result-return (Constructor (Sym id name module sym-range) Empty range))))
-            (Constructor (Sym id name module sym-range) expressions range)
+                (result-return (Constructor name Empty range))))
+            (Constructor name expressions range)
                 (result-bind   (result-concat (list-map (over-identifiers f) expressions))  (fn (expressions)
                 (result-bind   (f name)                                                     (fn (name)
-                (result-return (Constructor (Sym id name module sym-range) expressions range))))))
+                (result-return (Constructor name expressions range))))))
             (FunctionApplication expressions range)
                 (result-bind   (result-concat (list-map (over-identifiers f) expressions))  (fn (expressions)
                 (result-return (FunctionApplication expressions range))))

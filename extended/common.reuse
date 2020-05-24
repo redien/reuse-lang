@@ -46,7 +46,7 @@
      (string-equal? (string-substring 0 3 name) (data-sparkle)))
 
 (def validate-identifier (identifier)
-     (match (symbol-is-reserved? identifier)
+     (match (symbol-is-reserved? (symbol-name identifier))
             True   (result-error (data-error-reserved-identifier))
             False  (result-lift identifier)))
 

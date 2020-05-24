@@ -31,7 +31,7 @@
                                        (match definition
                                               (FunctionDefinition (Sym id _ __ ___) arguments expression ____)
                                                   (dictionary-set (definition-name definition)
-                                                                  (ValueFunction arguments expression)
+                                                                  (ValueFunction (list-map symbol-name arguments) expression)
                                                                   dictionary)
                                               _
                                                   dictionary))

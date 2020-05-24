@@ -39,7 +39,7 @@
      (result-concat (list-map (transform-special-form symbol-id transformer) definitions)))
 
 (def transform-pipe (module expressions range)
-     (Lambda (list (data-sparkle-x))
+     (Lambda (list (Sym (sym-sparkle-x) (data-sparkle-x) module range))
              (list-foldl (fn (expression composed)
                              (FunctionApplication (list expression composed) range))
                          (Identifier (Sym (sym-sparkle-x) (data-sparkle-x) module range))

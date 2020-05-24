@@ -121,7 +121,7 @@
                 (bind (sequence (list-map (eval-expression scope stack-trace) arguments)) (fn (values)
                 (return (ValueConstructor (symbol-name sym) values))))
             (Lambda arguments expression _)
-                (return (ValueClosure arguments expression scope))
+                (return (ValueClosure (list-map symbol-name arguments) expression scope))
             (FunctionApplication expressions _)
                 (bind (sequence (list-map (eval-expression scope stack-trace) expressions)) (fn (values)
                 (match values

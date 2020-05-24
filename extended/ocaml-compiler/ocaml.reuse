@@ -135,7 +135,7 @@
 (def translate-argument-list (arguments)
      (match (list-empty? arguments)
             True  (wrap-in-brackets (string-empty))
-            False (string-join (data-space) (list-map escape-identifier arguments))))
+            False (string-join (data-space) (list-map (pipe symbol-name escape-identifier) arguments))))
 
 (def translate-lambda (translate-expression arguments expression)
      (join (list (data-fun)

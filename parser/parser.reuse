@@ -121,8 +121,8 @@
 (def sexp-to-lambda (sexp-to-expression rest range)
      (match rest
             (Cons (List arguments _) (Cons expression Empty))
-                (parser-bind   (parser-sequence (list-map symbol-to-string arguments))  (fn (arguments)
-                (parser-bind   (sexp-to-expression expression)                          (fn (expression)
+                (parser-bind   (parser-sequence (list-map symbol-to-sym arguments))  (fn (arguments)
+                (parser-bind   (sexp-to-expression expression)                       (fn (expression)
                 (parser-return (Lambda arguments expression range))))))
             _
                 (parser-error (MalformedFunctionDefinitionError range))))
@@ -212,9 +212,9 @@
 (def sexp-to-function-definition (name-symbol rest range)
      (match (Pair name-symbol rest)
             (Pair (Symbol id name sym-range) (Cons (List arguments __) (Cons expression Empty)))
-                  (parser-bind   (parser-sequence (list-map symbol-to-string arguments))  (fn (arguments)
-                  (parser-bind   (sexp-to-expression expression)                          (fn (expression)
-                  (parser-bind   (parser-get-module)                                      (fn (module)
+                  (parser-bind   (parser-sequence (list-map symbol-to-sym arguments))  (fn (arguments)
+                  (parser-bind   (sexp-to-expression expression)                       (fn (expression)
+                  (parser-bind   (parser-get-module)                                   (fn (module)
                   (parser-return (FunctionDefinition (Sym id name module sym-range) arguments expression range))))))))
             _
                   (parser-error (MalformedFunctionDefinitionError range))))
@@ -330,7 +330,7 @@
            range))
 
 (def function-arguments-to-sexp (arguments range)
-     (List (list-map (fn (name) (Symbol 0 name range)) arguments) range))
+     (List (list-map sym-to-symbol arguments) range))
 
 (def pattern-to-sexp (pattern)
      (match pattern
@@ -372,19 +372,19 @@
             (FunctionApplication expressions range)
                 (List (list-map expression-to-sexp expressions) range)))
 
-(def function-definition-to-sexp (id name arguments expression range kind)
-    (List (list (Symbol 0 kind range)
-                (Symbol id name range)
-                (function-arguments-to-sexp arguments range)
-                (expression-to-sexp expression))
-          range))
+(def function-definition-to-sexp (name arguments expression range)
+     (List (list (Symbol (sym-def) (data-def) range)
+                 (sym-to-symbol name)
+                 (function-arguments-to-sexp arguments range)
+                 (expression-to-sexp expression))
+           range))
 
 (def definition-to-sexp (definition)
      (match definition
             (TypeDefinition (Sym id name _ __) parameters constructors range)
                 (type-definition-to-sexp id name parameters constructors range)
-            (FunctionDefinition (Sym id name _ __) arguments expression range)
-                (function-definition-to-sexp id name arguments expression range (data-def))))
+            (FunctionDefinition name arguments expression range)
+                (function-definition-to-sexp name arguments expression range)))
 
 (def definitions-to-sexps (definitions)
      (list-map definition-to-sexp definitions))
