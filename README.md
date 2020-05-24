@@ -195,8 +195,6 @@ docker run --rm -it -v $PWD:/home/opam/reuse-lang redien/reuse-lang-dev-env
 
 - Eliminate allocations when looking up an associative array
   - Use a binary tree instead of a prefix tree?
-- Manually create symbols for reserved identifiers for constant time lookup
-  - Compare ID with range of symbols
 
 **Thoughts on a parens-less syntax**
 
