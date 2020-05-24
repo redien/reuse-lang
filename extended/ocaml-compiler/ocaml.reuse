@@ -148,10 +148,10 @@
      (match expression
             (Lambda arguments expression _)
                 (wrap-in-brackets (translate-lambda translate-expression arguments expression))
-            (Constructor _ name Empty __)
-                (prefix-constructor (escape-identifier name))
-            (Constructor _ name expressions __)
-                ((translate-constructor translate-expression name) expressions)
+            (Constructor sym Empty _)
+                (prefix-constructor (escape-identifier (symbol-name sym)))
+            (Constructor sym expressions _)
+                ((translate-constructor translate-expression (symbol-name sym)) expressions)
             (FunctionApplication expressions _)
                 (wrap-in-brackets (translate-function-application translate-expression expressions))
             (IntegerConstant integer _)
@@ -214,10 +214,10 @@
 
 (def translate-constructor-definition (type parameters constructor)
      (match constructor
-            (SimpleConstructor _ name __)
-                (prefix-constructor (escape-identifier name))
-            (ComplexConstructor _ name types __)
-                (translate-complex-constructor-definition name type types parameters)))
+            (SimpleConstructor sym)
+                (prefix-constructor (escape-identifier (symbol-name sym)))
+            (ComplexConstructor sym types _)
+                (translate-complex-constructor-definition (symbol-name sym) type types parameters)))
 
 (def translate-constructor-definitions (type parameters)
      (pipe (list-map (translate-constructor-definition type parameters))

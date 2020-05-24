@@ -7,8 +7,8 @@
                             (FunctionType         (list (ast-type meta)) (ast-type meta) meta))
 (typ (type-parameter meta)  (UniversalParameter   string meta)
                             (ExistentialParameter string meta))
-(typ (constructor meta)     (SimpleConstructor    int32 string meta)
-                            (ComplexConstructor   int32 string (list (ast-type meta)) meta))
+(typ (constructor meta)     (SimpleConstructor    ast-sym)
+                            (ComplexConstructor   ast-sym (list (ast-type meta)) range))
 (typ (pattern meta)         (Capture              string meta)
                             (IntegerPattern       int32 meta)
                             (ConstructorPattern   string (list (pattern meta)) meta))
@@ -20,7 +20,7 @@
                             (Match                (expression meta)
                                                   (list (pair (pattern meta) (expression meta)))
                                                   meta)
-                            (Constructor          int32 string (list (expression meta)) meta)
+                            (Constructor          ast-sym (list (expression meta)) meta)
                             (FunctionApplication  (list (expression meta)) meta))
 (typ (definition meta)      (TypeDefinition       ast-sym
                                                   (list (type-parameter meta))
@@ -30,6 +30,18 @@
                                                   (list string)
                                                   (expression meta)
                                                   meta))
+
+(def symbol-id (sym)
+     (match sym
+            (Sym id _ __ ___)  id))
+
+(def symbol-name (sym)
+     (match sym
+            (Sym _ name __ ___)  name))
+
+(def symbol-module (sym)
+     (match sym
+            (Sym _ __ module ___)  module))
 
 (def definition-with-module (module definition)
      (match definition
@@ -45,22 +57,18 @@
 
 (def definition-name (definition)
      (match definition
-            (TypeDefinition (Sym _ name __ ___) ____ _____ ______)
-                name
-            (FunctionDefinition (Sym _ name __ ___) ____ _____ ______)
-                name))
+            (TypeDefinition sym ____ _____ ______)      (symbol-name sym)
+            (FunctionDefinition sym ____ _____ ______)  (symbol-name sym)))
 
 (def definition-module (definition)
      (match definition
-            (TypeDefinition (Sym _ __ module ___) ____ _____ ______)
-                module
-            (FunctionDefinition (Sym _ __ module ___) ____ _____ ______)
-                module))
+            (TypeDefinition sym ____ _____ ______)      (symbol-module sym)
+            (FunctionDefinition sym ____ _____ ______)  (symbol-module sym)))
 
 (def constructor-id (constructor)
      (match constructor
-            (ComplexConstructor id _ __ ___)  id
-            (SimpleConstructor id _ __)       id))
+            (ComplexConstructor sym _ __)  (symbol-id sym)
+            (SimpleConstructor sym)        (symbol-id sym)))
 
 (def over-match-pair-expression (f pair)
      (match pair
@@ -83,9 +91,9 @@
                 (result-bind   (over-subexpressions f expression)                         (fn (expression)
                 (result-bind   (over-match-pair-expressions over-subexpressions f pairs)  (fn (pairs)
                 (result-return (Match expression pairs range))))))))
-            (Constructor id name expressions range)
+            (Constructor sym expressions range)
                 (result-bind   (result-concat (list-map (pipe f (result-flatmap (over-subexpressions f))) expressions)) (fn (expressions)
-                (result-return (Constructor id name expressions range))))
+                (result-return (Constructor sym expressions range))))
             (FunctionApplication expressions range)
                 (result-bind   (result-concat (list-map (pipe f (result-flatmap (over-subexpressions f))) expressions)) (fn (expressions)
                 (result-return (FunctionApplication expressions range))))
@@ -116,13 +124,13 @@
                 (result-bind   (over-identifiers f expression)         (fn (expression)
                 (result-bind   (result-concat (list-map f arguments))  (fn (arguments)
                 (result-return (Lambda arguments expression range))))))
-            (Constructor id name Empty range)
+            (Constructor (Sym id name module sym-range) Empty range)
                 (result-bind   (f name)                                (fn (name)
-                (result-return (Constructor id name Empty range))))
-            (Constructor id name expressions range)
+                (result-return (Constructor (Sym id name module sym-range) Empty range))))
+            (Constructor (Sym id name module sym-range) expressions range)
                 (result-bind   (result-concat (list-map (over-identifiers f) expressions))  (fn (expressions)
                 (result-bind   (f name)                                                     (fn (name)
-                (result-return (Constructor id name expressions range))))))
+                (result-return (Constructor (Sym id name module sym-range) expressions range))))))
             (FunctionApplication expressions range)
                 (result-bind   (result-concat (list-map (over-identifiers f) expressions))  (fn (expressions)
                 (result-return (FunctionApplication expressions range))))

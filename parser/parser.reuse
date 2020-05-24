@@ -70,10 +70,12 @@
 (def sexp-to-constructor-definition (constructor)
      (match constructor
             (Symbol id name range)
-                (parser-return (SimpleConstructor id name range))
-            (List (Cons (Symbol id name _) types) range)
+                (parser-bind (parser-get-module) (fn (module)
+                (parser-return (SimpleConstructor (Sym id name module range)))))
+            (List (Cons (Symbol id name sym-range) types) range)
+                (parser-bind   (parser-get-module) (fn (module)
                 (parser-bind   (parser-sequence (list-map sexp-to-type types)) (fn (types)
-                (parser-return (ComplexConstructor id name types range))))
+                (parser-return (ComplexConstructor (Sym id name module sym-range) types range))))))
             (Integer _ range)
                 (parser-error (MalformedConstructorError range))
             (List _ range)
@@ -160,8 +162,9 @@
                 (parser-error (MalformedExpressionError range))))
 
 (def sexp-to-constructor (sexp-to-expression range id name rest)
+     (parser-bind   (parser-get-module)                                  (fn (module)
      (parser-bind   (parser-sequence (list-map sexp-to-expression rest)) (fn (expressions)
-     (parser-return (Constructor id name expressions range)))))
+     (parser-return (Constructor (Sym id name module range) expressions range)))))))
 
 (def sexp-to-list-expression (sexp-to-expression expressions range)
      (match expressions
@@ -186,7 +189,7 @@
                 (parser-bind (parser-constructor? id) (fn (constructor?)
                 (parser-bind (parser-get-module)      (fn (module)
                 (parser-return (match constructor?
-                                      True   (Constructor id symbol-name Empty range)
+                                      True   (Constructor (Sym id symbol-name module range) Empty range)
                                       False  (Identifier (Sym id symbol-name module range))))))))
             (List expressions range)
                 (match expressions
@@ -261,6 +264,11 @@
 
 
 
+(def sym-to-symbol (sym)
+     (match sym
+            (Sym id name _ range)
+                (Symbol id name range)))
+
 (def type-to-sexp (types-to-sexp type)
      (match type
             (SimpleType name range)
@@ -278,10 +286,10 @@
 
 (def constructor-to-sexp (constructor)
      (match constructor
-            (SimpleConstructor id name range)
-                (Symbol id name range)
-            (ComplexConstructor id name types range)
-                (List (Cons (Symbol id name range) (types-to-sexp types)) range)))
+            (SimpleConstructor sym)
+                (sym-to-symbol sym)
+            (ComplexConstructor sym types range)
+                (List (Cons (sym-to-symbol sym) (types-to-sexp types)) range)))
 
 (def constructors-to-sexp (constructors)
      (list-map constructor-to-sexp constructors))
@@ -342,12 +350,12 @@
                 (List (Cons (Symbol 0 (data-match) range)
                       (Cons (expression-to-sexp expression)
                             (list-flatmap (match-pair-to-sexp expression-to-sexp) pairs))) range)
-            (Constructor id name expressions range)
+            (Constructor sym expressions range)
                 (match expressions
                        Empty
-                            (Symbol id name range)
+                            (sym-to-symbol sym)
                        _
-                            (List (Cons (Symbol id name range) (list-map expression-to-sexp expressions)) range))
+                            (List (Cons (sym-to-symbol sym) (list-map expression-to-sexp expressions)) range))
             (FunctionApplication expressions range)
                 (List (list-map expression-to-sexp expressions) range)))
 

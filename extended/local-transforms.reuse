@@ -48,8 +48,8 @@
 
 (def transform-list (module expressions range)
      (list-foldr (fn (expression composed)
-                     (Constructor (sym-cons) (data-Cons) (list expression composed) range))
-                 (Constructor (sym-empty) (data-Empty) Empty range)
+                     (Constructor (Sym (sym-cons) (data-Cons) module range) (list expression composed) range))
+                 (Constructor (Sym (sym-empty) (data-Empty) module range) Empty range)
                  expressions))
 
 (def local-transforms (definitions)
