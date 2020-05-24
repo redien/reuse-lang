@@ -5,7 +5,7 @@ Reuse is a general-purpose programming language designed to compile to other pro
 The language is strongly typed with a complete and sound type system and decidable type inference.
 The language does not support side-effects by design and all data is immutable. Any input/output or other kinds of side-effects can be performed by the host language.
 
-## Contents
+## Table of Contents
 
 - [Examples](#Examples)
 - [Installation](#Installation)
@@ -14,6 +14,7 @@ The language does not support side-effects by design and all data is immutable. 
 - [Usage](#Usage)
 - [Design Rationale](#Design-Rationale)
 - [Development](#Development)
+- [Todo](#Todo)
 
 ## Examples
 
@@ -42,7 +43,7 @@ For more examples please look through the `minimal/specification` and `extended/
 
 ## Installation
 
-#### MacOS
+**MacOS**
 
 The Reuse compiler is distributed using a Homebrew tap. Install it using the following commands:
 
@@ -51,11 +52,11 @@ brew tap redien/reuse
 brew install --HEAD reuse
 ```
 
-#### Linux/Unix
+**Linux/Unix**
 
 Clone the repository and symlink `[repository path]/reusec` to the appropriate directory in your PATH.
 
-#### Windows
+**Windows**
 
 Windows support is currently not implemented.
 
@@ -103,7 +104,7 @@ $ ./factorial
 
 ## Language
 
-#### Integer manipulation
+**Integer manipulation**
 
 The int32 type is a 32-bit signed integer.
 
@@ -121,7 +122,7 @@ The int32 type is a 32-bit signed integer.
 (<= 1 2)   True
 ```
 
-#### Boolean operators
+**Boolean operators**
 
 ```
 (and True False)    False
@@ -129,7 +130,7 @@ The int32 type is a 32-bit signed integer.
 (not True)          False
 ```
 
-#### Function Definition
+**Function Definition**
 
 ```
 (def identity (x)
@@ -166,7 +167,7 @@ Compiler for the Reuse programming language
   - Pro: A match expression can work just as well as a let expression
   - Con: Might encourage breaking up functions that would be better understood as just one
 
-#### Minimal and extended
+**Minimal and extended**
 
 Reuse has a minimal subset making it trivial to write a translator for a new language.
 
@@ -180,19 +181,26 @@ Use the prepared docker image to launch a bash shell with the necessary tools:
 docker run --rm -it -v $PWD:/home/opam/reuse-lang redien/reuse-lang-dev-env
 ```
 
-#### Todo
+## Todo
 
 - Re-implement a javascript backend to get a debugger for free
   - Implement source maps to improve debugging experience
 - Generate new IDs for symbols that shadow others
-- Eliminate allocations when looking up an associative array
-  - Use a binary tree instead of a prefix tree?
 - Implement modules by parsing other files and adding them to the symbol table with separate IDs
 - Handle division by zero safely
   - Return INT32_MAX?
   - Return Maybe?
+- Change all strings in ASTs to Syms
 
-### Thoughts on a parens-less syntax
+**Performance**
+
+- Eliminate allocations when looking up an associative array
+  - Use a binary tree instead of a prefix tree?
+- Manually create symbols for reserved identifiers for constant time lookup
+  - Compare ID with range of symbols
+- Remove all string comparisons from the code generators
+
+**Thoughts on a parens-less syntax**
 
 ```
 type sexp
