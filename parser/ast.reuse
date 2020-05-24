@@ -12,24 +12,24 @@
 (typ pattern                (Capture              ast-sym)
                             (IntegerPattern       int32 range)
                             (ConstructorPattern   ast-sym (list pattern) range))
-(typ (expression meta)      (IntegerConstant      int32 meta)
+(typ expression             (IntegerConstant      int32 range)
                             (Identifier           ast-sym)
                             (Lambda               (list string)
-                                                  (expression meta)
-                                                  meta)
-                            (Match                (expression meta)
-                                                  (list (pair pattern (expression meta)))
-                                                  meta)
-                            (Constructor          ast-sym (list (expression meta)) meta)
-                            (FunctionApplication  (list (expression meta)) meta))
-(typ (definition meta)      (TypeDefinition       ast-sym
+                                                  expression
+                                                  range)
+                            (Match                expression
+                                                  (list (pair pattern expression))
+                                                  range)
+                            (Constructor          ast-sym (list expression) range)
+                            (FunctionApplication  (list expression) range))
+(typ definition             (TypeDefinition       ast-sym
                                                   (list type-parameter)
                                                   (list constructor)
-                                                  meta)
+                                                  range)
                             (FunctionDefinition   ast-sym
                                                   (list string)
-                                                  (expression meta)
-                                                  meta))
+                                                  expression
+                                                  range))
 
 (def symbol-id (sym)
      (match sym
@@ -47,17 +47,10 @@
      (match sym
             (Sym _ __ ___ range)  range))
 
-(def definition-with-module (module definition)
+(def definition-range (definition)
      (match definition
-            (TypeDefinition (Sym id name _ range) parameters constructors meta)
-                (TypeDefinition (Sym id name module range) parameters constructors meta)
-            (FunctionDefinition (Sym id name _ range) parameters body meta)
-                (FunctionDefinition (Sym id name module range) parameters body meta)))
-
-(def definition-meta (definition)
-     (match definition
-            (TypeDefinition _ __ ___ meta)      meta
-            (FunctionDefinition _ __ ___ meta)  meta))
+            (TypeDefinition _ __ ___ range)      range
+            (FunctionDefinition _ __ ___ range)  range))
 
 (def definition-name (definition)
      (match definition
