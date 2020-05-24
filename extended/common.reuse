@@ -81,6 +81,5 @@
             stringify-parse-errors
             (match minimal?
                    True   id
-                   False  validate-reserved-identifiers)
-            local-transforms)
+                   False  (pipe validate-reserved-identifiers local-transforms)))
         files))
