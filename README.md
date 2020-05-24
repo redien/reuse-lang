@@ -190,7 +190,6 @@ docker run --rm -it -v $PWD:/home/opam/reuse-lang redien/reuse-lang-dev-env
 - Handle division by zero safely
   - Return INT32_MAX?
   - Return Maybe?
-- Change all strings in ASTs to Syms
 
 **Performance**
 
@@ -198,7 +197,6 @@ docker run --rm -it -v $PWD:/home/opam/reuse-lang redien/reuse-lang-dev-env
   - Use a binary tree instead of a prefix tree?
 - Manually create symbols for reserved identifiers for constant time lookup
   - Compare ID with range of symbols
-- Remove all string comparisons from the code generators
 
 **Thoughts on a parens-less syntax**
 
