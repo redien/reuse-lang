@@ -1,33 +1,64 @@
 
-(typ (array value) (Array (dictionary value)))
+(typ array-color ArrayRed ArrayBlack)
+(typ (array value) ArrayEmpty
+                   (ArrayTree array-color (array value) (pair int32 value) (array value)))
 
-(def array-empty () (Array (dictionary-empty)))
+(def array-empty () ArrayEmpty)
 
-(def array-split-index' (index)
-     (string-append (& index 255) (string-append (& index 65280) (string-append (& index 16711680) (string-append (& index 4278190080) (string-empty))))))
-
-(def array-set (index new-value array)
+(def array-make-black' (array)
      (match array
-            (Array dictionary)
-                (Array (dictionary-set (array-split-index' index) new-value dictionary))))
+            ArrayEmpty           ArrayEmpty
+            (ArrayTree _ a y b)  (ArrayTree ArrayBlack a y b)))
 
-(def array-get (index array)
+(def array-balance' (array)
      (match array
-            (Array dictionary)
-                (dictionary-get (array-split-index' index) dictionary)))
+            (ArrayTree ArrayBlack (ArrayTree ArrayRed (ArrayTree ArrayRed a x b) y c) z d)  (ArrayTree ArrayRed (ArrayTree ArrayBlack a x b) y (ArrayTree ArrayBlack c z d))
+            (ArrayTree ArrayBlack (ArrayTree ArrayRed a x (ArrayTree ArrayRed b y c)) z d)  (ArrayTree ArrayRed (ArrayTree ArrayBlack a x b) y (ArrayTree ArrayBlack c z d))
+            (ArrayTree ArrayBlack a x (ArrayTree ArrayRed (ArrayTree ArrayRed b y c) z d))  (ArrayTree ArrayRed (ArrayTree ArrayBlack a x b) y (ArrayTree ArrayBlack c z d))
+            (ArrayTree ArrayBlack a x (ArrayTree ArrayRed b y (ArrayTree ArrayRed c z d)))  (ArrayTree ArrayRed (ArrayTree ArrayBlack a x b) y (ArrayTree ArrayBlack c z d))
+            rest                                                                            rest))
+
+(def array-set' (x value array)
+     (match array
+            ArrayEmpty
+               (ArrayTree ArrayRed ArrayEmpty (Pair x value) ArrayEmpty)
+            (ArrayTree color a y b)
+               (match (< x (pair-left y))
+                      True   (array-balance' (ArrayTree color (array-set' x value a) y b))
+                      False
+               (match (> x (pair-left y))
+                      True   (array-balance' (ArrayTree color a y (array-set' x value b)))
+                      False  (ArrayTree color a (Pair x value) b)))))
+
+(def array-set (x value array)
+     (array-make-black' (array-set' x value array)))
+
+(def array-get (x array)
+     (match array
+            ArrayEmpty
+               None
+            (ArrayTree _ a (Pair y value) b)
+               (match (< x y)
+                      True   (array-get x a)
+                      False
+               (match (> x y)
+                      True   (array-get x b)
+                      False  (Some value)))))
 
 (def array-entries (array)
      (match array
-            (Array dictionary)
-                (dictionary-entries dictionary)))
+            ArrayEmpty
+               Empty
+            (ArrayTree _ a entry b)
+               (list-flatten (list (array-entries a) (list entry) (array-entries b)))))
 
 (def array-of (entries)
-     (Array (dictionary-of (list-map (pair-map-left array-split-index') entries))))
+     (list-foldl (fn (entry array) (match entry (Pair key value) (array-set key value array))) ArrayEmpty entries))
 
 (def array-singleton (index value)
-     (Array (dictionary-singleton (array-split-index' index) value)))
+     (ArrayTree ArrayBlack ArrayEmpty (Pair index value) ArrayEmpty))
 
 (def array-get-or (index default array)
-     (match array
-            (Array dictionary)
-                (dictionary-get-or (array-split-index' index) default dictionary)))
+     (match (array-get index array)
+            (Some value)  value
+            None          default))
