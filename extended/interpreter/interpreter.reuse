@@ -6,6 +6,8 @@
 (def sequence (xs) (result-concat xs))
 (def map (f xs) (result-map f xs))
 
+(def sym-main () -2005)
+
 (def eval-error ()
      (Error (data-error-generic)))
 
@@ -13,9 +15,9 @@
      (match (Pair value pattern)
             (Pair (ValueInteger a) (IntegerPattern b _2))
                 (= a b)
-            (Pair (ValueConstructor id name arguments) (ConstructorPattern pattern-symbol patterns _2))
+            (Pair (ValueConstructor id name values) (ConstructorPattern pattern-symbol patterns _2))
                 (and (= id (symbol-id pattern-symbol))
-                     (list-every? (pair-map pattern-matches-value) (list-zip arguments patterns)))
+                     (list-every? (pair-map pattern-matches-value) (list-zip values patterns)))
             (Pair _1 (Capture _2))
                 True
             _
@@ -25,10 +27,10 @@
      (match pair
             (Pair value (IntegerPattern _1 _2))
                 Empty
-            (Pair (ValueConstructor _1 _2 arguments) (ConstructorPattern _3 patterns _4))
-                (list-flatmap case-capture (list-zip arguments patterns))
+            (Pair (ValueConstructor _1 _2 values) (ConstructorPattern _3 patterns _4))
+                (list-flatmap case-capture (list-zip values patterns))
             (Pair value (Capture sym))
-                (list (Pair (symbol-name sym) value))
+                (list (Pair (symbol-id sym) value))
             _
                 Empty))
 
@@ -94,9 +96,9 @@
             True
                 (return (ValueClosure (list-skip (list-size values) arguments)
                                       expression
-                                      (scope-add (list-zip arguments values) scope)))
+                                      (scope-add (list-zip (list-map symbol-id arguments) values) scope)))
             False
-                (eval-expression (scope-add (list-zip arguments values) scope)
+                (eval-expression (scope-add (list-zip (list-map symbol-id arguments) values) scope)
                                  stack-trace
                                  expression)))
 
@@ -105,7 +107,7 @@
             (IntegerConstant value _)
                 (return (ValueInteger value))
             (Variable sym)
-                (match (scope-get (symbol-name sym) scope)
+                (match (scope-get (symbol-id sym) scope)
                        (Some value)
                             (return value)
                        None
@@ -121,7 +123,7 @@
                 (bind (sequence (list-map (eval-expression scope stack-trace) arguments)) (fn (values)
                 (return (ValueConstructor (symbol-id sym) (symbol-name sym) values))))
             (Lambda arguments expression _)
-                (return (ValueClosure (list-map symbol-name arguments) expression scope))
+                (return (ValueClosure arguments expression scope))
             (FunctionApplication expressions _)
                 (bind (sequence (list-map (eval-expression scope stack-trace) expressions)) (fn (values)
                 (match values
@@ -148,29 +150,29 @@
                 (pattern-match eval-expression scope stack-trace expression cases)))))
 
 (def eval (scope values)
-     (match (scope-get (data-main) scope)
+     (match (scope-get (sym-main) scope)
             (Some (ValueFunction arguments expression))
-                (eval-expression (scope-add (list-zip arguments values) scope)
+                (eval-expression (scope-add (list-zip (list-map symbol-id arguments) values) scope)
                                  Empty
                                  expression)
             _
                 (eval-error)))
 
 (def add-intrinsics (scope)
-     (scope-add (list (Pair (data-int32-less-than)  (ValueIntrinsic eval-int32-less-than))
-                      (Pair (data-percent)          (ValueIntrinsic (eval-int32-operator %)))
-                      (Pair (data-plus)             (ValueIntrinsic (eval-int32-operator +)))
-                      (Pair (data-minus)            (ValueIntrinsic (eval-int32-operator -)))
-                      (Pair (data-slash)            (ValueIntrinsic (eval-int32-operator /)))
-                      (Pair (data-multiply)         (ValueIntrinsic (eval-int32-operator *)))
-                      (Pair (data-ampersand)        (ValueIntrinsic (eval-int32-operator &))))
+     (scope-add (list (Pair -2006  (ValueIntrinsic eval-int32-less-than))
+                      (Pair -2007  (ValueIntrinsic (eval-int32-operator %)))
+                      (Pair -2008  (ValueIntrinsic (eval-int32-operator +)))
+                      (Pair -2009  (ValueIntrinsic (eval-int32-operator -)))
+                      (Pair -2010  (ValueIntrinsic (eval-int32-operator /)))
+                      (Pair -2011  (ValueIntrinsic (eval-int32-operator *)))
+                      (Pair -2012  (ValueIntrinsic (eval-int32-operator &))))
                 scope))
 
 (def definitions-to-scope (definitions)
      (scope-add-definitions definitions (add-intrinsics (scope-empty))))
 
 (def main-takes-argument (scope)
-     (match (scope-get (data-main) scope)
+     (match (scope-get (sym-main) scope)
             (Some (ValueFunction (Cons _ __) ___))
                 True
             _
@@ -236,7 +238,9 @@
             False  (output-result (eval scope Empty))))
 
 (def internal-symbols ()
-     (add-identifiers (list data-Some data-None data-Pair data-IterableClass data-IndexedIterator) -2000
+     (add-identifiers (list data-Some data-None data-Pair data-IterableClass data-IndexedIterator
+                            data-main data-int32-less-than data-percent data-plus data-minus
+                            data-slash data-multiply data-ampersand) -2000
      (with-local-transform-keywords (keywords))))
 
 (def on-event (event)

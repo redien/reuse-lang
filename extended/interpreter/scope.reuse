@@ -1,39 +1,32 @@
 
-(typ (scope expression iterable) (Scope (dictionary (value expression (scope expression iterable) iterable))))
+(typ (scope expression iterable) (Scope (array (value expression (scope expression iterable) iterable))))
 
 (def scope-empty ()
-     (Scope (dictionary-empty)))
+     (Scope (array-empty)))
 
 (def scope-add (variables scope)
      (match scope
-            (Scope dictionary)
-                (Scope (list-foldl (fn (pair dictionary)
-                                       (match pair
-                                              (Pair argument value)
-                                                  (dictionary-set argument value dictionary)))
-                                   dictionary
+            (Scope scope)
+                (Scope (list-foldl (fn (variable scope)
+                                       (match variable
+                                              (Pair name value)
+                                                  (array-set name value scope)))
+                                   scope
                                    variables))))
-
-(def scope-concat (a b)
-     (match a
-            (Scope a)
-                (scope-add (dictionary-entries a) b)))
 
 (def scope-get (name scope)
      (match scope
-            (Scope dictionary)
-                (dictionary-get name dictionary)))
+            (Scope scope)
+                (array-get name scope)))
 
 (def scope-add-definitions (definitions scope)
      (match scope
-            (Scope dictionary)
-                (Scope (list-foldl (fn (definition dictionary)
+            (Scope scope)
+                (Scope (list-foldl (fn (definition scope)
                                        (match definition
-                                              (FunctionDefinition (Sym id _ __ ___) arguments expression ____)
-                                                  (dictionary-set (definition-name definition)
-                                                                  (ValueFunction (list-map symbol-name arguments) expression)
-                                                                  dictionary)
+                                              (FunctionDefinition identifier arguments expression ____)
+                                                  (array-set (symbol-id identifier) (ValueFunction arguments expression) scope)
                                               _
-                                                  dictionary))
-                                   dictionary
+                                                  scope))
+                                   scope
                                    definitions))))
