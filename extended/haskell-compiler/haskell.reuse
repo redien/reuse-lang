@@ -14,12 +14,18 @@
 (def identifier-is-reserved? (id)
      (and (<= id -2000) (> id -3000)))
 
+(def special-identifiers ()
+     (list data-plus data-slash data-percent data-minus data-multiply data-ampersand))
+
+(def identifier-is-special? (id)
+     (and (<= id -3000) (> id -4000)))
+
 (def escape-identifier (identifier)
      (match (identifier-is-reserved? (symbol-id identifier))
             True   (string-prepend 95 (symbol-name identifier))
             False  (string-flatmap escape-char (symbol-name identifier))))
 
-(def special-identifiers ()
+(def special-identifiers-map ()
      (dictionary-of (list
         (Pair (data-plus) (data-int32-plus))
         (Pair (data-slash) (data-int32-divide))
@@ -30,9 +36,11 @@
      )))
 
 (def translate-identifier (identifier)
-     (match (dictionary-get (symbol-name identifier) (special-identifiers))
-            (Some translation)  translation
-            None                (escape-identifier identifier)))
+     (match (identifier-is-special? (symbol-id identifier))
+            True   (match (dictionary-get (symbol-name identifier) (special-identifiers-map))
+                          (Some translation)  translation
+                          None                (escape-identifier identifier))
+            False  (escape-identifier identifier)))
 
 (def prefix-type-variable (identifier)
      (translate-identifier identifier))
@@ -271,4 +279,5 @@
      (dictionary-set (data-int32-less-than) (Pair (sym-int32-less-than) (data-int32-less-than))
      (dictionary-set (data-int32) (Pair (sym-int32) (data-int32))
      (add-identifiers (reserved-identifiers) -2000
-     (with-local-transform-keywords (keywords))))))
+     (add-identifiers (special-identifiers) -3000
+     (with-local-transform-keywords (keywords)))))))
