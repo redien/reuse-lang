@@ -215,7 +215,7 @@
 
 (def translate-type-parameters (parameters)
      ((pipe (list-map translate-type-parameter-for-definition)
-            (list-filter not-empty?)
+            (list-filter (. not string-empty?))
             (string-join (data-comma)))
         parameters))
 

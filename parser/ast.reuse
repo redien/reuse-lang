@@ -50,16 +50,6 @@
 (def symbol-equal? (a b)
      (= (symbol-id a) (symbol-id b)))
 
-(def definition-range (definition)
-     (match definition
-            (TypeDefinition _ __ ___ range)      range
-            (FunctionDefinition _ __ ___ range)  range))
-
-(def definition-name (definition)
-     (match definition
-            (TypeDefinition sym ____ _____ ______)      (symbol-name sym)
-            (FunctionDefinition sym ____ _____ ______)  (symbol-name sym)))
-
 (def definition-module (definition)
      (match definition
             (TypeDefinition sym ____ _____ ______)      (symbol-module sym)

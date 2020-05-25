@@ -1,9 +1,6 @@
 
 (def join (list) (string-join (string-empty) list))
 
-(def not-empty? (string)
-     (not (string-empty? string)))
-
 (def is-alphanumeric (char)
      (or (and (>= char 65) (<= char 90))
      (or (and (>= char 48) (<= char 57))
@@ -47,7 +44,7 @@
                 (i18n-malformed-sexp-too-many-closing-brackets English)))
 
 (def stringify-parse-errors (definitions)
-    (result-bimap id error-to-string definitions))
+     (result-bimap id error-to-string definitions))
 
 (def identifier-is-reserved? (identifier)
      (string-equal? (string-substring 0 3 (symbol-name identifier)) (data-sparkle)))
