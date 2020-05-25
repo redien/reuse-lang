@@ -1,7 +1,7 @@
 
 (typ (value expression scope iterable)
      (ValueInteger int32)
-     (ValueConstructor string (list (value expression scope iterable)))
+     (ValueConstructor int32 string (list (value expression scope iterable)))
      (ValueClosure (list string) expression scope)
      (ValueFunction (list string) expression)
      (ValueIntrinsic (fn ((list (value expression scope iterable))) (result (value expression scope iterable) string)))
@@ -22,7 +22,7 @@
      (match value
             (ValueInteger integer)
                 (string-from-int32 integer)
-            (ValueConstructor name values)
+            (ValueConstructor _ name values)
                 (match values
                        Empty
                             name

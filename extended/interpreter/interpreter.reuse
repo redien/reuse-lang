@@ -13,8 +13,8 @@
      (match (Pair value pattern)
             (Pair (ValueInteger a) (IntegerPattern b _2))
                 (= a b)
-            (Pair (ValueConstructor name arguments) (ConstructorPattern pattern-symbol patterns _2))
-                (and (string-equal? name (symbol-name pattern-symbol))
+            (Pair (ValueConstructor id name arguments) (ConstructorPattern pattern-symbol patterns _2))
+                (and (= id (symbol-id pattern-symbol))
                      (list-every? (pair-map pattern-matches-value) (list-zip arguments patterns)))
             (Pair _1 (Capture _2))
                 True
@@ -25,7 +25,7 @@
      (match pair
             (Pair value (IntegerPattern _1 _2))
                 Empty
-            (Pair (ValueConstructor _1 arguments) (ConstructorPattern _2 patterns _3))
+            (Pair (ValueConstructor _1 _2 arguments) (ConstructorPattern _3 patterns _4))
                 (list-flatmap case-capture (list-zip arguments patterns))
             (Pair value (Capture sym))
                 (list (Pair (symbol-name sym) value))
@@ -119,7 +119,7 @@
                                                       (render-stack-trace stack-trace)))))
             (Constructor sym arguments _)
                 (bind (sequence (list-map (eval-expression scope stack-trace) arguments)) (fn (values)
-                (return (ValueConstructor (symbol-name sym) values))))
+                (return (ValueConstructor (symbol-id sym) (symbol-name sym) values))))
             (Lambda arguments expression _)
                 (return (ValueClosure (list-map symbol-name arguments) expression scope))
             (FunctionApplication expressions _)
@@ -178,8 +178,8 @@
 
 (def box-maybe (maybe)
      (match maybe
-            (Some x)  (ValueConstructor (data-Some) (list (ValueInteger x)))
-            None      (ValueConstructor (data-None) Empty)))
+            (Some x)  (ValueConstructor -2000 (data-Some) (list (ValueInteger x)))
+            None      (ValueConstructor -2001 (data-None) Empty)))
 
 (def box-get (collection get arguments)
      (match arguments
@@ -189,7 +189,7 @@
                 (eval-error)))
 
 (def box-next' (value iterator)
-     (return (ValueConstructor (data-Pair)
+     (return (ValueConstructor -2002 (data-Pair)
                                (list (box-maybe value)
                                      (ValueNativeIterator iterator)))))
 
@@ -203,11 +203,11 @@
                 (eval-error)))
 
 (def box-iterable-class (iterator)
-     (ValueConstructor (data-IterableClass)
+     (ValueConstructor -2003 (data-IterableClass)
                        (list (ValueIntrinsic box-next))))
 
 (def box-indexed-iterator (iterator)
-     (ValueConstructor (data-IndexedIterator)
+     (ValueConstructor -2004 (data-IndexedIterator)
                        (list (box-iterable-class)
                              (ValueNativeIterator iterator)
                              (ValueInteger (indexed-iterator-index iterator)))))
@@ -236,7 +236,8 @@
             False  (output-result (eval scope Empty))))
 
 (def internal-symbols ()
-     (with-local-transform-keywords (keywords)))
+     (add-identifiers (list data-Some data-None data-Pair data-IterableClass data-IndexedIterator) -2000
+     (with-local-transform-keywords (keywords))))
 
 (def on-event (event)
      (match event
