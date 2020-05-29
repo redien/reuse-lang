@@ -20,8 +20,8 @@ $project_root/reusec --language ocaml\
                      $script_path/string.reuse\
                      $script_path/result.reuse\
                      $script_path/state.reuse\
-                     $script_path/dictionary.reuse\
                      $script_path/array.reuse\
+                     $script_path/dictionary.reuse\
                      $project_root/bootstrap/data/pervasives.ml\
                      $build_dir/test.reuse
 

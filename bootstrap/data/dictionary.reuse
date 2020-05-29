@@ -1,7 +1,7 @@
 
-(typ (dictionary value) (TrieNode (maybe value) (list (pair int32 (dictionary value)))))
+(typ (dictionary value) (TrieNode (maybe value) (array (dictionary value))))
 
-(def dictionary-empty () (TrieNode None Empty))
+(def dictionary-empty () (TrieNode None (array-empty)))
 
 (def dictionary-value' (dictionary)
      (match dictionary
@@ -12,12 +12,7 @@
             (TrieNode _ children) children))
 
 (def dictionary-find-child' (char dictionary)
-     (maybe-map pair-right (list-find-first (pipe pair-left (= char)) (dictionary-children' dictionary))))
-
-(def dictionary-remove-child' (char dictionary)
-     (match dictionary
-            (TrieNode value children)
-                (TrieNode value (list-exclude (pipe pair-left (= char)) children))))
+     (array-get char (dictionary-children' dictionary)))
 
 (def dictionary-set (key new-value dictionary)
      (match (string-first key)
@@ -28,8 +23,7 @@
                        (maybe-else dictionary-empty)
                        (dictionary-set (string-rest key) new-value)
                        (fn (child)
-                           (TrieNode (dictionary-value' dictionary)
-                                     (Cons (Pair char child) (dictionary-children' (dictionary-remove-child' char dictionary))))))
+                           (TrieNode (dictionary-value' dictionary) (array-set char child (dictionary-children' dictionary)))))
                     dictionary)))
 
 (def dictionary-get (key dictionary)
@@ -41,6 +35,7 @@
 
 (def dictionary-entries' (key dictionary)
      ((pipe dictionary-children'
+            array-entries
             (list-flatmap (fn (child)
                               (dictionary-entries' (string-append (pair-left child) key) (pair-right child))))
             (fn (entries)
