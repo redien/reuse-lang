@@ -5,4 +5,3 @@ WORKDIR /home/opam/reuse-lang
 RUN opam init --auto-setup --disable-sandboxing
 RUN opam switch 4.07+flambda
 RUN echo '. /home/opam/.profile' >> /home/opam/.bashrc
-ENTRYPOINT /bin/bash
