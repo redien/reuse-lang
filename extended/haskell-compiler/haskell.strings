@@ -38,3 +38,4 @@ prelude             |_int32_add :: Int32 -> Int32 -> Int32 ; _int32_add a b = a 
 language-exts       |{-# LANGUAGE ExistentialQuantification, BangPatterns #-}
 imports             |import Data.Int ; import Prelude hiding (not, and, or, mod) ; import Data.Bits
 pervasives-filename |Pervasives.hs
+preamble-filename   |preamble.hs

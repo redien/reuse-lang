@@ -29,7 +29,8 @@ let read_file filename =
     let file = really_input_string channel (in_channel_length channel) in
     close_in channel;
     ml_string_to_indexed_iterator file;;
-let read_files m file_paths = list_45map (fun path -> CSourceFile (m, path, (read_file path))) file_paths;;
+let read_files m file_paths = list_45map (fun path -> CSourceFile (m, path, (read_file path)))
+                                         (CCons (ml_string_to_reuse (data_path ^ reuse_string_to_ml (data_45preamble_45filename ())), file_paths));;
 let read_modules modules = if (list_45size modules) > 0l then read_files stdlib_module stdlib_paths else CEmpty;;
 
 let write_file filename content =

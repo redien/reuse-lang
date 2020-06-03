@@ -38,5 +38,6 @@ ocamlopt -O3 unix.cmxa \
 
 # Copy run-time dependencies
 [ -d $build_dir/data ] || mkdir $build_dir/data
+cp $script_path/preamble.hs $build_dir/data/preamble.hs
 cp $script_path/Pervasives.hs $build_dir/data/Pervasives.hs
 cp $project_root/standard-library/*.reuse $build_dir/data

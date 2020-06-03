@@ -40,5 +40,6 @@ fi
 
 # Copy run-time dependencies
 [ -d $build_dir/data ] || mkdir $build_dir/data
+cp $script_path/preamble.ml $build_dir/data/preamble.ml
 cp $script_path/pervasives.ml $build_dir/data/pervasives.ml
 cp $project_root/standard-library/*.reuse $build_dir/data
