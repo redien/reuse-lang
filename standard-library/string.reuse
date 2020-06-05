@@ -204,7 +204,7 @@
      (string-foldr list-cons Empty string))
 
 (def string-from-list (list)
-     (list-foldr string-prepend (string-empty) list))
+     (list-foldl string-append (string-empty) list))
 
 (def string-skip (count string)
      (match (> count 0)
@@ -345,7 +345,7 @@
      (string-collect-from-indexed-iterator' predicate iterator (string-empty)))
 
 (def string-from-indexed-iterator (iterator)
-     (string-from-list (pair-right (list-collect-from-indexed-iterator (fn (_) True) iterator))))
+     (pair-right (string-collect-from-indexed-iterator (fn (_) True) iterator)))
 
 (def string-iterable ()
      (IterableClass
