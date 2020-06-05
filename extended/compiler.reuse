@@ -1,22 +1,11 @@
 
-(def target-language? (file)
-     (= (source-file-type file) SourceFileTypeTargetLanguage))
-
-(def split-source-files (files)
-     (Pair (list-filter target-language? files)
-           (list-filter (. not target-language?) files)))
-
 (typ compiler-parameters (CompilerParameters boolean boolean))
 
-(def join-files (files)
-     (string-join (string-empty) (list-map (. string-from-indexed-iterator source-file-content) files)))
-
 (def compile (file-entries module-name parameters)
-     (match (Pair (split-source-files file-entries) parameters)
-            (Pair (Pair target-language-files source-files) (CompilerParameters as-minimal use-stdlib))
-                  (match (parse-source-files (internal-symbols) as-minimal source-files)
+     (match parameters
+            (CompilerParameters as-minimal use-stdlib)
+                  (match (parse-source-files (internal-symbols) as-minimal file-entries)
                          (Result definitions)
-                              (result-return (string-concat (generate-source module-name definitions)
-                                                            (join-files target-language-files)))
+                              (result-return (generate-source module-name definitions))
                          (Error error)
                               (result-error error))))

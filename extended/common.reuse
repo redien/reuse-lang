@@ -72,10 +72,16 @@
             (SourceFile module path content)
                 (parse-definitions! module (transform-strings path content))))
 
+(def parse-target-file (file)
+     (match file
+            (SourceFile module path content)
+                (parser-return (list (TargetDefinition module content)))))
+
 (def parse-source-file (file)
      (match (source-file-type file)
-            SourceFileTypeStrings  (parse-strings-file file)
-            _                      (parse-reuse-file file)))
+            SourceFileTypeStrings         (parse-strings-file file)
+            SourceFileTypeReuse           (parse-reuse-file file)
+            SourceFileTypeTargetLanguage  (parse-target-file file)))
 
 (def parse-source-files (internal-symbols minimal? files)
      ((pipe (list-map parse-source-file)
