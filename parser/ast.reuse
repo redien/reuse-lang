@@ -29,7 +29,9 @@
                             (FunctionDefinition   ast-sym
                                                   (list ast-sym)
                                                   expression
-                                                  range))
+                                                  range)
+                            (TargetDefinition     module-reference
+                                                  (indexed-iterator int32)))
 
 (def symbol-id (sym)
      (match sym
@@ -53,7 +55,8 @@
 (def definition-module (definition)
      (match definition
             (TypeDefinition sym ____ _____ ______)      (symbol-module sym)
-            (FunctionDefinition sym ____ _____ ______)  (symbol-module sym)))
+            (FunctionDefinition sym ____ _____ ______)  (symbol-module sym)
+            (TargetDefinition module _)                 module))
 
 (def constructor-id (constructor)
      (match constructor

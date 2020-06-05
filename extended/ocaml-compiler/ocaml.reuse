@@ -244,7 +244,9 @@
             (FunctionDefinition identifier arguments expression _)
                 (translate-function-definition identifier arguments expression)
             (TypeDefinition name parameters constructors _)
-                (translate-type-definition name parameters constructors)))
+                (translate-type-definition name parameters constructors)
+            (TargetDefinition _ data)
+                (string-from-indexed-iterator data)))
 
 (def generate-source (module-name definitions)
      ((pipe (list-map translate-definition)

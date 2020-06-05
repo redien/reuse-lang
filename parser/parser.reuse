@@ -384,7 +384,9 @@
             (TypeDefinition (Sym id name _ __) parameters constructors range)
                 (type-definition-to-sexp id name parameters constructors range)
             (FunctionDefinition name arguments expression range)
-                (function-definition-to-sexp name arguments expression range)))
+                (function-definition-to-sexp name arguments expression range)
+            (TargetDefinition _ data)
+                (Symbol 0 (string-from-indexed-iterator data) (Range 0 0))))
 
 (def definitions-to-sexps (definitions)
      (list-map definition-to-sexp definitions))
