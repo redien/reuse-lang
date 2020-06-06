@@ -52,8 +52,20 @@
                  (Constructor (Sym (sym-empty) (data-Empty) module range) Empty range)
                  expressions))
 
+(def transform-match-expression (expression pairs range)
+     (result-return (Match expression pairs range)))
+
+(def transform-match-expressions (definition)
+     (over-definition-expressions
+     (over-subexpressions
+     (over-match-expression
+         (fn (expression pairs range)
+             (transform-match-expression expression pairs range))))
+         definition))
+
 (def local-transforms (definitions)
-     (result-bind definitions (fn (definitions)
-     (result-bind (transform-special-forms (sym-pipe) transform-pipe definitions) (fn (definitions)
-     (result-bind (transform-special-forms (sym-list) transform-list definitions) (fn (definitions)
-     (result-return definitions))))))))
+     (result-bind definitions                                                         (fn (definitions)
+     (result-bind (transform-special-forms (sym-pipe) transform-pipe definitions)     (fn (definitions)
+     (result-bind (transform-special-forms (sym-list) transform-list definitions)     (fn (definitions)
+     (result-bind (result-concat (list-map transform-match-expressions definitions))  (fn (definitions)
+     (result-return definitions))))))))))

@@ -113,6 +113,13 @@
             _
                 (result-return expression)))
 
+(def over-match-expression (f expression)
+     (match expression
+            (Match expression pairs range)
+                (f expression pairs range)
+            _
+                (result-return expression)))
+
 (def over-identifiers (f expression)
      (match expression
             (Variable name)
