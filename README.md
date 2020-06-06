@@ -193,6 +193,8 @@ docker run --rm -it -v $PWD:/home/opam/reuse-lang redien/reuse-lang-dev-env
 
 **Performance**
 
+- Instead of interning strings, compute a hash that replaces the ID and perform a string compare if hashes match
+
 **Thoughts on a parens-less syntax**
 
 ```
