@@ -194,6 +194,8 @@ docker run --rm -it -v $PWD:/home/opam/reuse-lang redien/reuse-lang-dev-env
 **Performance**
 
 - Instead of interning strings, compute a hash that replaces the ID and perform a string compare if hashes match
+- Reduce the allocations in local transforms by not allocating new AST nodes when nothing changes
+- Fuse local transformation steps
 
 **Thoughts on a parens-less syntax**
 
