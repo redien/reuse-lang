@@ -104,6 +104,26 @@
 (def list-partition (n xs)
      (list-reverse (list-partition' n xs Empty)))
 
+(def list-partition-by' (x xs)
+     (match xs
+            (Cons partition rest)
+               (Cons (Cons x partition) rest)
+            Empty
+               xs))
+
+(def list-partition-by (f xs)
+     (match xs
+            Empty
+               Empty
+            (Cons x Empty)
+               (list (list x))
+            (Cons x (Cons x' rest))
+               (match (f x x')
+                      True
+                         (list-partition-by' x (list-partition-by f (Cons x' rest)))
+                      False
+                         (Cons (list x) (list-partition-by f (Cons x' rest))))))
+
 (def list-skip (count list)
      (pair-right (list-split-at count list)))
 
