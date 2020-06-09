@@ -25,7 +25,8 @@ $project_root/reusec --language ocaml\
                      $script_path/interpreter.strings\
                      $script_path/value.reuse\
                      $script_path/scope.reuse\
-                     $script_path/interpreter.reuse
+                     $script_path/interpreter.reuse\
+                     $script_path/main.reuse
 
 cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $build_dir/StdinWrapper.ml
 cp $project_root/extended/interpreter/Main.ml $build_dir/Main.ml

@@ -1,0 +1,40 @@
+
+(typ (event iterator state) (EventArguments (list string))
+                            (EventReadStdin iterator state)
+                            (EventReadFiles (list (source-file iterator)) state))
+
+(typ (command state) (CommandError string)
+                     (CommandOutput string)
+                     (CommandReadStdin state)
+                     (CommandReadFiles (list string) (list string) state))
+
+(def output-result (result)
+     (match result
+            (Result value)
+                (CommandOutput (value-to-string value))
+            (Error error)
+                (CommandError error)))
+
+(def process-definitions (scope)
+     (match (main-takes-argument scope)
+            True   (CommandReadStdin scope)
+            False  (output-result (eval scope Empty))))
+
+(def on-event (event)
+     (match event
+            (EventArguments arguments)
+                (match (parse-arguments arguments)
+                       (CliArguments _ Empty)
+                            (CommandError (data-no-input-files))
+                       (CliArguments arguments input-files)
+                            (CommandReadFiles input-files Empty (scope-empty))
+                       (CliErrorMissingValue key)
+                            (CommandError key))
+            (EventReadStdin stdin state)
+                (output-result (eval state (list (box-indexed-iterator stdin))))
+            (EventReadFiles source-files state)
+                (match (parse-source-files (internal-symbols) False source-files)
+                       (Result definitions)
+                            (process-definitions (definitions-to-scope definitions))
+                       (Error error)
+                            (CommandError error))))
