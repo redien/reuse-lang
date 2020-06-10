@@ -48,6 +48,7 @@ lsr                       |lsr
 lxor                      |lxor
 method                    |method
 mod                       |mod
+module                    |module
 mutable                   |mutable
 new                       |new
 nonrec                    |nonrec

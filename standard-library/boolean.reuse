@@ -1,6 +1,3 @@
-
-(module stdlib)
-
 (typ boolean True False)
 
 (def not (a)

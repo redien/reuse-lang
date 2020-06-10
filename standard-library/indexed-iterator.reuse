@@ -1,6 +1,4 @@
 
-(module stdlib)
-
 (typ (indexed-iterator (exists iterable) element)
      (IndexedIterator (iterable-class iterable element) iterable int32))
 

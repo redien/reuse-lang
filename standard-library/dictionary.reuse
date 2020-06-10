@@ -1,6 +1,4 @@
 
-(module stdlib)
-
 (typ (dictionary value) (TrieNode (maybe value) (array (dictionary value))))
 
 (def dictionary-empty () (TrieNode None (array-empty)))

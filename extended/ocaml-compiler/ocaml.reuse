@@ -239,13 +239,8 @@
                  (translate-constructor-definitions (translate-type-name name parameters) parameters constructors)
                  (data-definition-end))))
 
-(def translate-module-definition (name)
-     (string-empty))
-
 (def translate-definition (definition)
      (match definition
-            (ModuleDefinition name _)
-                (translate-module-definition name)
             (FunctionDefinition identifier arguments expression _)
                 (translate-function-definition identifier arguments expression)
             (TypeDefinition name parameters constructors _)

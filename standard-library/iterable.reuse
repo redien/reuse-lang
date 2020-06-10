@@ -1,6 +1,4 @@
 
-(module stdlib)
-
 (typ (iterable-class collection element)
      (IterableClass (fn (collection) (pair (maybe element) collection))))
 

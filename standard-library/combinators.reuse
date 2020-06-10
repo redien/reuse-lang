@@ -1,6 +1,4 @@
 
-(module stdlib)
-
 (def id (x) x)
 (def const (a b) a)
 (def flip (f) (fn (b a) (f a b)))

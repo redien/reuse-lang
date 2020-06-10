@@ -22,9 +22,7 @@
                                                   range)
                             (Constructor          ast-sym (list expression) range)
                             (FunctionApplication  (list expression) range))
-(typ definition             (ModuleDefinition     ast-sym
-                                                  range)
-                            (TypeDefinition       ast-sym
+(typ definition             (TypeDefinition       ast-sym
                                                   (list type-parameter)
                                                   (list constructor)
                                                   range)
@@ -56,7 +54,6 @@
 
 (def definition-module (definition)
      (match definition
-            (ModuleDefinition sym _)                    (symbol-module sym)
             (TypeDefinition sym ____ _____ ______)      (symbol-module sym)
             (FunctionDefinition sym ____ _____ ______)  (symbol-module sym)
             (TargetDefinition module _)                 module))

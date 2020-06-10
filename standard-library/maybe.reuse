@@ -1,6 +1,4 @@
 
-(module stdlib)
-
 (typ (maybe a) (Some a)
                None)
 

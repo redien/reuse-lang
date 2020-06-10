@@ -1,6 +1,4 @@
 
-(module stdlib)
-
 (typ (result v e) (Result v) (Error e))
 
 (def result-lift (result)

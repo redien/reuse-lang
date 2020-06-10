@@ -1,6 +1,4 @@
 
-(module stdlib)
-
 (typ (pair a b) (Pair a b))
 
 (def pair-cons (a b)

@@ -252,13 +252,8 @@
                  (translate-existential-parameters parameters)
                  ((translate-constructor-definitions parameters) constructors))))
 
-(def translate-module-definition (name)
-     (string-empty))
-
 (def translate-definition (definition)
      (match definition
-            (ModuleDefinition name _)
-                (translate-module-definition name)
             (FunctionDefinition name arguments expression ____)
                 (translate-function-definition (escape-identifier name) arguments expression)
             (TypeDefinition name parameters constructors ____)

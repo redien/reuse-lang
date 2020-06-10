@@ -1,6 +1,3 @@
-
-(module stdlib)
-
 (typ (list a) (Cons a (list a)) Empty)
 
 (def list-cons (x xs)
