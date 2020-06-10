@@ -1,4 +1,6 @@
 
+(module stdlib)
+
 (typ array-color ArrayRed ArrayBlack)
 (typ (array value) ArrayEmpty
                    (ArrayTree array-color (array value) (pair int32 value) (array value)))

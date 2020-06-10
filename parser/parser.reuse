@@ -1,15 +1,17 @@
 
-(def sym-def ()   -1)
-(def sym-typ ()   -2)
-(def sym-fn ()    -3)
-(def sym-match () -4)
+(def sym-def ()    -1)
+(def sym-typ ()    -2)
+(def sym-fn ()     -3)
+(def sym-match ()  -4)
+(def sym-module () -5)
 
 (def keywords ()
      (dictionary-of (list
-          (Pair (data-def)   (Pair (sym-def) (data-def)))
-          (Pair (data-typ)   (Pair (sym-typ) (data-typ)))
-          (Pair (data-fn)    (Pair (sym-fn) (data-fn)))
-          (Pair (data-match) (Pair (sym-match) (data-match))))))
+          (Pair (data-def)    (Pair (sym-def) (data-def)))
+          (Pair (data-typ)    (Pair (sym-typ) (data-typ)))
+          (Pair (data-fn)     (Pair (sym-fn) (data-fn)))
+          (Pair (data-match)  (Pair (sym-match) (data-match)))
+          (Pair (data-module) (Pair (sym-module) (data-module))))))
 
 (typ error  (MalformedDefinitionError range)
             (MalformedTypeDefinitionError range)
@@ -219,15 +221,13 @@
             _
                   (parser-error (MalformedFunctionDefinitionError range))))
 
-(def sexp-to-definition' (name rest range kind)
-     (match (= kind (sym-typ))
-            True
-                (parser-bind (parser-sequence (list-map sexp-to-constructor-definition rest))  (fn (constructors)
-                (sexp-to-type-definition name constructors range)))
-            False
-     (match (= kind (sym-def))
-            True   (sexp-to-function-definition name rest range)
-            False  (parser-error (MalformedDefinitionError range)))))
+(def sexp-to-module-definition (name range)
+     (match name
+            (Symbol id name sym-range)
+                (parser-bind (parser-set-module! (ModulePath name)) (fn (_)
+                (parser-return (ModuleDefinition (Sym id name (ModulePath name) sym-range) range))))
+            _
+                (parser-error (MalformedDefinitionError range))))
 
 (def specific-malformed-definition-error (kind range)
      (match (= kind (sym-typ))
@@ -237,14 +237,26 @@
             True   (parser-error (MalformedFunctionDefinitionError range))
             False  (parser-error (MalformedDefinitionError range)))))
 
+(def sexp-to-definition' (name rest range kind)
+     (match (= kind (sym-module))
+            True
+                (sexp-to-module-definition name range)
+            False
+     (match (and (= kind (sym-typ)) (not (list-empty? rest)))
+            True
+                (parser-bind (parser-sequence (list-map sexp-to-constructor-definition rest))  (fn (constructors)
+                (sexp-to-type-definition name constructors range)))
+            False
+     (match (= kind (sym-def))
+            True   (sexp-to-function-definition name rest range)
+            False  (specific-malformed-definition-error kind range)))))
+
 (def sexp-to-definition (expression)
      (match expression
-            (List (Cons (Symbol kind _ __) Empty) range)
-                (specific-malformed-definition-error kind range)
-            (List (Cons (Symbol kind _ __) (Cons ___ Empty)) range)
-                (specific-malformed-definition-error kind range)
             (List (Cons (Symbol kind _ __) (Cons name rest)) range)
                 (sexp-to-definition' name rest range kind)
+            (List (Cons (Symbol kind _ __) Empty) range)
+                (specific-malformed-definition-error kind range)
             (List (Cons (List _ range) Empty) __)
                 (parser-error (MalformedDefinitionError range))
             (List _ range)
@@ -379,8 +391,15 @@
                  (expression-to-sexp expression))
            range))
 
+(def module-definition-to-sexp (module range)
+     (List (list (Symbol (sym-module) (data-module) range)
+                 (sym-to-symbol module))
+           range))
+
 (def definition-to-sexp (definition)
      (match definition
+            (ModuleDefinition module range)
+                (module-definition-to-sexp module range)
             (TypeDefinition (Sym id name _ __) parameters constructors range)
                 (type-definition-to-sexp id name parameters constructors range)
             (FunctionDefinition name arguments expression range)

@@ -1,4 +1,6 @@
 
+(module stdlib)
+
 (typ string-node (FTValue int32)
                  (FTNode2 int32 string-node string-node)
                  (FTNode3 int32 string-node string-node string-node))

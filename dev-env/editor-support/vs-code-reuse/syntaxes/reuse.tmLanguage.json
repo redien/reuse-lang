@@ -13,7 +13,7 @@
     "keywords": {
       "patterns": [
         {
-          "match": "[\\s\\(\\)](typ|def|match|list|pipe|fn)[\\s\\(\\)]",
+          "match": "[\\s\\(\\)](typ|def|match|list|pipe|fn|module)[\\s\\(\\)]",
           "captures": {
             "1": { "name": "keyword.control.reuse" }
           }

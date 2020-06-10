@@ -3,3 +3,4 @@ typ    |typ
 fn     |fn
 match  |match
 exists |exists
+module |module

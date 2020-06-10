@@ -1,4 +1,6 @@
 
+(module stdlib)
+
 (typ (state s v) (Operation (fn (s) (pair s v))))
 
 (def state-run (state operation)
