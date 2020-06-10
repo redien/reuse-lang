@@ -1,0 +1,9 @@
+
+(def generate-source (module-name definitions)
+     ((pipe (list-filter (. (module-equal? ModuleSelf) definition-module))
+            (list-map definition-to-sexp)
+            stringify-sexps)
+        definitions))
+
+(def internal-symbols ()
+     (with-local-transform-keywords (keywords)))
