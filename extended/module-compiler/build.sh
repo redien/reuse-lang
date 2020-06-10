@@ -44,4 +44,3 @@ fi
 [ -d $build_dir/data ] || mkdir $build_dir/data
 cp $script_path/preamble.reuse $build_dir/data/preamble.reuse
 cp $script_path/pervasives.reuse $build_dir/data/pervasives.reuse
-cp $project_root/standard-library/*.reuse $build_dir/data

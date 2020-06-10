@@ -40,4 +40,6 @@ ocamlopt -O3 unix.cmxa \
 [ -d $build_dir/data ] || mkdir $build_dir/data
 cp $script_path/preamble.hs $build_dir/data/preamble.hs
 cp $script_path/Pervasives.hs $build_dir/data/Pervasives.hs
-cp $project_root/standard-library/*.reuse $build_dir/data
+
+$project_root/standard-library/build.sh
+cp $($project_root/dev-env/builddir.sh standard-library)/standard-library.reuse $build_dir/data

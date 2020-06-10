@@ -3,25 +3,15 @@ set -e
 
 script_path=$(dirname "$0")
 project_root=$script_path/..
-build_dir=$($project_root/dev-env/tempdir.sh standard-library)
+stdlib_path=$($project_root/dev-env/builddir.sh standard-library)/standard-library.reuse
+build_dir=$($project_root/dev-env/tempdir.sh standard-library-eval)
 
 echo "$1 (def reuse-main (_) $2)" > $build_dir/test.reuse
 
 $project_root/reusec --language ocaml\
                      --stdlib false\
                      --output $build_dir/test.ml\
-                     $script_path/combinators.reuse\
-                     $script_path/boolean.reuse\
-                     $script_path/pair.reuse\
-                     $script_path/maybe.reuse\
-                     $script_path/iterable.reuse\
-                     $script_path/indexed-iterator.reuse\
-                     $script_path/list.reuse\
-                     $script_path/string.reuse\
-                     $script_path/result.reuse\
-                     $script_path/state.reuse\
-                     $script_path/array.reuse\
-                     $script_path/dictionary.reuse\
+                     $stdlib_path\
                      $project_root/bootstrap/data/pervasives.ml\
                      $build_dir/test.reuse
 
