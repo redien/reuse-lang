@@ -72,4 +72,5 @@ output-key                |--output
 no-output-path            |No output file specified, please use the --output [file] flag.
 stdlib                    |--stdlib
 minimal                   |--minimal
-stdlib-module             |stdlib
+module-flag               |--module
+standard-library-filename |standard-library.reuse

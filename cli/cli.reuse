@@ -5,7 +5,7 @@
 (typ (command state) (CommandError string)
                      (CommandOutput string)
                      (CommandWriteFiles (list (pair string string)))
-                     (CommandReadFiles (list string) (list string) state))
+                     (CommandReadFiles (list string) (list (pair string string)) state))
 
 (def standard-library? (arguments)
      (match (dictionary-get (data-stdlib) arguments)
@@ -17,36 +17,50 @@
             (Some value)  (string-equal? value (data-true))
             None          False))
 
-(def module-name-from-filename (filename)
-     (string-take (- (string-size filename) 3) filename))
+(def filename-without-extension (filename)
+     (match (list-first (string-split 46 filename))
+            (Some name)  name
+            None         filename))
 
 (def filename-from-path (path)
      (match (list-last (string-split 47 path))
             (Some filename)  filename
             None             path))
 
-(def modules-from-arguments (arguments)
-     (match (standard-library? arguments)
-            True   (list (data-stdlib-module))
-            False  Empty))
+(def module-name-and-path (path)
+     (Pair (filename-without-extension (filename-from-path path))
+           path))
 
-(def on-event (event)
+(def standard-library-files (data-path)
+     (list (string-join (data-slash) (list data-path (data-standard-library-filename)))
+           (string-join (data-slash) (list data-path (data-pervasives-filename)))))
+
+(def modules-from-arguments (data-path arguments)
+     ((pipe (list-filter (. (string-equal? (data-module-flag)) pair-left))
+            (list-map pair-right)
+            (match (standard-library? (dictionary-of arguments))
+                   True   (list-concat (standard-library-files data-path))
+                   False  id)
+            (list-map module-name-and-path))
+          arguments))
+
+(def on-event (data-path event)
      (match event
             (EventArguments arguments)
                 (match (parse-arguments arguments)
                        (CliArguments _ Empty)
                             (CommandError (data-no-input-files))
                        (CliArguments arguments input-files)
-                            (match (dictionary-of arguments)
-                                   arguments
-                                        (CommandReadFiles input-files (modules-from-arguments arguments) arguments))
+                            (CommandReadFiles input-files
+                                              (modules-from-arguments data-path arguments)
+                                              (dictionary-of arguments))
                        (CliErrorMissingValue key)
                             (CommandError key))
             (EventReadFiles file-entries arguments)
                 (match (dictionary-get (data-output-key) arguments)
                        (Some output-path)
                             (match (compile file-entries
-                                            (module-name-from-filename (filename-from-path output-path))
+                                            (filename-without-extension (filename-from-path output-path))
                                             (CompilerParameters (minimal? arguments) (standard-library? arguments)))
                                    (Result source)  (CommandWriteFiles (list (Pair output-path source)))
                                    (Error error)    (CommandError error))
