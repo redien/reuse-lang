@@ -3,13 +3,15 @@
 (def sym-typ ()   -2)
 (def sym-fn ()    -3)
 (def sym-match () -4)
+(def sym-pub ()   -5)
 
 (def keywords ()
      (dictionary-of (list
           (Pair (data-def)   (Pair (sym-def) (data-def)))
           (Pair (data-typ)   (Pair (sym-typ) (data-typ)))
           (Pair (data-fn)    (Pair (sym-fn) (data-fn)))
-          (Pair (data-match) (Pair (sym-match) (data-match))))))
+          (Pair (data-match) (Pair (sym-match) (data-match)))
+          (Pair (data-pub)   (Pair (sym-pub) (data-pub))))))
 
 (typ error  (MalformedDefinitionError range)
             (MalformedTypeDefinitionError range)
@@ -194,13 +196,13 @@
                                       True   (Constructor sym Empty (symbol-range sym))
                                       False  (Variable sym)))))))))
 
-(def sexp-to-function-definition (name-symbol rest range)
+(def sexp-to-function-definition (name-symbol public? rest range)
      (match rest
             (Cons (List arguments _) (Cons expression Empty))
                   (parser-bind   (parser-sequence (list-map symbol-to-sym arguments))  (fn (arguments)
                   (parser-bind   (sexp-to-expression expression)                       (fn (expression)
                   (parser-bind   (symbol-to-sym name-symbol)                           (fn (sym)
-                  (parser-return (FunctionDefinition sym arguments expression range))))))))
+                  (parser-return (FunctionDefinition sym public? arguments expression range))))))))
             _
                   (parser-error (MalformedFunctionDefinitionError range))))
 
@@ -211,8 +213,11 @@
                 (sexp-to-type-definition name constructors range)))
             False
      (match (= kind (sym-def))
-            True   (sexp-to-function-definition name rest range)
-            False  (parser-error (MalformedDefinitionError range)))))
+            True   (sexp-to-function-definition name False rest range)
+            False
+     (match (= kind (sym-pub))
+            True   (sexp-to-function-definition name True rest range)
+            False  (parser-error (MalformedDefinitionError range))))))
 
 (def specific-malformed-definition-error (kind range)
      (match (= kind (sym-typ))
@@ -357,8 +362,10 @@
             (FunctionApplication expressions range)
                 (List (list-map expression-to-sexp expressions) range)))
 
-(def function-definition-to-sexp (name arguments expression range)
-     (List (list (Symbol (sym-def) (data-def) range)
+(def function-definition-to-sexp (name public? arguments expression range)
+     (List (list (match public?
+                        True   (Symbol (sym-pub) (data-pub) range)
+                        False  (Symbol (sym-def) (data-def) range))
                  (sym-to-symbol name)
                  (function-arguments-to-sexp arguments range)
                  (expression-to-sexp expression))
@@ -368,8 +375,8 @@
      (match definition
             (TypeDefinition (Sym id name _ __) parameters constructors range)
                 (type-definition-to-sexp id name parameters constructors range)
-            (FunctionDefinition name arguments expression range)
-                (function-definition-to-sexp name arguments expression range)
+            (FunctionDefinition name public? arguments expression range)
+                (function-definition-to-sexp name public? arguments expression range)
             (TargetDefinition _ data)
                 (Symbol 0 (string-from-indexed-iterator data) (Range 0 0))))
 

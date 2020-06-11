@@ -254,9 +254,9 @@
 
 (def translate-definition (definition)
      (match definition
-            (FunctionDefinition name arguments expression ____)
+            (FunctionDefinition name _ arguments expression __)
                 (translate-function-definition (escape-identifier name) arguments expression)
-            (TypeDefinition name parameters constructors ____)
+            (TypeDefinition name parameters constructors _)
                 (translate-type-definition name parameters constructors)
             (TargetDefinition _ data)
                 (string-from-indexed-iterator data)))

@@ -241,7 +241,7 @@
 
 (def translate-definition (definition)
      (match definition
-            (FunctionDefinition identifier arguments expression _)
+            (FunctionDefinition identifier _ arguments expression __)
                 (translate-function-definition identifier arguments expression)
             (TypeDefinition name parameters constructors _)
                 (translate-type-definition name parameters constructors)

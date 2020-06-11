@@ -27,6 +27,7 @@
                                                   (list constructor)
                                                   range)
                             (FunctionDefinition   ast-sym
+                                                  boolean
                                                   (list ast-sym)
                                                   expression
                                                   range)
@@ -73,7 +74,7 @@
 (def definition-module (definition)
      (match definition
             (TypeDefinition sym ____ _____ ______)      (symbol-module sym)
-            (FunctionDefinition sym ____ _____ ______)  (symbol-module sym)
+            (FunctionDefinition sym ___ ____ _____ ______)  (symbol-module sym)
             (TargetDefinition module _)                 module))
 
 (def constructor-id (constructor)
@@ -118,9 +119,9 @@
 
 (def over-definition-expressions (f definition)
      (match definition
-            (FunctionDefinition sym arguments expression range)
+            (FunctionDefinition sym public? arguments expression range)
                 (result-bind   (f expression)  (fn (expression)
-                (result-return (FunctionDefinition sym arguments expression range))))
+                (result-return (FunctionDefinition sym public? arguments expression range))))
             _
                 (result-return definition)))
 
