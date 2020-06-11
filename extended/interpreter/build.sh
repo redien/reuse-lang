@@ -7,7 +7,7 @@ build_dir=$($project_root/dev-env/builddir.sh interpreter)
 
 $project_root/reusec --language ocaml\
                      --output $build_dir/Interpreter.ml\
-                     $project_root/sexp-parser/parser.reuse\
+                     $project_root/sexp-parser/sexp-parser.reuse\
                      $project_root/parser/ast.reuse\
                      $project_root/parser/parser.strings\
                      $project_root/parser/parser-context.reuse\

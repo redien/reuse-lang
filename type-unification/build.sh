@@ -7,7 +7,7 @@ build_dir=$($project_root/dev-env/builddir.sh type-unification)
 
 $project_root/reusec --language haskell\
                      --output $build_dir/Test.hs\
-                     $project_root/sexp-parser/parser.reuse\
+                     $project_root/sexp-parser/sexp-parser.reuse\
                      $project_root/parser/parser.strings\
                      $project_root/parser/ast.reuse\
                      $project_root/extended/strings.reuse\
