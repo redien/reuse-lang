@@ -52,6 +52,9 @@
 (def symbol-equal? (a b)
      (= (symbol-id a) (symbol-id b)))
 
+(def symbol-equal-to? (sym id)
+     (= (symbol-id sym) id))
+
 (def module-equal? (a b)
      (match a
             (ModulePath a')
