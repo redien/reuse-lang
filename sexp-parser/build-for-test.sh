@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-project_root=$(dirname "$0")/..
-
+script_path=$(dirname "$0")
+project_root=$script_path/..
 build_dir=$($project_root/dev-env/builddir.sh sexp-parser)
 
 $project_root/reusec --language ocaml\
