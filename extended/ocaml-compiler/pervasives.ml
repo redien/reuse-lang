@@ -15,16 +15,16 @@ let reuse_boolean_to_ml b =
       | CTrue -> true
       | CFalse -> false;;
 
-let ml_string_get succ fail s index =
+let ml_string_get s index =
     let i = (Int32.to_int index) in
     if i < (String.length s) && i >= 0 then
-            succ (Int32.of_int (Char.code (String.get s i)))
+            CSome (Int32.of_int (Char.code (String.get s i)))
     else
-            fail ();;
+            CNone;;
 
 let ml_string_next iterable =
     match iterable with
         CPair (s, index) -> CPair (
-            (ml_string_get (fun x -> CSome (x)) (fun _ -> CNone) s index),
+            (ml_string_get s index),
             CPair (s, Int32.add index 1l));;
 let ml_string_to_indexed_iterator s = indexed_45iterator_45from_45iterable (CIterableClass (ml_string_next)) (CPair (s, 0l));;
