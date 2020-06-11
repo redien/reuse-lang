@@ -5,17 +5,16 @@ script_path=$(dirname "$0")
 project_root=$script_path/../..
 build_dir=$($project_root/dev-env/builddir.sh haskell-compiler)
 
+$project_root/parser/build.sh
+
 # Build compiler
 $project_root/reusec --language ocaml\
                      --output $build_dir/ReuseCompiler.ml\
-                     $project_root/sexp-parser/sexp-parser.reuse\
-                     $project_root/parser/ast.reuse\
-                     $project_root/parser/parser.strings\
-                     $project_root/parser/parser-context.reuse\
-                     $project_root/parser/parser.reuse\
+                     --module $project_root/string-gen/string-gen.reuse\
+                     --module $project_root/sexp-parser/sexp-parser.reuse\
+                     --module $($project_root/dev-env/builddir.sh parser)/parser.reuse\
                      $script_path/../../cli/argument-parser.strings\
                      $script_path/../../cli/argument-parser.reuse\
-                     $script_path/../../string-gen/string-gen.reuse\
                      $script_path/../local-transforms.strings\
                      $script_path/../local-transforms.reuse\
                      $script_path/../source-file.strings\
