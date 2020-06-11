@@ -75,7 +75,7 @@
 (def parse-target-file (file)
      (match file
             (SourceFile module path content)
-                (parser-return (list (TargetDefinition module content)))))
+                (parser-return (list (TargetDefinition (SourceReference path module) content)))))
 
 (def parse-source-file (file)
      (match (source-file-type file)

@@ -29,7 +29,7 @@
      (match symbol
             (Symbol id name range)
                 (parser-bind (parser-get-source-reference) (fn (source-reference)
-                (parser-return (Sym id name (source-reference-module source-reference) range))))
+                (parser-return (Sym id name source-reference range))))
             (Integer _ range)
                 (parser-error  (MalformedSymbolError range))
             (List _ range)
@@ -163,7 +163,7 @@
 (def sexp-to-constructor (sexp-to-expression range id name rest)
      (parser-bind   (parser-get-source-reference)                        (fn (source-reference)
      (parser-bind   (parser-sequence (list-map sexp-to-expression rest)) (fn (expressions)
-     (parser-return (Constructor (Sym id name (source-reference-module source-reference) range) expressions range)))))))
+     (parser-return (Constructor (Sym id name source-reference range) expressions range)))))))
 
 (def sexp-to-list-expression (sexp-to-expression expressions range)
      (match expressions
