@@ -190,10 +190,12 @@ docker run --rm -it -v $PWD:/home/opam/reuse-lang redien/reuse-lang-dev-env
 - Handle division by zero safely
   - Return INT32_MAX?
   - Return Maybe?
+- Improve error messages to show file, line and column as well as print out the range.
 
 **Performance**
 
 - Instead of interning strings, compute a hash that replaces the ID and perform a string compare if hashes match
+  - Also perform static tokenization by hard-coding keywords into sexp-parser.
 - Reduce the allocations in local transforms by not allocating new AST nodes when nothing changes
 - Fuse local transformation steps
 
