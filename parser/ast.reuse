@@ -1,6 +1,7 @@
 
 (typ module-reference       (ModulePath           string)
                             ModuleSelf)
+(typ source-reference       (SourceReference      string module-reference))
 (typ ast-sym                (Sym                  int32 string module-reference range))
 (typ ast-type               (SimpleType           ast-sym)
                             (ComplexType          ast-sym (list ast-type) range)
@@ -70,6 +71,16 @@
                             False
                        ModuleSelf
                             True)))
+
+(def source-reference-file-path (source-reference)
+     (match source-reference
+            (SourceReference file-path _)
+                file-path))
+
+(def source-reference-module (source-reference)
+     (match source-reference
+            (SourceReference _ module)
+                module))
 
 (def definition-module (definition)
      (match definition

@@ -65,12 +65,12 @@
 (def parse-reuse-file (file)
      (match file
             (SourceFile module path content)
-                (parse-definitions! module content)))
+                (parse-definitions! module path content)))
 
 (def parse-strings-file (file)
      (match file
             (SourceFile module path content)
-                (parse-definitions! module (transform-strings path content))))
+                (parse-definitions! module path (transform-strings path content))))
 
 (def parse-target-file (file)
      (match file

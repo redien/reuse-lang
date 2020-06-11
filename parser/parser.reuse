@@ -28,8 +28,8 @@
 (def symbol-to-sym (symbol)
      (match symbol
             (Symbol id name range)
-                (parser-bind (parser-get-module) (fn (module)
-                (parser-return (Sym id name module range))))
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
+                (parser-return (Sym id name (source-reference-module source-reference) range))))
             (Integer _ range)
                 (parser-error  (MalformedSymbolError range))
             (List _ range)
@@ -161,9 +161,9 @@
                 (parser-error (MalformedExpressionError range))))
 
 (def sexp-to-constructor (sexp-to-expression range id name rest)
-     (parser-bind   (parser-get-module)                                  (fn (module)
+     (parser-bind   (parser-get-source-reference)                        (fn (source-reference)
      (parser-bind   (parser-sequence (list-map sexp-to-expression rest)) (fn (expressions)
-     (parser-return (Constructor (Sym id name module range) expressions range)))))))
+     (parser-return (Constructor (Sym id name (source-reference-module source-reference) range) expressions range)))))))
 
 (def sexp-to-list-expression (sexp-to-expression expressions range)
      (match expressions
@@ -253,8 +253,8 @@
             ParseErrorTooFewClosingBrackets   MalformedSexpTooFewClosingBrackets
             ParseErrorTooManyClosingBrackets  MalformedSexpTooManyClosingBrackets))
 
-(def parse-definitions! (module iterator)
-     (parser-bind (parser-set-module! module) (fn (_)
+(def parse-definitions! (module file-path iterator)
+     (parser-bind (parser-set-source-reference! (SourceReference file-path module)) (fn (_)
      (parser-bind (parser-get-symbols) (fn (symbols)
      (match (parse-sexps symbols iterator)
             (Result (Pair symbols expressions))
