@@ -7,3 +7,5 @@
 
 (def internal-symbols ()
      (with-local-transform-keywords (keywords)))
+
+(def perform-transformations? () False)

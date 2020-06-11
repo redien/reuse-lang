@@ -281,3 +281,5 @@
      (add-identifiers (reserved-identifiers) -2000
      (add-identifiers (special-identifiers) -3000
      (with-local-transform-keywords (keywords)))))))
+
+(def perform-transformations? () True)

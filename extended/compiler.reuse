@@ -4,7 +4,7 @@
 (def compile (file-entries module-name parameters)
      (match parameters
             (CompilerParameters as-minimal use-stdlib)
-                  (match (parse-source-files (internal-symbols) as-minimal file-entries)
+                  (match (parse-source-files (internal-symbols) (or (not (perform-transformations?)) as-minimal) file-entries)
                          (Result definitions)
                               (result-return (generate-source module-name definitions))
                          (Error error)
