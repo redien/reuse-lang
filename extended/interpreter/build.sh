@@ -12,15 +12,15 @@ $project_root/reusec --language ocaml\
                      --module $project_root/string-gen/string-gen.reuse\
                      --module $project_root/sexp-parser/sexp-parser.reuse\
                      --module $($project_root/dev-env/builddir.sh parser)/parser.reuse\
-                     $script_path/../../cli/argument-parser.strings\
-                     $script_path/../../cli/argument-parser.reuse\
-                     $script_path/../local-transforms.strings\
-                     $script_path/../local-transforms.reuse\
-                     $script_path/../source-file.strings\
-                     $script_path/../source-file.reuse\
-                     $script_path/../common.strings\
-                     $script_path/../strings.reuse\
-                     $script_path/../common.reuse\
+                     $project_root/argument-parser/argument-parser.strings\
+                     $project_root/argument-parser/argument-parser.reuse\
+                     $project_root/compiler-frontend/local-transforms.strings\
+                     $project_root/compiler-frontend/local-transforms.reuse\
+                     $project_root/compiler-frontend/source-file.strings\
+                     $project_root/compiler-frontend/source-file.reuse\
+                     $project_root/compiler-frontend/common.strings\
+                     $project_root/compiler-frontend/strings.reuse\
+                     $project_root/compiler-frontend/common.reuse\
                      $script_path/interpreter.strings\
                      $script_path/value.reuse\
                      $script_path/scope.reuse\
