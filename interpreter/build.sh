@@ -27,7 +27,7 @@ $project_root/reusec --language ocaml\
                      $script_path/interpreter.reuse\
                      $script_path/main.reuse
 
-cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $build_dir/StdinWrapper.ml
+cp $project_root/compiler-backend/ocaml/StdinWrapper.ml $build_dir/StdinWrapper.ml
 cp $script_path/Main.ml $build_dir/Main.ml
 
 ocamlopt.opt -O3 \

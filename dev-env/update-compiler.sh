@@ -5,7 +5,7 @@ project_root=$(dirname "$0")/..
 build_dir=$($project_root/dev-env/builddir.sh ocaml-compiler)
 
 build_compiler_source() {
-    $project_root/extended/ocaml-compiler/build.sh --no-binary
+    $project_root/compiler-backend/ocaml/build.sh --no-binary
 }
 
 build_compiler_binary() {

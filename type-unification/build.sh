@@ -19,4 +19,4 @@ $project_root/reusec --language haskell\
                      $project_root/type-system/type-from-ast.reuse\
                      $project_root/type-unification/main.reuse
 
-$project_root/extended/haskell-compiler/compile-stdin-test.sh $build_dir Test.hs source.out
+$project_root/compiler-backend/haskell/compile-stdin-test.sh $build_dir Test.hs source.out

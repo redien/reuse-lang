@@ -14,4 +14,4 @@ $project_root/reusec --language ocaml\
                      $project_root/parser/main.strings\
                      $project_root/parser/main.reuse
 
-$project_root/extended/ocaml-compiler/compile-stdin-test.sh $build_dir Test.ml source.out
+$project_root/compiler-backend/ocaml/compile-stdin-test.sh $build_dir Test.ml source.out

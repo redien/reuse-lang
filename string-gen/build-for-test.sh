@@ -33,7 +33,7 @@ else
 
 END_OF_SOURCE
 
-cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $build_dir
+cp $project_root/compiler-backend/ocaml/StdinWrapper.ml $build_dir
 
 ocamlopt -O3 unix.cmxa \
          -I "$build_dir" \

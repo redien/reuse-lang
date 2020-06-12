@@ -15,7 +15,7 @@ $project_root/reusec --language ocaml\
                      $project_root/bootstrap/data/pervasives.ml\
                      $build_dir/test.reuse
 
-$project_root/extended/ocaml-compiler/compile-stdin-test.sh $build_dir test.ml test.out
+$project_root/compiler-backend/ocaml/compile-stdin-test.sh $build_dir test.ml test.out
 
 echo "" | $build_dir/test.out
 result=$?

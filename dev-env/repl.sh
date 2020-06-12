@@ -37,7 +37,7 @@ eval_reuse() {
         return
     fi
 
-    $project_root/extended/ocaml-compiler/compile-stdin-test.sh $build_dir repl.ml repl.out
+    $project_root/compiler-backend/ocaml/compile-stdin-test.sh $build_dir repl.ml repl.out
     if [ -e "$build_dir/repl.out" ]; then
         echo "" | $build_dir/repl.out
         printf "\n"
