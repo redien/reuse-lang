@@ -2,7 +2,7 @@
 set -e
 
 script_path=$(dirname "$0")
-project_root=$script_path/../..
+project_root=$script_path/..
 build_dir=$($project_root/dev-env/builddir.sh interpreter)
 
 $project_root/parser/build.sh
@@ -28,7 +28,7 @@ $project_root/reusec --language ocaml\
                      $script_path/main.reuse
 
 cp $project_root/extended/ocaml-compiler/StdinWrapper.ml $build_dir/StdinWrapper.ml
-cp $project_root/extended/interpreter/Main.ml $build_dir/Main.ml
+cp $script_path/Main.ml $build_dir/Main.ml
 
 ocamlopt.opt -O3 \
              unix.cmxa \

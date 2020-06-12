@@ -6,7 +6,7 @@ project_root=$script_path/..
 run() {
     case $1 in
         test)                           run test-string-gen && run test-sexp-parser && run test-parser && run test-compilers && run test-interpreter && run test-standard-library;;
-        test-interpreter)               $project_root/extended/interpreter/build-for-test.sh && IMPL=extended/interpreter run test-minimal && IMPL=extended/interpreter run test-extended ;;
+        test-interpreter)               $project_root/interpreter/build-for-test.sh && IMPL=interpreter run test-minimal && IMPL=interpreter run test-extended ;;
         test-compilers)                 run test-haskell-compiler && run test-ocaml-compiler ;;
         test-module-compiler)           $project_root/extended/module-compiler/build-for-test.sh && IMPL=extended/module-compiler run test-minimal && IMPL=extended/module-compiler run test-extended ;;
         test-ocaml-compiler)            $project_root/extended/ocaml-compiler/build-for-test.sh && IMPL=extended/ocaml-compiler run test-minimal && IMPL=extended/ocaml-compiler run test-extended ;;

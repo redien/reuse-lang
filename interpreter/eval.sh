@@ -2,7 +2,7 @@
 set -e
 
 script_path="$(dirname $0)"
-project_root="$script_path/../.."
+project_root="$script_path/.."
 
 test_dir=$($project_root/dev-env/tempdir.sh interpreter-eval)
 
