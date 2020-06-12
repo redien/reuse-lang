@@ -40,6 +40,6 @@ Return types of functions with no arguments should generalize
 = 7
 
 Public functions should act as normal functions
-| (pub foo (a b) b)
+| (pub def foo (a b) b)
 > (foo 42 8)
 = 8

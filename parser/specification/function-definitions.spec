@@ -11,5 +11,5 @@ Should parse function arguments
 = (def _ (a b c) 1)
 
 Should parse public functions
-> (pub constant () 1)
-= (pub constant () 1)
+> (pub def constant () 1)
+= (pub def constant () 1)

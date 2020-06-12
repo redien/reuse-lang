@@ -206,18 +206,15 @@
             _
                   (parser-error (MalformedFunctionDefinitionError range))))
 
-(def sexp-to-definition' (name rest range kind)
+(def sexp-to-definition' (name public? rest range kind)
      (match (= kind (sym-typ))
             True
                 (parser-bind (parser-sequence (list-map sexp-to-constructor-definition rest))  (fn (constructors)
                 (sexp-to-type-definition name constructors range)))
             False
      (match (= kind (sym-def))
-            True   (sexp-to-function-definition name False rest range)
-            False
-     (match (= kind (sym-pub))
-            True   (sexp-to-function-definition name True rest range)
-            False  (parser-error (MalformedDefinitionError range))))))
+            True   (sexp-to-function-definition name public? rest range)
+            False  (parser-error (MalformedDefinitionError range)))))
 
 (def specific-malformed-definition-error (kind range)
      (match (= kind (sym-typ))
@@ -233,8 +230,10 @@
                 (specific-malformed-definition-error kind range)
             (List (Cons (Symbol kind _ __) (Cons ___ Empty)) range)
                 (specific-malformed-definition-error kind range)
+            (List (Cons (Symbol -5 _ __) (Cons (Symbol kind ___ ____) (Cons name rest))) range)
+                (sexp-to-definition' name True rest range kind)
             (List (Cons (Symbol kind _ __) (Cons name rest)) range)
-                (sexp-to-definition' name rest range kind)
+                (sexp-to-definition' name False rest range kind)
             (List (Cons (List _ range) Empty) __)
                 (parser-error (MalformedDefinitionError range))
             (List _ range)
@@ -313,12 +312,6 @@
                             (list-map type-parameter-to-sexp parameters))
                       range)))
 
-(def type-definition-to-sexp (id name parameters constructors range)
-     (List (list-concat (list (Symbol 0 (data-typ) range)
-                              (type-name-to-sexp id range name parameters))
-                        (constructors-to-sexp constructors))
-           range))
-
 (def function-arguments-to-sexp (arguments range)
      (List (list-map sym-to-symbol arguments) range))
 
@@ -362,21 +355,29 @@
             (FunctionApplication expressions range)
                 (List (list-map expression-to-sexp expressions) range)))
 
-(def function-definition-to-sexp (name public? arguments expression range)
-     (List (list (match public?
-                        True   (Symbol (sym-pub) (data-pub) range)
-                        False  (Symbol (sym-def) (data-def) range))
-                 (sym-to-symbol name)
-                 (function-arguments-to-sexp arguments range)
-                 (expression-to-sexp expression))
+(def type-definition-to-sexp (id name parameters constructors range)
+     (list-concat (list (Symbol 0 (data-typ) range)
+                        (type-name-to-sexp id range name parameters))
+                  (constructors-to-sexp constructors)))
+
+(def function-definition-to-sexp (name arguments expression range)
+     (list (Symbol (sym-def) (data-def) range)
+           (sym-to-symbol name)
+           (function-arguments-to-sexp arguments range)
+           (expression-to-sexp expression)))
+
+(def definition-to-sexp' (public? range sexp)
+     (List (match public?
+                  True   (Cons (Symbol (sym-pub) (data-pub) range) sexp)
+                  False  sexp)
            range))
 
 (def definition-to-sexp (definition)
      (match definition
             (TypeDefinition (Sym id name _ __) parameters constructors range)
-                (type-definition-to-sexp id name parameters constructors range)
+                (definition-to-sexp' False range (type-definition-to-sexp id name parameters constructors range))
             (FunctionDefinition name public? arguments expression range)
-                (function-definition-to-sexp name public? arguments expression range)
+                (definition-to-sexp' public? range (function-definition-to-sexp name arguments expression range))
             (TargetDefinition _ data)
                 (Symbol 0 (string-from-indexed-iterator data) (Range 0 0))))
 
