@@ -24,6 +24,7 @@
                             (Constructor          ast-sym (list expression) range)
                             (FunctionApplication  (list expression) range))
 (typ definition             (TypeDefinition       ast-sym
+                                                  boolean
                                                   (list type-parameter)
                                                   (list constructor)
                                                   range)
@@ -87,7 +88,7 @@
 
 (def definition-source-reference (definition)
      (match definition
-            (TypeDefinition sym ____ _____ ______)          (symbol-source-reference sym)
+            (TypeDefinition sym _ __ ___ ____)              (symbol-source-reference sym)
             (FunctionDefinition sym ___ ____ _____ ______)  (symbol-source-reference sym)
             (TargetDefinition source-reference _)           source-reference))
 

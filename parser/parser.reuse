@@ -90,20 +90,6 @@
                 (parser-bind   (symbol-to-sym symbol) (fn (sym)
                 (parser-return (UniversalParameter sym))))))
 
-(def sexp-to-type-definition (type-name constructors range)
-     (match type-name
-            (List (Cons name parameters) _)
-                (parser-bind   (symbol-to-sym name)                                            (fn (sym)
-                (parser-bind   (parser-sequence (list-map sexp-to-type-parameter parameters))  (fn (parameters)
-                (parser-return (TypeDefinition sym parameters constructors range))))))
-            (Integer _ range)
-                (parser-error (MalformedTypeError range))
-            (List _ range)
-                (parser-error (MalformedTypeError range))
-            symbol
-                (parser-bind   (symbol-to-sym symbol)                                          (fn (sym)
-                (parser-return (TypeDefinition sym Empty constructors range))))))
-
 (def sexp-to-lambda (sexp-to-expression rest range)
      (match rest
             (Cons (List arguments _) (Cons expression Empty))
@@ -196,6 +182,20 @@
                                       True   (Constructor sym Empty (symbol-range sym))
                                       False  (Variable sym)))))))))
 
+(def sexp-to-type-definition (type-name public? constructors range)
+     (match type-name
+            (List (Cons name parameters) _)
+                (parser-bind   (symbol-to-sym name)                                            (fn (sym)
+                (parser-bind   (parser-sequence (list-map sexp-to-type-parameter parameters))  (fn (parameters)
+                (parser-return (TypeDefinition sym public? parameters constructors range))))))
+            (Integer _ range)
+                (parser-error (MalformedTypeError range))
+            (List _ range)
+                (parser-error (MalformedTypeError range))
+            symbol
+                (parser-bind   (symbol-to-sym symbol)                                          (fn (sym)
+                (parser-return (TypeDefinition sym public? Empty constructors range))))))
+
 (def sexp-to-function-definition (name-symbol public? rest range)
      (match rest
             (Cons (List arguments _) (Cons expression Empty))
@@ -210,7 +210,7 @@
      (match (= kind (sym-typ))
             True
                 (parser-bind (parser-sequence (list-map sexp-to-constructor-definition rest))  (fn (constructors)
-                (sexp-to-type-definition name constructors range)))
+                (sexp-to-type-definition name public? constructors range)))
             False
      (match (= kind (sym-def))
             True   (sexp-to-function-definition name public? rest range)
@@ -374,8 +374,8 @@
 
 (def definition-to-sexp (definition)
      (match definition
-            (TypeDefinition (Sym id name _ __) parameters constructors range)
-                (definition-to-sexp' False range (type-definition-to-sexp id name parameters constructors range))
+            (TypeDefinition (Sym id name _ __) public? parameters constructors range)
+                (definition-to-sexp' public? range (type-definition-to-sexp id name parameters constructors range))
             (FunctionDefinition name public? arguments expression range)
                 (definition-to-sexp' public? range (function-definition-to-sexp name arguments expression range))
             (TargetDefinition _ data)

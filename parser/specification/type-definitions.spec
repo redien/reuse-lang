@@ -3,6 +3,10 @@ Should parse the simplest type definition
 > (typ a b)
 = (typ a b)
 
+Should parse public type definitions
+> (pub typ a b)
+= (pub typ a b)
+
 Should parse complex type
 > (typ (a b) c)
 = (typ (a b) c)

@@ -68,3 +68,7 @@ Pattern is parameterised constructor but not value
 > (match Empty (Cons x) x Empty 12)
 = 12
 
+Public types work the same way as normal types
+| (pub typ my-boolean MyTrue MyFalse)
+> (match MyFalse MyTrue 0 MyFalse 13)
+= 13

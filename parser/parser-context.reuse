@@ -6,7 +6,7 @@
 
 (def parser-context-add-constructors (definition array)
      (match definition
-            (TypeDefinition _ __ constructors ___)
+            (TypeDefinition _ __ ___ constructors ____)
                 (list-foldl (fn (constructor array)
                                 (array-set (constructor-id constructor) definition array))
                             array

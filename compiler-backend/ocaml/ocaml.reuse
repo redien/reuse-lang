@@ -243,7 +243,7 @@
      (match definition
             (FunctionDefinition identifier _ arguments expression __)
                 (translate-function-definition identifier arguments expression)
-            (TypeDefinition name parameters constructors _)
+            (TypeDefinition name _ parameters constructors __)
                 (translate-type-definition name parameters constructors)
             (TargetDefinition _ data)
                 (string-from-indexed-iterator data)))
