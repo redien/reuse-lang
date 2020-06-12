@@ -18,8 +18,8 @@ run() {
         test-type-inference)            $project_root/type-inference/build-for-test.sh && $project_root/dev-env/spec-runner/run.sh type-inference/specification $project_root/type-inference/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
         test-type-unification)          $project_root/type-unification/build-for-test.sh && $project_root/dev-env/spec-runner/run.sh type-unification/specification $project_root/type-unification/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
         test-string-gen)                $project_root/string-gen/build-for-test.sh && $project_root/dev-env/spec-runner/run.sh string-gen/specification $project_root/string-gen/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
-        test-minimal)                   $project_root/dev-env/spec-runner/run.sh minimal/specification $project_root/$IMPL/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
-        test-extended)                  $project_root/dev-env/spec-runner/run.sh extended/specification $project_root/$IMPL/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
+        test-minimal)                   $project_root/dev-env/spec-runner/run.sh specification/minimal $project_root/$IMPL/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
+        test-extended)                  $project_root/dev-env/spec-runner/run.sh specification/extended $project_root/$IMPL/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
         line-count)                     (cd $project_root ; git ls-files | grep -v 'bootstrap/' | grep -E '\.(reuse|strings)' | xargs wc -l) ;;
         line-count-with-spec)           (cd $project_root ; git ls-files | grep -v 'bootstrap/' | grep -E '\.(reuse|strings|spec)' | xargs wc -l) ;;
         vscode-install)                 ln -s $PWD/$project_root/dev-env/editor-support/vs-code-reuse ~/.vscode/extensions/vs-code-reuse ;;

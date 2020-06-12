@@ -39,7 +39,7 @@ Another example involving algebraic data-types:
             (Cons x xs) (reduce f (f x initial) xs)))
 ```
 
-For more examples please look through the `minimal/specification` and `extended/specification` directories. Also see the [getting started section](#Getting-Started).
+For more examples please look through the `specification/minimal` and `specification/extended` directories. Also see the [getting started section](#Getting-Started).
 
 ## Installation
 
