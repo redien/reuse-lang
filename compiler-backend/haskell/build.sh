@@ -33,7 +33,7 @@ ocamlopt -O3 unix.cmxa \
         -I "$build_dir" \
         "$build_dir/ReuseCompiler.ml" \
         "$build_dir/Cli.ml" \
-        -o "$build_dir/compiler-haskell"
+        -o "$build_dir/compiler"
 
 # Copy run-time dependencies
 [ -d $build_dir/data ] || mkdir $build_dir/data

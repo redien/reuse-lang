@@ -35,7 +35,7 @@ if [ "$1" != "--no-binary" ]; then
             -I "$build_dir" \
             "$build_dir/ReuseCompiler.ml" \
             "$build_dir/Cli.ml" \
-            -o "$build_dir/compiler-module"
+            -o "$build_dir/compiler"
 fi
 
 # Copy run-time dependencies
