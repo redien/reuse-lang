@@ -4,7 +4,7 @@
      (ValueConstructor int32 string (list (value expression scope iterable)))
      (ValueClosure (list ast-sym) expression scope)
      (ValueFunction (list ast-sym) expression)
-     (ValueIntrinsic (fn ((list (value expression scope iterable))) (result (value expression scope iterable) string)))
+     (ValueIntrinsic (fn (scope (list string) (list (value expression scope iterable))) (result (value expression scope iterable) string)))
      (ValueNativeIterator iterable))
 
 (def value-function-to-string (arguments expression)

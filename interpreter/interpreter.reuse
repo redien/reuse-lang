@@ -75,14 +75,14 @@
                                           (string-of-char 10)
                                           (render-stack-trace stack-trace))))))
 
-(def eval-int32-operator (operator arguments)
+(def eval-int32-operator (operator scope stack-trace arguments)
      (match arguments
             (Cons (ValueInteger a) (Cons (ValueInteger b) Empty))
                 (return (ValueInteger (operator a b)))
             _
                 (Error (data-error-int32-op))))
 
-(def eval-int32-less-than (arguments)
+(def eval-int32-less-than (scope stack-trace arguments)
      (match arguments
             (Cons (ValueInteger a) (Cons (ValueInteger b) (Cons first (Cons second Empty))))
                 (match (< a b)
@@ -101,6 +101,27 @@
                 (eval-expression (scope-add (list-zip (list-map symbol-id arguments) values) scope)
                                  stack-trace
                                  expression)))
+
+(def apply-function (eval-expression scope stack-trace expression values)
+    (match values
+           (Cons (ValueClosure arguments body closed-scope) parameters)
+               (eval-function-application eval-expression
+                                          (add-stack-trace expression parameters stack-trace)
+                                          arguments
+                                          parameters
+                                          closed-scope
+                                          body)
+           (Cons (ValueFunction arguments body) parameters)
+               (eval-function-application eval-expression
+                                          (add-stack-trace expression parameters stack-trace)
+                                          arguments
+                                          parameters
+                                          scope
+                                          body)
+           (Cons (ValueIntrinsic evaluator) parameters)
+               (evaluator scope stack-trace (list-rest values))
+           _
+               (eval-error)))
 
 (def eval-expression (scope stack-trace expression)
      (match expression
@@ -125,29 +146,24 @@
             (Lambda arguments expression _)
                 (return (ValueClosure arguments expression scope))
             (FunctionApplication expressions _)
-                (bind (sequence (list-map (eval-expression scope stack-trace) expressions)) (fn (values)
-                (match values
-                        (Cons (ValueClosure arguments body closed-scope) parameters)
-                            (eval-function-application eval-expression
-                                                       (add-stack-trace (list-first expressions) parameters stack-trace)
-                                                       arguments
-                                                       parameters
-                                                       closed-scope
-                                                       body)
-                        (Cons (ValueFunction arguments body) parameters)
-                            (eval-function-application eval-expression
-                                                       (add-stack-trace (list-first expressions) parameters stack-trace)
-                                                       arguments
-                                                       parameters
-                                                       scope
-                                                       body)
-                        (Cons (ValueIntrinsic evaluator) parameters)
-                            (evaluator (list-rest values))
-                        _
-                            (eval-error))))
+                (bind (sequence (list-map (eval-expression scope stack-trace) expressions))
+                (apply-function eval-expression scope stack-trace (list-first expressions)))
             (Match expression cases _)
                 (bind (eval-expression scope stack-trace expression) (fn (expression)
                 (pattern-match eval-expression scope stack-trace expression cases)))))
+
+(def eval-pipe' (functions scope stack-trace parameters)
+     (match functions
+            Empty
+                (match (list-first parameters)
+                       None          (eval-error)
+                       (Some value)  (return value))
+            (Cons function rest)
+                (bind (apply-function eval-expression scope stack-trace None (Cons function parameters)) (fn (value)
+                (eval-pipe' rest scope stack-trace (list value))))))
+
+(def eval-pipe (scope stack-trace functions)
+     (return (ValueIntrinsic (eval-pipe' functions))))
 
 (def eval (scope values)
      (match (scope-get (sym-main) scope)
@@ -165,7 +181,8 @@
                       (Pair -2009  (ValueIntrinsic (eval-int32-operator -)))
                       (Pair -2010  (ValueIntrinsic (eval-int32-operator /)))
                       (Pair -2011  (ValueIntrinsic (eval-int32-operator *)))
-                      (Pair -2012  (ValueIntrinsic (eval-int32-operator &))))
+                      (Pair -2012  (ValueIntrinsic (eval-int32-operator &)))
+                      (Pair -2013  (ValueIntrinsic eval-pipe)))
                 scope))
 
 (def definitions-to-scope (definitions)
@@ -195,7 +212,7 @@
                                (list (box-maybe value)
                                      (ValueNativeIterator iterator)))))
 
-(def box-next (arguments)
+(def box-next (scope stack-trace arguments)
      (match arguments
             (Cons (ValueNativeIterator iterator) Empty)
                 (match (indexed-iterator-next iterator)
@@ -217,5 +234,5 @@
 (def internal-symbols ()
      (add-identifiers (list data-Some data-None data-Pair data-IterableClass data-IndexedIterator
                             data-main data-int32-less-than data-percent data-plus data-minus
-                            data-slash data-multiply data-ampersand) -2000
+                            data-slash data-multiply data-ampersand data-pipe) -2000
      (with-local-transform-keywords (keywords))))
