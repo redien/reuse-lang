@@ -5,7 +5,7 @@
 (typ (command state) (CommandError string)
                      (CommandOutput string)
                      (CommandWriteFiles (list (pair string string)))
-                     (CommandReadFiles (list string) (list (pair string string)) state))
+                     (CommandReadFiles (list (pair module-reference string)) state))
 
 (def standard-library? (arguments)
      (match (dictionary-get (data-stdlib) arguments)
@@ -28,7 +28,7 @@
             None             path))
 
 (def module-name-and-path (path)
-     (Pair (filename-without-extension (filename-from-path path))
+     (Pair (ModulePath (filename-without-extension (filename-from-path path)))
            path))
 
 (def standard-library-files (data-path)
@@ -44,6 +44,9 @@
             (list-map module-name-and-path))
           arguments))
 
+(def source-files-from-paths (paths)
+     (list-map (pair-cons ModuleSelf) paths))
+
 (def on-event (data-path event)
      (match event
             (EventArguments arguments)
@@ -51,8 +54,9 @@
                        (CliArguments _ Empty)
                             (CommandError (data-no-input-files))
                        (CliArguments arguments input-files)
-                            (CommandReadFiles input-files
-                                              (modules-from-arguments data-path arguments)
+                            (CommandReadFiles (list-concat (Cons (Pair ModuleSelf (string-concat data-path (data-preamble-filename)))
+                                                                 (modules-from-arguments data-path arguments))
+                                                           (source-files-from-paths input-files))
                                               (dictionary-of arguments))
                        (CliErrorMissingValue key)
                             (CommandError key))
