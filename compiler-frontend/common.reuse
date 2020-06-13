@@ -1,19 +1,4 @@
 
-(def join (list) (string-join (string-empty) list))
-
-(def is-alphanumeric (char)
-     (match (and (>= char 65) (<= char 90))
-            True   True
-            False
-     (match (and (>= char 48) (<= char 57))
-            True   True
-            False  (and (>= char 97) (<= char 122)))))
-
-(def escape-char (char)
-     (match (is-alphanumeric char)
-            True   (string-of-char char)
-            False  (string-prepend 95 (string-from-int32 char))))
-
 (def add-identifiers (identifiers offset dictionary)
      (match identifiers
             (Cons identifier rest)
@@ -86,13 +71,10 @@
             SourceFileTypeReuse           (parse-reuse-file file)
             SourceFileTypeTargetLanguage  (parse-target-file file)))
 
-(def parse-source-files (internal-symbols minimal? files)
+(def parse-source-files (internal-symbols files)
      ((pipe (list-map parse-source-file)
             parser-sequence
             (parser-run internal-symbols)
             (result-map list-flatten)
-            stringify-parse-errors
-            (match minimal?
-                   True   id
-                   False  (pipe validate-reserved-identifiers local-transforms)))
+            stringify-parse-errors)
         files))
