@@ -1,0 +1,19 @@
+
+(typ symbol-table-entry (SymbolTableEntry int32 string))
+(typ symbol-table (SymbolTable (array symbol-table-entry)))
+
+(def symbol-table-empty ()
+     (SymbolTable (array-empty)))
+
+(def symbol-table-set-entry' (id entry table)
+     (match table
+            (SymbolTable array)
+                (SymbolTable (array-set id entry array))))
+
+(def symbol-table-get' (id table)
+     (match table
+            (SymbolTable array)
+                (array-get id array)))
+
+(def symbol-table-bind (id string table)
+     (symbol-table-set-entry' id (SymbolTableEntry id string) table))
