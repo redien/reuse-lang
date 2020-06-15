@@ -1,6 +1,6 @@
 # Reuse
 
-Reuse is a general-purpose programming language designed to compile to other programming languages. This dramatically increases the number of platforms and languages that libraries written in Reuse support.
+Reuse exists to create a universal standard library. It is a general-purpose programming language designed to compile to other programming languages. This dramatically increases the number of platforms and languages that libraries written in Reuse support.
 
 The language is strongly typed with a complete and sound type system and decidable type inference.
 The language does not support side-effects by design and all data is immutable. Any input/output or other kinds of side-effects can be performed by the host language.
@@ -153,15 +153,19 @@ Compiler for the Reuse programming language
 
 ## Design Rationale
 
-- Keeping the language pure
-  - Pro: No more value restriction there is not mutability
-    - https://ocamlverse.github.io/content/weak_type_variables.html
-  - Pro: Easy to translate to pure and non-pure languages
-  - Con: Makes it difficult to avoid heap allocations
 - Keeping the language as small as possible
   - Pro: Reduces the work of implementing new language targets and tools
   - Pro: Fewer features to learn
   - Con: Not as expressive as it could be
+- No mutability
+  - Pro: Easy to translate to pure and non-pure languages
+  - Pro: Regain the free lunch: Make parallel programming a breeze
+  - Pro: [No more value restriction as there is no mutability](https://ocamlverse.github.io/content/weak_type_variables.html)
+  - Con: Makes it difficult to avoid heap allocations
+  - Con: Poor cache locality
+- Strict evaluation
+  - Pro: Does not behave "badly" when compiled to a lazy language
+  - Con: Not as expressive as lazy evaluation
 - No let expression
   - Pro: let generalization is [not frequently used](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/tldi10-vytiniotis.pdf).
   - Pro: A match expression can work just as well as a let expression
@@ -191,6 +195,11 @@ docker run --rm -it -v $PWD:/home/opam/reuse-lang redien/reuse-lang-dev-env
   - Return INT32_MAX?
   - Return Maybe?
 - Improve error messages to show file, line and column as well as print out the range.
+- Research alternative number representations.
+  - Big num?
+  - dec64?
+  - int64?
+  - uint8?
 
 **Performance**
 
