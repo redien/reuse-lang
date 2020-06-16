@@ -29,7 +29,7 @@
      (match symbol
             (Symbol id name range)
                 (parser-bind (parser-get-source-reference) (fn (source-reference)
-                (parser-return (Sym id name source-reference range))))
+                (parser-return (Sym id name source-reference range None))))
             (Integer _ range)
                 (parser-error  (MalformedSymbolError range))
             (List _ range)
@@ -149,7 +149,7 @@
 (def sexp-to-constructor (sexp-to-expression range id name rest)
      (parser-bind   (parser-get-source-reference)                        (fn (source-reference)
      (parser-bind   (parser-sequence (list-map sexp-to-expression rest)) (fn (expressions)
-     (parser-return (Constructor (Sym id name source-reference range) expressions range)))))))
+     (parser-return (Constructor (Sym id name source-reference range None) expressions range)))))))
 
 (def sexp-to-list-expression (sexp-to-expression expressions range)
      (match expressions
@@ -200,9 +200,10 @@
      (match rest
             (Cons (List arguments _) (Cons expression Empty))
                   (parser-bind   (parser-sequence (list-map symbol-to-sym arguments))  (fn (arguments)
+                  (parser-bind   (parser-sequence (list-map parser-bind-symbol! arguments))  (fn (argument)
                   (parser-bind   (sexp-to-expression expression)                       (fn (expression)
                   (parser-bind   (symbol-to-sym name-symbol)                           (fn (sym)
-                  (parser-return (FunctionDefinition sym public? arguments expression range))))))))
+                  (parser-return (FunctionDefinition sym public? arguments expression range))))))))))
             _
                   (parser-error (MalformedFunctionDefinitionError range))))
 
@@ -268,7 +269,7 @@
 
 (def sym-to-symbol (sym)
      (match sym
-            (Sym id name _ range)
+            (Sym id name _ range __)
                 (Symbol id name range)))
 
 (def type-to-sexp (types-to-sexp type)
@@ -335,7 +336,7 @@
      (match expression
             (IntegerConstant integer range)
                 (Integer integer range)
-            (Variable (Sym id string _ range))
+            (Variable (Sym id string _ range __))
                 (Symbol id string range)
             (Lambda arguments expression range)
                 (List (list (Symbol 0 (data-fn) range)
@@ -374,7 +375,7 @@
 
 (def definition-to-sexp (definition)
      (match definition
-            (TypeDefinition (Sym id name _ __) public? parameters constructors range)
+            (TypeDefinition (Sym id name _ __ ___) public? parameters constructors range)
                 (definition-to-sexp' public? range (type-definition-to-sexp id name parameters constructors range))
             (FunctionDefinition name public? arguments expression range)
                 (definition-to-sexp' public? range (function-definition-to-sexp name arguments expression range))

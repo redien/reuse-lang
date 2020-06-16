@@ -2,7 +2,7 @@
 (typ module-reference       (ModulePath           string)
                             ModuleSelf)
 (typ source-reference       (SourceReference      string module-reference))
-(typ ast-sym                (Sym                  int32 string source-reference range))
+(typ ast-sym                (Sym                  int32 string source-reference range (maybe int32)))
 (typ ast-type               (SimpleType           ast-sym)
                             (ComplexType          ast-sym (list ast-type) range)
                             (FunctionType         (list ast-type) ast-type range))
@@ -48,22 +48,22 @@
 
 (def symbol-id (sym)
      (match sym
-            (Sym id _ __ ___)  id))
+            (Sym id _ __ ___ ____)  id))
 
 (def symbol-name (sym)
      (match sym
-            (Sym _ name __ ___)  name))
+            (Sym _ name __ ___ ____)  name))
 
 (def symbol-source-reference (sym)
      (match sym
-            (Sym _ __ source-reference ___)  source-reference))
+            (Sym _ __ source-reference ___ ____)  source-reference))
 
 (def symbol-module (sym)
      (source-reference-module (symbol-source-reference sym)))
 
 (def symbol-range (sym)
      (match sym
-            (Sym _ __ ___ range)  range))
+            (Sym _ __ ___ range ____)  range))
 
 (def symbol-equal? (a b)
      (= (symbol-id a) (symbol-id b)))

@@ -15,7 +15,7 @@
 
 (def expression-is-symbol? (symbol-id expression)
      (match expression
-            (Variable (Sym id _ __ ___))
+            (Variable (Sym id _ __ ___ ____))
                 (= symbol-id id)
             _
                 False))
@@ -39,17 +39,17 @@
      (result-concat (list-map (transform-special-form symbol-id transformer) definitions)))
 
 (def transform-pipe (source-reference expressions range)
-     (Lambda (list (Sym (sym-sparkle-x) (data-sparkle-x) source-reference range))
+     (Lambda (list (Sym (sym-sparkle-x) (data-sparkle-x) source-reference range None))
              (list-foldl (fn (expression composed)
                              (FunctionApplication (list expression composed) range))
-                         (Variable (Sym (sym-sparkle-x) (data-sparkle-x) source-reference range))
+                         (Variable (Sym (sym-sparkle-x) (data-sparkle-x) source-reference range None))
                          expressions)
              range))
 
 (def transform-list (source-reference expressions range)
      (list-foldr (fn (expression composed)
-                     (Constructor (Sym (sym-cons) (data-Cons) source-reference range) (list expression composed) range))
-                 (Constructor (Sym (sym-empty) (data-Empty) source-reference range) Empty range)
+                     (Constructor (Sym (sym-cons) (data-Cons) source-reference range None) (list expression composed) range))
+                 (Constructor (Sym (sym-empty) (data-Empty) source-reference range None) Empty range)
                  expressions))
 
 (def transform-match-expression (expression pairs range)
