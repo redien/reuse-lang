@@ -42,6 +42,10 @@ do
             shift
             shift
         ;;
+        --help)
+            usage
+            exit
+        ;;
         *)
             REUSE_ARGS="$REUSE_ARGS $arg"
             shift
