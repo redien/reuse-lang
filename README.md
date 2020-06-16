@@ -1,5 +1,7 @@
 # Reuse
 
+![CI](https://github.com/redien/reuse-lang/workflows/CI/badge.svg)
+
 Reuse exists to create a universal standard library. It is a general-purpose programming language designed to compile to other programming languages. This dramatically increases the number of platforms and languages that libraries written in Reuse support.
 
 The language is statically typed, does not support side-effects by design and all data is immutable. Any input/output or other kinds of side-effects can be performed by the host language.

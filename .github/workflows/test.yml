@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-20.04
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up dependencies (Ubuntu)
+      if: ${{ matrix.os == 'ubuntu-20.04' }}
+      run: sudo apt-get install ocaml-nox ghc
+
+    - name: Set up dependencies (MacOS)
+      if: ${{ matrix.os == 'macos-latest' }}
+      run: brew install ocaml coreutils ghc
+
+    - name: Build the bootstrap compiler
+      run: $GITHUB_WORKSPACE/build.sh
+
+    - name: Update the compiler and run all tests
+      run: $GITHUB_WORKSPACE/dev-env/update-compiler.sh
