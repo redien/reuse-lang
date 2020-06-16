@@ -33,6 +33,11 @@
             (ParserContext source-reference symbols parent symbol-table constructors)
                 (ParserContext source-reference symbols (parser-scope-new parent) symbol-table constructors)))
 
+(def parser-context-new-module (context)
+     (match context
+            (ParserContext source-reference symbols _ symbol-table constructors)
+                (ParserContext source-reference symbols (parser-scope-empty) symbol-table constructors)))
+
 (def parser-context-resolve (sym context)
      (match context
             (ParserContext _ __ scope ___ ____)
@@ -112,6 +117,10 @@
 
 (def parser-new-scope! ()
      (state-bind (state-modify parser-context-new-scope) (fn (state)
+     (parser-return state))))
+
+(def parser-new-module! ()
+     (state-bind (state-modify parser-context-new-module) (fn (state)
      (parser-return state))))
 
 (def parser-bind-symbol! (sym)

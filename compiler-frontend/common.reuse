@@ -71,8 +71,14 @@
             SourceFileTypeReuse           (parse-reuse-file file)
             SourceFileTypeTargetLanguage  (parse-target-file file)))
 
+(def parse-module (files)
+     (parser-bind (parser-new-module!) (fn (_)
+     (parser-bind (parser-sequence (list-map parse-source-file files)) (fn (definitions)
+     (parser-return (list-flatten definitions)))))))
+
 (def parse-source-files (internal-symbols files)
-     ((pipe (list-map parse-source-file)
+     ((pipe (list-partition-by (fn (a b) (module-equal? (source-file-module a) (source-file-module b))))
+            (list-map parse-module)
             parser-sequence
             (parser-run internal-symbols)
             (result-map list-flatten)
