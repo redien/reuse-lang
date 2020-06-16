@@ -65,6 +65,10 @@
      (match sym
             (Sym _ __ ___ range ____)  range))
 
+(def symbol-with-id' (id sym)
+     (match sym
+            (Sym _1 _2 _3 _4 _)  (Sym _1 _2 _3 _4 id)))
+
 (def symbol-equal? (a b)
      (= (symbol-id a) (symbol-id b)))
 

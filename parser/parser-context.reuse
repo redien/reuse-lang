@@ -125,7 +125,7 @@
 
 (def parser-bind-symbol! (sym)
      (state-bind (state-modify (parser-context-bind-symbol sym)) (fn (state)
-     (parser-return (- 1 (parser-context-symbol-id state))))))
+     (parser-return (symbol-with-id' (Some (- 1 (parser-context-symbol-id state))) sym)))))
 
 (def parser-resolve-symbol (sym)
      (state-bind (state-get) (fn (state)

@@ -20,6 +20,6 @@
             (ParserScope symbols parent)
                 (match (array-get (symbol-id sym) symbols)
                        None    (parser-scope-resolve sym parent)
-                       symbol  symbol)
+                       id      (symbol-with-id' id sym))
             (ParserScopeRoot symbols)
-                (array-get (symbol-id sym) symbols)))
+                (symbol-with-id' (array-get (symbol-id sym) symbols) sym)))

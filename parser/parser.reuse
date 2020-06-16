@@ -35,6 +35,16 @@
             (List _ range)
                 (parser-error  (MalformedSymbolError range))))
 
+(def bind-symbol! (symbol)
+     (parser-bind (symbol-to-sym symbol)    (fn (sym)
+     (parser-bind (parser-bind-symbol! sym) (fn (sym)
+     (parser-return sym))))))
+
+(def resolve-symbol (symbol)
+     (parser-bind (symbol-to-sym symbol)      (fn (sym)
+     (parser-bind (parser-resolve-symbol sym) (fn (sym)
+     (parser-return sym))))))
+
 (def sexp-to-complex-type (sexp-to-type sym parameters range)
      (parser-bind   (parser-sequence (list-map sexp-to-type parameters))  (fn (sub-types)
      (parser-return (ComplexType sym sub-types range)))))
@@ -199,11 +209,10 @@
 (def sexp-to-function-definition (name-symbol public? rest range)
      (match rest
             (Cons (List arguments _) (Cons expression Empty))
-                  (parser-bind   (parser-sequence (list-map symbol-to-sym arguments))  (fn (arguments)
-                  (parser-bind   (parser-sequence (list-map parser-bind-symbol! arguments))  (fn (argument)
+                  (parser-bind   (parser-sequence (list-map bind-symbol! arguments))   (fn (arguments)
                   (parser-bind   (sexp-to-expression expression)                       (fn (expression)
                   (parser-bind   (symbol-to-sym name-symbol)                           (fn (sym)
-                  (parser-return (FunctionDefinition sym public? arguments expression range))))))))))
+                  (parser-return (FunctionDefinition sym public? arguments expression range))))))))
             _
                   (parser-error (MalformedFunctionDefinitionError range))))
 
