@@ -1,6 +1,6 @@
 # Reuse
 
-![CI](https://github.com/redien/reuse-lang/workflows/CI/badge.svg)
+[![CI](https://github.com/redien/reuse-lang/workflows/CI/badge.svg)](https://github.com/redien/reuse-lang/actions?query=workflow%3ACI)
 
 Reuse exists to create a universal standard library. It is a general-purpose programming language designed to compile to other programming languages. This dramatically increases the number of platforms and languages that libraries written in Reuse support.
 
