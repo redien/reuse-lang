@@ -2,8 +2,7 @@
 
 Reuse exists to create a universal standard library. It is a general-purpose programming language designed to compile to other programming languages. This dramatically increases the number of platforms and languages that libraries written in Reuse support.
 
-The language is strongly typed with a complete and sound type system and decidable type inference.
-The language does not support side-effects by design and all data is immutable. Any input/output or other kinds of side-effects can be performed by the host language.
+The language is statically typed, does not support side-effects by design and all data is immutable. Any input/output or other kinds of side-effects can be performed by the host language.
 
 ## Table of Contents
 
@@ -54,7 +53,7 @@ brew install --HEAD reuse
 
 **Linux/Unix**
 
-Clone the repository and symlink `[repository path]/reusec` to the appropriate directory in your PATH.
+Clone the repository, build using `[repository path]/build.sh` and symlink `[repository path]/reusec` to the appropriate directory in your PATH. It currently requires the [OCaml compiler](https://ocaml.org/) to bootstrap.
 
 **Windows**
 
