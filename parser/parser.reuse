@@ -1,18 +1,4 @@
 
-(def sym-def ()   -1)
-(def sym-typ ()   -2)
-(def sym-fn ()    -3)
-(def sym-match () -4)
-(def sym-pub ()   -5)
-
-(def keywords ()
-     (dictionary-of (list
-          (Pair (data-def)   (Pair (sym-def) (data-def)))
-          (Pair (data-typ)   (Pair (sym-typ) (data-typ)))
-          (Pair (data-fn)    (Pair (sym-fn) (data-fn)))
-          (Pair (data-match) (Pair (sym-match) (data-match)))
-          (Pair (data-pub)   (Pair (sym-pub) (data-pub))))))
-
 (typ error  (MalformedDefinitionError range)
             (MalformedTypeDefinitionError range)
             (MalformedFunctionDefinitionError range)
@@ -22,6 +8,8 @@
             (MalformedSymbolError range)
             (MalformedConstructorError range)
             (MalformedTypeError range)
+            (ErrorNotDefined string)
+            (ErrorAlreadyDefined string)
             MalformedSexpTooFewClosingBrackets
             MalformedSexpTooManyClosingBrackets)
 
@@ -43,7 +31,11 @@
 (def resolve-symbol (symbol)
      (parser-bind (symbol-to-sym symbol)      (fn (sym)
      (parser-bind (parser-resolve-symbol sym) (fn (sym)
-     (parser-return sym))))))
+     (match sym
+            (Sym _ name __ ___ None)
+                (parser-error (ErrorNotDefined name))
+            _
+                (parser-return sym)))))))
 
 (def sexp-to-complex-type (sexp-to-type sym parameters range)
      (parser-bind   (parser-sequence (list-map sexp-to-type parameters))  (fn (sub-types)
@@ -247,7 +239,7 @@
                 (specific-malformed-definition-error kind range)
             (List (Cons (Symbol kind _ __) (Cons ___ Empty)) range)
                 (specific-malformed-definition-error kind range)
-            (List (Cons (Symbol -5 _ __) (Cons (Symbol kind ___ ____) (Cons name rest))) range)
+            (List (Cons (Symbol -6 _ __) (Cons (Symbol kind ___ ____) (Cons name rest))) range)
                 (sexp-to-definition' name True rest range kind)
             (List (Cons (Symbol kind _ __) (Cons name rest)) range)
                 (sexp-to-definition' name False rest range kind)
@@ -293,7 +285,7 @@
             (SimpleType sym)
                 (sym-to-symbol sym)
             (FunctionType arg-types return-type range)
-                (List (list (Symbol 0 (data-fn) range)
+                (List (list (Symbol (sym-fn) (data-fn) range)
                             (List (types-to-sexp arg-types) range)
                             (type-to-sexp types-to-sexp return-type))
                       range)
@@ -316,7 +308,7 @@
 (def type-parameter-to-sexp (parameter)
      (match parameter
             (ExistentialParameter sym)
-                (List (list (Symbol 0 (data-exists) (symbol-range sym)) (sym-to-symbol sym)) (symbol-range sym))
+                (List (list (Symbol (sym-exists) (data-exists) (symbol-range sym)) (sym-to-symbol sym)) (symbol-range sym))
             (UniversalParameter sym)
                 (sym-to-symbol sym)))
 
@@ -355,12 +347,12 @@
             (Variable (Sym id string _ range __))
                 (Symbol id string range)
             (Lambda arguments expression range)
-                (List (list (Symbol 0 (data-fn) range)
+                (List (list (Symbol (sym-fn) (data-fn) range)
                             (function-arguments-to-sexp arguments range)
                             (expression-to-sexp expression))
                       range)
             (Match expression pairs range)
-                (List (Cons (Symbol 0 (data-match) range)
+                (List (Cons (Symbol (sym-match) (data-match) range)
                       (Cons (expression-to-sexp expression)
                             (list-flatmap (match-pair-to-sexp expression-to-sexp) pairs))) range)
             (Constructor sym expressions range)
@@ -373,7 +365,7 @@
                 (List (list-map expression-to-sexp expressions) range)))
 
 (def type-definition-to-sexp (id name parameters constructors range)
-     (list-concat (list (Symbol 0 (data-typ) range)
+     (list-concat (list (Symbol (sym-typ) (data-typ) range)
                         (type-name-to-sexp id range name parameters))
                   (constructors-to-sexp constructors)))
 

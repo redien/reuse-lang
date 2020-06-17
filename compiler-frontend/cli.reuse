@@ -32,8 +32,8 @@
            path))
 
 (def standard-library-files (data-path)
-     (list (string-join (data-slash) (list data-path (data-standard-library-filename)))
-           (string-join (data-slash) (list data-path (data-pervasives-filename)))))
+     (list (string-join (data-/) (list data-path (data-standard-library-filename)))
+           (string-join (data-/) (list data-path (data-pervasives-filename)))))
 
 (def modules-from-arguments (data-path arguments)
      ((pipe (list-filter (. (string-equal? (data-module-flag)) pair-left))

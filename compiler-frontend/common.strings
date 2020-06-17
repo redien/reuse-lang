@@ -1,11 +1,4 @@
 space                     | 
-plus                      |+
-multiply                  |*
-minus                     |-
-slash                     |/
-percent                   |%
-ampersand                 |&
-int32-less-than           |int32-less-than
 parse-error               |parse error 
 fun                       |fun
 type                      |type
@@ -74,3 +67,5 @@ stdlib                    |--stdlib
 minimal                   |--minimal
 module-flag               |--module
 standard-library-filename |standard-library.reuse
+not-defined-error         |The following identifier was not defined: 
+already-defined-error     |The following identifier was already defined: 

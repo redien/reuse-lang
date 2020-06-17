@@ -8,12 +8,15 @@
 (def parser-scope-new (parent)
      (ParserScope (array-empty) parent))
 
-(def parser-scope-set (sym id scope)
+(def parser-scope-set' (symbol-id symbol-table-id scope)
      (match scope
             (ParserScope symbols parent)
-                (ParserScope (array-set (symbol-id sym) id symbols) parent)
+                (ParserScope (array-set symbol-id symbol-table-id symbols) parent)
             (ParserScopeRoot symbols)
-                (ParserScopeRoot (array-set (symbol-id sym) id symbols))))
+                (ParserScopeRoot (array-set symbol-id symbol-table-id symbols))))
+
+(def parser-scope-set (sym id scope)
+     (parser-scope-set' (symbol-id sym) id scope))
 
 (def parser-scope-resolve (sym scope)
      (match scope
@@ -23,3 +26,6 @@
                        id      (symbol-with-id' id sym))
             (ParserScopeRoot symbols)
                 (symbol-with-id' (array-get (symbol-id sym) symbols) sym)))
+
+(def parser-scope-set-list (symbols scope)
+     (list-foldl (pair-map parser-scope-set') scope symbols))

@@ -2,16 +2,12 @@
 (def sym-sparkle-x () -1000)
 (def sym-cons () -1001)
 (def sym-empty () -1002)
-(def sym-list () -1003)
-(def sym-pipe () -1004)
 
 (def with-local-transform-keywords (dictionary)
      (dictionary-set (data-sparkle-x) (Pair (sym-sparkle-x) (data-sparkle-x))
      (dictionary-set (data-Cons) (Pair (sym-cons) (data-Cons))
      (dictionary-set (data-Empty) (Pair (sym-empty) (data-Empty))
-     (dictionary-set (data-list) (Pair (sym-list) (data-list))
-     (dictionary-set (data-pipe) (Pair (sym-pipe) (data-pipe))
-     dictionary))))))
+     dictionary))))
 
 (def expression-is-symbol? (symbol-id expression)
      (match expression

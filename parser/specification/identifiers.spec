@@ -1,8 +1,8 @@
 
 Should parse identifiers
-> (def _ () f)
-= (def _ () f)
+> (def _ (f) f)
+= (def _ (f) f)
 
-> (def _ () identifier)
-= (def _ () identifier)
+> (def _ (identifier) identifier)
+= (def _ (identifier) identifier)
 

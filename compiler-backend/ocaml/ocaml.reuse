@@ -1,6 +1,4 @@
 
-(def sym-int32-less-than () -10000)
-
 (def prefix-type-variable (identifier)
      (string-prepend 39 (string-prepend 84 (symbol-name identifier))))
 
@@ -19,30 +17,23 @@
 (def identifier-is-reserved? (id)
      (and (<= id -2000) (> id -3000)))
 
-(def special-identifiers ()
-     (list data-plus data-slash data-percent data-minus data-multiply data-ampersand))
-
-(def identifier-is-special? (id)
-     (and (<= id -3000) (> id -4000)))
-
 (def escape-identifier (identifier)
      (match (identifier-is-reserved? (symbol-id identifier))
             True   (string-prepend 95 (symbol-name identifier))
             False  (string-flatmap escape-char (symbol-name identifier))))
 
-(def special-identifier-map ()
+(def operator-translation-map ()
      (dictionary-of (list
-        (Pair (data-plus) (data-int32-plus))
-        (Pair (data-slash) (data-int32-divide))
-        (Pair (data-percent) (data-int32-modulus))
-        (Pair (data-minus) (data-int32-minus))
-        (Pair (data-multiply) (data-int32-multiply))
-        (Pair (data-ampersand) (data-int32-and))
-     )))
+        (Pair (data-+) (data-int32-plus))
+        (Pair (data--) (data-int32-minus))
+        (Pair (data-*) (data-int32-multiply))
+        (Pair (data-/) (data-int32-divide))
+        (Pair (data-%) (data-int32-modulus))
+        (Pair (data-&) (data-int32-and)))))
 
 (def translate-identifier (identifier)
-     (match (identifier-is-special? (symbol-id identifier))
-            True   (match (dictionary-get (symbol-name identifier) (special-identifier-map))
+     (match (identifier-is-operator? (symbol-id identifier))
+            True   (match (dictionary-get (symbol-name identifier) (operator-translation-map))
                           (Some translation)  translation
                           None                (escape-identifier identifier))
             False  (escape-identifier identifier)))
@@ -254,9 +245,7 @@
         definitions))
 
 (def internal-symbols ()
-     (dictionary-set (data-int32-less-than) (Pair (sym-int32-less-than) (data-int32-less-than))
      (add-identifiers (reserved-identifiers) -2000
-     (add-identifiers (special-identifiers) -3000
-     (with-local-transform-keywords (keywords))))))
+     (with-local-transform-keywords (default-identifiers))))
 
 (def perform-transformations? () True)

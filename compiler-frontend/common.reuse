@@ -26,6 +26,10 @@
                 (i18n-malformed-constructor-error English range)
             (MalformedTypeError range)
                 (i18n-malformed-type-error English range)
+            (ErrorNotDefined name)
+                (string-concat (data-not-defined-error) name)
+            (ErrorAlreadyDefined name)
+                (string-concat (data-already-defined-error) name)
             MalformedSexpTooFewClosingBrackets
                 (i18n-malformed-sexp-too-few-closing-brackets English)
             MalformedSexpTooManyClosingBrackets

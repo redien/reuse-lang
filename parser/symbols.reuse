@@ -1,0 +1,42 @@
+
+(def sym-def ()              -1)
+(def sym-typ ()              -2)
+(def sym-fn ()               -3)
+(def sym-match ()            -4)
+(def sym-exists ()           -5)
+(def sym-pub ()              -6)
+
+(def sym-+ ()                 0)
+(def sym-- ()                 1)
+(def sym-* ()                 2)
+(def sym-/ ()                 3)
+(def sym-% ()                 4)
+(def sym-& ()                 5)
+(def sym-int32-less-than ()   6)
+(def sym-list ()              7)
+(def sym-pipe ()              8)
+(def default-symbol-count ()  9)
+
+(def intrinsic-identifiers ()
+     (list (Pair (sym-+) (data-+)) (Pair (sym--) (data--)) (Pair (sym-*) (data-*))
+           (Pair (sym-/) (data-/)) (Pair (sym-%) (data-%)) (Pair (sym-&) (data-&))
+           (Pair (sym-int32-less-than) (data-int32-less-than))
+           (Pair (sym-list) (data-list)) (Pair (sym-pipe) (data-pipe))))
+
+(def default-symbol-table ()
+     (symbol-table-bind-list (list-map pair-right (intrinsic-identifiers)) (symbol-table-empty)))
+
+(def default-scope ()
+     (parser-scope-set-list (list-map (. (fn (x) (Pair x x)) pair-left) (intrinsic-identifiers)) (parser-scope-empty)))
+
+(def default-identifiers ()
+     (dictionary-set (data-def)    (Pair (sym-def) (data-def))
+     (dictionary-set (data-typ)    (Pair (sym-typ) (data-typ))
+     (dictionary-set (data-fn)     (Pair (sym-fn) (data-fn))
+     (dictionary-set (data-match)  (Pair (sym-match) (data-match))
+     (dictionary-set (data-exists) (Pair (sym-pub) (data-exists))
+     (dictionary-set (data-pub)    (Pair (sym-pub) (data-pub))
+     (dictionary-of (list-map (fn (pair) (Pair (pair-right pair) pair)) (intrinsic-identifiers))))))))))
+
+(def identifier-is-operator? (id)
+     (and (>= id 0) (<= id 5)))

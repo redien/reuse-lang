@@ -7,5 +7,7 @@ MalformedMatchExpressionError       |MalformedMatchExpressionError
 MalformedSymbolError                |MalformedSymbolError
 MalformedConstructorError           |MalformedConstructorError
 MalformedTypeError                  |MalformedTypeError
+ErrorNotDefined                     |ErrorNotDefined
+ErrorAlreadyDefined                 |ErrorAlreadyDefined
 MalformedSexpTooFewClosingBrackets  |MalformedSexpTooFewClosingBrackets
 MalformedSexpTooManyClosingBrackets |MalformedSexpTooManyClosingBrackets

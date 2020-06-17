@@ -11,9 +11,10 @@ $project_root/reusec --language ocaml\
                      $project_root/string-gen/string-gen.reuse\
                      $project_root/sexp-parser/sexp-parser.reuse\
                      $project_root/parser/ast.reuse\
-                     $project_root/parser/parser.strings\
                      $project_root/parser/scope.reuse\
                      $project_root/parser/symbol-table.reuse\
+                     $project_root/parser/symbols.strings\
+                     $project_root/parser/symbols.reuse\
                      $project_root/parser/parser-context.reuse\
                      $project_root/parser/parser.reuse\
                      $project_root/argument-parser/argument-parser.strings\
@@ -45,3 +46,5 @@ fi
 [ -d $build_dir/data ] || mkdir $build_dir/data
 cp $script_path/preamble.reuse $build_dir/data/preamble.reuse
 cp $script_path/pervasives.reuse $build_dir/data/pervasives.reuse
+
+cp bootstrap/data/standard-library.reuse $build_dir/data

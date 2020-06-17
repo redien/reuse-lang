@@ -35,8 +35,8 @@
 
 (def parser-context-new-module (context)
      (match context
-            (ParserContext source-reference symbols _ symbol-table constructors)
-                (ParserContext source-reference symbols (parser-scope-empty) symbol-table constructors)))
+            (ParserContext source-reference symbols scope symbol-table constructors)
+                (ParserContext source-reference symbols scope symbol-table constructors)))
 
 (def parser-context-resolve (sym context)
      (match context
@@ -80,9 +80,9 @@
 
 (def parser-run (symbols parser)
      (match (state-run (ParserContext (SourceReference (string-empty) ModuleSelf)
-                                      (Pair 0 symbols)
-                                      (parser-scope-empty)
-                                      (symbol-table-empty)
+                                      (Pair (default-symbol-count) symbols)
+                                      (default-scope)
+                                      (default-symbol-table)
                                       (array-empty))
                        parser)
             (Pair _ result)  result))

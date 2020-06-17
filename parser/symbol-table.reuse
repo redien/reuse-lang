@@ -14,3 +14,6 @@
      (match table
             (SymbolTable id array)
                 (SymbolTable (+ id 1) (array-set id (SymbolTableEntry id string) array))))
+
+(def symbol-table-bind-list (names table)
+     (list-foldl symbol-table-bind table names))

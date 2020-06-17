@@ -31,8 +31,8 @@ Should parse existential types
 = (typ (closure (exists s) a) (Closure (fn (s) a) s))
 
 Should parse constructor expressions
-> (def _ () (Constructor x))
-= (def _ () (Constructor x))
+> (typ a (Constructor a)) (def _ () (Constructor 1))
+= (typ a (Constructor a)) (def _ () (Constructor 1))
 
-> (def _ () Constructor)
-= (def _ () Constructor)
+> (typ a Constructor) (def _ () Constructor)
+= (typ a Constructor) (def _ () Constructor)

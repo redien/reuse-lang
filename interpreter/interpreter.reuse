@@ -7,8 +7,8 @@
 (def map (f xs) (result-map f xs))
 
 (def sym-main () -2005)
-(def sym-Empty () -2015)
-(def sym-Cons () -2016)
+(def sym-Empty () -2006)
+(def sym-Cons () -2007)
 
 (def eval-error ()
      (Error (data-error-generic)))
@@ -187,15 +187,15 @@
                 (eval-error)))
 
 (def add-intrinsics (scope)
-     (scope-add (list (Pair -2006  (ValueIntrinsic eval-int32-less-than))
-                      (Pair -2007  (ValueIntrinsic (eval-int32-operator %)))
-                      (Pair -2008  (ValueIntrinsic (eval-int32-operator +)))
-                      (Pair -2009  (ValueIntrinsic (eval-int32-operator -)))
-                      (Pair -2010  (ValueIntrinsic (eval-int32-operator /)))
-                      (Pair -2011  (ValueIntrinsic (eval-int32-operator *)))
-                      (Pair -2012  (ValueIntrinsic (eval-int32-operator &)))
-                      (Pair -2013  (ValueIntrinsic eval-pipe))
-                      (Pair -2014  (ValueIntrinsic eval-list)))
+     (scope-add (list (Pair (sym-+)                (ValueIntrinsic (eval-int32-operator +)))
+                      (Pair (sym--)                (ValueIntrinsic (eval-int32-operator -)))
+                      (Pair (sym-*)                (ValueIntrinsic (eval-int32-operator *)))
+                      (Pair (sym-/)                (ValueIntrinsic (eval-int32-operator /)))
+                      (Pair (sym-%)                (ValueIntrinsic (eval-int32-operator %)))
+                      (Pair (sym-&)                (ValueIntrinsic (eval-int32-operator &)))
+                      (Pair (sym-int32-less-than)  (ValueIntrinsic eval-int32-less-than))
+                      (Pair (sym-pipe)             (ValueIntrinsic eval-pipe))
+                      (Pair (sym-list)             (ValueIntrinsic eval-list)))
                 scope))
 
 (def definitions-to-scope (definitions)
@@ -246,7 +246,5 @@
 
 (def internal-symbols ()
      (add-identifiers (list data-Some data-None data-Pair data-IterableClass data-IndexedIterator
-                            data-main data-int32-less-than data-percent data-plus data-minus
-                            data-slash data-multiply data-ampersand data-pipe data-list data-Empty
-                            data-Cons) -2000
-     (with-local-transform-keywords (keywords))))
+                            data-main data-Empty data-Cons) -2000
+     (with-local-transform-keywords (default-identifiers))))
