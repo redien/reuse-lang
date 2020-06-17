@@ -64,5 +64,5 @@ Should return an error given a malformed match expression
 > (match 1 x)
 ? This match expression is not correct, make sure you have put parentheses correctly so that all your match rules come in pairs like this:\\n\\n(match e\\n       pattern1  e1\\n       pattern2  e2\\n       ...)\\n\\n
 
-> (match 1 x y z)
+> (match 1 x 2 z)
 ? This match expression is not correct, make sure you have put parentheses correctly so that all your match rules come in pairs like this:\\n\\n(match e\\n       pattern1  e1\\n       pattern2  e2\\n       ...)\\n\\n
