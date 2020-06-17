@@ -19,3 +19,9 @@ A array should return the last value added for a specific key
 array-of should add every entry in turn to the array
 > (string-of-char (array-get-or 0 66 (array-of (list (Pair 256 67) (Pair 0 65)))))
 = A
+
+> (string-of-char (array-get-or 0 70 (array-from-list (list 65 67))))
+= A
+
+> (string-of-char (array-get-or 1 70 (array-from-list (list 65 66))))
+= B

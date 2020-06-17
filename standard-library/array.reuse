@@ -52,6 +52,16 @@
             (ArrayTree _ a entry b)
                (list-flatten (list (array-entries a) (list entry) (array-entries b)))))
 
+(def array-from-list' (entries index array)
+     (match entries
+            (Cons x xs)
+               (array-from-list' xs (+ index 1) (array-set index x array))
+            Empty
+               array))
+
+(def array-from-list (entries)
+     (array-from-list' entries 0 ArrayEmpty))
+
 (def array-of (entries)
      (list-foldl (fn (entry array) (match entry (Pair key value) (array-set key value array))) ArrayEmpty entries))
 
