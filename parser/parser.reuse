@@ -103,9 +103,10 @@
 (def sexp-to-lambda (sexp-to-expression rest range)
      (match rest
             (Cons (List arguments _) (Cons expression Empty))
-                (parser-bind   (parser-sequence (list-map symbol-to-sym arguments))  (fn (arguments)
+                (parser-bind   (parser-new-scope!)                                   (fn (_)
+                (parser-bind   (parser-sequence (list-map bind-symbol! arguments))   (fn (arguments)
                 (parser-bind   (sexp-to-expression expression)                       (fn (expression)
-                (parser-return (Lambda arguments expression range))))))
+                (parser-return (Lambda arguments expression range))))))))
             _
                 (parser-error (MalformedFunctionDefinitionError range))))
 
@@ -113,12 +114,16 @@
      (parser-bind (parser-sequence (list-map sexp-to-expression expressions)) (fn (expressions)
      (parser-return (FunctionApplication expressions range)))))
 
+(def symbol-to-capture (symbol)
+     (parser-bind (bind-symbol! symbol) (fn (sym)
+     (parser-return (Capture sym)))))
+
 (def to-constructor-or-capture (symbol)
      (parser-bind (symbol-to-sym symbol)                 (fn (sym)
      (parser-bind (parser-constructor? (symbol-id sym))  (fn (constructor?)
-     (parser-return (match constructor?
-                           True  (ConstructorPattern sym Empty (symbol-range sym))
-                           False (Capture sym))))))))
+     (match constructor?
+            True  (parser-return (ConstructorPattern sym Empty (symbol-range sym)))
+            False (symbol-to-capture symbol)))))))
 
 (def sexp-to-pattern (sexp)
      (match sexp
@@ -151,8 +156,9 @@
      (match rest
             (Cons expression rest)
                 (parser-bind   (sexp-to-expression expression)                      (fn (expression)
+                (parser-bind   (parser-new-scope!)                                  (fn (_)
                 (parser-bind   (sexp-to-match-pairs sexp-to-expression range rest)  (fn (pairs)
-                (parser-return (Match expression pairs range))))))
+                (parser-return (Match expression pairs range))))))))
             _
                 (parser-error (MalformedExpressionError range))))
 
@@ -186,7 +192,7 @@
                        Empty  (parser-error (MalformedExpressionError range))
                        _      (sexp-to-list-expression sexp-to-expression expressions range))
             symbol
-                (parser-bind (symbol-to-sym symbol)                (fn (sym)
+                (parser-bind (resolve-symbol symbol)               (fn (sym)
                 (parser-bind (parser-constructor? (symbol-id sym)) (fn (constructor?)
                 (parser-return (match constructor?
                                       True   (Constructor sym Empty (symbol-range sym))
@@ -195,7 +201,7 @@
 (def sexp-to-type-definition (type-name public? constructors range)
      (match type-name
             (List (Cons name parameters) _)
-                (parser-bind   (symbol-to-sym name)                                            (fn (sym)
+                (parser-bind   (bind-symbol! name)                                             (fn (sym)
                 (parser-bind   (parser-sequence (list-map sexp-to-type-parameter parameters))  (fn (parameters)
                 (parser-return (TypeDefinition sym public? parameters constructors range))))))
             (Integer _ range)
@@ -203,16 +209,17 @@
             (List _ range)
                 (parser-error (MalformedTypeError range))
             symbol
-                (parser-bind   (symbol-to-sym symbol)                                          (fn (sym)
+                (parser-bind   (bind-symbol! symbol)                                           (fn (sym)
                 (parser-return (TypeDefinition sym public? Empty constructors range))))))
 
 (def sexp-to-function-definition (name-symbol public? rest range)
      (match rest
             (Cons (List arguments _) (Cons expression Empty))
+                  (parser-bind   (parser-new-scope!)                                   (fn (_)
                   (parser-bind   (parser-sequence (list-map bind-symbol! arguments))   (fn (arguments)
+                  (parser-bind   (bind-symbol! name-symbol)                            (fn (sym)
                   (parser-bind   (sexp-to-expression expression)                       (fn (expression)
-                  (parser-bind   (symbol-to-sym name-symbol)                           (fn (sym)
-                  (parser-return (FunctionDefinition sym public? arguments expression range))))))))
+                  (parser-return (FunctionDefinition sym public? arguments expression range))))))))))
             _
                   (parser-error (MalformedFunctionDefinitionError range))))
 
