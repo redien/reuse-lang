@@ -3,7 +3,7 @@
      (ParserContext source-reference
                     (pair int32 (dictionary (pair int32 string)))
                     parser-scope
-                    (pair int32 symbol-table)
+                    symbol-table
                     (array definition)))
 
 (def parser-context-add-constructors (definition array)
@@ -45,11 +45,11 @@
 
 (def parser-context-bind-symbol (sym context)
      (match context
-            (ParserContext source-reference symbols scope (Pair symbol-id symbol-table) constructors)
+            (ParserContext source-reference symbols scope symbol-table constructors)
                 (ParserContext source-reference
                                symbols
-                               (parser-scope-set sym symbol-id scope)
-                               (Pair (+ 1 symbol-id) (symbol-table-bind symbol-id (symbol-name sym) symbol-table))
+                               (parser-scope-set sym (symbol-table-id symbol-table) scope)
+                               (symbol-table-bind (symbol-name sym) symbol-table)
                                constructors)))
 
 (def parser-context-symbols (context)
@@ -64,8 +64,8 @@
 
 (def parser-context-symbol-id (context)
      (match context
-            (ParserContext _ __ ___ (Pair symbol-id ____) _____)
-                symbol-id))
+            (ParserContext _ __ ___ symbol-table ____)
+                (symbol-table-id symbol-table)))
 
 (def parser-context-source-reference (context)
      (match context
@@ -82,7 +82,7 @@
      (match (state-run (ParserContext (SourceReference (string-empty) ModuleSelf)
                                       (Pair 0 symbols)
                                       (parser-scope-empty)
-                                      (Pair 0 (symbol-table-empty))
+                                      (symbol-table-empty)
                                       (array-empty))
                        parser)
             (Pair _ result)  result))
