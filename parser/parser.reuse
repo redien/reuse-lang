@@ -76,7 +76,7 @@
 (def sexp-to-constructor-definition (constructor)
      (match constructor
             (List (Cons name types) range)
-                (parser-bind   (symbol-to-sym name) (fn (sym)
+                (parser-bind   (bind-symbol! name)                             (fn (sym)
                 (parser-bind   (parser-sequence (list-map sexp-to-type types)) (fn (types)
                 (parser-return (ComplexConstructor sym types range))))))
             (Integer _ range)
@@ -84,7 +84,7 @@
             (List _ range)
                 (parser-error (MalformedConstructorError range))
             symbol
-                (parser-bind (symbol-to-sym symbol) (fn (sym)
+                (parser-bind (bind-symbol! symbol)                             (fn (sym)
                 (parser-return (SimpleConstructor sym))))))
 
 (def sexp-to-type-parameter (sexp)
@@ -201,7 +201,7 @@
 (def sexp-to-type-definition (type-name public? constructors range)
      (match type-name
             (List (Cons name parameters) _)
-                (parser-bind   (bind-symbol! name)                                             (fn (sym)
+                (parser-bind   (symbol-to-sym name)                                            (fn (sym)
                 (parser-bind   (parser-sequence (list-map sexp-to-type-parameter parameters))  (fn (parameters)
                 (parser-return (TypeDefinition sym public? parameters constructors range))))))
             (Integer _ range)
