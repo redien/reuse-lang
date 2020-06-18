@@ -3,6 +3,7 @@
      (ParserContext source-reference
                     (pair int32 (dictionary (pair int32 string)))
                     parser-scope
+                    parser-scope
                     symbol-table
                     (array definition)))
 
@@ -18,68 +19,71 @@
 
 (def parser-context-add-definition (definition context)
      (match context
-            (ParserContext source-reference symbols scope symbol-table constructors)
+            (ParserContext source-reference symbols module-scope global-scope symbol-table constructors)
                 (ParserContext source-reference
                                symbols
-                               (parser-scope-set-all (symbols-from-definition definition) scope)
+                               (parser-scope-set-all (symbols-from-definition definition) module-scope)
+                               (parser-scope-set-all (symbols-from-definition definition) global-scope)
                                symbol-table
                                (parser-context-add-constructors definition constructors))))
 
 (def parser-context-constructor? (id context)
      (match context
-            (ParserContext _ __ ___ ____ constructors)
+            (ParserContext _ __ ___ ____ _____ constructors)
                 (match (array-get id constructors)
                        (Some _)  True
                        None      False)))
 
 (def parser-context-new-module (context)
      (match context
-            (ParserContext source-reference symbols scope symbol-table constructors)
-                (ParserContext source-reference symbols scope symbol-table constructors)))
+            (ParserContext source-reference symbols module-scope global-scope symbol-table constructors)
+                (ParserContext source-reference symbols module-scope global-scope symbol-table constructors)))
 
 (def parser-context-global-scope (context)
      (match context
-            (ParserContext _ __ scope ___ ____)
-                scope))
+            (ParserContext _ __ ___ global-scope ____ _____)
+                global-scope))
 
 (def parser-context-bind-symbol (sym context)
      (match context
-            (ParserContext source-reference symbols scope symbol-table constructors)
+            (ParserContext source-reference symbols module-scope global-scope symbol-table constructors)
                 (ParserContext source-reference
                                symbols
-                               scope
+                               module-scope
+                               global-scope
                                (symbol-table-bind (symbol-name sym) symbol-table)
                                constructors)))
 
 (def parser-context-symbols (context)
      (match context
-            (ParserContext _ symbols __ ___ ____)
+            (ParserContext _ symbols __ ___ ____ _____)
                 symbols))
 
 (def parser-context-with-symbols (symbols context)
      (match context
-            (ParserContext source-reference _ scope symbol-table constructors)
-                (ParserContext source-reference symbols scope symbol-table constructors)))
+            (ParserContext source-reference _ module-scope global-scope symbol-table constructors)
+                (ParserContext source-reference symbols module-scope global-scope symbol-table constructors)))
 
 (def parser-context-symbol-id (context)
      (match context
-            (ParserContext _ __ ___ symbol-table ____)
+            (ParserContext _ __ ___ ____ symbol-table _____)
                 (symbol-table-id symbol-table)))
 
 (def parser-context-source-reference (context)
      (match context
-            (ParserContext source-reference _ __ ___ ____)
+            (ParserContext source-reference _ __ ___ ____ _____)
                 source-reference))
 
 (def parser-context-with-source-reference (source-reference context)
      (match context
-            (ParserContext _ symbols scope symbol-table constructors)
-                (ParserContext source-reference symbols scope symbol-table constructors)))
+            (ParserContext _ symbols module-scope global-scope symbol-table constructors)
+                (ParserContext source-reference symbols module-scope global-scope symbol-table constructors)))
 
 
 (def parser-run (symbols parser)
      (match (state-run (ParserContext (SourceReference (string-empty) ModuleSelf)
                                       (Pair (default-symbol-count) symbols)
+                                      (default-scope)
                                       (default-scope)
                                       (default-symbol-table)
                                       (array-empty))
