@@ -204,7 +204,7 @@
                 (parser-bind   (bind-symbol! symbol)                                           (fn (sym)
                 (parser-return (TypeDefinition sym public? Empty constructors range))))))
 
-(def sexp-to-function-definition (name-symbol public? rest range)
+(def sexp-to-function-definition (scope name-symbol public? rest range)
      (match rest
             (Cons (List arguments _) (Cons expression Empty))
                   (parser-bind   (parser-new-scope!)                                   (fn (_)
@@ -215,14 +215,14 @@
             _
                   (parser-error (MalformedFunctionDefinitionError range))))
 
-(def sexp-to-definition' (name public? rest range kind)
+(def sexp-to-definition' (scope name public? rest range kind)
      (match (= kind (sym-typ))
             True
                 (parser-bind (parser-sequence (list-map sexp-to-constructor-definition rest))  (fn (constructors)
                 (sexp-to-type-definition name public? constructors range)))
             False
      (match (= kind (sym-def))
-            True   (sexp-to-function-definition name public? rest range)
+            True   (sexp-to-function-definition scope name public? rest range)
             False  (parser-error (MalformedDefinitionError range)))))
 
 (def specific-malformed-definition-error (kind range)
@@ -233,16 +233,16 @@
             True   (parser-error (MalformedFunctionDefinitionError range))
             False  (parser-error (MalformedDefinitionError range)))))
 
-(def sexp-to-definition (expression)
+(def sexp-to-definition (scope expression)
      (match expression
             (List (Cons (Symbol kind _ __) Empty) range)
                 (specific-malformed-definition-error kind range)
             (List (Cons (Symbol kind _ __) (Cons ___ Empty)) range)
                 (specific-malformed-definition-error kind range)
             (List (Cons (Symbol -6 _ __) (Cons (Symbol kind ___ ____) (Cons name rest))) range)
-                (sexp-to-definition' name True rest range kind)
+                (sexp-to-definition' scope name True rest range kind)
             (List (Cons (Symbol kind _ __) (Cons name rest)) range)
-                (sexp-to-definition' name False rest range kind)
+                (sexp-to-definition' scope name False rest range kind)
             (List (Cons (List _ range) Empty) __)
                 (parser-error (MalformedDefinitionError range))
             (List _ range)
@@ -252,8 +252,8 @@
             (Symbol _ __ range)
                 (parser-error (MalformedDefinitionError range))))
 
-(def parse-definition! (expression)
-     (parser-bind (sexp-to-definition expression) (fn (definition)
+(def parse-definition! (scope expression)
+     (parser-bind (sexp-to-definition scope expression) (fn (definition)
      (parser-add-definition! definition))))
 
 (def sexp-error-to-ast-error (error)
@@ -262,14 +262,15 @@
             ParseErrorTooManyClosingBrackets  MalformedSexpTooManyClosingBrackets))
 
 (def parse-definitions! (module file-path iterator)
+     (parser-bind (parser-get-global-scope) (fn (scope)
      (parser-bind (parser-set-source-reference! (SourceReference file-path module)) (fn (_)
      (parser-bind (parser-get-symbols) (fn (symbols)
      (match (parse-sexps symbols iterator)
             (Result (Pair symbols expressions))
                 (parser-bind (parser-set-symbols! symbols) (fn (_)
-                (parser-sequence (list-map parse-definition! expressions))))
+                (parser-sequence (list-map (parse-definition! scope) expressions))))
             (Error error)
-                (parser-error (sexp-error-to-ast-error error))))))))
+                (parser-error (sexp-error-to-ast-error error))))))))))
 
 
 
