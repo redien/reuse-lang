@@ -15,8 +15,14 @@
             (ParserScopeRoot symbols)
                 (ParserScopeRoot (array-set symbol-id symbol-table-id symbols))))
 
-(def parser-scope-set (sym id scope)
-     (parser-scope-set' (symbol-id sym) id scope))
+(def parser-scope-set (sym scope)
+     (maybe-or-else scope
+     (maybe-map (fn (symbol-table-id)
+                    (parser-scope-set' (symbol-id sym) symbol-table-id scope))
+          (symbol-id' sym))))
+
+(def parser-scope-set-all (syms scope)
+     (list-foldl parser-scope-set scope syms))
 
 (def parser-scope-resolve (sym scope)
      (match scope

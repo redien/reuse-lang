@@ -65,6 +65,10 @@
      (match sym
             (Sym _ __ ___ range ____)  range))
 
+(def symbol-id' (sym)
+     (match sym
+            (Sym _ __ ___ ____ id)  id))
+
 (def symbol-with-id' (id sym)
      (match sym
             (Sym _1 _2 _3 _4 _)  (Sym _1 _2 _3 _4 id)))
@@ -99,15 +103,36 @@
 (def definition-module (definition)
      (source-reference-module (definition-source-reference definition)))
 
-(def constructor-id (constructor)
+(def constructor-sym (constructor)
      (match constructor
-            (ComplexConstructor sym _ __)  (symbol-id sym)
-            (SimpleConstructor sym)        (symbol-id sym)))
+            (ComplexConstructor sym _ __)  sym
+            (SimpleConstructor sym)        sym))
+
+(def constructor-id (constructor)
+     (symbol-id (constructor-sym constructor)))
 
 (def type-parameter-symbol (parameter)
      (match parameter
             (UniversalParameter sym)    sym
             (ExistentialParameter sym)  sym))
+
+(def captured-symbols-from-pattern (pattern)
+     (match pattern
+            (Capture sym)
+                (list sym)
+            (ConstructorPattern _ patterns __)
+                (list-flatmap captured-symbols-from-pattern patterns)
+            _
+                Empty))
+
+(def symbols-from-definition (definition)
+     (match definition
+            (TypeDefinition name _ __ constructors ___)
+                (Cons name (list-map constructor-sym constructors))
+            (FunctionDefinition name _ arguments __ ___)
+                (Cons name arguments)
+            (TargetDefinition _ __)
+                Empty))
 
 (def over-match-pair-expression (f pair)
      (match pair

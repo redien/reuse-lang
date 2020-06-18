@@ -16,10 +16,14 @@
             _
                 array))
 
-(def parser-context-add (definition context)
+(def parser-context-add-definition (definition context)
      (match context
             (ParserContext source-reference symbols scope symbol-table constructors)
-                (ParserContext source-reference symbols scope symbol-table (parser-context-add-constructors definition constructors))))
+                (ParserContext source-reference
+                               symbols
+                               (parser-scope-set-all (symbols-from-definition definition) scope)
+                               symbol-table
+                               (parser-context-add-constructors definition constructors))))
 
 (def parser-context-constructor? (id context)
      (match context
@@ -27,11 +31,6 @@
                 (match (array-get id constructors)
                        (Some _)  True
                        None      False)))
-
-(def parser-context-new-scope (context)
-     (match context
-            (ParserContext source-reference symbols parent symbol-table constructors)
-                (ParserContext source-reference symbols (parser-scope-new parent) symbol-table constructors)))
 
 (def parser-context-new-module (context)
      (match context
@@ -43,15 +42,12 @@
             (ParserContext _ __ scope ___ ____)
                 scope))
 
-(def parser-context-resolve (sym context)
-     (parser-scope-resolve sym (parser-context-global-scope context)))
-
 (def parser-context-bind-symbol (sym context)
      (match context
             (ParserContext source-reference symbols scope symbol-table constructors)
                 (ParserContext source-reference
                                symbols
-                               (parser-scope-set sym (symbol-table-id symbol-table) scope)
+                               scope
                                (symbol-table-bind (symbol-name sym) symbol-table)
                                constructors)))
 
@@ -107,7 +103,7 @@
      (parser-return (parser-context-constructor? name context)))))
 
 (def parser-add-definition! (definition)
-     (state-bind (state-modify (parser-context-add definition)) (fn (_)
+     (state-bind (state-modify (parser-context-add-definition definition)) (fn (_)
      (parser-return definition))))
 
 (def parser-get-symbols ()
@@ -122,10 +118,6 @@
      (state-bind (state-get) (fn (state)
      (parser-return (parser-context-global-scope state)))))
 
-(def parser-new-scope! ()
-     (state-bind (state-modify parser-context-new-scope) (fn (state)
-     (parser-return state))))
-
 (def parser-new-module! ()
      (state-bind (state-modify parser-context-new-module) (fn (state)
      (parser-return state))))
@@ -133,10 +125,6 @@
 (def parser-bind-symbol! (sym)
      (state-bind (state-modify (parser-context-bind-symbol sym)) (fn (state)
      (parser-return (symbol-with-id' (Some (- 1 (parser-context-symbol-id state))) sym)))))
-
-(def parser-resolve-symbol (sym)
-     (state-bind (state-get) (fn (state)
-     (parser-return (parser-context-resolve sym state)))))
 
 (def parser-get-source-reference ()
      (state-bind (state-get) (fn (state)
@@ -153,3 +141,6 @@
                      (parser-return (Cons a' b')))))))
                  (parser-return Empty)
                  list))
+
+(def parser-bind-symbols! (syms)
+     (parser-sequence (list-map parser-bind-symbol! syms)))
