@@ -1,5 +1,5 @@
 
-(typ module-reference       (ModulePath           string)
+(typ module-reference       (ModulePath           string boolean)
                             ModuleSelf)
 (typ source-reference       (SourceReference      string module-reference))
 (typ ast-sym                (Sym                  int32 string source-reference range (maybe int32)))
@@ -77,15 +77,15 @@
 
 (def module-equal? (a b)
      (match a
-            (ModulePath a')
+            (ModulePath a' _)
                 (match b
-                       (ModulePath b')
+                       (ModulePath b' _)
                             (string-equal? a' b')
                        ModuleSelf
                             False)
             ModuleSelf
                 (match b
-                       (ModulePath _)
+                       (ModulePath _ __)
                             False
                        ModuleSelf
                             True)))

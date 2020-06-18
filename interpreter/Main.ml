@@ -24,7 +24,7 @@ let data_path = (Filename.dirname Sys.executable_name) ^ Filename.dir_sep ^ "dat
 let stdlib_paths = List.map (fun name -> data_path ^ name) [
     "standard-library.reuse";
 ] |> ml_string_list_to_reuse;;
-let stdlib_module = CModulePath (ml_string_to_reuse "standard-library");;
+let stdlib_module = CModulePath (ml_string_to_reuse "standard-library", CTrue);;
 
 let read_file filename =
     let channel = open_in (reuse_string_to_ml filename) in
