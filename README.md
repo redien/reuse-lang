@@ -190,8 +190,9 @@ docker run --rm -it -v $PWD:/home/opam/reuse-lang redien/reuse-lang-dev-env
 
 - Re-implement a javascript backend to get a debugger for free
   - Implement source maps to improve debugging experience
-- Generate new IDs for symbols that shadow others
-- Implement modules by parsing other files and adding them to the symbol table with separate IDs
+- Generate new names for duplicate entries in the symbol table
+- Only escape names for entries in symbol table
+- Use symbol table in backend
 - Handle division by zero safely
   - Return INT32_MAX?
   - Return Maybe?
