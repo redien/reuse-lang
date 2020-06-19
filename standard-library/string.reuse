@@ -7,10 +7,10 @@
             (FTSingle string-node)
             (FTDeep (list string-node) string (list string-node)))
 
-(def string-empty ()
+(pub def string-empty ()
      FTEmpty)
 
-(def string-of-char (character)
+(pub def string-of-char (character)
      (FTSingle (FTValue character)))
 
 (def string-node-size' (node)
@@ -40,7 +40,7 @@
                        _
                             (FTDeep (Cons a first) middle last))))
 
-(def string-prepend (char string)
+(pub def string-prepend (char string)
      (string-prepend-node' (FTValue char) string))
 
 (def string-append-node' (a tree)
@@ -58,7 +58,7 @@
                        _
                             (FTDeep first middle (Cons a last)))))
 
-(def string-append (char string)
+(pub def string-append (char string)
      (string-append-node' (FTValue char) string))
 
 (def string-first-node' (node)
@@ -67,7 +67,7 @@
             (FTNode2 _ x __)       (string-first-node' x)
             (FTNode3 _ x __ ___)   (string-first-node' x)))
 
-(def string-first (string)
+(pub def string-first (string)
      (match string
             FTEmpty           None
             (FTSingle node)   (Some (string-first-node' node))
@@ -86,7 +86,7 @@
                        (Some node)  (Some (string-node3' node b c))
                        None         (Some (string-node2' b c)))))
 
-(def string-rest (string)
+(pub def string-rest (string)
      (match string
             FTEmpty
                 string
@@ -110,7 +110,7 @@
             (FTNode2 _ a b)    (string-foldr-node' f a (string-foldr-node' f b identity))
             (FTNode3 _ a b c)  (string-foldr-node' f a (string-foldr-node' f b (string-foldr-node' f c identity)))))
 
-(def string-foldr (f identity tree)
+(pub def string-foldr (f identity tree)
      (match tree
             FTEmpty
                 identity
@@ -129,7 +129,7 @@
             (FTNode2 _ b a)    (string-foldl-node' f a (string-foldl-node' f b identity))
             (FTNode3 _ c b a)  (string-foldl-node' f a (string-foldl-node' f b (string-foldl-node' f c identity)))))
 
-(def string-foldl (f identity tree)
+(pub def string-foldl (f identity tree)
      (match tree
             FTEmpty
                 identity
@@ -142,7 +142,7 @@
                         middle)
                     last)))
 
-(def string-size (string)
+(pub def string-size (string)
      (match string
             FTEmpty
                 0
@@ -184,29 +184,29 @@
                         (string-concat' middle1 (string-concat-nodes' (list-concat (list-reverse last1) (list-concat nodes first2))) middle2)
                         last2)))
 
-(def string-concat (a b)
+(pub def string-concat (a b)
      (string-concat' a Empty b))
 
 
 
-(def string-empty? (string)
+(pub def string-empty? (string)
      (match (string-first string)
             (Some _)  False
             None      True))
 
-(def string-any? (predicate string)
+(pub def string-any? (predicate string)
      (string-foldl (fn (x b) (or (predicate x) b)) False string))
 
-(def string-every? (predicate string)
+(pub def string-every? (predicate string)
      (string-foldl (fn (x b) (and (predicate x) b)) True string))
 
-(def string-to-list (string)
+(pub def string-to-list (string)
      (string-foldr list-cons Empty string))
 
-(def string-from-list (list)
+(pub def string-from-list (list)
      (list-foldl string-append (string-empty) list))
 
-(def string-skip (count string)
+(pub def string-skip (count string)
      (match (> count 0)
             True   (string-skip (- count 1) (string-rest string))
             False  string))
@@ -220,16 +220,16 @@
                           None         taken)
             False  taken))
 
-(def string-take (count string)
+(pub def string-take (count string)
      (string-take' count string (string-empty)))
 
-(def string-reverse (string)
+(pub def string-reverse (string)
      (string-foldl string-prepend (string-empty) string))
 
-(def string-substring (start size string)
+(pub def string-substring (start size string)
      (string-take size (string-skip start string)))
 
-(def string-join (separator strings)
+(pub def string-join (separator strings)
      (match strings
             (Cons first rest)
                 (list-foldl (fn (string joined)
@@ -239,7 +239,7 @@
             Empty
                 (string-empty)))
 
-(def string-flatmap (f string)
+(pub def string-flatmap (f string)
      (string-foldl (fn (x xs) (string-concat xs (f x))) (string-empty) string))
 
 (def string-split' (separator list current parts)
@@ -249,7 +249,7 @@
                                   True   (string-split' separator rest Empty (Cons (list-reverse current) parts))
                                   False  (string-split' separator rest (Cons c current) parts))))
 
-(def string-split (separator string)
+(pub def string-split (separator string)
      (list-map string-from-list (string-split' separator (string-to-list string) Empty Empty)))
 
 (def string-trim-start' (list)
@@ -261,16 +261,16 @@
             Empty
                 list))
 
-(def string-trim-start (string)
+(pub def string-trim-start (string)
      (string-from-list (string-trim-start' (string-to-list string))))
 
-(def string-trim-end (string)
+(pub def string-trim-end (string)
      (string-reverse (string-trim-start (string-reverse string))))
 
-(def string-trim (string)
+(pub def string-trim (string)
      (string-trim-start (string-trim-end string)))
 
-(def string-equal? (a b)
+(pub def string-equal? (a b)
      (match (string-first a)
             (Some xa) (match (string-first b)
             (Some xb) (and (= xa xb) (string-equal? (string-rest a) (string-rest b)))
@@ -278,7 +278,7 @@
             None      (string-empty? b)))
 
 
-(def string-point-is-digit (point)
+(pub def string-point-is-digit (point)
      (match (> point 47)
             False  False
             True
@@ -314,7 +314,7 @@
             Empty
                 None))
 
-(def string-to-int32 (string)
+(pub def string-to-int32 (string)
      (string-to-int32' (string-to-list string)))
 
 (def string-from-int32'' (integer string)
@@ -335,7 +335,7 @@
             False
                 (string-from-int32'' integer Empty)))
 
-(def string-from-int32 (integer)
+(pub def string-from-int32 (integer)
      (string-from-list (string-from-int32' integer)))
 
 (def string-collect-from-indexed-iterator' (predicate iterator initial)
@@ -345,18 +345,18 @@
                                          True   (string-collect-from-indexed-iterator' predicate next (string-append x initial))
                                          False  (Pair iterator initial))))
 
-(def string-collect-from-indexed-iterator (predicate iterator)
+(pub def string-collect-from-indexed-iterator (predicate iterator)
      (string-collect-from-indexed-iterator' predicate iterator (string-empty)))
 
-(def string-from-indexed-iterator (iterator)
+(pub def string-from-indexed-iterator (iterator)
      (pair-right (string-collect-from-indexed-iterator (fn (_) True) iterator)))
 
-(def string-iterable ()
+(pub def string-iterable ()
      (IterableClass
         (fn (string)
             (Pair (string-first string) (string-rest string)))))
 
-(def string-from-boolean (boolean)
+(pub def string-from-boolean (boolean)
      (match boolean
             True  (string-from-list (list 84 114 117 101))
             False (string-from-list (list 70 97 108 115 101))))

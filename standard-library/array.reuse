@@ -3,7 +3,7 @@
 (typ (array value) ArrayEmpty
                    (ArrayTree array-color (array value) (pair int32 value) (array value)))
 
-(def array-empty () ArrayEmpty)
+(pub def array-empty () ArrayEmpty)
 
 (def array-make-black' (array)
      (match array
@@ -30,10 +30,10 @@
                       True   (array-balance' (ArrayTree color a y (array-set' x value b)))
                       False  (ArrayTree color a (Pair x value) b)))))
 
-(def array-set (x value array)
+(pub def array-set (x value array)
      (array-make-black' (array-set' x value array)))
 
-(def array-get (x array)
+(pub def array-get (x array)
      (match array
             ArrayEmpty
                None
@@ -45,7 +45,7 @@
                       True   (array-get x b)
                       False  (Some value)))))
 
-(def array-entries (array)
+(pub def array-entries (array)
      (match array
             ArrayEmpty
                Empty
@@ -59,16 +59,16 @@
             Empty
                array))
 
-(def array-from-list (entries)
+(pub def array-from-list (entries)
      (array-from-list' entries 0 ArrayEmpty))
 
-(def array-of (entries)
+(pub def array-of (entries)
      (list-foldl (fn (entry array) (match entry (Pair key value) (array-set key value array))) ArrayEmpty entries))
 
-(def array-singleton (index value)
+(pub def array-singleton (index value)
      (ArrayTree ArrayBlack ArrayEmpty (Pair index value) ArrayEmpty))
 
-(def array-get-or (index default array)
+(pub def array-get-or (index default array)
      (match (array-get index array)
             (Some value)  value
             None          default))

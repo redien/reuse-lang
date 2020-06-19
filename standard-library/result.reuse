@@ -1,46 +1,46 @@
 
-(typ (result v e) (Result v) (Error e))
+(pub typ (result v e) (Result v) (Error e))
 
-(def result-lift (result)
+(pub def result-lift (result)
      (Result result))
 
-(def result-error (error)
+(pub def result-error (error)
      (Error error))
 
-(def result-prod (return result)
+(pub def result-prod (return result)
      (match result
             (Result m)     m
             (Error error)  (return (Error error))))
 
-(def result-bimap (f g result)
+(pub def result-bimap (f g result)
      (match result
             (Result x)     (Result (f x))
             (Error y)      (Error (g y))))
 
-(def result-either (f g result)
+(pub def result-either (f g result)
      (match result
             (Result x)     (f x)
             (Error x)      (g x)))
 
-(def result-map (f result)
+(pub def result-map (f result)
      (result-bimap f id result))
 
-(def result-flatmap (f result)
+(pub def result-flatmap (f result)
      (match result
             (Result x)     (f x)
             (Error error)  (Error error)))
 
-(def result-or-else (value result)
+(pub def result-or-else (value result)
      (match result
             (Result x) x
             (Error x)  value))
 
-(def result-error? (result)
+(pub def result-error? (result)
      (match result
             (Error _)  True
             _          False))
 
-(def result-filter-list (list)
+(pub def result-filter-list (list)
      (list-foldr (fn (result new-list)
                      (match result
                             (Result x)  (Cons x new-list)
@@ -48,21 +48,21 @@
                  Empty
                  list))
 
-(def result-concat (list)
+(pub def result-concat (list)
      (match (list-filter result-error? list)
             (Cons (Error error) _)  (Error error)
             (Cons (Result _) __)    (Result Empty)
             Empty                   (Result (result-filter-list list))))
 
-(def result-of-maybe (error maybe)
+(pub def result-of-maybe (error maybe)
      (match maybe
             (Some x)
                 (Result x)
             None
                 (Error error)))
 
-(def result-bind (result f)
+(pub def result-bind (result f)
      (result-flatmap f result))
 
-(def result-return (value)
+(pub def result-return (value)
      (result-lift value))

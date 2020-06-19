@@ -1,6 +1,6 @@
 
-(def id (x) x)
-(def const (a b) a)
-(def flip (f) (fn (b a) (f a b)))
-(def . (f g x) (f (g x)))
-(def fix (f) (f (fix f)))
+(pub def id (x) x)
+(pub def const (a b) a)
+(pub def flip (f) (fn (b a) (f a b)))
+(pub def . (f g x) (f (g x)))
+(pub def fix (f) (f (fix f)))

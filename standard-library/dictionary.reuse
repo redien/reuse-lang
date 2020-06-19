@@ -1,7 +1,7 @@
 
 (typ (dictionary value) (TrieNode (maybe value) (array (dictionary value))))
 
-(def dictionary-empty () (TrieNode None (array-empty)))
+(pub def dictionary-empty () (TrieNode None (array-empty)))
 
 (def dictionary-value' (dictionary)
      (match dictionary
@@ -14,7 +14,7 @@
 (def dictionary-find-child' (char dictionary)
      (array-get char (dictionary-children' dictionary)))
 
-(def dictionary-set (key new-value dictionary)
+(pub def dictionary-set (key new-value dictionary)
      (match (string-first key)
             None
                 (TrieNode (Some new-value) (dictionary-children' dictionary))
@@ -26,7 +26,7 @@
                            (TrieNode (dictionary-value' dictionary) (array-set char child (dictionary-children' dictionary)))))
                     dictionary)))
 
-(def dictionary-get (key dictionary)
+(pub def dictionary-get (key dictionary)
      (match (string-first key)
             (Some char)
                 (maybe-flatmap (dictionary-get (string-rest key)) (dictionary-find-child' char dictionary))
@@ -46,16 +46,16 @@
                             entries)))
         dictionary))
 
-(def dictionary-entries (dictionary)
+(pub def dictionary-entries (dictionary)
      (dictionary-entries' (string-empty) dictionary))
 
-(def dictionary-of (entries)
+(pub def dictionary-of (entries)
      (list-foldl (pair-map dictionary-set) (dictionary-empty) entries))
 
-(def dictionary-singleton (key value)
+(pub def dictionary-singleton (key value)
      (dictionary-set key value (dictionary-empty)))
 
-(def dictionary-get-or (key default dictionary)
+(pub def dictionary-get-or (key default dictionary)
      (match (dictionary-get key dictionary)
             (Some value)  value
             None          default))

@@ -1,40 +1,40 @@
 
-(typ module-reference       (ModulePath           string boolean)
-                            ModuleSelf)
-(typ source-reference       (SourceReference      string module-reference))
-(typ ast-sym                (Sym                  int32 string source-reference range (maybe int32)))
-(typ ast-type               (SimpleType           ast-sym)
-                            (ComplexType          ast-sym (list ast-type) range)
-                            (FunctionType         (list ast-type) ast-type range))
-(typ type-parameter         (UniversalParameter   ast-sym)
-                            (ExistentialParameter ast-sym))
-(typ constructor            (SimpleConstructor    ast-sym)
-                            (ComplexConstructor   ast-sym (list ast-type) range))
-(typ pattern                (Capture              ast-sym)
-                            (IntegerPattern       int32 range)
-                            (ConstructorPattern   ast-sym (list pattern) range))
-(typ expression             (IntegerConstant      int32 range)
-                            (Variable             ast-sym)
-                            (Lambda               (list ast-sym)
-                                                  expression
-                                                  range)
-                            (Match                expression
-                                                  (list (pair pattern expression))
-                                                  range)
-                            (Constructor          ast-sym (list expression) range)
-                            (FunctionApplication  (list expression) range))
-(typ definition             (TypeDefinition       ast-sym
-                                                  boolean
-                                                  (list type-parameter)
-                                                  (list constructor)
-                                                  range)
-                            (FunctionDefinition   ast-sym
-                                                  boolean
-                                                  (list ast-sym)
-                                                  expression
-                                                  range)
-                            (TargetDefinition     source-reference
-                                                  (indexed-iterator int32)))
+(pub typ module-reference       (ModulePath           string boolean)
+                                ModuleSelf)
+(pub typ source-reference       (SourceReference      string module-reference))
+(pub typ ast-sym                (Sym                  int32 string source-reference range (maybe int32)))
+(pub typ ast-type               (SimpleType           ast-sym)
+                                (ComplexType          ast-sym (list ast-type) range)
+                                (FunctionType         (list ast-type) ast-type range))
+(pub typ type-parameter         (UniversalParameter   ast-sym)
+                                (ExistentialParameter ast-sym))
+(pub typ constructor            (SimpleConstructor    ast-sym)
+                                (ComplexConstructor   ast-sym (list ast-type) range))
+(pub typ pattern                (Capture              ast-sym)
+                                (IntegerPattern       int32 range)
+                                (ConstructorPattern   ast-sym (list pattern) range))
+(pub typ expression             (IntegerConstant      int32 range)
+                                (Variable             ast-sym)
+                                (Lambda               (list ast-sym)
+                                                      expression
+                                                      range)
+                                (Match                expression
+                                                      (list (pair pattern expression))
+                                                      range)
+                                (Constructor          ast-sym (list expression) range)
+                                (FunctionApplication  (list expression) range))
+(pub typ definition             (TypeDefinition       ast-sym
+                                                      boolean
+                                                      (list type-parameter)
+                                                      (list constructor)
+                                                      range)
+                                (FunctionDefinition   ast-sym
+                                                      boolean
+                                                      (list ast-sym)
+                                                      expression
+                                                      range)
+                                (TargetDefinition     source-reference
+                                                      (indexed-iterator int32)))
 
 (def source-reference-file-path (source-reference)
      (match source-reference
@@ -46,13 +46,18 @@
             (SourceReference _ module)
                 module))
 
-(def symbol-id (sym)
+(pub def symbol-id (sym)
      (match sym
             (Sym id _ __ ___ ____)  id))
 
-(def symbol-name (sym)
+(pub def symbol-name (sym)
      (match sym
             (Sym _ name __ ___ ____)  name))
+
+(def symbol-with-name (name sym)
+     (match sym
+            (Sym _1 _ _2 _3 _4)
+                (Sym _1 name _2 _3 _4)))
 
 (def symbol-source-reference (sym)
      (match sym
@@ -73,13 +78,10 @@
      (match sym
             (Sym _1 _2 _3 _4 _)  (Sym _1 _2 _3 _4 id)))
 
-(def symbol-equal? (a b)
+(pub def symbol-equal? (a b)
      (= (symbol-id a) (symbol-id b)))
 
-(def symbol-equal-to? (sym id)
-     (= (symbol-id sym) id))
-
-(def module-equal? (a b)
+(pub def module-equal? (a b)
      (match a
             (ModulePath a' _)
                 (match b
@@ -94,7 +96,7 @@
                        ModuleSelf
                             True)))
 
-(def definition-source-reference (definition)
+(pub def definition-source-reference (definition)
      (match definition
             (TypeDefinition sym _ __ ___ ____)              (symbol-source-reference sym)
             (FunctionDefinition sym ___ ____ _____ ______)  (symbol-source-reference sym)
@@ -102,6 +104,12 @@
 
 (def definition-module (definition)
      (source-reference-module (definition-source-reference definition)))
+
+(def definition-public? (definition)
+     (match definition
+            (TypeDefinition _ public? __ ___ ____)          public?
+            (FunctionDefinition _ public? __ ___ ____)      public?
+            (TargetDefinition _ __)                         False))
 
 (def constructor-sym (constructor)
      (match constructor
@@ -111,7 +119,7 @@
 (def constructor-id (constructor)
      (symbol-id (constructor-sym constructor)))
 
-(def type-parameter-symbol (parameter)
+(pub def type-parameter-symbol (parameter)
      (match parameter
             (UniversalParameter sym)    sym
             (ExistentialParameter sym)  sym))
@@ -134,16 +142,16 @@
             (TargetDefinition _ __)
                 Empty))
 
-(def over-match-pair-expression (f pair)
+(pub def over-match-pair-expression (f pair)
      (match pair
             (Pair pattern expression)
                 (result-bind   (f expression) (fn (expression)
                 (result-return (Pair pattern expression))))))
 
-(def over-match-pair-expressions (over-subexpressions f pairs)
+(pub def over-match-pair-expressions (over-subexpressions f pairs)
      (result-concat (list-map (over-match-pair-expression (pipe f (result-flatmap (over-subexpressions f)))) pairs)))
 
-(def over-subexpressions (f expression)
+(pub def over-subexpressions (f expression)
      (result-bind (f expression)  (fn (expression)
      (match expression
             (Lambda arguments expression range)
@@ -164,7 +172,7 @@
             _
                 (result-return expression)))))
 
-(def over-definition-expressions (f definition)
+(pub def over-definition-expressions (f definition)
      (match definition
             (FunctionDefinition sym public? arguments expression range)
                 (result-bind   (f expression)  (fn (expression)
@@ -172,21 +180,21 @@
             _
                 (result-return definition)))
 
-(def over-function-application (f expression)
+(pub def over-function-application (f expression)
      (match expression
             (FunctionApplication expressions range)
                 (f expressions range)
             _
                 (result-return expression)))
 
-(def over-match-expression (f expression)
+(pub def over-match-expression (f expression)
      (match expression
             (Match expression pairs range)
                 (f expression pairs range)
             _
                 (result-return expression)))
 
-(def over-identifiers (f expression)
+(pub def over-identifiers (f expression)
      (match expression
             (Variable name)
                 (result-bind   (f name)                                (fn (name)

@@ -1,17 +1,17 @@
 
-(typ error  (MalformedDefinitionError range)
-            (MalformedTypeDefinitionError range)
-            (MalformedFunctionDefinitionError range)
-            (MalformedFunctionNameError range)
-            (MalformedExpressionError range)
-            (MalformedMatchExpressionError range)
-            (MalformedSymbolError range)
-            (MalformedConstructorError range)
-            (MalformedTypeError range)
-            (ErrorNotDefined string)
-            (ErrorAlreadyDefined string)
-            MalformedSexpTooFewClosingBrackets
-            MalformedSexpTooManyClosingBrackets)
+(pub typ error  (MalformedDefinitionError range)
+                (MalformedTypeDefinitionError range)
+                (MalformedFunctionDefinitionError range)
+                (MalformedFunctionNameError range)
+                (MalformedExpressionError range)
+                (MalformedMatchExpressionError range)
+                (MalformedSymbolError range)
+                (MalformedConstructorError range)
+                (MalformedTypeError range)
+                (ErrorNotDefined string)
+                (ErrorAlreadyDefined string)
+                MalformedSexpTooFewClosingBrackets
+                MalformedSexpTooManyClosingBrackets)
 
 (def symbol-to-sym (symbol)
      (match symbol
@@ -257,7 +257,7 @@
                 (parser-error (MalformedDefinitionError range))))
 
 (def parse-definition! (expression)
-     (parser-bind (parser-get-global-scope) (fn (scope)
+     (parser-bind (parser-get-module-scope) (fn (scope)
      (parser-bind (sexp-to-definition scope expression) (fn (definition)
      (parser-add-definition! definition))))))
 
@@ -266,7 +266,7 @@
             ParseErrorTooFewClosingBrackets   MalformedSexpTooFewClosingBrackets
             ParseErrorTooManyClosingBrackets  MalformedSexpTooManyClosingBrackets))
 
-(def parse-definitions! (module file-path iterator)
+(pub def parse-definitions! (module file-path iterator)
      (parser-bind (parser-set-source-reference! (SourceReference file-path module)) (fn (_)
      (parser-bind (parser-get-symbols) (fn (symbols)
      (match (parse-sexps symbols iterator)
@@ -329,7 +329,7 @@
 (def function-arguments-to-sexp (arguments range)
      (List (list-map sym-to-symbol arguments) range))
 
-(def pattern-to-sexp (pattern)
+(pub def pattern-to-sexp (pattern)
      (match pattern
             (ConstructorPattern sym Empty _)
                 (sym-to-symbol sym)
@@ -345,7 +345,7 @@
             (Pair pattern expression)
                (list (pattern-to-sexp pattern) (expression-to-sexp expression))))
 
-(def expression-to-sexp (expression)
+(pub def expression-to-sexp (expression)
      (match expression
             (IntegerConstant integer range)
                 (Integer integer range)
@@ -386,7 +386,7 @@
                   False  sexp)
            range))
 
-(def definition-to-sexp (definition)
+(pub def definition-to-sexp (definition)
      (match definition
             (TypeDefinition (Sym id name _ __ ___) public? parameters constructors range)
                 (definition-to-sexp' public? range (type-definition-to-sexp id name parameters constructors range))
@@ -395,5 +395,5 @@
             (TargetDefinition _ data)
                 (Symbol 0 (string-from-indexed-iterator data) (Range 0 0))))
 
-(def definitions-to-sexps (definitions)
+(pub def definitions-to-sexps (definitions)
      (list-map definition-to-sexp definitions))

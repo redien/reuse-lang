@@ -17,15 +17,31 @@
             _
                 array))
 
+(def prefix-module-symbol (module sym)
+     (match module
+            (ModulePath name open?)
+               (match open?
+                      True   sym
+                      False  (symbol-with-name (string-join (data-:) (list name (symbol-name sym))) sym))
+            ModuleSelf
+               sym))
+
+(def prefix-module-symbols (module syms)
+     (list-map (prefix-module-symbol module) syms))
+
 (def parser-context-add-definition (definition context)
      (match context
             (ParserContext source-reference symbols module-scope global-scope symbol-table constructors)
+                (match (symbols-from-definition definition)        definition-symbols
+                (match (source-reference-module source-reference)  module
                 (ParserContext source-reference
                                symbols
-                               (parser-scope-set-all (symbols-from-definition definition) module-scope)
-                               (parser-scope-set-all (symbols-from-definition definition) global-scope)
+                               (parser-scope-set-all definition-symbols module-scope)
+                               (match (definition-public? definition)
+                                      True   (parser-scope-set-all (prefix-module-symbols module definition-symbols) global-scope)
+                                      False  global-scope)
                                symbol-table
-                               (parser-context-add-constructors definition constructors))))
+                               (parser-context-add-constructors definition constructors))))))
 
 (def parser-context-constructor? (id context)
      (match context
@@ -36,13 +52,13 @@
 
 (def parser-context-new-module (context)
      (match context
-            (ParserContext source-reference symbols module-scope global-scope symbol-table constructors)
-                (ParserContext source-reference symbols module-scope global-scope symbol-table constructors)))
+            (ParserContext source-reference symbols _ global-scope symbol-table constructors)
+                (ParserContext source-reference symbols (parser-scope-new global-scope) global-scope symbol-table constructors)))
 
-(def parser-context-global-scope (context)
+(def parser-context-module-scope (context)
      (match context
-            (ParserContext _ __ ___ global-scope ____ _____)
-                global-scope))
+            (ParserContext _ __ module-scope ___ ____ _____)
+                module-scope))
 
 (def parser-context-bind-symbol (sym context)
      (match context
@@ -80,7 +96,7 @@
                 (ParserContext source-reference symbols module-scope global-scope symbol-table constructors)))
 
 
-(def parser-run (symbols parser)
+(pub def parser-run (symbols parser)
      (match (state-run (ParserContext (SourceReference (string-empty) ModuleSelf)
                                       (Pair (default-symbol-count) symbols)
                                       (default-scope)
@@ -90,13 +106,13 @@
                        parser)
             (Pair _ result)  result))
 
-(def parser-return (value)
+(pub def parser-return (value)
      (state-return (result-return value)))
 
-(def parser-error (error)
+(pub def parser-error (error)
      (state-return (result-error error)))
 
-(def parser-bind (parser f)
+(pub def parser-bind (parser f)
      (state-bind parser (fn (result)
      (result-prod state-return
      (result-bind result (fn (value)
@@ -118,11 +134,11 @@
      (state-bind (state-modify (parser-context-with-symbols symbols)) (fn (_)
      (parser-return symbols))))
 
-(def parser-get-global-scope ()
+(def parser-get-module-scope ()
      (state-bind (state-get) (fn (state)
-     (parser-return (parser-context-global-scope state)))))
+     (parser-return (parser-context-module-scope state)))))
 
-(def parser-new-module! ()
+(pub def parser-new-module! ()
      (state-bind (state-modify parser-context-new-module) (fn (state)
      (parser-return state))))
 
@@ -138,7 +154,7 @@
      (state-bind (state-modify (parser-context-with-source-reference source-reference)) (fn (_)
      (parser-return source-reference))))
 
-(def parser-sequence (list)
+(pub def parser-sequence (list)
      (list-foldr (fn (a b)
                      (parser-bind a (fn (a')
                      (parser-bind b (fn (b')

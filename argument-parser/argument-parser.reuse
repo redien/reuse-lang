@@ -1,6 +1,6 @@
 
-(typ cli-arguments (CliArguments (list (pair string string)) (list string))
-                   (CliErrorMissingValue string))
+(pub typ cli-arguments (CliArguments (list (pair string string)) (list string))
+                       (CliErrorMissingValue string))
 
 (def is-key? (argument)
      (string-equal? (data-double-dash) (string-take 2 argument)))
@@ -26,5 +26,5 @@
             Empty
                 (CliArguments (list-reverse kv-args) (list-reverse inputs))))
 
-(def parse-arguments (arguments)
+(pub def parse-arguments (arguments)
      (parse-arguments' arguments Empty Empty))

@@ -1,29 +1,29 @@
 
-(typ (pair a b) (Pair a b))
+(pub typ (pair a b) (Pair a b))
 
-(def pair-cons (a b)
+(pub def pair-cons (a b)
      (Pair a b))
 
-(def pair-left (pair)
+(pub def pair-left (pair)
      (match pair
             (Pair x _)  x))
 
-(def pair-right (pair)
+(pub def pair-right (pair)
      (match pair
             (Pair _ x)  x))
 
-(def pair-map (f pair)
+(pub def pair-map (f pair)
      (match pair
             (Pair x y)  (f x y)))
 
-(def pair-map-left (f pair)
+(pub def pair-map-left (f pair)
      (match pair
             (Pair x y)  (Pair (f x) y)))
 
-(def pair-map-right (f pair)
+(pub def pair-map-right (f pair)
      (match pair
             (Pair x y)  (Pair x (f y))))
 
-(def pair-swap (pair)
+(pub def pair-swap (pair)
      (match pair
             (Pair x y) (Pair y x)))

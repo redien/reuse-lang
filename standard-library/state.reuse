@@ -1,39 +1,39 @@
 
 (typ (state s v) (Operation (fn (s) (pair s v))))
 
-(def state-run (state operation)
+(pub def state-run (state operation)
      (match operation
             (Operation f)  (f state)))
 
-(def state-final-value (initial-state operation)
+(pub def state-final-value (initial-state operation)
      (match (state-run initial-state operation)
             (Pair _ value)  value))
 
-(def state-return (value)
+(pub def state-return (value)
      (Operation (fn (state)
                     (Pair state value))))
 
-(def state-bind (operation f)
+(pub def state-bind (operation f)
      (Operation (fn (state)
                     (match (state-run state operation)
                            (Pair new-state new-value)  (state-run new-state (f new-value))))))
 
-(def state-get ()
+(pub def state-get ()
      (Operation (fn (state)
                     (Pair state state))))
 
-(def state-set (state)
+(pub def state-set (state)
      (Operation (fn (_)
                     (Pair state state))))
 
-(def state-modify (f)
+(pub def state-modify (f)
      (state-bind (state-get) (fn (state)
                  (state-set (f state)))))
 
-(def state-let (value f)
+(pub def state-let (value f)
      (state-bind (state-return value) f))
 
-(def state-foldr (f initial-value operations)
+(pub def state-foldr (f initial-value operations)
      (list-foldr (fn (operation chain)
                      (state-bind operation (fn (x)
                      (state-bind chain     (fn (xs)
@@ -41,15 +41,15 @@
                  (state-return initial-value)
                  operations))
 
-(def state-foreach (f xs)
+(pub def state-foreach (f xs)
      (state-foldr list-cons Empty (list-map f xs)))
 
 
-(def state-flatmap (f operation)
+(pub def state-flatmap (f operation)
      (state-bind operation f))
 
-(def state-map (f operation)
+(pub def state-map (f operation)
      (state-flatmap (pipe f state-return) operation))
 
-(def state-lift (value)
+(pub def state-lift (value)
      (state-return value))

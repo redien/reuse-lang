@@ -1,37 +1,37 @@
-(typ (list a) (Cons a (list a)) Empty)
+(pub typ (list a) (Cons a (list a)) Empty)
 
-(def list-cons (x xs)
+(pub def list-cons (x xs)
      (Cons x xs))
 
-(def list-from (x)
+(pub def list-from (x)
      (Cons x Empty))
 
-(def list-from-range (from _to)
+(pub def list-from-range (from _to)
      (match (< from _to)
             True   (Cons from (list-from-range (+ from 1) _to))
             False  Empty))
 
-(def list-first (list)
+(pub def list-first (list)
      (match list
             (Cons x _)
                 (Some x)
             Empty
                 None))
 
-(def list-rest (list)
+(pub def list-rest (list)
      (match list
             (Cons _ rest)
                 rest
             Empty
                 Empty)) 
 
-(def list-last (list)
+(pub def list-last (list)
     (match list
            Empty           None
            (Cons x Empty)  (Some x)
            (Cons _ rest)   (list-last rest)))
 
-(def list-empty? (list)
+(pub def list-empty? (list)
      (match list
             (Cons _ __)
                 False
@@ -45,45 +45,45 @@
             Empty
                 size))
 
-(def list-size (list)
+(pub def list-size (list)
      (list-size' list 0))
 
-(def list-foldrk (f initial list continue)
+(pub def list-foldrk (f initial list continue)
      (match list
             Empty       (continue initial)
             (Cons x xs) (list-foldrk f initial xs (fn (value) (f x value continue)))))
 
-(def list-foldlk (f initial list continue)
+(pub def list-foldlk (f initial list continue)
      (match list
             Empty       (continue initial)
             (Cons x xs) (f x initial (fn (new-value)
                                          (list-foldlk f new-value xs continue)))))
 
-(def list-foldr (f initial list)
+(pub def list-foldr (f initial list)
      (list-foldrk (fn (x value continue)
                       (continue (f x value)))
                   initial
                   list
                   (fn (x) x)))
 
-(def list-foldl (f initial list)
+(pub def list-foldl (f initial list)
      (match list
             Empty       initial
             (Cons x xs) (list-foldl f (f x initial) xs)))
 
-(def list-concat (a b)
+(pub def list-concat (a b)
      (list-foldr list-cons b a))
 
-(def list-reverse (list)
+(pub def list-reverse (list)
      (list-foldl list-cons Empty list))
 
-(def list-map (f list)
+(pub def list-map (f list)
      (list-foldr (fn (head tail) (list-cons (f head) tail)) Empty list))
 
-(def list-flatmap (f list)
+(pub def list-flatmap (f list)
      (list-foldr (fn (head tail) (list-concat (f head) tail)) Empty list))
 
-(def list-flatten (list)
+(pub def list-flatten (list)
      (list-foldr list-concat Empty list))
 
 (def list-split-at' (n a b)
@@ -93,7 +93,7 @@
                           Empty        (Pair (list-reverse a) b))
             False  (Pair (list-reverse a) b)))
 
-(def list-split-at (n xs)
+(pub def list-split-at (n xs)
      (list-split-at' n Empty xs))
 
 (def list-partition' (n xs partitions)
@@ -101,7 +101,7 @@
             (Pair Empty _)       partitions
             (Pair partition xs)  (list-partition' n xs (Cons partition partitions))))
 
-(def list-partition (n xs)
+(pub def list-partition (n xs)
      (list-reverse (list-partition' n xs Empty)))
 
 (def list-partition-by' (x xs)
@@ -111,7 +111,7 @@
             Empty
                xs))
 
-(def list-partition-by (f xs)
+(pub def list-partition-by (f xs)
      (match xs
             Empty
                Empty
@@ -124,10 +124,10 @@
                       False
                          (Cons (list x) (list-partition-by f (Cons x' rest))))))
 
-(def list-skip (count list)
+(pub def list-skip (count list)
      (pair-right (list-split-at count list)))
 
-(def list-take (count list)
+(pub def list-take (count list)
      (pair-left (list-split-at count list)))
 
 (def list-zip' (xs ys collected)
@@ -137,22 +137,22 @@
                                 Empty        collected
                                 (Cons y ys)  (list-zip' xs ys (Cons (Pair x y) collected)))))
 
-(def list-zip (xs ys)
+(pub def list-zip (xs ys)
      (list-reverse (list-zip' xs ys Empty)))
 
-(def list-pairs (xs)
+(pub def list-pairs (xs)
      (match xs
             (Cons a (Cons b rest))  (Cons (Pair a b) (list-pairs rest))
             _                       Empty))
 
-(def list-find-first (predicate list)
+(pub def list-find-first (predicate list)
      (match list
             Empty        None
             (Cons x xs)  (match (predicate x)
                                 True   (Some x)
                                 False  (list-find-first predicate xs))))
 
-(def list-filter (f list)
+(pub def list-filter (f list)
      (list-foldr (fn (head tail)
                      (match (f head)
                             True  (Cons head tail)
@@ -160,15 +160,15 @@
                  Empty
                  list))
 
-(def list-exclude (f list)
+(pub def list-exclude (f list)
      (list-filter (pipe f not) list))
 
-(def list-any? (f list)
+(pub def list-any? (f list)
      (match (list-find-first f list)
             (Some _)  True
             _         False))
 
-(def list-every? (f list)
+(pub def list-every? (f list)
      (match (list-find-first (fn (x) (not (f x))) list)
             (Some _)  False
             _         True))
@@ -180,6 +180,6 @@
                                          True   (list-collect-from-indexed-iterator' predicate next (Cons x initial))
                                          False  (Pair iterator initial))))
 
-(def list-collect-from-indexed-iterator (predicate iterator)
+(pub def list-collect-from-indexed-iterator (predicate iterator)
      (match (list-collect-from-indexed-iterator' predicate iterator Empty)
             (Pair iterator result) (Pair iterator (list-reverse result))))

@@ -13,5 +13,6 @@ $project_root/reusec --language module\
                      $project_root/parser/symbol-table.reuse\
                      $project_root/parser/symbols.strings\
                      $project_root/parser/symbols.reuse\
+                     $project_root/parser/parser-context.strings\
                      $project_root/parser/parser-context.reuse\
                      $project_root/parser/parser.reuse
