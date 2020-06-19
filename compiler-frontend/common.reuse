@@ -6,7 +6,52 @@
             Empty
                 dictionary))
 
-(def error-to-string (error)
+(def string-format (list)
+     (string-join (string-of-char 10)
+                  (list-map (string-join (string-empty)) list)))
+
+(def find-file-matching (files source-reference)
+     (list-find-first (. (string-equal? (source-reference-file-path source-reference)) source-file-path) files))
+
+(def range-information (range)
+     (match range
+            (Range start end)
+                (string-join (string-of-char 45) (list (string-from-int32 start) (string-from-int32 end)))))
+
+(def count-newlines (source)
+     (string-foldl (fn (c sum)
+                       (match c
+                              10  (+ 1 sum)
+                              _   sum))
+                   0
+                   source))
+
+(def line-information (file range)
+     (match range
+            (Range start _)
+                (match (string-from-indexed-iterator (source-file-content file))    content
+                (match (count-newlines (string-substring 0 start content))          line-number
+                (string-from-int32 (+ line-number 1))))))
+
+(def source-paragraph (file range)
+     (match range
+            (Range start end)
+                (match (string-from-indexed-iterator (source-file-content file))       content
+                (match (string-substring (- start 300) (+ (- end start) 500) content)  region
+                region))))
+
+(def location-information (files source-reference range)
+     (match (find-file-matching files source-reference)
+            (Some file)  (string-format (list
+                            Empty
+                            (list (source-paragraph file range))
+                            Empty
+                            (list (data-Line:) (line-information file range))
+                            (list (data-Range:) (range-information range))
+                            (list (data-File:) (source-file-path file))))
+            None         (data-no-location-information)))
+
+(def error-to-string (files error)
      (match error
             (MalformedDefinitionError range)
                 (i18n-malformed-definition-error English range)
@@ -26,8 +71,10 @@
                 (i18n-malformed-constructor-error English range)
             (MalformedTypeError range)
                 (i18n-malformed-type-error English range)
-            (ErrorNotDefined name)
-                (string-concat (data-not-defined-error) name)
+            (ErrorNotDefined name source-reference range)
+                (string-join (string-of-char 10) (list
+                    (string-concat (data-not-defined-error) name)
+                    (location-information files source-reference range)))
             (ErrorAlreadyDefined name)
                 (string-concat (data-already-defined-error) name)
             MalformedSexpTooFewClosingBrackets
@@ -35,8 +82,8 @@
             MalformedSexpTooManyClosingBrackets
                 (i18n-malformed-sexp-too-many-closing-brackets English)))
 
-(def stringify-parse-errors (definitions)
-     (result-bimap id error-to-string definitions))
+(def stringify-parse-errors (files definitions)
+     (result-bimap id (error-to-string files) definitions))
 
 (def identifier-is-reserved? (identifier)
      (string-equal? (string-substring 0 3 (symbol-name identifier)) (data-sparkle)))
@@ -86,5 +133,5 @@
             parser-sequence
             (parser-run internal-symbols)
             (result-map list-flatten)
-            stringify-parse-errors)
+            (stringify-parse-errors files))
         files))

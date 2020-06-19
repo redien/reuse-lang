@@ -36,12 +36,12 @@
                                 (TargetDefinition     source-reference
                                                       (indexed-iterator int32)))
 
-(def source-reference-file-path (source-reference)
+(pub def source-reference-file-path (source-reference)
      (match source-reference
             (SourceReference file-path _)
                 file-path))
 
-(def source-reference-module (source-reference)
+(pub def source-reference-module (source-reference)
      (match source-reference
             (SourceReference _ module)
                 module))

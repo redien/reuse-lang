@@ -8,7 +8,7 @@
                 (MalformedSymbolError range)
                 (MalformedConstructorError range)
                 (MalformedTypeError range)
-                (ErrorNotDefined string)
+                (ErrorNotDefined string source-reference range)
                 (ErrorAlreadyDefined string)
                 MalformedSexpTooFewClosingBrackets
                 MalformedSexpTooManyClosingBrackets)
@@ -29,8 +29,8 @@
 (def resolve-symbol (symbol scope)
      (parser-bind (symbol-to-sym symbol)            (fn (sym)
      (match (parser-scope-resolve sym scope)
-            (Sym _ name __ ___ None)
-                (parser-error (ErrorNotDefined name))
+            (Sym _ name source-reference range None)
+                (parser-error (ErrorNotDefined name source-reference range))
             _
                 (parser-return sym)))))
 
@@ -161,7 +161,7 @@
 
 (def sexp-to-list-expression (sexp-to-expression scope expressions range)
      (match expressions
-            (Cons (Symbol id symbol-name __) rest) 
+            (Cons (Symbol id symbol-name __) rest)
                   (match (= id (sym-fn))
                          True   (sexp-to-lambda sexp-to-expression scope rest range)
                          False
