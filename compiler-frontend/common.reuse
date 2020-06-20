@@ -72,9 +72,9 @@
             (MalformedTypeError range)
                 (i18n-malformed-type-error English range)
             (ErrorNotDefined name source-reference range)
-                (string-join (string-of-char 10) (list
-                    (string-concat (data-not-defined-error) name)
-                    (location-information files source-reference range)))
+                (string-format (list
+                    (list (string-concat (data-not-defined-error) name))
+                    (list (location-information files source-reference range))))
             (ErrorAlreadyDefined name)
                 (string-concat (data-already-defined-error) name)
             MalformedSexpTooFewClosingBrackets
