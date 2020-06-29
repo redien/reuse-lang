@@ -244,3 +244,28 @@ string-trim
 
 > (string-trim (string-from-list (list 65 32 32 66)))
 = A  B
+
+string-index-of
+> (string-from-int32 (maybe-or-else -1 (string-index-of (string-of-char 65) (string-of-char 65))))
+= 0
+
+> (string-from-int32 (maybe-or-else -1 (string-index-of (string-of-char 65) (string-from-list (list 66 65)))))
+= 1
+
+> (string-from-int32 (maybe-or-else -1 (string-index-of (string-of-char 65) (string-from-list (list 65 66)))))
+= 0
+
+> (string-from-int32 (maybe-or-else -1 (string-index-of (string-of-char 65) (string-empty))))
+= -1
+
+> (string-from-int32 (maybe-or-else -1 (string-index-of (string-from-list (list 65 66)) (string-from-list (list 65 66)))))
+= 0
+
+> (string-from-int32 (maybe-or-else -1 (string-index-of (string-from-list (list 65 66)) (string-from-list (list 67 65 66)))))
+= 1
+
+> (string-from-int32 (maybe-or-else -1 (string-index-of (string-from-list (list 65 66)) (string-from-list (list 65 66 67)))))
+= 0
+
+> (string-from-int32 (maybe-or-else -1 (string-index-of (string-from-list (list 65 66)) (string-from-list (list 65)))))
+= -1

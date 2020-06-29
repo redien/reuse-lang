@@ -6,6 +6,7 @@ project_root=$script_path/..
 build_dir=$($project_root/dev-env/builddir.sh standard-library)
 
 $project_root/bin/reuse-module --output $build_dir/standard-library.reuse\
+                               --stdlib false\
                                $script_path/combinators.reuse\
                                $script_path/boolean.reuse\
                                $script_path/pair.reuse\

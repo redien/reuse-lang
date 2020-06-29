@@ -17,6 +17,9 @@
             None
                 None))
 
+(pub def maybe-bind (maybe f)
+     (maybe-flatmap f maybe))
+
 (pub def maybe-filter (f maybe)
      (match maybe
             (Some x)
