@@ -33,12 +33,21 @@
                 (match (count-newlines (string-substring 0 start content))          line-number
                 (string-from-int32 (+ line-number 1))))))
 
+(def next-newline (content index)
+     (match (string-index-of (string-of-char 10) (string-skip index content))
+            (Some offset)
+                (+ (+ index offset) 1)
+            None
+                index))
+
 (def source-paragraph (file range)
      (match range
             (Range start end)
-                (match (string-from-indexed-iterator (source-file-content file))       content
-                (match (string-substring (- start 300) (+ (- end start) 500) content)  region
-                region))))
+                (match (string-from-indexed-iterator (source-file-content file))                             content
+                (match (next-newline content (- start 100))                                                  paragraph-start
+                (match (- (next-newline content (+ end 50)) paragraph-start)                                 paragraph-size
+                (match (string-substring paragraph-start paragraph-size content)                             region
+                region))))))
 
 (def location-information (files source-reference range)
      (match (find-file-matching files source-reference)

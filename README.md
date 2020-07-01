@@ -191,12 +191,17 @@ docker run --rm -it -v $PWD:/home/opam/reuse-lang redien/reuse-lang-dev-env
 - Re-implement a javascript backend to get a debugger for free
   - Implement source maps to improve debugging experience
 - Generate new names for duplicate entries in the symbol table
-- Only escape names for entries in symbol table
-- Use symbol table in backend
+  - Resolve module identifiers as a step after parsing
+    - Save the name/module of the identifier in the symbol table
+    - By keeping the module identifier separate (split by colon?), identifiers can be resolved lazily
+    - Keeping the name means that different threads do not have to coordinate
+    - Merge symbol tables together to get one table
+- Escape identifiers by adding the new identifier to the symbol table entry
+- Use symbol table in the backend
 - Handle division by zero safely
   - Return INT32_MAX?
   - Return Maybe?
-- Improve error messages to show file, line and column as well as print out the range.
+- Improve error messages to show column
 - Research alternative number representations.
   - Big num?
   - dec64?
