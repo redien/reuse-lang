@@ -18,46 +18,45 @@
             (Range start end)
                 (string-join (string-of-char 45) (list (string-from-int32 start) (string-from-int32 end)))))
 
-(def count-newlines (source)
-     (string-foldl (fn (c sum)
-                       (match c
-                              10  (+ 1 sum)
-                              _   sum))
-                   0
-                   source))
+(def count-lines (index lines source)
+     (match (string-index-of index (string-of-char 10) source)
+            (Some index)  (count-lines (+ index 1) (+ lines 1) source)
+            None          (Pair lines (+ (- (string-size source) index) 1))))
 
 (def line-information (file range)
      (match range
             (Range start _)
-                (match (string-from-indexed-iterator (source-file-content file))    content
-                (match (count-newlines (string-substring 0 start content))          line-number
-                (string-from-int32 (+ line-number 1))))))
+                (match (string-from-indexed-iterator (source-file-content file))  content
+                (count-lines 0 1 (string-substring 0 start content)))))
 
 (def next-newline (content index)
      (match (string-index-of index (string-of-char 10) content)
-            (Some offset)
-                (+ (+ index offset) 1)
+            (Some index)
+                (+ index 1)
             None
                 index))
 
 (def source-paragraph (file range)
      (match range
             (Range start end)
-                (match (string-from-indexed-iterator (source-file-content file))                             content
-                (match (next-newline content (- start 100))                                                  paragraph-start
-                (match (- (next-newline content (+ end 50)) paragraph-start)                                 paragraph-size
-                (match (string-substring paragraph-start paragraph-size content)                             region
+                (match (string-from-indexed-iterator (source-file-content file))  content
+                (match (next-newline content (- start 100))                       paragraph-start
+                (match (- (next-newline content (+ end 50)) paragraph-start)      paragraph-size
+                (match (string-substring paragraph-start paragraph-size content)  region
                 region))))))
 
 (def location-information (files source-reference range)
      (match (find-file-matching files source-reference)
-            (Some file)  (string-format (list
-                            Empty
-                            (list (source-paragraph file range))
-                            Empty
-                            (list (data-Line:) (line-information file range))
-                            (list (data-Range:) (range-information range))
-                            (list (data-File:) (source-file-path file))))
+            (Some file)
+                (match (line-information file range)
+                       (Pair lines column)
+                            (string-format (list Empty
+                                                 (list (source-paragraph file range))
+                                                 Empty
+                                                 (list (data-Line:) (string-from-int32 lines))
+                                                 (list (data-Column:) (string-from-int32 column))
+                                                 (list (data-Range:) (range-information range))
+                                                 (list (data-File:) (source-file-path file)))))
             None         (data-no-location-information)))
 
 (def error-to-string (files error)

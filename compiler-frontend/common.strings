@@ -71,6 +71,7 @@ not-defined-error            |The following identifier was not defined:
 already-defined-error        |The following identifier was already defined: 
 no-location-information      |(No location information available)
 Line:                        |Line: 
+Column:                      |Column: 
 File:                        |File: 
 Range:                       |Range: 
 def                          |def
