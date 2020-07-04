@@ -34,7 +34,7 @@
                 (string-from-int32 (+ line-number 1))))))
 
 (def next-newline (content index)
-     (match (string-index-of (string-of-char 10) (string-skip index content))
+     (match (string-index-of index (string-of-char 10) content)
             (Some offset)
                 (+ (+ index offset) 1)
             None
