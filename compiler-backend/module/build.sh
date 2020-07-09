@@ -48,4 +48,4 @@ fi
 cp $script_path/preamble.reuse $build_dir/data/preamble.reuse
 cp $script_path/pervasives.reuse $build_dir/data/pervasives.reuse
 
-cp bootstrap/data/standard-library.reuse $build_dir/data
+cp $project_root/bootstrap/data/standard-library.reuse $build_dir/data
