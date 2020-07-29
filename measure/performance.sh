@@ -11,7 +11,7 @@ clone_repo() {
     [ -d $repo_dir/.git ] || git clone https://github.com/redien/reuse-lang $repo_dir --quiet
     cd $repo_dir
     git reset --hard
-    git checkout master --quiet
+    git checkout base --quiet
     git pull --rebase --quiet
     cd $working_dir
 }
