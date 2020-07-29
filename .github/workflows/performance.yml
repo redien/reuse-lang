@@ -7,7 +7,7 @@ on:
     branches: [master]
 
 jobs:
-  test:
+  measure:
     runs-on: ubuntu-20.04
 
     steps:

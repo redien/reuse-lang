@@ -8,7 +8,7 @@ build_dir=$($project_root/dev-env/builddir.sh measure)
 repo_dir=$($project_root/dev-env/builddir.sh measure-repo)
 
 clone_repo() {
-    [ -d $repo_dir/.git ] || git clone $project_root $repo_dir --quiet
+    [ -d $repo_dir/.git ] || git clone https://github.com/redien/reuse-lang $repo_dir --quiet
     cd $repo_dir
     git reset --hard
     git checkout master --quiet
