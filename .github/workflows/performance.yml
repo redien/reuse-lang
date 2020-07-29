@@ -25,8 +25,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Report ${{ github.ref }}
+          tag_name: performance
+          release_name: Performance report
           draft: false
           prerelease: false
 
