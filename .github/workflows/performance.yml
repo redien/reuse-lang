@@ -22,4 +22,4 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: report
-          path: $GITHUB_WORKSPACE/generated/measure/report.csv
+          path: ${{ github.workspace }}/generated/measure/report.csv
