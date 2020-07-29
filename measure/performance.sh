@@ -57,3 +57,5 @@ test_commits() {
 clone_repo
 echo Test,Date,Commit Message,Time \(s\) > $build_dir/report.csv
 test_commits 'sexp-parser' "$(list_commits 50)" 'sexp-parser/time-sexp-parser.sh' | tac >> $build_dir/report.csv
+
+echo Wrote report to \'$build_dir/report.csv\'
