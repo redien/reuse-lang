@@ -31,7 +31,7 @@ checkout_commit() {
 
 format_time() {
     cd $repo_dir
-    echo "\"$1\",\"$(git log -n 1 --format=%ai --no-color $2)\",\"$(git log -n 1 --format=%s --no-color $2)\",$3"
+    echo "\"$1\",\"$(git log -n 1 --format=%ai --no-color $2)\",\"$2\",\"$(git log -n 1 --format=%s --no-color $2)\",$3"
     cd $working_dir
 }
 
@@ -55,7 +55,7 @@ test_commits() {
 }
 
 clone_repo
-echo Test,Date,Commit Message,Time \(s\) > $build_dir/report.csv
+echo Test,Date,Commit,Commit Message,Time \(s\) > $build_dir/report.csv
 test_commits 'sexp-parser' "$(list_commits 50)" 'sexp-parser/time-sexp-parser.sh' | tac >> $build_dir/report.csv
 
 echo Wrote report to \'$build_dir/report.csv\'
