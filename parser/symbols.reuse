@@ -38,5 +38,5 @@
      (dictionary-set (data-pub)    (Pair (sym-pub) (data-pub))
      (dictionary-of (list-map (fn (pair) (Pair (pair-right pair) pair)) (intrinsic-identifiers))))))))))
 
-(pub def identifier-is-operator? (id)
-     (and (>= id 0) (<= id 5)))
+(pub def token-is-operator? (token)
+     (and (>= token 0) (<= token 5)))

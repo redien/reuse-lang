@@ -25,7 +25,7 @@
                 (Scope (list-foldl (fn (definition scope)
                                        (match definition
                                               (FunctionDefinition identifier _ arguments expression __)
-                                                  (array-set (symbol-id identifier) (ValueFunction arguments expression) scope)
+                                                  (array-set (symbol-token identifier) (ValueFunction arguments expression) scope)
                                               _
                                                   scope))
                                    scope

@@ -27,16 +27,16 @@
 
 (def intern-string (iterator next-iterator name symbol-state next)
      (match symbol-state
-            (Pair id symbols)
+            (Pair token symbols)
                   (match (dictionary-get name symbols)
-                         (Some (Pair id name))
+                         (Some (Pair token name))
                                (next next-iterator
                                      symbol-state
-                                     (Symbol id name (symbol-range iterator next-iterator)))
+                                     (Symbol token name (symbol-range iterator next-iterator)))
                          None
                                (next next-iterator
-                                     (Pair (+ id 1) (dictionary-set name (Pair id name) symbols))
-                                     (Symbol id name (symbol-range iterator next-iterator))))))
+                                     (Pair (+ token 1) (dictionary-set name (Pair token name) symbols))
+                                     (Symbol token name (symbol-range iterator next-iterator))))))
 
 (def parse-symbol (iterator symbols next end)
      (match (string-collect-from-indexed-iterator atom-character? iterator)

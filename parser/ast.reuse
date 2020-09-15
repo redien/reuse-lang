@@ -46,9 +46,9 @@
             (SourceReference _ module)
                 module))
 
-(pub def symbol-id (sym)
+(pub def symbol-token (sym)
      (match sym
-            (Sym id _ __ ___ ____)  id))
+            (Sym token _ __ ___ ____)  token))
 
 (pub def symbol-name (sym)
      (match sym
@@ -79,7 +79,7 @@
             (Sym _1 _2 _3 _4 _)  (Sym _1 _2 _3 _4 id)))
 
 (pub def symbol-equal? (a b)
-     (= (symbol-id a) (symbol-id b)))
+     (= (symbol-token a) (symbol-token b)))
 
 (pub def module-equal? (a b)
      (match a
@@ -115,9 +115,6 @@
      (match constructor
             (ComplexConstructor sym _ __)  sym
             (SimpleConstructor sym)        sym))
-
-(def constructor-id (constructor)
-     (symbol-id (constructor-sym constructor)))
 
 (pub def type-parameter-symbol (parameter)
      (match parameter

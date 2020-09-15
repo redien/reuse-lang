@@ -11,7 +11,7 @@
      (match definition
             (TypeDefinition _ __ ___ constructors ____)
                 (list-foldl (fn (constructor array)
-                                (array-set (constructor-id constructor) definition array))
+                                (array-set (symbol-token (constructor-sym constructor)) definition array))
                             array
                             constructors)
             _
@@ -43,10 +43,10 @@
                                symbol-table
                                (parser-context-add-constructors definition constructors))))))
 
-(def parser-context-constructor? (id context)
+(def parser-context-token-is-constructor? (token context)
      (match context
             (ParserContext _ __ ___ ____ _____ constructors)
-                (match (array-get id constructors)
+                (match (array-get token constructors)
                        (Some _)  True
                        None      False)))
 
@@ -118,9 +118,9 @@
      (result-bind result (fn (value)
      (result-return (f value))))))))
 
-(def parser-constructor? (name)
+(def parser-token-is-constructor? (token)
      (state-bind (state-get) (fn (context)
-     (parser-return (parser-context-constructor? name context)))))
+     (parser-return (parser-context-token-is-constructor? token context)))))
 
 (def parser-add-definition! (definition)
      (state-bind (state-modify (parser-context-add-definition definition)) (fn (_)

@@ -9,30 +9,30 @@
      (dictionary-set (data-Empty) (Pair (sym-empty) (data-Empty))
      dictionary))))
 
-(def expression-is-symbol? (symbol-id expression)
+(def expression-is-token? (token expression)
      (match expression
-            (Variable (Sym id _ __ ___ ____))
-                (= symbol-id id)
+            (Variable (Sym expression-token _ __ ___ ____))
+                (= expression-token token)
             _
                 False))
 
-(def first-expression-is-symbol? (symbol-id expressions)
-     ((pipe (maybe-map (expression-is-symbol? symbol-id))
+(def first-expression-is-token? (token expressions)
+     ((pipe (maybe-map (expression-is-token? token))
             (maybe-else (fn () False)))
         (list-first expressions)))
 
-(def transform-special-form (symbol-id transformer definition)
+(def transform-special-form (token transformer definition)
      (over-definition-expressions
      (over-subexpressions
      (over-function-application
          (fn (expressions range)
-             (result-return (match (first-expression-is-symbol? symbol-id expressions)
+             (result-return (match (first-expression-is-token? token expressions)
                                    True   (transformer (definition-source-reference definition) (list-rest expressions) range)
                                    False  (FunctionApplication expressions range))))))
          definition))
 
-(def transform-special-forms (symbol-id transformer definitions)
-     (result-concat (list-map (transform-special-form symbol-id transformer) definitions)))
+(def transform-special-forms (token transformer definitions)
+     (result-concat (list-map (transform-special-form token transformer) definitions)))
 
 (def transform-pipe (source-reference expressions range)
      (Lambda (list (Sym (sym-sparkle-x) (data-sparkle-x) source-reference range None))

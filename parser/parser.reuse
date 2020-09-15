@@ -15,9 +15,9 @@
 
 (def symbol-to-sym (symbol)
      (match symbol
-            (Symbol id name range)
+            (Symbol token name range)
                 (parser-bind (parser-get-source-reference) (fn (source-reference)
-                (parser-return (Sym id name source-reference range None))))
+                (parser-return (Sym token name source-reference range None))))
             (Integer _ range)
                 (parser-error  (MalformedSymbolError range))
             (List _ range)
@@ -48,7 +48,7 @@
      (match type
             (List (Cons symbol parameters) range)
                 (parser-bind   (symbol-to-sym symbol)  (fn (sym)
-                (match (= (symbol-id sym) (sym-fn))
+                (match (= (symbol-token sym) (sym-fn))
                         True   (sexp-to-function-type sexp-to-type parameters range)
                         False  (sexp-to-complex-type sexp-to-type sym parameters range))))
             (Integer _ range)
@@ -105,8 +105,8 @@
      (parser-return (FunctionApplication expressions range)))))
 
 (def to-constructor-or-capture (symbol)
-     (parser-bind (symbol-to-sym symbol)                 (fn (sym)
-     (parser-bind (parser-constructor? (symbol-id sym))  (fn (constructor?)
+     (parser-bind (symbol-to-sym symbol)                    (fn (sym)
+     (parser-bind (parser-token-is-constructor? (symbol-token sym))  (fn (constructor?)
      (match constructor?
             True  (parser-return (ConstructorPattern sym Empty (symbol-range sym)))
             False (parser-return (Capture sym))))))))
@@ -151,23 +151,23 @@
             _
                 (parser-error (MalformedExpressionError range))))
 
-(def sexp-to-constructor (sexp-to-expression range id name rest)
+(def sexp-to-constructor (sexp-to-expression range token name rest)
      (parser-bind   (parser-get-source-reference)                        (fn (source-reference)
      (parser-bind   (parser-sequence (list-map sexp-to-expression rest)) (fn (expressions)
-     (parser-return (Constructor (Sym id name source-reference range None) expressions range)))))))
+     (parser-return (Constructor (Sym token name source-reference range None) expressions range)))))))
 
 (def sexp-to-list-expression (sexp-to-expression scope expressions range)
      (match expressions
-            (Cons (Symbol id symbol-name __) rest)
-                  (match (= id (sym-fn))
+            (Cons (Symbol token symbol-name __) rest)
+                  (match (= token (sym-fn))
                          True   (sexp-to-lambda sexp-to-expression scope rest range)
                          False
-                  (match (= id (sym-match))
+                  (match (= token (sym-match))
                          True   (sexp-to-match sexp-to-expression scope range rest)
                          False
-                  (parser-bind (parser-constructor? id) (fn (constructor?)
+                  (parser-bind (parser-token-is-constructor? token) (fn (constructor?)
                   (match constructor?
-                         True   (sexp-to-constructor (sexp-to-expression scope) range id symbol-name rest)
+                         True   (sexp-to-constructor (sexp-to-expression scope) range token symbol-name rest)
                          False  (sexp-to-function-application (sexp-to-expression scope) range expressions))))))
             _
                   (sexp-to-function-application (sexp-to-expression scope) range expressions)))
@@ -182,7 +182,7 @@
                        _      (sexp-to-list-expression sexp-to-expression scope expressions range))
             symbol
                 (parser-bind (resolve-symbol symbol scope)         (fn (sym)
-                (parser-bind (parser-constructor? (symbol-id sym)) (fn (constructor?)
+                (parser-bind (parser-token-is-constructor? (symbol-token sym)) (fn (constructor?)
                 (parser-return (match constructor?
                                       True   (Constructor sym Empty (symbol-range sym))
                                       False  (Variable sym)))))))))
@@ -279,8 +279,8 @@
 
 (def sym-to-symbol (sym)
      (match sym
-            (Sym id name _ range __)
-                (Symbol id name range)))
+            (Sym token name _ range __)
+                (Symbol token name range)))
 
 (def type-to-sexp (types-to-sexp type)
      (match type
@@ -314,12 +314,12 @@
             (UniversalParameter sym)
                 (sym-to-symbol sym)))
 
-(def type-name-to-sexp (id range name parameters)
+(def type-name-to-sexp (token range name parameters)
      (match parameters
             Empty
-                (Symbol id name range) 
+                (Symbol token name range) 
             _
-                (List (Cons (Symbol id name range)
+                (List (Cons (Symbol token name range)
                             (list-map type-parameter-to-sexp parameters))
                       range)))
 
@@ -346,8 +346,8 @@
      (match expression
             (IntegerConstant integer range)
                 (Integer integer range)
-            (Variable (Sym id string _ range __))
-                (Symbol id string range)
+            (Variable (Sym token string _ range __))
+                (Symbol token string range)
             (Lambda arguments expression range)
                 (List (list (Symbol (sym-fn) (data-fn) range)
                             (function-arguments-to-sexp arguments range)
@@ -366,9 +366,9 @@
             (FunctionApplication expressions range)
                 (List (list-map expression-to-sexp expressions) range)))
 
-(def type-definition-to-sexp (id name parameters constructors range)
+(def type-definition-to-sexp (token name parameters constructors range)
      (list-concat (list (Symbol (sym-typ) (data-typ) range)
-                        (type-name-to-sexp id range name parameters))
+                        (type-name-to-sexp token range name parameters))
                   (constructors-to-sexp constructors)))
 
 (def function-definition-to-sexp (name arguments expression range)
@@ -385,8 +385,8 @@
 
 (pub def definition-to-sexp (definition)
      (match definition
-            (TypeDefinition (Sym id name _ __ ___) public? parameters constructors range)
-                (definition-to-sexp' public? range (type-definition-to-sexp id name parameters constructors range))
+            (TypeDefinition (Sym token name _ __ ___) public? parameters constructors range)
+                (definition-to-sexp' public? range (type-definition-to-sexp token name parameters constructors range))
             (FunctionDefinition name public? arguments expression range)
                 (definition-to-sexp' public? range (function-definition-to-sexp name arguments expression range))
             (TargetDefinition _ data)

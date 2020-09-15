@@ -10,11 +10,11 @@
            data-forall data-foreign data-import data-instance data-infix data-infixl data-infixr
            data-newtype data-where))
 
-(def identifier-is-reserved? (id)
-     (and (<= id -2000) (> id -3000)))
+(def token-is-reserved? (token)
+     (and (<= token -2000) (> token -3000)))
 
 (def escape-identifier (identifier)
-     (match (identifier-is-reserved? (symbol-id identifier))
+     (match (token-is-reserved? (symbol-token identifier))
             True   (string-prepend 95 (symbol-name identifier))
             False  (string-flatmap escape-char (symbol-name identifier))))
 
@@ -28,7 +28,7 @@
         (Pair (data-&) (data-int32-and)))))
 
 (def translate-identifier (identifier)
-     (match (identifier-is-operator? (symbol-id identifier))
+     (match (token-is-operator? (symbol-token identifier))
             True   (match (dictionary-get (symbol-name identifier) (operator-translation-map))
                           (Some translation)  translation
                           None                (escape-identifier identifier))
@@ -38,7 +38,7 @@
      (translate-identifier identifier))
 
 (def prefix-type (identifier)
-     (match (= (symbol-id identifier) (sym-int32))
+     (match (= (symbol-token identifier) (sym-int32))
             True   (data-Int32)
             False  (string-prepend 84 (translate-identifier identifier))))
 
@@ -106,7 +106,7 @@
 (def translate-function-application (translate-expression expressions)
      (match expressions
             (Cons (Variable sym) rest)
-                    (match (= (symbol-id sym) (sym-int32-less-than))
+                    (match (= (symbol-token sym) (sym-int32-less-than))
                            True  (translate-less-than translate-expression rest)
                            False (translate-function-application' translate-expression expressions))
             _
