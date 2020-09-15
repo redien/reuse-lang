@@ -23,9 +23,6 @@
             (List _ range)
                 (parser-error  (MalformedSymbolError range))))
 
-(def symbols-to-syms (symbols)
-     (parser-sequence (list-map symbol-to-sym symbols)))
-
 (def resolve-symbol (symbol scope)
      (parser-bind (symbol-to-sym symbol)            (fn (sym)
      (match (parser-scope-resolve sym scope)
@@ -94,7 +91,7 @@
 (def sexp-to-lambda (sexp-to-expression scope rest range)
      (match rest
             (Cons (List arguments _) (Cons expression Empty))
-                (parser-bind   (symbols-to-syms arguments)                           (fn (arguments)
+                (parser-bind   (parser-sequence (list-map symbol-to-sym arguments))  (fn (arguments)
                 (parser-bind   (parser-bind-symbols! arguments)                      (fn (arguments)
                 (match         (parser-scope-new scope)                              scope
                 (match         (parser-scope-set-all arguments scope)                scope
@@ -210,7 +207,7 @@
             (Cons (List arguments _) (Cons expression Empty))
                   (parser-bind   (symbol-to-sym name-symbol)                           (fn (name)
                   (parser-bind   (parser-bind-symbol! name)                            (fn (name)
-                  (parser-bind   (symbols-to-syms arguments)                           (fn (arguments)
+                  (parser-bind   (parser-sequence (list-map symbol-to-sym arguments))  (fn (arguments)
                   (parser-bind   (parser-bind-symbols! arguments)                      (fn (arguments)
                   (match         (parser-scope-new scope)                              scope
                   (match         (parser-scope-set-all (Cons name arguments) scope)    scope
