@@ -6,18 +6,23 @@
 
 # Changes
 
+- Implement boolean type as a compiler intrinsic.
+- Implement existing logical operators as compiler intrinsics.
 - Restrict type/variable/function identifiers to be strictly lowercase latin letters and snake-case: `list-map` or `list-collect-from-indexed-iterator`.
 - Restrict constructor identifiers to be strictly latin and upper camel case: `LinkedList` or `PlanB`.
+- Convert identifiers to target naming convention.
 
 # Benefits
 
-- It's possible to convert the identifiers to the target language's naming convention
+- Users of libraries will actually want to use them.
+- It's possible to convert the identifiers to the target language's naming convention.
 - The backends will no longer need to encode identifiers since the character set is restricted.
 
 # Disadvantages
 
 - Does not support non-latin characters.
 - Symbols commonly used for operators will not be usable. (Other than the ones for int32 arithmetic.)
+- More operators will need to be implemented in the compiler. (Although this is arguably a good thing seeing as existing logical operators currently do not short-circuit but we would like them to.)
 
 # Alternative solutions
 
