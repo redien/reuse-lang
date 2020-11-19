@@ -1,0 +1,35 @@
+
+[cli] -> [argument-parser]
+[cli] -> [compiler]
+
+[compiler] -> [common]
+[compiler] -> [local-transforms]
+[compiler] -> [backend]
+
+[common] -> [parser]
+[common] -> [string-gen]
+
+[cli] -> [source-file]
+[common] -> [source-file]
+
+[backend] -> [local-transforms]
+[backend] -> [shared]
+[backend] -> [symbols]
+
+[symbols] -> [scope]
+[parser-context] -> [scope]
+[parser] -> [scope]
+
+[symbols] -> [symbol-table]
+[parser-context] -> [symbol-table]
+[parser-context] -> [symbols]
+
+[parser] -> [parser-context]
+[common] -> [parser-context]
+
+[local-transforms] -> [ast]
+[backend] -> [ast]
+[cli] -> [ast]
+[common] -> [ast]
+[parser] -> [ast]
+[parser-context] -> [ast]
