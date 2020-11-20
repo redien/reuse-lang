@@ -17,13 +17,13 @@ $project_root/reusec --language ocaml\
                      $project_root/parser/symbols.reuse\
                      $project_root/parser/parser-context.strings\
                      $project_root/parser/parser-context.reuse\
+                     $project_root/parser/source-file.strings\
+                     $project_root/parser/source-file.reuse\
                      $project_root/parser/parser.reuse\
                      $project_root/argument-parser/argument-parser.strings\
                      $project_root/argument-parser/argument-parser.reuse\
                      $project_root/compiler-frontend/local-transforms.strings\
                      $project_root/compiler-frontend/local-transforms.reuse\
-                     $project_root/compiler-frontend/source-file.strings\
-                     $project_root/compiler-frontend/source-file.reuse\
                      $project_root/compiler-frontend/common.strings\
                      $project_root/compiler-frontend/strings.reuse\
                      $project_root/compiler-frontend/common.reuse\

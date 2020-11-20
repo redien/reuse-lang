@@ -4,17 +4,16 @@
 
 [compiler] -> [common]
 [compiler] -> [local-transforms]
-[compiler] -> [backend]
+[compiler] -> [<reference> backend]
 
 [common] -> [parser]
-[common] -> [string-gen]
 
 [cli] -> [source-file]
 [common] -> [source-file]
 
-[backend] -> [local-transforms]
-[backend] -> [shared]
-[backend] -> [symbols]
+[<reference> backend] -> [local-transforms]
+[<reference> backend] -> [shared]
+[<reference> backend] -> [symbols]
 
 [symbols] -> [scope]
 [parser-context] -> [scope]
@@ -25,7 +24,8 @@
 [parser-context] -> [symbols]
 
 [parser] -> [parser-context]
-[common] -> [parser-context]
+[parser] -> [string-gen]
+[parser] -> [source-file]
 
 [local-transforms] -> [ast]
 [backend] -> [ast]

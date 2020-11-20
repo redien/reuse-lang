@@ -96,7 +96,7 @@
                 (ParserContext source-reference symbols module-scope global-scope symbol-table constructors)))
 
 
-(pub def parser-run (symbols parser)
+(def parser-run (symbols parser)
      (match (state-run (ParserContext (SourceReference (string-empty) ModuleSelf)
                                       (Pair (default-symbol-count) symbols)
                                       (default-scope)
@@ -106,13 +106,13 @@
                        parser)
             (Pair _ result)  result))
 
-(pub def parser-return (value)
+(def parser-return (value)
      (state-return (result-return value)))
 
-(pub def parser-error (error)
+(def parser-error (error)
      (state-return (result-error error)))
 
-(pub def parser-bind (parser f)
+(def parser-bind (parser f)
      (state-bind parser (fn (result)
      (result-prod state-return
      (result-bind result (fn (value)
@@ -138,7 +138,7 @@
      (state-bind (state-get) (fn (state)
      (parser-return (parser-context-module-scope state)))))
 
-(pub def parser-new-module! ()
+(def parser-new-module! ()
      (state-bind (state-modify parser-context-new-module) (fn (state)
      (parser-return state))))
 
@@ -154,7 +154,7 @@
      (state-bind (state-modify (parser-context-with-source-reference source-reference)) (fn (_)
      (parser-return source-reference))))
 
-(pub def parser-sequence (list)
+(def parser-sequence (list)
      (list-foldr (fn (a b)
                      (parser-bind a (fn (a')
                      (parser-bind b (fn (b')

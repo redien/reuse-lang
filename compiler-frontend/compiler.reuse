@@ -3,6 +3,7 @@
 
 (def frontend (minimal? file-entries)
      ((pipe (parse-source-files (internal-symbols))
+            (stringify-parse-errors file-entries)
             (match (or (not (perform-transformations?)) minimal?)
                    True   id
                    False  (. local-transforms validate-reserved-identifiers)))

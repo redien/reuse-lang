@@ -263,7 +263,7 @@
             ParseErrorTooFewClosingBrackets   MalformedSexpTooFewClosingBrackets
             ParseErrorTooManyClosingBrackets  MalformedSexpTooManyClosingBrackets))
 
-(pub def parse-definitions! (module file-path iterator)
+(def parse-definitions! (module file-path iterator)
      (parser-bind (parser-set-source-reference! (SourceReference file-path module)) (fn (_)
      (parser-bind (parser-get-symbols) (fn (symbols)
      (match (parse-sexps symbols iterator)
@@ -273,6 +273,44 @@
             (Error error)
                 (parser-error (sexp-error-to-ast-error error))))))))
 
+(def transform-strings (path content)
+     (match (string-gen content)
+            (Result string)  (indexed-iterator-from-iterable (string-iterable) string)
+            (Error error)    (indexed-iterator-from-iterable (string-iterable) (string-empty))))
+
+(def parse-reuse-file (file)
+     (match file
+            (SourceFile module path content)
+                (parse-definitions! module path content)))
+
+(def parse-strings-file (file)
+     (match file
+            (SourceFile module path content)
+                (parse-definitions! module path (transform-strings path content))))
+
+(def parse-target-file (file)
+     (match file
+            (SourceFile module path content)
+                (parser-return (list (TargetDefinition (SourceReference path module) content)))))
+
+(def parse-source-file (file)
+     (match (source-file-type file)
+            SourceFileTypeStrings         (parse-strings-file file)
+            SourceFileTypeReuse           (parse-reuse-file file)
+            SourceFileTypeTargetLanguage  (parse-target-file file)))
+
+(def parse-module (files)
+     (parser-bind (parser-new-module!) (fn (_)
+     (parser-bind (parser-sequence (list-map parse-source-file files)) (fn (definitions)
+     (parser-return (list-flatten definitions)))))))
+
+(pub def parse-source-files (internal-symbols files)
+     ((pipe (list-partition-by (fn (a b) (module-equal? (source-file-module a) (source-file-module b))))
+            (list-map parse-module)
+            parser-sequence
+            (parser-run internal-symbols)
+            (result-map list-flatten))
+        files))
 
 
 

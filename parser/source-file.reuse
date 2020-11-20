@@ -1,23 +1,23 @@
 
-(typ (source-file iterator)  (SourceFile module-reference string iterator))
-(typ source-file-type SourceFileTypeReuse
-                      SourceFileTypeStrings
-                      SourceFileTypeTargetLanguage)
+(pub typ (source-file iterator)  (SourceFile module-reference string iterator))
+(pub typ source-file-type SourceFileTypeReuse
+                          SourceFileTypeStrings
+                          SourceFileTypeTargetLanguage)
 
-(def source-file-of (module path iterator)
+(pub def source-file-of (module path iterator)
      (SourceFile module path iterator))
 
-(def source-file-module (file)
+(pub def source-file-module (file)
      (match file
             (SourceFile module _ __)
                 module))
 
-(def source-file-path (file)
+(pub def source-file-path (file)
      (match file
             (SourceFile _ path __)
                 path))
 
-(def source-file-content (file)
+(pub def source-file-content (file)
      (match file
             (SourceFile _ __ content)
                 content))
@@ -25,7 +25,7 @@
 (def last-n-chars (n path)
      (string-substring (- (string-size path) n) n path))
 
-(def source-file-type (file)
+(pub def source-file-type (file)
      (match (string-equal? (last-n-chars 6 (source-file-path file)) (data-reuse-file-ending))
             True   SourceFileTypeReuse
             False

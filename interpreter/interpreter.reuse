@@ -244,6 +244,13 @@
                              (ValueNativeIterator iterator)
                              (ValueInteger (indexed-iterator-index iterator)))))
 
+(def add-identifiers (identifiers offset dictionary)
+     (match identifiers
+            (Cons identifier rest)
+                (add-identifiers rest (- offset 1) (dictionary-set (identifier) (Pair offset (identifier)) dictionary))
+            Empty
+                dictionary))
+
 (def internal-symbols ()
      (add-identifiers (list data-Some data-None data-Pair data-IterableClass data-IndexedIterator
                             data-main data-Empty data-Cons) -2000
