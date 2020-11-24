@@ -4,7 +4,9 @@
 
 (def validate-identifier (identifier)
      (match (identifier-is-reserved? identifier)
-            True   (result-error (data-error-reserved-identifier))
+            True   (result-error (ErrorReservedIdentifier (symbol-name identifier)
+                                                          (symbol-source-reference identifier)
+                                                          (symbol-range identifier)))
             False  (result-lift identifier)))
 
 (def validate-reserved-identifiers (definitions)

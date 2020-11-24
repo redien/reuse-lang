@@ -10,6 +10,7 @@
                 (MalformedTypeError range)
                 (ErrorNotDefined string source-reference range)
                 (ErrorAlreadyDefined string)
+                (ErrorReservedIdentifier string source-reference range)
                 MalformedSexpTooFewClosingBrackets
                 MalformedSexpTooManyClosingBrackets)
 

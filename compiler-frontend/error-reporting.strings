@@ -1,3 +1,4 @@
+reserved-identifier-error    |Symbols prefixed with ✨ are reserved:
 not-defined-error            |The following identifier was not defined: 
 already-defined-error        |The following identifier was already defined: 
 no-location-information      |(No location information available)

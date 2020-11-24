@@ -12,6 +12,7 @@
             (MalformedTypeError                  _)        (data-MalformedTypeError                  )
             (ErrorNotDefined                     _ __ ___) (data-ErrorNotDefined                     )
             (ErrorAlreadyDefined                 _)        (data-ErrorAlreadyDefined                 )
+            (ErrorReservedIdentifier             _ __ ___) (data-ErrorReservedIdentifier             )
              MalformedSexpTooFewClosingBrackets            (data-MalformedSexpTooFewClosingBrackets  )
              MalformedSexpTooManyClosingBrackets           (data-MalformedSexpTooManyClosingBrackets )))
 

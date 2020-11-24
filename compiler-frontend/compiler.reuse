@@ -3,7 +3,6 @@
 
 (def frontend (minimal? file-entries)
      ((pipe (parse-source-files (internal-symbols))
-            (stringify-parse-errors file-entries)
             (match (or (not (perform-transformations?)) minimal?)
                    True   id
                    False  (. local-transforms validate-reserved-identifiers)))
@@ -12,8 +11,5 @@
 (def compile (file-entries module-name parameters)
      (match parameters
             (CompilerParameters minimal? use-stdlib)
-                  (match (frontend minimal? file-entries)
-                         (Result definitions)
-                              (result-return (generate-source module-name definitions))
-                         (Error error)
-                              (result-error error))))
+                  (result-map (generate-source module-name)
+                              (frontend minimal? file-entries))))

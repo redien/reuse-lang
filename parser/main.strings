@@ -9,5 +9,6 @@ MalformedConstructorError           |MalformedConstructorError
 MalformedTypeError                  |MalformedTypeError
 ErrorNotDefined                     |ErrorNotDefined
 ErrorAlreadyDefined                 |ErrorAlreadyDefined
+ErrorReservedIdentifier             |ErrorReservedIdentifier
 MalformedSexpTooFewClosingBrackets  |MalformedSexpTooFewClosingBrackets
 MalformedSexpTooManyClosingBrackets |MalformedSexpTooManyClosingBrackets

@@ -78,10 +78,11 @@
                     (list (location-information files source-reference range))))
             (ErrorAlreadyDefined name)
                 (string-concat (data-already-defined-error) name)
+            (ErrorReservedIdentifier name source-reference range)
+                (string-format (list
+                    (list (string-concat (data-reserved-identifier-error) name))
+                    (list (location-information files source-reference range))))
             MalformedSexpTooFewClosingBrackets
                 (i18n-malformed-sexp-too-few-closing-brackets)
             MalformedSexpTooManyClosingBrackets
                 (i18n-malformed-sexp-too-many-closing-brackets)))
-
-(def stringify-parse-errors (files definitions)
-     (result-bimap id (error-to-string files) definitions))

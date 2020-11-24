@@ -66,6 +66,6 @@
                                             (filename-without-extension (filename-from-path output-path))
                                             (CompilerParameters (minimal? arguments) (standard-library? arguments)))
                                    (Result source)  (CommandWriteFiles (list (Pair output-path source)))
-                                   (Error error)    (CommandError error))
+                                   (Error error)    (CommandError (error-to-string file-entries error)))
                        None
                             (CommandError (data-no-output-path)))))

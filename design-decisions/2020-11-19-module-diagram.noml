@@ -2,8 +2,8 @@
 
 [cli] -> [argument-parser]
 [cli] -> [compiler]
+[cli] -> [error-reporting]
 
-[compiler] -> [error-reporting]
 [compiler] -> [identifier-validation]
 [compiler] -> [local-transforms]
 [compiler] -> [<reference> backend]

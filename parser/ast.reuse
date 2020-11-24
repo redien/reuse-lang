@@ -59,14 +59,14 @@
             (Sym _1 _ _2 _3 _4)
                 (Sym _1 name _2 _3 _4)))
 
-(def symbol-source-reference (sym)
+(pub def symbol-source-reference (sym)
      (match sym
             (Sym _ __ source-reference ___ ____)  source-reference))
 
 (def symbol-module (sym)
      (source-reference-module (symbol-source-reference sym)))
 
-(def symbol-range (sym)
+(pub def symbol-range (sym)
      (match sym
             (Sym _ __ ___ range ____)  range))
 
