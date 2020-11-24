@@ -58,8 +58,6 @@ while                        |while
 parser                       |parser
 value                        |value
 to                           |to
-error-reserved-identifier    |Symbols prefixed with ✨ are reserved
-sparkle                      |✨
 no-input-files               |No input files
 output-key                   |--output
 no-output-path               |No output file specified, please use the --output [file] flag.
@@ -67,13 +65,6 @@ stdlib                       |--stdlib
 minimal                      |--minimal
 module-flag                  |--module
 standard-library-filename    |standard-library.reuse
-not-defined-error            |The following identifier was not defined: 
-already-defined-error        |The following identifier was already defined: 
-no-location-information      |(No location information available)
-Line:                        |Line: 
-Column:                      |Column: 
-File:                        |File: 
-Range:                       |Range: 
 def                          |def
 typ                          |typ
 fn                           |fn

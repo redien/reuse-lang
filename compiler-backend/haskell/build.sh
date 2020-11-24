@@ -17,9 +17,12 @@ $project_root/reusec --language ocaml\
                      $project_root/argument-parser/argument-parser.reuse\
                      $project_root/compiler-frontend/local-transforms.strings\
                      $project_root/compiler-frontend/local-transforms.reuse\
+                     $project_root/compiler-frontend/error-reporting.strings\
+                     $project_root/compiler-frontend/error-strings.reuse\
+                     $project_root/compiler-frontend/error-reporting.reuse\
+                     $project_root/compiler-frontend/identifier-validation.strings\
+                     $project_root/compiler-frontend/identifier-validation.reuse\
                      $project_root/compiler-frontend/common.strings\
-                     $project_root/compiler-frontend/strings.reuse\
-                     $project_root/compiler-frontend/common.reuse\
                      $project_root/compiler-backend/shared.reuse\
                      $script_path/haskell.strings\
                      $script_path/haskell.reuse\

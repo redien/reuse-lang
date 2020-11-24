@@ -1,0 +1,11 @@
+
+(def identifier-is-reserved? (identifier)
+     (string-equal? (string-substring 0 3 (symbol-name identifier)) (data-sparkle)))
+
+(def validate-identifier (identifier)
+     (match (identifier-is-reserved? identifier)
+            True   (result-error (data-error-reserved-identifier))
+            False  (result-lift identifier)))
+
+(def validate-reserved-identifiers (definitions)
+     (result-flatmap (. result-concat (list-map (over-definition-expressions (over-identifiers validate-identifier)))) definitions))
