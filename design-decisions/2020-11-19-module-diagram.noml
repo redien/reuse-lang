@@ -9,7 +9,6 @@
 [compiler] -> [<reference> backend]
 [compiler] -> [parser]
 
-[<reference> backend] -> [local-transforms]
 [<reference> backend] -> [shared]
 [<reference> backend] -> [symbols]
 

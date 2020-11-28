@@ -246,6 +246,6 @@
 
 (def internal-symbols ()
      (add-identifiers (reserved-identifiers) -2000
-     (with-local-transform-keywords (default-identifiers))))
+     (default-identifiers)))
 
 (def perform-transformations? () True)

@@ -29,6 +29,7 @@
   - The backends will no longer need to encode identifiers since the character set is restricted.
   - Operator symbols other than built-in ones would no longer be usable
   - No unicode characters could be used
+  - Would generate more readable code
 
 - Restrict all identifiers but allow a list of standard operators that get converted into text form
 

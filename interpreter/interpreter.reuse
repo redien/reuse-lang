@@ -254,4 +254,4 @@
 (def internal-symbols ()
      (add-identifiers (list data-Some data-None data-Pair data-IterableClass data-IndexedIterator
                             data-main data-Empty data-Cons) -2000
-     (with-local-transform-keywords (default-identifiers))))
+     (default-identifiers)))

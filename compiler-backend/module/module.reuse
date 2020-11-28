@@ -6,6 +6,6 @@
         definitions))
 
 (def internal-symbols ()
-     (with-local-transform-keywords (default-identifiers)))
+     (default-identifiers))
 
 (def perform-transformations? () False)

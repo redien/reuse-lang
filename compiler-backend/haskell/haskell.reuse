@@ -270,6 +270,6 @@
 (def internal-symbols ()
      (dictionary-set (data-int32) (Pair (sym-int32) (data-int32))
      (add-identifiers (reserved-identifiers) -2000
-     (with-local-transform-keywords (default-identifiers)))))
+     (default-identifiers))))
 
 (def perform-transformations? () True)

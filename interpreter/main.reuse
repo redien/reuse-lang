@@ -33,7 +33,7 @@
             (EventReadStdin stdin state)
                 (output-result (eval state (list (box-indexed-iterator stdin))))
             (EventReadFiles source-files state)
-                (match (validate-reserved-identifiers (parse-source-files (internal-symbols) source-files))
+                (match (local-transforms (validate-reserved-identifiers (parse-source-files (with-local-transform-keywords (internal-symbols)) source-files)))
                        (Result definitions)
                             (process-definitions (definitions-to-scope definitions))
                        (Error error)
