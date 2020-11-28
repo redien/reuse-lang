@@ -8,30 +8,30 @@
 (def parser-scope-new (parent)
      (ParserScope (array-empty) parent))
 
-(def parser-scope-set' (symbol-token symbol-table-id scope)
+(def parser-scope-set' (identifier-token symbol-table-id scope)
      (match scope
             (ParserScope symbols parent)
-                (ParserScope (array-set symbol-token symbol-table-id symbols) parent)
+                (ParserScope (array-set identifier-token symbol-table-id symbols) parent)
             (ParserScopeRoot symbols)
-                (ParserScopeRoot (array-set symbol-token symbol-table-id symbols))))
+                (ParserScopeRoot (array-set identifier-token symbol-table-id symbols))))
 
-(def parser-scope-set (sym scope)
+(def parser-scope-set (identifier scope)
      (maybe-or-else scope
      (maybe-map (fn (symbol-table-id)
-                    (parser-scope-set' (symbol-token sym) symbol-table-id scope))
-          (symbol-id' sym))))
+                    (parser-scope-set' (identifier-token identifier) symbol-table-id scope))
+          (identifier-id' identifier))))
 
 (def parser-scope-set-all (syms scope)
      (list-foldl parser-scope-set scope syms))
 
-(def parser-scope-resolve (sym scope)
+(def parser-scope-resolve (identifier scope)
      (match scope
             (ParserScope symbols parent)
-                (match (array-get (symbol-token sym) symbols)
-                       None    (parser-scope-resolve sym parent)
-                       id      (symbol-with-id' id sym))
+                (match (array-get (identifier-token identifier) symbols)
+                       None    (parser-scope-resolve identifier parent)
+                       id      (identifier-with-id' id identifier))
             (ParserScopeRoot symbols)
-                (symbol-with-id' (array-get (symbol-token sym) symbols) sym)))
+                (identifier-with-id' (array-get (identifier-token identifier) symbols) identifier)))
 
 (def parser-scope-set-list (symbols scope)
      (list-foldl (pair-map parser-scope-set') scope symbols))

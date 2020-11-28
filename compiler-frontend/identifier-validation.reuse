@@ -1,12 +1,12 @@
 
 (def identifier-is-reserved? (identifier)
-     (string-equal? (string-substring 0 3 (symbol-name identifier)) (data-sparkle)))
+     (string-equal? (string-substring 0 3 (identifier-name identifier)) (data-sparkle)))
 
 (def validate-identifier (identifier)
      (match (identifier-is-reserved? identifier)
-            True   (result-error (ErrorReservedIdentifier (symbol-name identifier)
-                                                          (symbol-source-reference identifier)
-                                                          (symbol-range identifier)))
+            True   (result-error (ErrorReservedIdentifier (identifier-name identifier)
+                                                          (identifier-source-reference identifier)
+                                                          (identifier-range identifier)))
             False  (result-lift identifier)))
 
 (def validate-reserved-identifiers (definitions)

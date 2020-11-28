@@ -1,17 +1,17 @@
 
-(def sym-sparkle-x () -1000)
-(def sym-cons () -1001)
-(def sym-empty () -1002)
+(def identifier-sparkle-x () -1000)
+(def identifier-cons () -1001)
+(def identifier-empty () -1002)
 
 (def with-local-transform-keywords (dictionary)
-     (dictionary-set (data-sparkle-x) (Pair (sym-sparkle-x) (data-sparkle-x))
-     (dictionary-set (data-Cons) (Pair (sym-cons) (data-Cons))
-     (dictionary-set (data-Empty) (Pair (sym-empty) (data-Empty))
+     (dictionary-set (data-sparkle-x) (Pair (identifier-sparkle-x) (data-sparkle-x))
+     (dictionary-set (data-Cons) (Pair (identifier-cons) (data-Cons))
+     (dictionary-set (data-Empty) (Pair (identifier-empty) (data-Empty))
      dictionary))))
 
 (def expression-is-token? (token expression)
      (match expression
-            (Variable (Sym expression-token _ __ ___ ____))
+            (Variable (Identifier expression-token _ __ ___ ____))
                 (= expression-token token)
             _
                 False))
@@ -35,17 +35,17 @@
      (result-concat (list-map (transform-special-form token transformer) definitions)))
 
 (def transform-pipe (source-reference expressions range)
-     (Lambda (list (Sym (sym-sparkle-x) (data-sparkle-x) source-reference range None))
+     (Lambda (list (Identifier (identifier-sparkle-x) (data-sparkle-x) source-reference range None))
              (list-foldl (fn (expression composed)
                              (FunctionApplication (list expression composed) range))
-                         (Variable (Sym (sym-sparkle-x) (data-sparkle-x) source-reference range None))
+                         (Variable (Identifier (identifier-sparkle-x) (data-sparkle-x) source-reference range None))
                          expressions)
              range))
 
 (def transform-list (source-reference expressions range)
      (list-foldr (fn (expression composed)
-                     (Constructor (Sym (sym-cons) (data-Cons) source-reference range None) (list expression composed) range))
-                 (Constructor (Sym (sym-empty) (data-Empty) source-reference range None) Empty range)
+                     (Constructor (Identifier (identifier-cons) (data-Cons) source-reference range None) (list expression composed) range))
+                 (Constructor (Identifier (identifier-empty) (data-Empty) source-reference range None) Empty range)
                  expressions))
 
 (def transform-match-expression (expression pairs range)
@@ -61,7 +61,7 @@
 
 (def local-transforms (definitions)
      (result-bind definitions                                                         (fn (definitions)
-     (result-bind (transform-special-forms (sym-pipe) transform-pipe definitions)     (fn (definitions)
-     (result-bind (transform-special-forms (sym-list) transform-list definitions)     (fn (definitions)
+     (result-bind (transform-special-forms (identifier-pipe) transform-pipe definitions)     (fn (definitions)
+     (result-bind (transform-special-forms (identifier-list) transform-list definitions)     (fn (definitions)
      (result-bind (result-concat (list-map transform-match-expressions definitions))  (fn (definitions)
      (result-return definitions))))))))))

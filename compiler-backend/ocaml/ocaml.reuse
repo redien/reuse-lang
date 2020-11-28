@@ -1,6 +1,6 @@
 
 (def prefix-type-variable (identifier)
-     (string-prepend 39 (string-prepend 84 (symbol-name identifier))))
+     (string-prepend 39 (string-prepend 84 (identifier-name identifier))))
 
 (def prefix-constructor (constructor)
      (string-prepend 67 constructor))
@@ -18,9 +18,9 @@
      (and (<= token -2000) (> token -3000)))
 
 (def escape-identifier (identifier)
-     (match (token-is-reserved? (symbol-token identifier))
-            True   (string-prepend 95 (symbol-name identifier))
-            False  (string-flatmap escape-char (symbol-name identifier))))
+     (match (token-is-reserved? (identifier-token identifier))
+            True   (string-prepend 95 (identifier-name identifier))
+            False  (string-flatmap escape-char (identifier-name identifier))))
 
 (def operator-translation-map ()
      (dictionary-of (list
@@ -32,8 +32,8 @@
         (Pair (data-&) (data-int32-and)))))
 
 (def translate-identifier (identifier)
-     (match (token-is-operator? (symbol-token identifier))
-            True   (match (dictionary-get (symbol-name identifier) (operator-translation-map))
+     (match (token-is-operator? (identifier-token identifier))
+            True   (match (dictionary-get (identifier-name identifier) (operator-translation-map))
                           (Some translation)  translation
                           None                (escape-identifier identifier))
             False  (escape-identifier identifier)))
@@ -70,14 +70,14 @@
 
 (def translate-pattern (pattern)
      (match pattern
-            (Capture sym)
-                (escape-identifier sym)
+            (Capture identifier)
+                (escape-identifier identifier)
             (IntegerPattern integer _)
                 (join (list (string-from-int32 integer) (string-of-char 108)))
-            (ConstructorPattern sym Empty _)
-                (prefix-constructor (escape-identifier sym))
-            (ConstructorPattern sym patterns _)
-                ((translate-constructor translate-pattern sym) patterns)))
+            (ConstructorPattern identifier Empty _)
+                (prefix-constructor (escape-identifier identifier))
+            (ConstructorPattern identifier patterns _)
+                ((translate-constructor translate-pattern identifier) patterns)))
 
 (def translate-rule (translate-expression rule)
      (match rule
@@ -102,8 +102,8 @@
 
 (def translate-function-application (translate-expression expressions)
      (match expressions
-            (Cons (Variable sym) rest)
-                    (match (= (symbol-token sym) (sym-int32-less-than))
+            (Cons (Variable identifier) rest)
+                    (match (= (identifier-token identifier) (identifier-int32-less-than))
                            True  (translate-less-than translate-expression rest)
                            False (translate-function-application' translate-expression expressions))
             _
@@ -125,16 +125,16 @@
      (match expression
             (Lambda arguments expression _)
                 (wrap-in-brackets (translate-lambda translate-expression arguments expression))
-            (Constructor sym Empty _)
-                (prefix-constructor (escape-identifier sym))
-            (Constructor sym expressions _)
-                ((translate-constructor translate-expression sym) expressions)
+            (Constructor identifier Empty _)
+                (prefix-constructor (escape-identifier identifier))
+            (Constructor identifier expressions _)
+                ((translate-constructor translate-expression identifier) expressions)
             (FunctionApplication expressions _)
                 (wrap-in-brackets (translate-function-application translate-expression expressions))
             (IntegerConstant integer _)
                 (wrap-in-brackets (string-concat (string-from-int32 integer) (string-of-char 108)))
-            (Variable sym)
-                (translate-identifier sym)
+            (Variable identifier)
+                (translate-identifier identifier)
             (Match expression rules _)
                 (wrap-in-brackets ((translate-match-expression translate-expression expression) rules))))
 
@@ -146,7 +146,7 @@
                  (data-definition-end))))
 
 (def translate-simple-type (identifier parameters)
-     (match (list-any? (. (symbol-equal? identifier) type-parameter-symbol) parameters)
+     (match (list-any? (. (identifier-equal? identifier) type-parameter-identifier) parameters)
             False  (escape-identifier identifier)
             True   (prefix-type-variable identifier)))
 
@@ -166,10 +166,10 @@
 
 (def translate-type (translate-types parameters type)
      (match type
-            (SimpleType sym)
-                (translate-simple-type sym parameters)
-            (ComplexType sym types _)
-                (translate-complex-types translate-types sym types)
+            (SimpleType identifier)
+                (translate-simple-type identifier parameters)
+            (ComplexType identifier types _)
+                (translate-complex-types translate-types identifier types)
             (FunctionType argument-types return-type _)
                 (translate-function-type translate-types return-type argument-types)))
 
@@ -187,10 +187,10 @@
 
 (def translate-constructor-definition (type parameters constructor)
      (match constructor
-            (SimpleConstructor sym)
-                (prefix-constructor (escape-identifier sym))
-            (ComplexConstructor sym types _)
-                (translate-complex-constructor-definition sym type types parameters)))
+            (SimpleConstructor identifier)
+                (prefix-constructor (escape-identifier identifier))
+            (ComplexConstructor identifier types _)
+                (translate-complex-constructor-definition identifier type types parameters)))
 
 (def translate-constructor-definitions (type parameters constructors)
      ((pipe (list-map (translate-constructor-definition type parameters))
@@ -199,8 +199,8 @@
 
 (def translate-type-parameter-for-definition (parameter)
      (match parameter
-            (UniversalParameter sym)
-                (prefix-type-variable sym)
+            (UniversalParameter identifier)
+                (prefix-type-variable identifier)
             (ExistentialParameter _)
                 (string-empty)))
 

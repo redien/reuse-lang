@@ -227,17 +227,17 @@ type parse-error
      ParseErrorTooFewClosingBrackets
      ParseErrorTooManyClosingBrackets
 
-func symbol-range start end
+func identifier-range start end
      Range (indexed-iterator-index start) (indexed-iterator-index end)
 
 func parse-symbol iterator end next
      case string-collect-from-indexed-iterator atom-character? iterator
           Pair next-iterator name ->
                case string-to-int32 name
-                    Some integer ->  next next-iterator (Integer integer (symbol-range iterator next-iterator))
+                    Some integer ->  next next-iterator (Integer integer (identifier-range iterator next-iterator))
                     None         ->
                case string-empty? name
-                    False ->  next next-iterator (Symbol name (symbol-range iterator next-iterator))
+                    False ->  next next-iterator (Symbol name (identifier-range iterator next-iterator))
                     True  ->  end iterator
 
 ...

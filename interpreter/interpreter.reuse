@@ -6,9 +6,9 @@
 (def sequence (xs) (result-concat xs))
 (def map (f xs) (result-map f xs))
 
-(def sym-main () -2005)
-(def sym-Empty () -2006)
-(def sym-Cons () -2007)
+(def identifier-main () -2005)
+(def identifier-Empty () -2006)
+(def identifier-Cons () -2007)
 
 (def eval-error ()
      (Error (data-error-generic)))
@@ -18,7 +18,7 @@
             (Pair (ValueInteger a) (IntegerPattern b _2))
                 (= a b)
             (Pair (ValueConstructor token name values) (ConstructorPattern pattern-symbol patterns _2))
-                (and (= token (symbol-token pattern-symbol))
+                (and (= token (identifier-token pattern-symbol))
                      (list-every? (pair-map pattern-matches-value) (list-zip values patterns)))
             (Pair _1 (Capture _2))
                 True
@@ -31,8 +31,8 @@
                 Empty
             (Pair (ValueConstructor _1 _2 values) (ConstructorPattern _3 patterns _4))
                 (list-flatmap case-capture (list-zip values patterns))
-            (Pair value (Capture sym))
-                (list (Pair (symbol-token sym) value))
+            (Pair value (Capture identifier))
+                (list (Pair (identifier-token identifier) value))
             _
                 Empty))
 
@@ -98,9 +98,9 @@
             True
                 (return (ValueClosure (list-skip (list-size values) arguments)
                                       expression
-                                      (scope-add (list-zip (list-map symbol-token arguments) values) scope)))
+                                      (scope-add (list-zip (list-map identifier-token arguments) values) scope)))
             False
-                (eval-expression (scope-add (list-zip (list-map symbol-token arguments) values) scope)
+                (eval-expression (scope-add (list-zip (list-map identifier-token arguments) values) scope)
                                  stack-trace
                                  expression)))
 
@@ -129,22 +129,22 @@
      (match expression
             (IntegerConstant value _)
                 (return (ValueInteger value))
-            (Variable sym)
-                (match (scope-get (symbol-token sym) scope)
+            (Variable identifier)
+                (match (scope-get (identifier-token identifier) scope)
                        (Some value)
                             (return value)
                        None
                             (Error (string-join (string-empty)
                                                 (list (data-error-no-symbol)
                                                       (data-space)
-                                                      (symbol-name sym)
+                                                      (identifier-name identifier)
                                                       (string-of-char 10)
                                                       (data-error-stack-trace)
                                                       (string-of-char 10)
                                                       (render-stack-trace stack-trace)))))
-            (Constructor sym arguments _)
+            (Constructor identifier arguments _)
                 (bind (sequence (list-map (eval-expression scope stack-trace) arguments)) (fn (values)
-                (return (ValueConstructor (symbol-token sym) (symbol-name sym) values))))
+                (return (ValueConstructor (identifier-token identifier) (identifier-name identifier) values))))
             (Lambda arguments expression _)
                 (return (ValueClosure arguments expression scope))
             (FunctionApplication expressions _)
@@ -170,39 +170,39 @@
 (def eval-list' (values)
      (match values
             Empty
-                (ValueConstructor (sym-Empty) (data-Empty) Empty)
+                (ValueConstructor (identifier-Empty) (data-Empty) Empty)
             (Cons value rest)
-                (ValueConstructor (sym-Cons) (data-Cons) (list value (eval-list' rest)))))
+                (ValueConstructor (identifier-Cons) (data-Cons) (list value (eval-list' rest)))))
 
 (def eval-list (scope stack-trace values)
      (return (eval-list' values)))
 
 (def eval (scope values)
-     (match (scope-get (sym-main) scope)
+     (match (scope-get (identifier-main) scope)
             (Some (ValueFunction arguments expression))
-                (eval-expression (scope-add (list-zip (list-map symbol-token arguments) values) scope)
+                (eval-expression (scope-add (list-zip (list-map identifier-token arguments) values) scope)
                                  Empty
                                  expression)
             _
                 (eval-error)))
 
 (def add-intrinsics (scope)
-     (scope-add (list (Pair (sym-+)                (ValueIntrinsic (eval-int32-operator +)))
-                      (Pair (sym--)                (ValueIntrinsic (eval-int32-operator -)))
-                      (Pair (sym-*)                (ValueIntrinsic (eval-int32-operator *)))
-                      (Pair (sym-/)                (ValueIntrinsic (eval-int32-operator /)))
-                      (Pair (sym-%)                (ValueIntrinsic (eval-int32-operator %)))
-                      (Pair (sym-&)                (ValueIntrinsic (eval-int32-operator &)))
-                      (Pair (sym-int32-less-than)  (ValueIntrinsic eval-int32-less-than))
-                      (Pair (sym-pipe)             (ValueIntrinsic eval-pipe))
-                      (Pair (sym-list)             (ValueIntrinsic eval-list)))
+     (scope-add (list (Pair (identifier-+)                (ValueIntrinsic (eval-int32-operator +)))
+                      (Pair (identifier--)                (ValueIntrinsic (eval-int32-operator -)))
+                      (Pair (identifier-*)                (ValueIntrinsic (eval-int32-operator *)))
+                      (Pair (identifier-/)                (ValueIntrinsic (eval-int32-operator /)))
+                      (Pair (identifier-%)                (ValueIntrinsic (eval-int32-operator %)))
+                      (Pair (identifier-&)                (ValueIntrinsic (eval-int32-operator &)))
+                      (Pair (identifier-int32-less-than)  (ValueIntrinsic eval-int32-less-than))
+                      (Pair (identifier-pipe)             (ValueIntrinsic eval-pipe))
+                      (Pair (identifier-list)             (ValueIntrinsic eval-list)))
                 scope))
 
 (def definitions-to-scope (definitions)
      (scope-add-definitions definitions (add-intrinsics (scope-empty))))
 
 (def main-takes-argument (scope)
-     (match (scope-get (sym-main) scope)
+     (match (scope-get (identifier-main) scope)
             (Some (ValueFunction (Cons _ __) ___))
                 True
             _

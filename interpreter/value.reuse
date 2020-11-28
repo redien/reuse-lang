@@ -2,8 +2,8 @@
 (typ (value expression scope iterable)
      (ValueInteger int32)
      (ValueConstructor int32 string (list (value expression scope iterable)))
-     (ValueClosure (list ast-sym) expression scope)
-     (ValueFunction (list ast-sym) expression)
+     (ValueClosure (list identifier) expression scope)
+     (ValueFunction (list identifier) expression)
      (ValueIntrinsic (fn (scope (list string) (list (value expression scope iterable))) (result (value expression scope iterable) string)))
      (ValueNativeIterator iterable))
 
@@ -12,7 +12,7 @@
             list-from
             stringify-sexps
             (string-concat (data-space))
-            (string-concat (wrap-in-brackets (string-join (data-space) (list-map symbol-name arguments))))
+            (string-concat (wrap-in-brackets (string-join (data-space) (list-map identifier-name arguments))))
             (string-concat (data-space))
             (string-concat (data-fn))
             wrap-in-brackets)

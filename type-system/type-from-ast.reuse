@@ -13,23 +13,23 @@
 
 (def type-from-ast-type (parameters ast-type)
      (match ast-type
-            (SimpleType sym)
-                        (match (lookup-type-parameter (symbol-name sym) parameters)
+            (SimpleType identifier)
+                        (match (lookup-type-parameter (identifier-name identifier) parameters)
                                (Some type)  type
-                               None         (ConstType (symbol-name sym) Empty))
+                               None         (ConstType (identifier-name identifier) Empty))
             (ComplexType name ast-types _)               (ConstType name (list-map (type-from-ast-type parameters) ast-types))
             (FunctionType argument-types return-type _)  (FnType (list-map (type-from-ast-type parameters) argument-types)
                                                                  (type-from-ast-type parameters return-type))))
 
 (def type-from-constructor (return-type parameters constructor)
      (match constructor
-            (SimpleConstructor sym)               (Pair (symbol-name sym) (FnType Empty return-type))
-            (ComplexConstructor sym ast-types _)  (Pair (symbol-name sym) (FnType (list-map (type-from-ast-type parameters) ast-types) return-type))))
+            (SimpleConstructor identifier)               (Pair (identifier-name identifier) (FnType Empty return-type))
+            (ComplexConstructor identifier ast-types _)  (Pair (identifier-name identifier) (FnType (list-map (type-from-ast-type parameters) ast-types) return-type))))
 
 (def type-from-parameter (parameter)
      (match parameter
-            (UniversalParameter sym)    (UniversalType (symbol-name sym))
-            (ExistentialParameter sym)  (ExistentialType (symbol-name sym))))
+            (UniversalParameter identifier)    (UniversalType (identifier-name identifier))
+            (ExistentialParameter identifier)  (ExistentialType (identifier-name identifier))))
 
 (def types-from-constructors (name parameters constructors)
      (list-map (type-from-constructor (ConstType name parameters) parameters) constructors))
