@@ -1,6 +1,6 @@
 # Problem
 
-- Currently there's an initial parsing step that produces a tree of s-expressions and a table of token ids to strings. This abstraction provides little value but increases the conceptual complexity of the compiler.
+- Currently there's an initial parsing step that produces a tree of s-expressions and a table of token ids to strings. This abstraction provides little value but increases the conceptual complexity of the compiler. It was implemented as an optimization to remove string comparisons.
 - Since the host language can more efficiently split an input string into substrings we would like to extract this part.
 
 # Changes
@@ -30,5 +30,5 @@
 - Optimize string operations and write the parser completely in Reuse
 
   - The most portable solution.
-  - Additional language primitives are needed to reduce allocations when working with strings.
+  - Additional language primitives are needed to reduce allocations when building substrings.
   - The tokenizer could always be rewritten in reuse if the allocation issues are solved.
