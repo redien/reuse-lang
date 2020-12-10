@@ -1,6 +1,7 @@
-import Data.Int
-import Prelude hiding (not, and, or, mod)
-import Data.Bits
+import Data.Int (Int32)
+import qualified Prelude
+import Prelude ((+), (*), (-), (<))
+import Data.Bits ((.&.))
 _int32_add :: Int32 -> Int32 -> Int32
 _int32_add a b = a + b
 

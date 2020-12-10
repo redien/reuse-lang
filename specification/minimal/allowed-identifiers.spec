@@ -247,6 +247,13 @@ Should allow commonly reserved words as variable names
 > (hiding' 10 hiding)
 = 10
 
+| (typ id MyEmpty)
+| (typ (mytype id) (MyCons id))
+| (def id () 1)
+| (def id' (id _) id)
+> (id' 10 id)
+= 10
+
 | (typ if MyEmpty)
 | (typ (mytype if) (MyCons if))
 | (def if () 1)
@@ -492,6 +499,13 @@ Should allow commonly reserved words as variable names
 > (rec' 10 rec)
 = 10
 
+| (typ rem MyEmpty)
+| (typ (mytype rem) (MyCons rem))
+| (def rem () 1)
+| (def rem' (rem _) rem)
+> (rem' 10 rem)
+= 10
+
 | (typ sig MyEmpty)
 | (typ (mytype sig) (MyCons sig))
 | (def sig () 1)
@@ -595,6 +609,13 @@ Should allow commonly reserved words as variable names
 | (def where () 1)
 | (def where' (where _) where)
 > (where' 10 where)
+= 10
+
+| (typ quot MyEmpty)
+| (typ (mytype quot) (MyCons quot))
+| (def quot () 1)
+| (def quot' (quot _) quot)
+> (quot' 10 quot)
 = 10
 
 Type names should be allowed as capture variables

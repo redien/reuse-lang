@@ -12,8 +12,8 @@ Int32               |Int32
 int32-plus          |_int32_add
 int32-multiply      |_int32_mul
 int32-minus         |_int32_sub
-int32-divide        |quot
-int32-modulus       |rem
+int32-divide        |Prelude.quot
+int32-modulus       |Prelude.rem
 int32-and           |_int32_and
 cempty              |CEmpty
 ccons               |CCons
