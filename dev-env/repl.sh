@@ -22,27 +22,29 @@ do
     esac
 done
 
-eval_reuse() {
-    echo "(def reuse-main (_) $1)" > $build_dir/repl.reuse
+program=''
 
-    $project_root/reusec --language ocaml\
-                         --output $build_dir/repl.ml\
-                         --stdlib false\
-                         $additional_sources\
-                         $build_dir/repl.reuse
+eval_reuse() {
+    local input="$1"
+    local new_program="$program"
+
+    if [[ "${input:0:5}" == "(def " || "${input:0:9}" == "(pub def " ||
+          "${input:0:5}" == "(typ " || "${input:0:9}" == "(pub typ " ]]; then
+        new_program="$program $input"
+        echo "$new_program (def reuse-main () 1)" > $build_dir/repl.reuse
+        $project_root/generated/interpreter/interpreter $build_dir/repl.reuse > /dev/null
+    else
+        echo "$program (def reuse-main () $input)" > $build_dir/repl.reuse
+        $project_root/generated/interpreter/interpreter $build_dir/repl.reuse
+    fi
 
     if [ "$?" != "0" ]; then
         echo
-        cleanup
         return
+    else
+        echo
+        program="$new_program"
     fi
-
-    $project_root/compiler-backend/ocaml/compile-stdin-test.sh $build_dir repl.ml repl.out
-    if [ -e "$build_dir/repl.out" ]; then
-        echo "" | $build_dir/repl.out
-        printf "\n"
-    fi
-    cleanup
 }
 
 printf "Reuse REPL\n"
