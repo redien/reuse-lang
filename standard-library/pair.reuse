@@ -16,6 +16,10 @@
      (match pair
             (Pair x y)  (f x y)))
 
+(pub def pair-bimap (f g pair)
+     (match pair
+            (Pair x y)  (Pair (f x) (g y))))
+
 (pub def pair-map-left (f pair)
      (match pair
             (Pair x y)  (Pair (f x) y)))

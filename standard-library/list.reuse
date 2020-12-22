@@ -1,15 +1,21 @@
 (pub typ (list a) (Cons a (list a)) Empty)
 
+(pub def list-empty ()
+     Empty)
+
 (pub def list-cons (x xs)
      (Cons x xs))
 
 (pub def list-from (x)
      (Cons x Empty))
 
-(pub def list-from-range (from _to)
-     (match (< from _to)
-            True   (Cons from (list-from-range (+ from 1) _to))
-            False  Empty))
+(def list-from-range' (from to rest)
+     (match (> to from)
+            True   (list-from-range' from (- to 1) (Cons (- to 1) rest))
+            False  rest))
+
+(pub def list-from-range (from to)
+     (list-from-range' from to Empty))
 
 (pub def list-first (list)
      (match list
