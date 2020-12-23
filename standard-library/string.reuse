@@ -207,9 +207,12 @@
      (list-foldl string-append (string-empty) list))
 
 (pub def string-skip (count string)
+     (match string
+            FTEmpty  FTEmpty
+            _
      (match (> count 0)
             True   (string-skip (- count 1) (string-rest string))
-            False  string))
+            False  string)))
 
 (def string-take' (count string taken)
      (match (> count 0)

@@ -102,6 +102,9 @@ string-prepend & string-append
 
 
 string-rest
+> (string-rest (string-prepend 65 (string-empty)))
+= 
+
 > (string-rest (string-append 67 (string-append 66 (string-append 65 (string-empty)))))
 = BC
 
