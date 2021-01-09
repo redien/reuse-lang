@@ -45,6 +45,50 @@
                       True   (array-get x b)
                       False  (Some value)))))
 
+(def array-min (array default)
+     (match array
+            ArrayEmpty
+               default
+            (ArrayTree _ ArrayEmpty y __)
+               y
+            (ArrayTree _ a __ ___)
+               (array-min a default)))
+
+(def array-remove-min (array)
+     (match array
+            ArrayEmpty
+               ArrayEmpty
+            (ArrayTree _ ArrayEmpty y b)
+               b
+            (ArrayTree color a y b)
+               (array-balance' (ArrayTree color (array-remove-min a) y b))))
+
+(def array-remove-root (array)
+     (match array
+            (ArrayTree _ ArrayEmpty y ArrayEmpty)
+               ArrayEmpty
+            (ArrayTree _ a y ArrayEmpty)
+               a
+            (ArrayTree _ ArrayEmpty y b)
+               b
+            (ArrayTree color a y b)
+               (array-balance' (ArrayTree color a (array-min b y) (array-remove-min b)))))
+
+(def array-remove' (x array)
+     (match array
+            ArrayEmpty
+               ArrayEmpty
+            (ArrayTree color a y b)
+               (match (< x (pair-left y))
+                      True   (array-balance' (ArrayTree color (array-remove' x a) y b))
+                      False
+               (match (> x (pair-left y))
+                      True   (array-balance' (ArrayTree color a y (array-remove' x b)))
+                      False  (array-remove-root array)))))
+
+(pub def array-remove (x array)
+     (array-make-black' (array-remove' x array)))
+
 (pub def array-entries (array)
      (match array
             ArrayEmpty
