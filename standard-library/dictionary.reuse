@@ -4,7 +4,7 @@
 (pub def dictionary-empty () (Dictionary (array-empty)))
 
 (def dictionary-bucket-from-key (key)
-     (% (string-foldl (fn (c h) (+ (* h 33) c)) 5381 key) 100000))
+     (string-foldl (fn (c h) (+ (* h 33) c)) 5381 key))
 
 (pub def dictionary-set (key new-value dictionary)
      (match dictionary
