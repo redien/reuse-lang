@@ -1,53 +1,53 @@
 
-(typ (dictionary value) (TrieNode (maybe value) (array (dictionary value))))
+(typ (dictionary value) (Dictionary (array (list (pair string value)))))
 
-(pub def dictionary-empty () (TrieNode None (array-empty)))
+(pub def dictionary-empty () (Dictionary (array-empty)))
 
-(def dictionary-value' (dictionary)
-     (match dictionary
-            (TrieNode value _) value))
-
-(def dictionary-children' (dictionary)
-     (match dictionary
-            (TrieNode _ children) children))
-
-(def dictionary-find-child' (char dictionary)
-     (array-get char (dictionary-children' dictionary)))
+(def dictionary-bucket-from-key (key)
+     (% (string-foldl (fn (c h) (+ (* h 33) c)) 5381 key) 100000))
 
 (pub def dictionary-set (key new-value dictionary)
-     (match (string-first key)
+     (match dictionary
+            (Dictionary array)
+     (match (dictionary-bucket-from-key key)
+            bucket-id
+     (match (array-get bucket-id array)
+            (Some bucket)
+                (match (list-filter (fn (entry) (not (string-equal? (pair-left entry) key))) bucket)
+                       new-bucket
+                           (Dictionary (array-set bucket-id (Cons (Pair key new-value) new-bucket) array)))
             None
-                (TrieNode (Some new-value) (dictionary-children' dictionary))
-            (Some char)
-                ((pipe (dictionary-find-child' char)
-                       (maybe-else dictionary-empty)
-                       (dictionary-set (string-rest key) new-value)
-                       (fn (child)
-                           (TrieNode (dictionary-value' dictionary) (array-set char child (dictionary-children' dictionary)))))
-                    dictionary)))
+                (Dictionary (array-set bucket-id (list (Pair key new-value)) array))))))
 
 (pub def dictionary-get (key dictionary)
-     (match (string-first key)
-            (Some char)
-                (maybe-flatmap (dictionary-get (string-rest key)) (dictionary-find-child' char dictionary))
+     (match dictionary
+            (Dictionary array)
+     (match (dictionary-bucket-from-key key)
+            bucket-id
+     (match (array-get bucket-id array)
+            (Some bucket)
+                (maybe-map pair-right (list-find-first (fn (entry) (string-equal? (pair-left entry) key)) bucket))
             None
-                (dictionary-value' dictionary)))
+                None))))
 
-(def dictionary-entries' (key dictionary)
-     ((pipe dictionary-children'
-            array-entries
-            (list-flatmap (fn (child)
-                              (dictionary-entries' (string-append (pair-left child) key) (pair-right child))))
-            (fn (entries)
-                (match (dictionary-value' dictionary)
-                       (Some value)
-                            (Cons (Pair key value) entries)
-                       None
-                            entries)))
-        dictionary))
+(pub def dictionary-remove (key dictionary)
+     (match dictionary
+            (Dictionary array)
+     (match (dictionary-bucket-from-key key)
+            bucket-id
+     (match (array-get bucket-id array)
+            (Some bucket)
+                (match (list-filter (fn (entry) (not (string-equal? (pair-left entry) key))) bucket)
+                       new-bucket
+                           (Dictionary (array-set bucket-id new-bucket array)))
+            None
+                dictionary))))
 
-(pub def dictionary-entries (dictionary)
-     (dictionary-entries' (string-empty) dictionary))
+(def dictionary-entries (dictionary)
+     (match dictionary
+            (Dictionary array)
+               (list-flatten (list-map pair-right (array-entries array)))))
+
 
 (pub def dictionary-of (entries)
      (list-foldl (pair-map dictionary-set) (dictionary-empty) entries))
