@@ -1,0 +1,54 @@
+#ranker: longest-path
+
+// The global symbol table contains symbols defined by the language.
+// But it behaves just like other modules.
+[<table> global-symbol-table |
+    0 | +    | definition ||
+    1 | -    | definition ||
+    2 | /    | definition ||
+    3 | *    | definition ]
+
+[<table> global-symbols |
+    0 | +    ||
+    1 | -    ||
+    2 | /    ||
+    3 | *    ]
+
+// The standard library is implemented as a module.
+[<table> stdlib-symbol-table |
+    0 | list-map     | definition ||
+    1 | list-foldr   | definition ||
+    2 | list-reverse | definition ]
+
+[<table> stdlib-symbols |
+    0 | list-map     ||
+    1 | list-foldr   ||
+    2 | list-reverse ]
+
+// The main program is also a module and references symbols from other
+// modules. When parsing, a symbol is assigned a number and is then used for all uses
+// of that same symbol. They can therefore be compared directly within the same module.
+// If the definition is found inside the module it is directly referenced.
+// The symbols not found inside the module are assigned a placeholder entry.
+// After parsing, the symbol tables mutually resolve symbols among themselves.
+[<table> main-symbol-table |
+    0 | exp          | definition ||
+    1 | -            | global:1   ||
+    2 | *            | global:3   ||
+    3 | sort         | definition ||
+    4 | list-foldr   | stdlib:1   ||
+    5 | main         | definition ]
+
+[<table> main-symbols |
+    0 | exp          ||
+    1 | -            ||
+    2 | *            ||
+    3 | sort         ||
+    4 | list-foldr   ||
+    5 | main         ]
+
+[global-symbols] --> [global-symbol-table]
+[main-symbols] --> [main-symbol-table]
+[main-symbol-table] -> [global-symbol-table]
+[main-symbol-table] -> [stdlib-symbol-table]
+[stdlib-symbols] --> [stdlib-symbol-table]
