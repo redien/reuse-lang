@@ -6,8 +6,6 @@ project_root=$($script_path/../../dev-env/builddir.sh measure-repo)
 
 build_dir=$($project_root/dev-env/builddir.sh stdlib-dictionary-perf)
 
-rm $build_dir/*
-
 # We just want the standard library for testing so compile an empty source file
 echo "" > $build_dir/empty-source.reuse
 $project_root/bin/reuse-ocaml --output $build_dir/Reuse.ml \
