@@ -58,6 +58,7 @@ test_commits() {
         run_test 'stdlib-dictionary-set' "$commit" 'stdlib-dictionary/time.sh DictionarySet'
         run_test 'stdlib-dictionary-set-duplicate' "$commit" 'stdlib-dictionary/time.sh DictionarySetDuplicate'
         run_test 'stdlib-dictionary-get' "$commit" 'stdlib-dictionary/time.sh DictionaryGet'
+        run_test 'stdlib-dictionary-get-missing' "$commit" 'stdlib-dictionary/time.sh DictionaryGetMissing'
     done
 }
 
