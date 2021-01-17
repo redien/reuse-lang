@@ -35,8 +35,17 @@ format_time() {
     cd $working_dir
 }
 
+run_test() {
+    echo "Running test for $1..." >&2
+    time_result=$($script_path/$3)
+    if [ "$?" == "0" ]; then
+        format_time $1 $2 $time_result
+        format_time $1 $2 $time_result >&2
+    fi
+}
+
 test_commits() {
-    for commit in $2; do
+    for commit in $1; do
         checkout_commit $commit
         echo Building compiler... >&2
         $repo_dir/build.sh >&2
@@ -44,18 +53,13 @@ test_commits() {
             continue
         fi
 
-        echo Running test... >&2
-        time_result=$($script_path/$3)
-        if [ "$?" != "0" ]; then
-            continue
-        fi
-        format_time $1 $commit $time_result
-        format_time $1 $commit $time_result >&2
+        run_test 'sexp-parser' "$commit" 'sexp-parser/time-sexp-parser.sh'
+        run_test 'ocaml-compiler' "$commit" 'ocaml-compiler/time.sh'
     done
 }
 
 clone_repo
 echo Test,Date,Commit,Commit Message,Time \(s\) > $build_dir/report.csv
-test_commits 'sexp-parser' "$(list_commits 50)" 'sexp-parser/time-sexp-parser.sh' | tac >> $build_dir/report.csv
+test_commits "$(list_commits 50)" | tac >> $build_dir/report.csv
 
 echo Wrote report to \'$build_dir/report.csv\'
