@@ -1,4 +1,7 @@
 
+let length_of_keys = int_of_string (Array.get Sys.argv 1);;
+let number_of_keys = int_of_string (Array.get Sys.argv 2);;
+
 let random_string n =
   let buffer = Buffer.create n in
   for i = 1 to n do
@@ -26,8 +29,6 @@ let rec dictionary_get_keys keys i dict =
   else
     dict;;
 
-let number_of_keys = 10000;;
-let length_of_keys = 10;;
 let keys = random_strings number_of_keys length_of_keys;;
 let dict = dictionary_set_keys keys (number_of_keys - 1) (Reuse.dictionary_45empty ());;
 

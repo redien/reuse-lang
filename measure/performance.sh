@@ -55,10 +55,10 @@ test_commits() {
 
         run_test 'sexp-parser' "$commit" 'sexp-parser/time-sexp-parser.sh'
         run_test 'ocaml-compiler' "$commit" 'ocaml-compiler/time.sh'
-        run_test 'stdlib-dictionary-set' "$commit" 'stdlib-dictionary/time.sh DictionarySet'
-        run_test 'stdlib-dictionary-set-duplicate' "$commit" 'stdlib-dictionary/time.sh DictionarySetDuplicate'
-        run_test 'stdlib-dictionary-get' "$commit" 'stdlib-dictionary/time.sh DictionaryGet'
-        run_test 'stdlib-dictionary-get-missing' "$commit" 'stdlib-dictionary/time.sh DictionaryGetMissing'
+        run_test 'stdlib-dictionary-set' "$commit" 'stdlib-dictionary/time.sh DictionarySet 10 10000'
+        run_test 'stdlib-dictionary-set-duplicate' "$commit" 'stdlib-dictionary/time.sh DictionarySetDuplicate 10 1000'
+        run_test 'stdlib-dictionary-get' "$commit" 'stdlib-dictionary/time.sh DictionaryGet 10 10000'
+        run_test 'stdlib-dictionary-get-missing' "$commit" 'stdlib-dictionary/time.sh DictionaryGetMissing 10 10000'
     done
 }
 

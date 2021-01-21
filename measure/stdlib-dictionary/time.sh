@@ -19,4 +19,4 @@ ocamlopt unix.cmxa \
          "$build_dir/$1.ml" \
          -o "$build_dir/$1"
 
-$build_dir/$1
+$build_dir/$1 $2 $3
