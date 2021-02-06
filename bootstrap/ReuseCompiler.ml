@@ -1,4 +1,20 @@
-
+type _slice = bytes;;
+let slice_45empty x = Bytes.empty;;
+let slice_45of x = if x >= 0l && x < 256l then Bytes.make 1 (Char.chr (Int32.to_int x)) else Bytes.make 1 (Char.chr 0);;
+let slice_45size slice = Int32.of_int (Bytes.length slice);;
+let slice_45get slice index =
+    if index >= 0l && index < (slice_45size slice) then
+        Int32.of_int (Char.code (Bytes.get slice (Int32.to_int index)))
+    else
+        0l ;;
+let slice_45concat a b = Bytes.concat (Bytes.empty) [a; b];;
+let slice_45foldl f ys xs =
+    let rec slice_foldl i f ys xs =
+        if i < Bytes.length xs then
+            slice_foldl (i + 1) f (f (Int32.of_int (Char.code (Bytes.get xs i))) ys) xs
+        else
+            ys in
+    slice_foldl 0 f ys xs;;
 let rec id = fun x -> x;;
 let rec const = fun a b -> a;;
 let rec flip = fun f -> (fun b a -> (f a b));;
@@ -126,6 +142,10 @@ let rec string_45to_45int32 = fun string -> (string_45to_45int32_39 (string_45to
 let rec string_45from_45int32_39_39 = fun integer string -> (match (_62 integer (9l)) with CTrue -> (string_45from_45int32_39_39 (Int32.div integer (10l)) (CCons ((Int32.add (Int32.rem integer (10l)) (48l)),string))) | CFalse -> (CCons ((Int32.add integer (48l)),string)));;
 let rec string_45from_45int32_39 = fun integer -> (match (_60 integer (0l)) with CTrue -> (match (_61 integer (-2147483648l)) with CTrue -> (CCons ((45l),(CCons ((50l),(CCons ((49l),(CCons ((52l),(CCons ((55l),(CCons ((52l),(CCons ((56l),(CCons ((51l),(CCons ((54l),(CCons ((52l),(CCons ((56l),CEmpty)))))))))))))))))))))) | CFalse -> (CCons ((45l),(string_45from_45int32_39 (Int32.mul integer (-1l)))))) | CFalse -> (string_45from_45int32_39_39 integer CEmpty));;
 let rec string_45from_45int32 = fun integer -> (string_45from_45list (string_45from_45int32_39 integer));;
+let rec string_45collect_45from_45slice_39 = fun predicate index _slice initial -> (match (_60 index (slice_45size _slice)) with CFalse -> (CPair (index,initial)) | CTrue -> (match (predicate (slice_45get _slice index)) with CTrue -> (string_45collect_45from_45slice_39 predicate (Int32.add index (1l)) _slice (string_45append (slice_45get _slice index) initial)) | CFalse -> (CPair (index,initial))));;
+let rec string_45collect_45from_45slice = fun predicate index _slice -> (string_45collect_45from_45slice_39 predicate index _slice (string_45empty ()));;
+let rec string_45to_45slice = fun string -> (string_45foldl (fun c _slice -> (slice_45concat _slice (slice_45of c))) (slice_45empty ()) string);;
+let rec string_45from_45slice = fun _slice -> (slice_45foldl string_45append (string_45empty ()) _slice);;
 let rec string_45collect_45from_45indexed_45iterator_39 = fun predicate iterator initial -> (match (indexed_45iterator_45next iterator) with (CPair (CNone,_95)) -> (CPair (iterator,initial)) | (CPair ((CSome (x)),next)) -> (match (predicate x) with CTrue -> (string_45collect_45from_45indexed_45iterator_39 predicate next (string_45append x initial)) | CFalse -> (CPair (iterator,initial))));;
 let rec string_45collect_45from_45indexed_45iterator = fun predicate iterator -> (string_45collect_45from_45indexed_45iterator_39 predicate iterator (string_45empty ()));;
 let rec string_45from_45indexed_45iterator = fun iterator -> (pair_45right (string_45collect_45from_45indexed_45iterator (fun _95 -> CTrue) iterator));;
@@ -181,7 +201,7 @@ let rec array_45singleton = fun index _value -> (CArrayTree (CArrayBlack,CArrayE
 let rec array_45get_45or = fun index default array -> (match (array_45get index array) with (CSome (_value)) -> _value | CNone -> default);;
 type ('Tvalue) dictionary = CDictionary : (((string,'Tvalue) pair) list) array -> ('Tvalue) dictionary;;
 let rec dictionary_45empty = fun () -> (CDictionary ((array_45empty ())));;
-let rec dictionary_45bucket_45from_45key = fun key -> (Int32.rem (string_45foldl (fun c h -> (Int32.add (Int32.mul h (33l)) c)) (5381l) key) (100000l));;
+let rec dictionary_45bucket_45from_45key = fun key -> (string_45foldl (fun c h -> (Int32.add (Int32.mul h (33l)) c)) (5381l) key);;
 let rec dictionary_45set = fun key new_45value dictionary -> (match dictionary with (CDictionary (array)) -> (match (dictionary_45bucket_45from_45key key) with bucket_45id -> (match (array_45get bucket_45id array) with (CSome (bucket)) -> (match (list_45filter (fun entry -> (not (string_45equal_63 (pair_45left entry) key))) bucket) with new_45bucket -> (CDictionary ((array_45set bucket_45id (CCons ((CPair (key,new_45value)),new_45bucket)) array)))) | CNone -> (CDictionary ((array_45set bucket_45id (CCons ((CPair (key,new_45value)),CEmpty)) array))))));;
 let rec dictionary_45get = fun key dictionary -> (match dictionary with (CDictionary (array)) -> (match (dictionary_45bucket_45from_45key key) with bucket_45id -> (match (array_45get bucket_45id array) with (CSome (bucket)) -> (maybe_45map pair_45right (list_45find_45first (fun entry -> (string_45equal_63 (pair_45left entry) key)) bucket)) | CNone -> CNone)));;
 let rec dictionary_45remove = fun key dictionary -> (match dictionary with (CDictionary (array)) -> (match (dictionary_45bucket_45from_45key key) with bucket_45id -> (match (array_45get bucket_45id array) with (CSome (bucket)) -> (match (list_45filter (fun entry -> (not (string_45equal_63 (pair_45left entry) key))) bucket) with new_45bucket -> (CDictionary ((array_45set bucket_45id new_45bucket array)))) | CNone -> dictionary)));;
@@ -313,6 +333,12 @@ let rec data_45_38 = fun () -> (string_45from_45list (CCons ((38l),CEmpty)));;
 let rec data_45int32_45less_45than = fun () -> (string_45from_45list (CCons ((105l),(CCons ((110l),(CCons ((116l),(CCons ((51l),(CCons ((50l),(CCons ((45l),(CCons ((108l),(CCons ((101l),(CCons ((115l),(CCons ((115l),(CCons ((45l),(CCons ((116l),(CCons ((104l),(CCons ((97l),(CCons ((110l),CEmpty)))))))))))))))))))))))))))))));;
 let rec data_45pipe = fun () -> (string_45from_45list (CCons ((112l),(CCons ((105l),(CCons ((112l),(CCons ((101l),CEmpty)))))))));;
 let rec data_45list = fun () -> (string_45from_45list (CCons ((108l),(CCons ((105l),(CCons ((115l),(CCons ((116l),CEmpty)))))))));;
+let rec data_45slice_45empty = fun () -> (string_45from_45list (CCons ((115l),(CCons ((108l),(CCons ((105l),(CCons ((99l),(CCons ((101l),(CCons ((45l),(CCons ((101l),(CCons ((109l),(CCons ((112l),(CCons ((116l),(CCons ((121l),CEmpty)))))))))))))))))))))));;
+let rec data_45slice_45of = fun () -> (string_45from_45list (CCons ((115l),(CCons ((108l),(CCons ((105l),(CCons ((99l),(CCons ((101l),(CCons ((45l),(CCons ((111l),(CCons ((102l),CEmpty)))))))))))))))));;
+let rec data_45slice_45size = fun () -> (string_45from_45list (CCons ((115l),(CCons ((108l),(CCons ((105l),(CCons ((99l),(CCons ((101l),(CCons ((45l),(CCons ((115l),(CCons ((105l),(CCons ((122l),(CCons ((101l),CEmpty)))))))))))))))))))));;
+let rec data_45slice_45get = fun () -> (string_45from_45list (CCons ((115l),(CCons ((108l),(CCons ((105l),(CCons ((99l),(CCons ((101l),(CCons ((45l),(CCons ((103l),(CCons ((101l),(CCons ((116l),CEmpty)))))))))))))))))));;
+let rec data_45slice_45concat = fun () -> (string_45from_45list (CCons ((115l),(CCons ((108l),(CCons ((105l),(CCons ((99l),(CCons ((101l),(CCons ((45l),(CCons ((99l),(CCons ((111l),(CCons ((110l),(CCons ((99l),(CCons ((97l),(CCons ((116l),CEmpty)))))))))))))))))))))))));;
+let rec data_45slice_45foldl = fun () -> (string_45from_45list (CCons ((115l),(CCons ((108l),(CCons ((105l),(CCons ((99l),(CCons ((101l),(CCons ((45l),(CCons ((102l),(CCons ((111l),(CCons ((108l),(CCons ((100l),(CCons ((108l),CEmpty)))))))))))))))))))))));;
 let rec identifier_45def = fun () -> (-1l);;
 let rec identifier_45typ = fun () -> (-2l);;
 let rec identifier_45fn = fun () -> (-3l);;
@@ -328,8 +354,14 @@ let rec identifier_45_38 = fun () -> (5l);;
 let rec identifier_45int32_45less_45than = fun () -> (6l);;
 let rec identifier_45list = fun () -> (7l);;
 let rec identifier_45pipe = fun () -> (8l);;
-let rec default_45symbol_45count = fun () -> (9l);;
-let rec intrinsic_45identifiers = fun () -> (CCons ((CPair ((identifier_45_43 ()),(data_45_43 ()))),(CCons ((CPair ((identifier_45_45 ()),(data_45_45 ()))),(CCons ((CPair ((identifier_45_42 ()),(data_45_42 ()))),(CCons ((CPair ((identifier_45_47 ()),(data_45_47 ()))),(CCons ((CPair ((identifier_45_37 ()),(data_45_37 ()))),(CCons ((CPair ((identifier_45_38 ()),(data_45_38 ()))),(CCons ((CPair ((identifier_45int32_45less_45than ()),(data_45int32_45less_45than ()))),(CCons ((CPair ((identifier_45list ()),(data_45list ()))),(CCons ((CPair ((identifier_45pipe ()),(data_45pipe ()))),CEmpty))))))))))))))))));;
+let rec identifier_45slice_45empty = fun () -> (9l);;
+let rec identifier_45slice_45of = fun () -> (10l);;
+let rec identifier_45slice_45size = fun () -> (11l);;
+let rec identifier_45slice_45get = fun () -> (12l);;
+let rec identifier_45slice_45concat = fun () -> (13l);;
+let rec identifier_45slice_45foldl = fun () -> (14l);;
+let rec default_45symbol_45count = fun () -> (15l);;
+let rec intrinsic_45identifiers = fun () -> (CCons ((CPair ((identifier_45_43 ()),(data_45_43 ()))),(CCons ((CPair ((identifier_45_45 ()),(data_45_45 ()))),(CCons ((CPair ((identifier_45_42 ()),(data_45_42 ()))),(CCons ((CPair ((identifier_45_47 ()),(data_45_47 ()))),(CCons ((CPair ((identifier_45_37 ()),(data_45_37 ()))),(CCons ((CPair ((identifier_45_38 ()),(data_45_38 ()))),(CCons ((CPair ((identifier_45int32_45less_45than ()),(data_45int32_45less_45than ()))),(CCons ((CPair ((identifier_45list ()),(data_45list ()))),(CCons ((CPair ((identifier_45pipe ()),(data_45pipe ()))),(CCons ((CPair ((identifier_45slice_45empty ()),(data_45slice_45empty ()))),(CCons ((CPair ((identifier_45slice_45foldl ()),(data_45slice_45foldl ()))),(CCons ((CPair ((identifier_45slice_45of ()),(data_45slice_45of ()))),(CCons ((CPair ((identifier_45slice_45size ()),(data_45slice_45size ()))),(CCons ((CPair ((identifier_45slice_45get ()),(data_45slice_45get ()))),(CCons ((CPair ((identifier_45slice_45concat ()),(data_45slice_45concat ()))),CEmpty))))))))))))))))))))))))))))));;
 let rec default_45symbol_45table = fun () -> (symbol_45table_45bind_45list (list_45map pair_45right (intrinsic_45identifiers ())) (symbol_45table_45empty ()));;
 let rec default_45scope = fun () -> (parser_45scope_45set_45list (list_45map (_46 (fun x -> (CPair (x,x))) pair_45left) (intrinsic_45identifiers ())) (parser_45scope_45empty ()));;
 let rec default_45identifiers = fun () -> (dictionary_45set (data_45def ()) (CPair ((identifier_45def ()),(data_45def ()))) (dictionary_45set (data_45typ ()) (CPair ((identifier_45typ ()),(data_45typ ()))) (dictionary_45set (data_45fn ()) (CPair ((identifier_45fn ()),(data_45fn ()))) (dictionary_45set (data_45match ()) (CPair ((identifier_45match ()),(data_45match ()))) (dictionary_45set (data_45exists ()) (CPair ((identifier_45pub ()),(data_45exists ()))) (dictionary_45set (data_45pub ()) (CPair ((identifier_45pub ()),(data_45pub ()))) (dictionary_45of (list_45map (fun pair -> (CPair ((pair_45right pair),pair))) (intrinsic_45identifiers ())))))))));;
@@ -574,6 +606,7 @@ let rec data_45ccons = fun () -> (string_45from_45list (CCons ((67l),(CCons ((67
 let rec data_45int32 = fun () -> (string_45from_45list (CCons ((73l),(CCons ((110l),(CCons ((116l),(CCons ((51l),(CCons ((50l),(CCons ((46l),(CCons ((111l),(CCons ((102l),(CCons ((95l),(CCons ((105l),(CCons ((110l),(CCons ((116l),(CCons ((32l),CEmpty)))))))))))))))))))))))))));;
 let rec data_45comma = fun () -> (string_45from_45list (CCons ((44l),CEmpty)));;
 let rec data_45with = fun () -> (string_45from_45list (CCons ((119l),(CCons ((105l),(CCons ((116l),(CCons ((104l),CEmpty)))))))));;
+let rec data_45slice = fun () -> (string_45from_45list (CCons ((115l),(CCons ((108l),(CCons ((105l),(CCons ((99l),(CCons ((101l),CEmpty)))))))))));;
 let rec data_45definition_45end = fun () -> (string_45from_45list (CCons ((59l),(CCons ((59l),CEmpty)))));;
 let rec data_45let_45rec = fun () -> (string_45from_45list (CCons ((108l),(CCons ((101l),(CCons ((116l),(CCons ((32l),(CCons ((114l),(CCons ((101l),(CCons ((99l),(CCons ((32l),CEmpty)))))))))))))))));;
 let rec data_45constant = fun () -> (string_45from_45list (CCons ((95l),(CCons ((99l),(CCons ((111l),(CCons ((110l),(CCons ((115l),(CCons ((116l),(CCons ((97l),(CCons ((110l),(CCons ((116l),(CCons ((95l),CEmpty)))))))))))))))))))));;
@@ -581,7 +614,7 @@ let rec data_45preamble_45filename = fun () -> (string_45from_45list (CCons ((11
 let rec data_45pervasives_45filename = fun () -> (string_45from_45list (CCons ((112l),(CCons ((101l),(CCons ((114l),(CCons ((118l),(CCons ((97l),(CCons ((115l),(CCons ((105l),(CCons ((118l),(CCons ((101l),(CCons ((115l),(CCons ((46l),(CCons ((109l),(CCons ((108l),CEmpty)))))))))))))))))))))))))));;
 let rec prefix_45type_45variable = fun identifier -> (string_45prepend (39l) (string_45prepend (84l) (identifier_45name identifier)));;
 let rec prefix_45constructor = fun constructor -> (string_45prepend (67l) constructor);;
-let rec reserved_45identifiers = fun () -> (CCons (data_45assert,(CCons (data_45asr,(CCons (data_45begin,(CCons (data_45constraint,(CCons (data_45do,(CCons (data_45done,(CCons (data_45downto,(CCons (data_45type,(CCons (data_45if,(CCons (data_45then,(CCons (data_45else,(CCons (data_45with,(CCons (data_45of,(CCons (data_45end,(CCons (data_45in,(CCons (data_45fun,(CCons (data_45let,(CCons (data_45open,(CCons (data_45and,(CCons (data_45or,(CCons (data_45as,(CCons (data_45class,(CCons (data_45exception,(CCons (data_45external,(CCons (data_45false,(CCons (data_45true,(CCons (data_45for,(CCons (data_45function,(CCons (data_45functor,(CCons (data_45if,(CCons (data_45include,(CCons (data_45inherit,(CCons (data_45initializer,(CCons (data_45land,(CCons (data_45lazy,(CCons (data_45lor,(CCons (data_45lsl,(CCons (data_45lsr,(CCons (data_45lxor,(CCons (data_45method,(CCons (data_45mod,(CCons (data_45module,(CCons (data_45mutable,(CCons (data_45new,(CCons (data_45nonrec,(CCons (data_45object,(CCons (data_45private,(CCons (data_45rec,(CCons (data_45sig,(CCons (data_45struct,(CCons (data_45try,(CCons (data_45val,(CCons (data_45virtual,(CCons (data_45when,(CCons (data_45while,(CCons (data_45parser,(CCons (data_45value,(CCons (data_45to,CEmpty))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))));;
+let rec reserved_45identifiers = fun () -> (CCons (data_45assert,(CCons (data_45asr,(CCons (data_45begin,(CCons (data_45constraint,(CCons (data_45do,(CCons (data_45done,(CCons (data_45downto,(CCons (data_45type,(CCons (data_45if,(CCons (data_45then,(CCons (data_45else,(CCons (data_45with,(CCons (data_45of,(CCons (data_45end,(CCons (data_45in,(CCons (data_45fun,(CCons (data_45let,(CCons (data_45open,(CCons (data_45and,(CCons (data_45or,(CCons (data_45as,(CCons (data_45class,(CCons (data_45exception,(CCons (data_45external,(CCons (data_45false,(CCons (data_45true,(CCons (data_45for,(CCons (data_45function,(CCons (data_45functor,(CCons (data_45if,(CCons (data_45include,(CCons (data_45inherit,(CCons (data_45initializer,(CCons (data_45land,(CCons (data_45lazy,(CCons (data_45lor,(CCons (data_45lsl,(CCons (data_45lsr,(CCons (data_45lxor,(CCons (data_45method,(CCons (data_45mod,(CCons (data_45module,(CCons (data_45mutable,(CCons (data_45new,(CCons (data_45nonrec,(CCons (data_45object,(CCons (data_45private,(CCons (data_45rec,(CCons (data_45sig,(CCons (data_45struct,(CCons (data_45try,(CCons (data_45val,(CCons (data_45virtual,(CCons (data_45when,(CCons (data_45while,(CCons (data_45parser,(CCons (data_45value,(CCons (data_45to,(CCons (data_45slice,CEmpty))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))));;
 let rec token_45is_45reserved_63 = fun token -> (_and (_60_61 token (-2000l)) (_62 token (-3000l)));;
 let rec escape_45identifier = fun identifier -> (match (token_45is_45reserved_63 (identifier_45token identifier)) with CTrue -> (string_45prepend (95l) (identifier_45name identifier)) | CFalse -> (string_45flatmap escape_45char (identifier_45name identifier)));;
 let rec operator_45translation_45map = fun () -> (dictionary_45of (CCons ((CPair ((data_45_43 ()),(data_45int32_45plus ()))),(CCons ((CPair ((data_45_45 ()),(data_45int32_45minus ()))),(CCons ((CPair ((data_45_42 ()),(data_45int32_45multiply ()))),(CCons ((CPair ((data_45_47 ()),(data_45int32_45divide ()))),(CCons ((CPair ((data_45_37 ()),(data_45int32_45modulus ()))),(CCons ((CPair ((data_45_38 ()),(data_45int32_45and ()))),CEmpty)))))))))))));;

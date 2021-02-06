@@ -12,7 +12,7 @@
            data-functor data-if data-include data-inherit data-initializer data-land data-lazy data-lor data-lsl
            data-lsr data-lxor data-method data-mod data-module data-mutable data-new data-nonrec data-object
            data-private data-rec data-sig data-struct data-try data-val data-virtual data-when data-while
-           data-parser data-value data-to))
+           data-parser data-value data-to data-slice))
 
 (def token-is-reserved? (token)
      (and (<= token -2000) (> token -3000)))

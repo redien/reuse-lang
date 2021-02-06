@@ -17,6 +17,7 @@ ccons               |CCons
 int32               |Int32.of_int 
 comma               |,
 with                |with
+slice               |slice
 definition-end      |;;
 let-rec             |let rec 
 constant            |_constant_

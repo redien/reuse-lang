@@ -13,3 +13,9 @@ pub                       |pub
 int32-less-than           |int32-less-than
 pipe                      |pipe
 list                      |list
+slice-empty               |slice-empty
+slice-of                  |slice-of
+slice-size                |slice-size
+slice-get                 |slice-get
+slice-concat              |slice-concat
+slice-foldl               |slice-foldl
