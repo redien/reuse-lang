@@ -1,16 +1,18 @@
 
-open Pervasives;;
-
 let read_line ic =
     try Some (input_line ic)
     with End_of_file -> None
 
 let read_lines ic =
-    let rec loop acc =
+    let buffer = Buffer.create 1024 in
+    let rec loop () =
         match read_line ic with
-        | Some line -> loop (line :: acc)
-        | None -> List.rev acc
+        | Some line ->
+            if Buffer.length buffer > 0 then Buffer.add_char buffer '\n' ;
+            Buffer.add_string buffer line ;
+            loop ()
+        | None -> buffer
     in
-        loop [];;
+        loop ();;
 
-let read_stdin _ = String.concat "\n" (read_lines stdin);;
+let read_stdin _ = Buffer.to_bytes (read_lines stdin);;

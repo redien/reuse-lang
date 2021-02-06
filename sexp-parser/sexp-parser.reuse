@@ -22,66 +22,62 @@
 (pub typ parse-error         ParseErrorTooFewClosingBrackets
                              ParseErrorTooManyClosingBrackets)
 
-(def symbol-range (start end)
-     (Range (indexed-iterator-index start) (indexed-iterator-index end)))
-
-(def intern-string (iterator next-iterator name symbol-state next)
+(def intern-string (index next-index name symbol-state next)
      (match symbol-state
             (Pair token symbols)
                   (match (dictionary-get name symbols)
                          (Some (Pair token name))
-                               (next next-iterator
+                               (next next-index
                                      symbol-state
-                                     (Symbol token name (symbol-range iterator next-iterator)))
+                                     (Symbol token name (Range index next-index)))
                          None
-                               (next next-iterator
+                               (next next-index
                                      (Pair (+ token 1) (dictionary-set name (Pair token name) symbols))
-                                     (Symbol token name (symbol-range iterator next-iterator))))))
+                                     (Symbol token name (Range index next-index))))))
 
-(def parse-symbol (iterator symbols next end)
-     (match (string-collect-from-indexed-iterator atom-character? iterator)
-            (Pair next-iterator name)
+(def parse-symbol (index slice symbols next end)
+     (match (string-collect-from-slice atom-character? index slice)
+            (Pair next-index name)
                     (match (string-to-int32 name)
-                           (Some integer)   (next next-iterator symbols (Integer integer (symbol-range iterator next-iterator)))
+                           (Some integer)   (next next-index symbols (Integer integer (Range index next-index)))
                            None
                     (match (string-empty? name)
-                           False  (intern-string iterator next-iterator name symbols next)
-                           True   (end iterator)))))
+                           False  (intern-string index next-index name symbols next)
+                           True   (end index)))))
 
-(def list-range (start end)
-     (Range (- (indexed-iterator-index start) 1) (indexed-iterator-index end)))
+(def parse-list (index slice parse-sexps symbols error next)
+     (parse-sexps index slice symbols Empty error
+                  (fn (next-index symbols expressions)
+                      (next next-index symbols (List expressions (Range (- index 1) next-index))))))
 
-(def parse-list (iterator parse-sexps symbols error next)
-     (parse-sexps iterator symbols Empty error
-                  (fn (next-iterator symbols expressions)
-                      (next next-iterator symbols (List expressions (list-range iterator next-iterator))))))
-
-(def parse-expression (depth iterator parse-sexps' symbols error next end)
-     (match (indexed-iterator-next iterator)
-            (Pair None _)
+(def parse-expression (depth index slice parse-sexps' symbols error next end)
+     (match (< index (slice-size slice))
+            False
                 (match depth
-                       0  (end iterator)
+                       0  (end index)
                        _  (error ParseErrorTooFewClosingBrackets))
-            (Pair (Some 40) next-iterator)
-                (parse-list next-iterator (parse-sexps' (+ depth 1)) symbols error next)
-            (Pair (Some 41) next-iterator)
+            True
+     (match (slice-get slice index)
+            40
+                (parse-list (+ index 1) slice (parse-sexps' (+ depth 1)) symbols error next)
+            41
                 (match depth
                        0  (error ParseErrorTooManyClosingBrackets)
-                       _  (end next-iterator))
-            (Pair (Some x) next-iterator)
+                       _  (end (+ index 1)))
+            x
                 (match (whitespace? x)
-                       True   (parse-expression depth next-iterator parse-sexps' symbols error next end)
-                       False  (parse-symbol iterator symbols next end))))
+                       True   (parse-expression depth (+ index 1) slice parse-sexps' symbols error next end)
+                       False  (parse-symbol index slice symbols next end)))))
 
-(def parse-sexps' (depth iterator symbols expressions error end)
-     (parse-expression depth iterator parse-sexps' symbols error
-                       (fn (iterator symbols expression)
-                           (parse-sexps' depth iterator symbols (Cons expression expressions) error end))
-                       (fn (iterator)
-                           (end iterator symbols (list-reverse expressions)))))
+(def parse-sexps' (depth index slice symbols expressions error end)
+     (parse-expression depth index slice parse-sexps' symbols error
+                       (fn (index symbols expression)
+                           (parse-sexps' depth index slice symbols (Cons expression expressions) error end))
+                       (fn (index)
+                           (end index symbols (list-reverse expressions)))))
 
-(pub def parse-sexps (symbols iterator)
-     (parse-sexps' 0 iterator symbols Empty
+(pub def parse-sexps (symbols slice)
+     (parse-sexps' 0 0 slice symbols Empty
                    (fn (error)
                        (Error error))
                    (fn (_ symbols expressions)

@@ -34,7 +34,7 @@
                                                       expression
                                                       range)
                                 (TargetDefinition     source-reference
-                                                      (indexed-iterator int32)))
+                                                      slice))
 
 (pub def source-reference-file-path (source-reference)
      (match source-reference

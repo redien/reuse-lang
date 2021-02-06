@@ -276,8 +276,8 @@
 
 (def transform-strings (path content)
      (match (string-gen content)
-            (Result string)  (indexed-iterator-from-iterable (string-iterable) string)
-            (Error error)    (indexed-iterator-from-iterable (string-iterable) (string-empty))))
+            (Result string)  (string-to-slice string)
+            (Error error)    (slice-empty)))
 
 (def parse-reuse-file (file)
      (match file
@@ -429,7 +429,7 @@
             (FunctionDefinition name public? arguments expression range)
                 (definition-to-sexp' public? range (function-definition-to-sexp name arguments expression range))
             (TargetDefinition _ data)
-                (Symbol 0 (string-from-indexed-iterator data) (Range 0 0))))
+                (Symbol 0 (string-from-slice data) (Range 0 0))))
 
 (pub def definitions-to-sexps (definitions)
      (list-map definition-to-sexp definitions))

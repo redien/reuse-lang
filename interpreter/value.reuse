@@ -5,7 +5,7 @@
      (ValueClosure (list identifier) expression scope)
      (ValueFunction (list identifier) expression)
      (ValueIntrinsic (fn (scope (list string) (list (value expression scope iterable))) (result (value expression scope iterable) string)))
-     (ValueNativeIterator iterable))
+     (ValueSlice iterable))
 
 (def value-function-to-string (arguments expression)
      ((pipe expression-to-sexp
@@ -36,7 +36,7 @@
                 (value-function-to-string arguments expression)
             (ValueFunction arguments expression)
                 (value-function-to-string arguments expression)
-            (ValueNativeIterator _)
-                (data-intrinsic)
+            (ValueSlice _)
+                (data-slice)
             (ValueIntrinsic _)
                 (data-intrinsic)))

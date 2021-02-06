@@ -1,17 +1,14 @@
 main                   |reuse-main
 no-input-files         |No input files
 intrinsic              |[intrinsic]
-IndexedIterator        |IndexedIterator
-IterableClass          |IterableClass
-Pair                   |Pair
-Some                   |Some
-None                   |None
+slice                  |[slice]
 pipe                   |pipe
 list                   |list
 Empty                  |Empty
 Cons                   |Cons
 error-generic          |Error evaluating expression
 error-int32-op         |Integer operator called with incorrect arguments
+error-slice-op         |Slice operator called with incorrect arguments
 error-unmatched-case   |This value does not match any of the cases in a match expression:
 error-unmatched-case2  |Patterns:
 error-stack-trace      |Stack trace:

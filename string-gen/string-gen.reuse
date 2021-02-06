@@ -22,6 +22,6 @@
                 (string-empty)))
 
 (pub def string-gen (stdin-iterator)
-     (match (string-collect-from-indexed-iterator (fn (_) True) stdin-iterator)
+     (match (string-collect-from-slice (fn (_) True) 0 stdin-iterator)
             (Pair _ stdin)
                  (Result (string-join (string-of-char 10) (list-map transform-line (string-split 10 stdin))))))

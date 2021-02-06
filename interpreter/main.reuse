@@ -31,7 +31,7 @@
                        (CliErrorMissingValue key)
                             (CommandError key))
             (EventReadStdin stdin state)
-                (output-result (eval state (list (box-indexed-iterator stdin))))
+                (output-result (eval state (list (ValueSlice stdin))))
             (EventReadFiles source-files state)
                 (match (local-transforms (validate-reserved-identifiers (parse-source-files (with-local-transform-keywords (internal-symbols)) source-files)))
                        (Result definitions)

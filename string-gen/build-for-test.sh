@@ -17,10 +17,8 @@ let performance = getenv "REUSE_TIME" = "true";;
 
 open StdinWrapper;;
 
-let stdin_list = read_stdin ();;
-
 let string_gen_start = Unix.gettimeofday ();;
-let string_gen_output = string_45gen (ml_string_to_indexed_iterator stdin_list);;
+let string_gen_output = string_45gen (read_stdin ());;
 let string_gen_end = Unix.gettimeofday ();;
 let string_gen_time = string_gen_end -. string_gen_start;;
 

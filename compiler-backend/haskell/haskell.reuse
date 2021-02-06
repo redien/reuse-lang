@@ -251,7 +251,7 @@
             (TypeDefinition name _ parameters constructors __)
                 (translate-type-definition name parameters constructors)
             (TargetDefinition _ data)
-                (string-from-indexed-iterator data)))
+                (string-from-slice data)))
 
 (def translate-module-declaration (module-name)
      (join (list (data-module)

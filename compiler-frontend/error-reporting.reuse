@@ -19,7 +19,7 @@
 (def line-information (file range)
      (match range
             (Range start _)
-                (match (string-from-indexed-iterator (source-file-content file))  content
+                (match (string-from-slice (source-file-content file))  content
                 (count-lines 0 1 (string-substring 0 start content)))))
 
 (def next-newline (content index)
@@ -32,7 +32,7 @@
 (def source-paragraph (file range)
      (match range
             (Range start end)
-                (match (string-from-indexed-iterator (source-file-content file))  content
+                (match (string-from-slice (source-file-content file))  content
                 (match (next-newline content (- start 100))                       paragraph-start
                 (match (- (next-newline content (+ end 50)) paragraph-start)      paragraph-size
                 (match (string-substring paragraph-start paragraph-size content)  region

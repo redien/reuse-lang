@@ -6,9 +6,9 @@
 (def sequence (xs) (result-concat xs))
 (def map (f xs) (result-map f xs))
 
-(def identifier-main () -2005)
-(def identifier-Empty () -2006)
-(def identifier-Cons () -2007)
+(def identifier-main () -2000)
+(def identifier-Empty () -2001)
+(def identifier-Cons () -2002)
 
 (def eval-error ()
      (Error (data-error-generic)))
@@ -92,6 +92,48 @@
                        False  (return second))
             _
                 (Error (data-error-int32-op))))
+
+(def eval-slice-empty (scope stack-trace arguments)
+     (return (ValueSlice (slice-empty))))
+
+(def eval-slice-of (scope stack-trace arguments)
+     (match arguments
+            (Cons (ValueInteger a) Empty)
+                (return (ValueSlice (slice-of a)))
+            _
+                (Error (data-error-slice-op))))
+
+(def eval-slice-size (scope stack-trace arguments)
+     (match arguments
+            (Cons (ValueSlice slice) Empty)
+                (return (ValueInteger (slice-size slice)))
+            _
+                (Error (data-error-slice-op))))
+
+(def eval-slice-get (scope stack-trace arguments)
+     (match arguments
+            (Cons (ValueSlice slice) (Cons (ValueInteger index) Empty))
+                (return (ValueInteger (slice-get slice index)))
+            _
+                (Error (data-error-slice-op))))
+
+(def eval-slice-concat (scope stack-trace arguments)
+     (match arguments
+            (Cons (ValueSlice a) (Cons (ValueSlice b) Empty))
+                (return (ValueSlice (slice-concat a b)))
+            _
+                (Error (data-error-slice-op))))
+
+(def eval-slice-foldl (apply-function scope stack-trace arguments)
+     (match arguments
+            (Cons f (Cons ys (Cons (ValueSlice slice) Empty)))
+                (slice-foldl (fn (y ys)
+                                 (bind ys (fn (ys-value)
+                                 (apply-function scope stack-trace None (list f (ValueInteger y) ys-value)))))
+                             (return ys)
+                             slice)
+            _
+                (Error (data-error-slice-op))))
 
 (def eval-function-application (eval-expression stack-trace arguments values scope expression)
      (match (< (list-size values) (list-size arguments))
@@ -194,6 +236,12 @@
                       (Pair (identifier-%)                (ValueIntrinsic (eval-int32-operator %)))
                       (Pair (identifier-&)                (ValueIntrinsic (eval-int32-operator &)))
                       (Pair (identifier-int32-less-than)  (ValueIntrinsic eval-int32-less-than))
+                      (Pair (identifier-slice-empty)      (ValueIntrinsic eval-slice-empty))
+                      (Pair (identifier-slice-of)         (ValueIntrinsic eval-slice-of))
+                      (Pair (identifier-slice-size)       (ValueIntrinsic eval-slice-size))
+                      (Pair (identifier-slice-get)        (ValueIntrinsic eval-slice-get))
+                      (Pair (identifier-slice-concat)     (ValueIntrinsic eval-slice-concat))
+                      (Pair (identifier-slice-foldl)      (ValueIntrinsic (eval-slice-foldl (apply-function eval-expression))))
                       (Pair (identifier-pipe)             (ValueIntrinsic eval-pipe))
                       (Pair (identifier-list)             (ValueIntrinsic eval-list)))
                 scope))
@@ -208,42 +256,6 @@
             _
                 False))
 
-(def box-maybe (maybe)
-     (match maybe
-            (Some x)  (ValueConstructor -2000 (data-Some) (list (ValueInteger x)))
-            None      (ValueConstructor -2001 (data-None) Empty)))
-
-(def box-get (collection get arguments)
-     (match arguments
-            (Cons _ (Cons (ValueInteger i) Empty))
-                (return (box-maybe (get collection i)))
-            _
-                (eval-error)))
-
-(def box-next' (value iterator)
-     (return (ValueConstructor -2002 (data-Pair)
-                               (list (box-maybe value)
-                                     (ValueNativeIterator iterator)))))
-
-(def box-next (scope stack-trace arguments)
-     (match arguments
-            (Cons (ValueNativeIterator iterator) Empty)
-                (match (indexed-iterator-next iterator)
-                       (Pair value next-iterator)
-                            (box-next' value next-iterator))
-            _
-                (eval-error)))
-
-(def box-iterable-class (iterator)
-     (ValueConstructor -2003 (data-IterableClass)
-                       (list (ValueIntrinsic box-next))))
-
-(def box-indexed-iterator (iterator)
-     (ValueConstructor -2004 (data-IndexedIterator)
-                       (list (box-iterable-class)
-                             (ValueNativeIterator iterator)
-                             (ValueInteger (indexed-iterator-index iterator)))))
-
 (def add-identifiers (identifiers offset dictionary)
      (match identifiers
             (Cons identifier rest)
@@ -252,6 +264,4 @@
                 dictionary))
 
 (def internal-symbols ()
-     (add-identifiers (list data-Some data-None data-Pair data-IterableClass data-IndexedIterator
-                            data-main data-Empty data-Cons) -2000
-     (default-identifiers)))
+     (add-identifiers (list data-main data-Empty data-Cons) -2000 (default-identifiers)))
