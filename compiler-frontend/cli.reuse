@@ -1,11 +1,15 @@
 
 (typ (event iterator state) (EventArguments (list string))
-                            (EventReadFiles (list (source-file iterator)) state))
+                            (EventReadFiles (list (source-file iterator)) state)
+                            (EventWroteFiles state)
+                            (EventTime int32 state))
 
 (typ (command state) (CommandError string)
                      (CommandOutput string)
-                     (CommandWriteFiles (list (pair string string)))
-                     (CommandReadFiles (list (pair module-reference string)) state))
+                     (CommandTime state)
+                     (CommandWriteFiles (list (pair string string)) state)
+                     (CommandReadFiles (list (pair module-reference string)) state)
+                     (CommandExit int32))
 
 (def standard-library? (arguments)
      (match (dictionary-get (data-stdlib) arguments)
@@ -65,7 +69,11 @@
                             (match (compile file-entries
                                             (filename-without-extension (filename-from-path output-path))
                                             (CompilerParameters (minimal? arguments) (standard-library? arguments)))
-                                   (Result source)  (CommandWriteFiles (list (Pair output-path source)))
+                                   (Result source)  (CommandWriteFiles (list (Pair output-path source)) arguments)
                                    (Error error)    (CommandError (error-to-string file-entries error)))
                        None
-                            (CommandError (data-no-output-path)))))
+                            (CommandError (data-no-output-path)))
+            (EventTime time state)
+                (CommandExit 1)
+            (EventWroteFiles state)
+                (CommandExit 0)))
