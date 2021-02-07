@@ -55,6 +55,7 @@ test_commits() {
 
         run_test 'sexp-parser' "$commit" 'sexp-parser/time-sexp-parser.sh'
         run_test 'ocaml-compiler' "$commit" 'ocaml-compiler/time.sh'
+        run_test 'ocaml-compiler-memory' "$commit" 'ocaml-compiler/memory.sh'
         run_test 'stdlib-dictionary-set' "$commit" 'stdlib-dictionary/time.sh DictionarySet 10 10000'
         run_test 'stdlib-dictionary-set-duplicate' "$commit" 'stdlib-dictionary/time.sh DictionarySetDuplicate 10 1000'
         run_test 'stdlib-dictionary-get' "$commit" 'stdlib-dictionary/time.sh DictionaryGet 10 10000'
@@ -63,7 +64,7 @@ test_commits() {
 }
 
 clone_repo
-echo Test,Date,Commit,Commit Message,Time \(s\) > $build_dir/report.csv
+echo Test,Date,Commit,Commit Message,Measurement > $build_dir/report.csv
 test_commits "$(list_commits 50)" | tac >> $build_dir/report.csv
 
 echo Wrote report to \'$build_dir/report.csv\'
