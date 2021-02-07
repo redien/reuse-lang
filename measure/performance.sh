@@ -54,6 +54,7 @@ test_commits() {
         fi
 
         run_test 'sexp-parser' "$commit" 'sexp-parser/time-sexp-parser.sh'
+        run_test 'sexp-parser-memory' "$commit" 'sexp-parser/memory.sh'
         run_test 'ocaml-compiler' "$commit" 'ocaml-compiler/time.sh'
         run_test 'ocaml-compiler-memory' "$commit" 'ocaml-compiler/memory.sh'
         run_test 'stdlib-dictionary-set' "$commit" 'stdlib-dictionary/time.sh DictionarySet 10 10000'
