@@ -25,6 +25,8 @@ while true do
     match (on_45event data_path !current) with
           CCommandError (error) -> Printf.eprintf "%s\n" (reuse_string_to_ml error) ; exit 1
         | CCommandOutput (output) -> Printf.printf "%s" (reuse_string_to_ml output) ; exit 0
-        | CCommandWriteFiles (files) -> write_files files ; exit 0
+        | CCommandTime (state) -> current := CEventTime (Int32.of_float ((Sys.time ()) *. 1000.0), state)
+        | CCommandWriteFiles (files, state) -> write_files files ; current := CEventWroteFiles (state)
         | CCommandReadFiles (files, state) -> current := CEventReadFiles (read_files files, state)
+        | CCommandExit (status) -> exit (Int32.to_int status)
 done

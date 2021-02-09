@@ -158,11 +158,9 @@
         types))
 
 (def translate-function-type (translate-types return-type argument-types)
-     ((pipe (fn (argument-types)
-                (list-concat argument-types (list return-type)))
-            (translate-types (data-arrow))
-            wrap-in-brackets)
-        argument-types))
+     (match (list-empty? argument-types)
+            True   (wrap-in-brackets (join (list (data-unit) (data-arrow) (translate-types (data-arrow) (list return-type)))))
+            False  (wrap-in-brackets (translate-types (data-arrow) (list-concat argument-types (list return-type))))))
 
 (def translate-type (translate-types parameters type)
      (match type

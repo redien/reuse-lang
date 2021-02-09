@@ -5,6 +5,7 @@ vertical-bar        | |
 pipe-operator       | |> 
 colon               | : 
 star                | * 
+unit                | unit 
 int32               |int32
 int32-plus          |Int32.add
 int32-multiply      |Int32.mul
