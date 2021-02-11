@@ -1,15 +1,11 @@
 
-(typ compiler-parameters (CompilerParameters boolean boolean))
-
-(def frontend (minimal? file-entries)
+(def frontend (file-entries)
      ((pipe (parse-source-files (with-local-transform-keywords (internal-symbols)))
-            (match (or (not (perform-transformations?)) minimal?)
-                   True   id
-                   False  (. local-transforms validate-reserved-identifiers)))
+            (match (perform-transformations?)
+                   False   id
+                   True  (. local-transforms validate-reserved-identifiers)))
           file-entries))
 
-(def compile (file-entries module-name parameters)
-     (match parameters
-            (CompilerParameters minimal? use-stdlib)
-                  (result-map (generate-source module-name)
-                              (frontend minimal? file-entries))))
+(def compile (file-entries module-name)
+     (result-map (generate-source module-name)
+                 (frontend file-entries)))

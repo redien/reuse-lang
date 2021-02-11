@@ -12,7 +12,6 @@ usage() {
     echo >&2
     echo Compiler for the Reuse programming language>&2
     echo >&2
-    echo "       --minimal [BOOL]   Source language should be treated as Minimal Reuse, default: false" >&2
     echo "       --stdlib [BOOL]    Include the standard library, default: true" >&2
     echo "       --language [LANG]  Target language to compile to." >&2
     echo "                          Can be $LANGUAGES." >&2
