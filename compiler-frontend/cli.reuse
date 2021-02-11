@@ -44,11 +44,23 @@
 (def table-to-string (table)
      (string-join (string-of-char 10) (list-map (string-join (data-space)) table)))
 
-(def print-diagnostics (arguments max-heap-size start-read-files end-read-files start-write-files end-write-files k)
+(def print-diagnostics (
+     arguments
+     max-heap-size
+     start-parse end-parse
+     start-transform end-transform
+     start-generate end-generate
+     start-read-files end-read-files
+     start-write-files end-write-files
+     k
+)
      (match (flag-is-true? (data-diagnostics-flag) False arguments)
             True
                (CliError (table-to-string (list 
                     (list (string-from-int32 max-heap-size) (data-max-heap-size))
+                    (list (string-from-int32 (- end-parse start-parse)) (data-parse-time))
+                    (list (string-from-int32 (- end-transform start-transform)) (data-transform-time))
+                    (list (string-from-int32 (- end-generate start-generate)) (data-generate-time))
                     (list (string-from-int32 (- end-read-files start-read-files)) (data-read-files))
                     (list (string-from-int32 (- end-write-files start-write-files)) (data-write-files))))
                                  k)
@@ -74,19 +86,35 @@
      (CliTime (fn (end-read-files)
           (match (dictionary-get (data-output-key) arguments)
                (Some output-path)
-                    (match (compile file-entries (filename-without-extension (filename-from-path output-path)))
+                    (match (filename-without-extension (filename-from-path output-path))
+                           module-name
+                    (CliTime (fn (start-parse)
+                    (match (parse file-entries)
+                           definitions
+                    (CliTime (fn (end-parse)
+                    (CliTime (fn (start-transform)
+                    (match (transform definitions)
+                           definitions
+                    (CliTime (fn (end-transform)
+                    (CliTime (fn (start-generate)
+                    (match (generate module-name definitions)
                            (Result source)
+                              (CliTime (fn (end-generate)
                               (CliTime (fn (start-write-files)
                               (CliWriteFiles (list (Pair output-path source)) (fn ()
                               (CliTime (fn (end-write-files)
                               (CliMaxHeapSize (fn (max-heap-size)
-                              (print-diagnostics arguments max-heap-size
-                                                           start-read-files end-read-files
-                                                           start-write-files end-write-files (fn ()
-                              (CliExit 0)))))))))))
+                              (print-diagnostics arguments
+                                                 max-heap-size
+                                                 start-parse end-parse
+                                                 start-transform end-transform
+                                                 start-generate end-generate
+                                                 start-read-files end-read-files
+                                                 start-write-files end-write-files (fn ()
+                              (CliExit 0)))))))))))))
                            (Error error)
                               (CliError (error-to-string file-entries error) (fn ()
-                              (CliExit 1))))
+                              (CliExit 1)))))))))))))))))
                None
                     (CliError (data-no-output-path) (fn ()
                     (CliExit 1)))))))))))))

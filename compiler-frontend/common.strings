@@ -67,6 +67,9 @@ diagnostics-flag             |--diagnostics
 read-files                   |read files (μs)
 write-files                  |write files (μs)
 max-heap-size                |max heap size (bytes)
+parse-time                   |parsing (μs)
+transform-time               |ast transformation (μs)
+generate-time                |code generation (μs)
 standard-library-filename    |standard-library.reuse
 def                          |def
 typ                          |typ

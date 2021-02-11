@@ -1,11 +1,11 @@
 
-(def frontend (file-entries)
-     ((pipe (parse-source-files (with-local-transform-keywords (internal-symbols)))
-            (match (perform-transformations?)
-                   False   id
-                   True  (. local-transforms validate-reserved-identifiers)))
-          file-entries))
+(def parse (file-entries)
+     (parse-source-files (with-local-transform-keywords (internal-symbols)) file-entries))
 
-(def compile (file-entries module-name)
-     (result-map (generate-source module-name)
-                 (frontend file-entries)))
+(def transform (definitions)
+     (match (perform-transformations?)
+            False  definitions
+            True   (local-transforms (validate-reserved-identifiers definitions))))
+
+(def generate (module-name definitions)
+     (result-map (generate-source module-name) definitions))
