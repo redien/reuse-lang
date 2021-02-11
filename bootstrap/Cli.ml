@@ -19,14 +19,15 @@ let write_file path content =
     close_out channel;;
 let write_files files = ignore (list_45map (fun p -> match p with CPair (path, content) -> write_file path content) files);;
 
-let current = ref (CEventArguments argv);;
+let current = ref (cli_45main data_path argv);;
 
 while true do
-    match (on_45event data_path !current) with
-          CCommandError (error) -> Printf.eprintf "%s\n" (reuse_string_to_ml error) ; exit 1
-        | CCommandOutput (output) -> Printf.printf "%s" (reuse_string_to_ml output) ; exit 0
-        | CCommandTime (state) -> current := CEventTime (Int32.of_float ((Sys.time ()) *. 1000.0), state)
-        | CCommandWriteFiles (files, state) -> write_files files ; current := CEventWroteFiles (state)
-        | CCommandReadFiles (files, state) -> current := CEventReadFiles (read_files files, state)
-        | CCommandExit (status) -> exit (Int32.to_int status)
+    match !current with
+          CCliError (error, k) -> Printf.eprintf "%s\n" (reuse_string_to_ml error) ; current := k ()
+        | CCliOutput (output, k) -> Printf.printf "%s" (reuse_string_to_ml output) ; current := k ()
+        | CCliTime (k) -> current := k (Int32.of_float ((Sys.time ()) *. 1000000.0))
+        | CCliMaxHeapSize (k) -> current := k (Int32.of_int ((Gc.stat ()).top_heap_words * (Sys.word_size / 8)))
+        | CCliWriteFiles (files, k) -> write_files files ; current := k ()
+        | CCliReadFiles (files, k) -> current := k (read_files files)
+        | CCliExit (status) -> exit (Int32.to_int status)
 done
