@@ -1,5 +1,5 @@
 
-(pub typ (source-file iterator)  (SourceFile module-reference string iterator))
+(pub typ source-file  (SourceFile module-reference string slice))
 (pub typ source-file-type SourceFileTypeReuse
                           SourceFileTypeStrings
                           SourceFileTypeTargetLanguage)
@@ -21,6 +21,11 @@
      (match file
             (SourceFile _ __ content)
                 content))
+
+(pub def source-file-size (file)
+     (match file
+            (SourceFile _ __ content)
+                (slice-size content)))
 
 (def last-n-chars (n path)
      (string-substring (- (string-size path) n) n path))

@@ -1,7 +1,7 @@
 
 (typ cli-program (CliTime (fn (int32) cli-program))
                  (CliMaxHeapSize (fn (int32) cli-program))
-                 (CliReadFiles (list (pair module-reference string)) (fn ((list (source-file slice))) cli-program))
+                 (CliReadFiles (list (pair module-reference string)) (fn ((list source-file)) cli-program))
                  (CliWriteFiles (list (pair string string)) (fn () cli-program))
                  (CliOutput string (fn () cli-program))
                  (CliError string (fn () cli-program))
@@ -45,7 +45,7 @@
      (string-join (string-of-char 10) (list-map (string-join (data-space)) table)))
 
 (def print-diagnostics (
-     arguments
+     arguments file-entries
      max-heap-size
      start-parse end-parse
      start-transform end-transform
@@ -57,6 +57,7 @@
      (match (flag-is-true? (data-diagnostics-flag) False arguments)
             True
                (CliError (table-to-string (list 
+                    (list (string-from-int32 (list-foldl (fn (file bytes) (+ bytes (source-file-size file))) 0 file-entries)) (data-bytes-read))
                     (list (string-from-int32 max-heap-size) (data-max-heap-size))
                     (list (string-from-int32 (- end-parse start-parse)) (data-parse-time))
                     (list (string-from-int32 (- end-transform start-transform)) (data-transform-time))
@@ -104,7 +105,7 @@
                               (CliWriteFiles (list (Pair output-path source)) (fn ()
                               (CliTime (fn (end-write-files)
                               (CliMaxHeapSize (fn (max-heap-size)
-                              (print-diagnostics arguments
+                              (print-diagnostics arguments file-entries
                                                  max-heap-size
                                                  start-parse end-parse
                                                  start-transform end-transform

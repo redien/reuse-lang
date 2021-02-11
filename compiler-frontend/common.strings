@@ -66,6 +66,7 @@ module-flag                  |--module
 diagnostics-flag             |--diagnostics
 read-files                   |read files (μs)
 write-files                  |write files (μs)
+bytes-read                   |read files (bytes)
 max-heap-size                |max heap size (bytes)
 parse-time                   |parsing (μs)
 transform-time               |ast transformation (μs)

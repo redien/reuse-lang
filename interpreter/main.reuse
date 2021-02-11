@@ -1,7 +1,7 @@
 
 (typ (event iterator state) (EventArguments (list string))
                             (EventReadStdin iterator state)
-                            (EventReadFiles (list (source-file iterator)) state))
+                            (EventReadFiles (list source-file) state))
 
 (typ (command state) (CommandError string)
                      (CommandOutput string)
