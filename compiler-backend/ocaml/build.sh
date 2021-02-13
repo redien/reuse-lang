@@ -28,6 +28,7 @@ $project_root/reusec --language ocaml\
                      $script_path/ocaml.reuse\
                      $project_root/compiler-frontend/path.reuse\
                      $project_root/compiler-frontend/compiler.reuse\
+                     $project_root/compiler-frontend/cli.strings\
                      $project_root/compiler-frontend/cli.reuse
 
 cp $project_root/compiler-frontend/Cli.ml $build_dir/Cli.ml

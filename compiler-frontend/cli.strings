@@ -1,0 +1,14 @@
+no-input-files               |No input files
+no-output-path               |No output file specified, please use the --output [file] flag.
+output-key                   |--output
+stdlib                       |--stdlib
+module-flag                  |--module
+diagnostics-flag             |--diagnostics
+read-files                   |read files (μs)
+write-files                  |write files (μs)
+bytes-read                   |read files (bytes)
+max-heap-size                |max heap size (bytes)
+parse-time                   |parsing (μs)
+transform-time               |ast transformation (μs)
+generate-time                |code generation (μs)
+standard-library-filename    |standard-library.reuse

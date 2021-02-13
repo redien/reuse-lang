@@ -30,16 +30,14 @@
 (def table-to-string (table)
      (string-join (string-of-char 10) (list-map (string-join (data-space)) table)))
 
-(def print-diagnostics (
-     arguments file-entries
-     max-heap-size
-     start-parse end-parse
-     start-transform end-transform
-     start-generate end-generate
-     start-read-files end-read-files
-     start-write-files end-write-files
-     k
-)
+(def print-diagnostics (arguments file-entries
+                        max-heap-size
+                        start-parse end-parse
+                        start-transform end-transform
+                        start-generate end-generate
+                        start-read-files end-read-files
+                        start-write-files end-write-files
+                        k)
      (match (flag-is-true? (data-diagnostics-flag) False arguments)
             True
                (CliError (table-to-string (list 
