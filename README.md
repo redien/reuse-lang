@@ -171,12 +171,6 @@ Compiler for the Reuse programming language
   - Pro: A match expression can work just as well as a let expression
   - Con: Might encourage breaking up functions that would be better understood as just one
 
-**Minimal and extended**
-
-Reuse has a minimal subset making it trivial to write a translator for a new language.
-
-The extended language gives us more convenience and compiles down to the minimal subset.
-
 ## Development
 
 Use the prepared docker image to launch a bash shell with the necessary tools:
@@ -184,6 +178,25 @@ Use the prepared docker image to launch a bash shell with the necessary tools:
 ```sh
 docker run --rm -it -v $PWD:/home/opam/reuse-lang redien/reuse-lang-dev-env
 ```
+
+## Popular library types that could be built with reuse
+
+- Parsing, manipulation and serialization of:
+  - Semver
+  - Date & Time
+  - URIs
+- Encoder/decoder of:
+  - JSON
+  - YAML
+  - TOML
+  - INI
+  - .env
+  - .properties
+  - CBOR
+  - msgpack
+- Command-line parser and usage generator
+- ASCII table generator
+- ASCII progress bar
 
 ## Todo
 
