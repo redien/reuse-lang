@@ -1,0 +1,18 @@
+
+(def path-filename (path)
+     (match (list-last (string-split 47 path))
+            (Some filename)  filename
+            None             path))
+
+(def path-filename-without-extension (path)
+     (match (list-first (string-split 46 (path-filename path)))
+            (Some name)  name
+            None         (path-filename path)))
+
+(def path-filename-extension (path)
+     (match (list-last (string-split 46 (path-filename path)))
+            (Some name)  name
+            None         (string-empty)))
+
+(def path-join (paths)
+     (string-join (data-/) paths))
