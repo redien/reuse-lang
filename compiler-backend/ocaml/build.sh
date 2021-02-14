@@ -10,8 +10,6 @@ $project_root/parser/build.sh
 # Build compiler
 $project_root/reusec --language ocaml\
                      --output $build_dir/ReuseCompiler.ml\
-                     --module $project_root/string-gen/string-gen.reuse\
-                     --module $project_root/sexp-parser/sexp-parser.reuse\
                      --module $($project_root/dev-env/builddir.sh parser)/parser.reuse\
                      $project_root/argument-parser/argument-parser.strings\
                      $project_root/argument-parser/argument-parser.reuse\

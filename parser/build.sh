@@ -7,8 +7,8 @@ build_dir=$($project_root/dev-env/builddir.sh parser)
 
 $project_root/reusec --language module\
                      --output $build_dir/parser.reuse\
-                     --module $project_root/sexp-parser/sexp-parser.reuse\
-                     --module $project_root/string-gen/string-gen.reuse\
+                     $project_root/sexp-parser/sexp-parser.reuse\
+                     $project_root/string-gen/string-gen.reuse\
                      $project_root/parser/ast.reuse\
                      $project_root/parser/source-file.strings\
                      $project_root/parser/source-file.reuse\

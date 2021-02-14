@@ -9,8 +9,6 @@ $script_path/build.sh
 
 $project_root/reusec --language ocaml\
                      --output $build_dir/Test.ml\
-                     --module $project_root/sexp-parser/sexp-parser.reuse\
-                     --module $project_root/string-gen/string-gen.reuse\
                      --module $build_dir/parser.reuse\
                      $project_root/parser/main.strings\
                      $project_root/parser/main.reuse
