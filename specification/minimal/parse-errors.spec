@@ -38,23 +38,23 @@ Should return an error given a malformed type definition
 Should return an error given a malformed function definition
 | (def)
 > 1
-? I think you wanted to write a function definition, but it doesn't have the right shape. It should look like this:\\n\\n(def name-of-function (arguments) expression)\\n\\n
+? Malformed function definition found:
 
 | (def name)
 > 1
-? I think you wanted to write a function definition, but it doesn't have the right shape. It should look like this:\\n\\n(def name-of-function (arguments) expression)\\n\\n
+? Malformed function definition found:
 
 | (def name ())
 > 1
-? I think you wanted to write a function definition, but it doesn't have the right shape. It should look like this:\\n\\n(def name-of-function (arguments) expression)\\n\\n
+? Malformed function definition found:
 
 | (def name a)
 > 1
-? I think you wanted to write a function definition, but it doesn't have the right shape. It should look like this:\\n\\n(def name-of-function (arguments) expression)\\n\\n
+? Malformed function definition found:
 
 | (def name () a b)
 > 1
-? I think you wanted to write a function definition, but it doesn't have the right shape. It should look like this:\\n\\n(def name-of-function (arguments) expression)\\n\\n
+? Malformed function definition found:
 
 
 Should return an error given a malformed match expression

@@ -56,8 +56,10 @@
      (match error
             (MalformedDefinitionError range)
                 (i18n-malformed-definition-error range)
-            (MalformedFunctionDefinitionError range)
-                (i18n-malformed-function-definition-error range)
+            (MalformedFunctionDefinitionError source-reference range)
+                (string-format (list
+                    (list (data-malformed-function-definition))
+                    (list (location-information files source-reference range))))
             (MalformedTypeDefinitionError range)
                 (i18n-malformed-type-definition-error range)
             (MalformedFunctionNameError range)

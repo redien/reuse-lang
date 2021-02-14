@@ -3,7 +3,7 @@
      (match error
             (MalformedDefinitionError            _)        (data-MalformedDefinitionError            )
             (MalformedTypeDefinitionError        _)        (data-MalformedTypeDefinitionError        )
-            (MalformedFunctionDefinitionError    _)        (data-MalformedFunctionDefinitionError    )
+            (MalformedFunctionDefinitionError    _ __)     (data-MalformedFunctionDefinitionError    )
             (MalformedFunctionNameError          _)        (data-MalformedFunctionNameError          )
             (MalformedExpressionError            _)        (data-MalformedExpressionError            )
             (MalformedMatchExpressionError       _)        (data-MalformedMatchExpressionError       )
