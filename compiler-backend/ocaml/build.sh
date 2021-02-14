@@ -46,3 +46,5 @@ cp $script_path/pervasives.ml $build_dir/data/pervasives.ml
 
 $project_root/standard-library/build.sh
 cp $($project_root/dev-env/builddir.sh standard-library)/standard-library.reuse $build_dir/data
+
+cp $($project_root/dev-env/builddir.sh parser)/parser.reuse $build_dir/data
