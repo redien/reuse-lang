@@ -63,7 +63,7 @@
      (match identifier
             (Identifier _ __ source-reference ___ ____)  source-reference))
 
-(def identifier-module (identifier)
+(pub def identifier-module (identifier)
      (source-reference-module (identifier-source-reference identifier)))
 
 (pub def identifier-range (identifier)

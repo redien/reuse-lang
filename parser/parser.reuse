@@ -234,8 +234,9 @@
             True   (parser-error (MalformedTypeDefinitionError range))
             False
      (match (= kind (identifier-def))
-            True   (parser-bind (parser-get-source-reference) (fn (source-reference)
-                   (parser-error (MalformedFunctionDefinitionError source-reference range))))
+            True   
+                (parser-bind  (parser-get-source-reference) (fn (source-reference)
+                (parser-error (MalformedFunctionDefinitionError source-reference range))))
             False  (parser-error (MalformedDefinitionError range)))))
 
 (def sexp-to-definition (scope expression)

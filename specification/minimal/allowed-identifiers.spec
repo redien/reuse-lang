@@ -72,6 +72,20 @@ Should allow commonly reserved words as variable names
 > (asr' 10 asr)
 = 10
 
+| (typ arguments MyEmpty)
+| (typ (mytype arguments) (MyCons arguments))
+| (def arguments () 1)
+| (def arguments' (arguments _) arguments)
+> (arguments' 10 arguments)
+= 10
+
+| (typ await MyEmpty)
+| (typ (mytype await) (MyCons await))
+| (def await () 1)
+| (def await' (await _) await)
+> (await' 10 await)
+= 10
+
 | (typ begin MyEmpty)
 | (typ (mytype begin) (MyCons begin))
 | (def begin () 1)
@@ -79,11 +93,25 @@ Should allow commonly reserved words as variable names
 > (begin' 10 begin)
 = 10
 
+| (typ break MyEmpty)
+| (typ (mytype break) (MyCons break))
+| (def break () 1)
+| (def break' (break _) break)
+> (break' 10 break)
+= 10
+
 | (typ class MyEmpty)
 | (typ (mytype class) (MyCons class))
 | (def class () 1)
 | (def class' (class _) class)
 > (class' 10 class)
+= 10
+
+| (typ const MyEmpty)
+| (typ (mytype const) (MyCons const))
+| (def const () 1)
+| (def const' (const _) const)
+> (const' 10 const)
 = 10
 
 | (typ constructor MyEmpty)
@@ -107,6 +135,13 @@ Should allow commonly reserved words as variable names
 > (constraint' 10 constraint)
 = 10
 
+| (typ continue MyEmpty)
+| (typ (mytype continue) (MyCons continue))
+| (def continue () 1)
+| (def continue' (continue _) continue)
+> (continue' 10 continue)
+= 10
+
 | (typ case MyEmpty)
 | (typ (mytype case) (MyCons case))
 | (def case () 1)
@@ -114,11 +149,32 @@ Should allow commonly reserved words as variable names
 > (case' 10 case)
 = 10
 
+| (typ catch MyEmpty)
+| (typ (mytype catch) (MyCons catch))
+| (def catch () 1)
+| (def catch' (catch _) catch)
+> (catch' 10 catch)
+= 10
+
 | (typ data MyEmpty)
 | (typ (mytype data) (MyCons data))
 | (def data () 1)
 | (def data' (data _) data)
 > (data' 10 data)
+= 10
+
+| (typ debugger MyEmpty)
+| (typ (mytype debugger) (MyCons debugger))
+| (def debugger () 1)
+| (def debugger' (debugger _) debugger)
+> (debugger' 10 debugger)
+= 10
+
+| (typ delete MyEmpty)
+| (typ (mytype delete) (MyCons delete))
+| (def delete () 1)
+| (def delete' (delete _) delete)
+> (delete' 10 delete)
 = 10
 
 | (typ deriving MyEmpty)
@@ -170,6 +226,20 @@ Should allow commonly reserved words as variable names
 > (external' 10 external)
 = 10
 
+| (typ export MyEmpty)
+| (typ (mytype export) (MyCons export))
+| (def export () 1)
+| (def export' (export _) export)
+> (export' 10 export)
+= 10
+
+| (typ extends MyEmpty)
+| (typ (mytype extends) (MyCons extends))
+| (def extends () 1)
+| (def extends' (extends _) extends)
+> (extends' 10 extends)
+= 10
+
 | (typ else MyEmpty)
 | (typ (mytype else) (MyCons else))
 | (def else () 1)
@@ -182,6 +252,20 @@ Should allow commonly reserved words as variable names
 | (def end () 1)
 | (def end' (end _) end)
 > (end' 10 end)
+= 10
+
+| (typ enum MyEmpty)
+| (typ (mytype enum) (MyCons enum))
+| (def enum () 1)
+| (def enum' (enum _) enum)
+> (enum' 10 enum)
+= 10
+
+| (typ eval MyEmpty)
+| (typ (mytype eval) (MyCons eval))
+| (def eval () 1)
+| (def eval' (eval _) eval)
+> (eval' 10 eval)
 = 10
 
 | (typ fun MyEmpty)
@@ -203,6 +287,13 @@ Should allow commonly reserved words as variable names
 | (def false () 1)
 | (def false' (false _) false)
 > (false' 10 false)
+= 10
+
+| (typ finally MyEmpty)
+| (typ (mytype finally) (MyCons finally))
+| (def finally () 1)
+| (def finally' (finally _) finally)
+> (finally' 10 finally)
 = 10
 
 | (typ for MyEmpty)
@@ -275,6 +366,13 @@ Should allow commonly reserved words as variable names
 > (import' 10 import)
 = 10
 
+| (typ implements MyEmpty)
+| (typ (mytype implements) (MyCons implements))
+| (def implements () 1)
+| (def implements' (implements _) implements)
+> (implements' 10 implements)
+= 10
+
 | (typ inherit MyEmpty)
 | (typ (mytype inherit) (MyCons inherit))
 | (def inherit () 1)
@@ -294,6 +392,20 @@ Should allow commonly reserved words as variable names
 | (def instance () 1)
 | (def instance' (instance _) instance)
 > (instance' 10 instance)
+= 10
+
+| (typ instanceof MyEmpty)
+| (typ (mytype instanceof) (MyCons instanceof))
+| (def instanceof () 1)
+| (def instanceof' (instanceof _) instanceof)
+> (instanceof' 10 instanceof)
+= 10
+
+| (typ infinity MyEmpty)
+| (typ (mytype infinity) (MyCons infinity))
+| (def infinity () 1)
+| (def infinity' (infinity _) infinity)
+> (infinity' 10 infinity)
 = 10
 
 | (typ infix MyEmpty)
@@ -322,6 +434,13 @@ Should allow commonly reserved words as variable names
 | (def in () 1)
 | (def in' (in _) in)
 > (in' 10 in)
+= 10
+
+| (typ interface MyEmpty)
+| (typ (mytype interface) (MyCons interface))
+| (def interface () 1)
+| (def interface' (interface _) interface)
+> (interface' 10 interface)
 = 10
 
 | (typ land MyEmpty)
@@ -408,6 +527,13 @@ Should allow commonly reserved words as variable names
 > (mutable' 10 mutable)
 = 10
 
+| (typ NaN MyEmpty)
+| (typ (mytype NaN) (MyCons NaN))
+| (def NaN () 1)
+| (def NaN' (NaN _) NaN)
+> (NaN' 10 NaN)
+= 10
+
 | (typ new MyEmpty)
 | (typ (mytype new) (MyCons new))
 | (def new () 1)
@@ -434,6 +560,13 @@ Should allow commonly reserved words as variable names
 | (def not () 1)
 | (def not' (not _) not)
 > (not' 10 not)
+= 10
+
+| (typ null MyEmpty)
+| (typ (mytype null) (MyCons null))
+| (def null () 1)
+| (def null' (null _) null)
+> (null' 10 null)
 = 10
 
 | (typ object MyEmpty)
@@ -478,11 +611,32 @@ Should allow commonly reserved words as variable names
 > (parser' 10 parser)
 = 10
 
+| (typ package MyEmpty)
+| (typ (mytype package) (MyCons package))
+| (def package () 1)
+| (def package' (package _) package)
+> (package' 10 package)
+= 10
+
 | (typ proc MyEmpty)
 | (typ (mytype proc) (MyCons proc))
 | (def proc () 1)
 | (def proc' (proc _) proc)
 > (proc' 10 proc)
+= 10
+
+| (typ protected MyEmpty)
+| (typ (mytype protected) (MyCons protected))
+| (def protected () 1)
+| (def protected' (protected _) protected)
+> (protected' 10 protected)
+= 10
+
+| (typ public MyEmpty)
+| (typ (mytype public) (MyCons public))
+| (def public () 1)
+| (def public' (public _) public)
+> (public' 10 public)
 = 10
 
 | (typ qualified MyEmpty)
@@ -506,6 +660,13 @@ Should allow commonly reserved words as variable names
 > (rem' 10 rem)
 = 10
 
+| (typ return MyEmpty)
+| (typ (mytype return) (MyCons return))
+| (def return () 1)
+| (def return' (return _) return)
+> (return' 10 return)
+= 10
+
 | (typ sig MyEmpty)
 | (typ (mytype sig) (MyCons sig))
 | (def sig () 1)
@@ -513,11 +674,32 @@ Should allow commonly reserved words as variable names
 > (sig' 10 sig)
 = 10
 
+| (typ static MyEmpty)
+| (typ (mytype static) (MyCons static))
+| (def static () 1)
+| (def static' (static _) static)
+> (static' 10 static)
+= 10
+
 | (typ struct MyEmpty)
 | (typ (mytype struct) (MyCons struct))
 | (def struct () 1)
 | (def struct' (struct _) struct)
 > (struct' 10 struct)
+= 10
+
+| (typ super MyEmpty)
+| (typ (mytype super) (MyCons super))
+| (def super () 1)
+| (def super' (super _) super)
+> (super' 10 super)
+= 10
+
+| (typ switch MyEmpty)
+| (typ (mytype switch) (MyCons switch))
+| (def switch () 1)
+| (def switch' (switch _) switch)
+> (switch' 10 switch)
 = 10
 
 | (typ true MyEmpty)
@@ -534,11 +716,32 @@ Should allow commonly reserved words as variable names
 > (then' 10 then)
 = 10
 
+| (typ this MyEmpty)
+| (typ (mytype this) (MyCons this))
+| (def this () 1)
+| (def this' (this _) this)
+> (this' 10 this)
+= 10
+
+| (typ throw MyEmpty)
+| (typ (mytype throw) (MyCons throw))
+| (def throw () 1)
+| (def throw' (throw _) throw)
+> (throw' 10 throw)
+= 10
+
 | (typ type MyEmpty)
 | (typ (mytype type) (MyCons type))
 | (def type () 1)
 | (def type' (type _) type)
 > (type' 10 type)
+= 10
+
+| (typ typeof MyEmpty)
+| (typ (mytype typeof) (MyCons typeof))
+| (def typeof () 1)
+| (def typeof' (typeof _) typeof)
+> (typeof' 10 typeof)
 = 10
 
 | (typ to MyEmpty)
@@ -553,6 +756,13 @@ Should allow commonly reserved words as variable names
 | (def try () 1)
 | (def try' (try _) try)
 > (try' 10 try)
+= 10
+
+| (typ undefined MyEmpty)
+| (typ (mytype undefined) (MyCons undefined))
+| (def undefined () 1)
+| (def undefined' (undefined _) undefined)
+> (undefined' 10 undefined)
 = 10
 
 | (typ val MyEmpty)
@@ -581,6 +791,13 @@ Should allow commonly reserved words as variable names
 | (def var () 1)
 | (def var' (var _) var)
 > (var' 10 var)
+= 10
+
+| (typ void MyEmpty)
+| (typ (mytype void) (MyCons void))
+| (def void () 1)
+| (def void' (void _) void)
+> (void' 10 void)
 = 10
 
 | (typ with MyEmpty)
@@ -616,6 +833,13 @@ Should allow commonly reserved words as variable names
 | (def quot () 1)
 | (def quot' (quot _) quot)
 > (quot' 10 quot)
+= 10
+
+| (typ yield MyEmpty)
+| (typ (mytype yield) (MyCons yield))
+| (def yield () 1)
+| (def yield' (yield _) yield)
+> (yield' 10 yield)
 = 10
 
 Type names should be allowed as capture variables

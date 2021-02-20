@@ -11,7 +11,7 @@ run() {
         test-module-compiler)           $project_root/compiler-backend/module/build-for-test.sh && IMPL=compiler-backend/module run test-minimal && IMPL=compiler-backend/module run test-extended ;;
         test-ocaml-compiler)            $project_root/compiler-backend/ocaml/build-for-test.sh && IMPL=compiler-backend/ocaml run test-minimal && IMPL=compiler-backend/ocaml run test-extended ;;
         test-haskell-compiler)          $project_root/compiler-backend/haskell/build-for-test.sh && IMPL=compiler-backend/haskell run test-minimal && IMPL=compiler-backend/haskell run test-extended ;;
-        test-javascript-node-compiler)  $project_root/compiler-backend/javascript-node/build-for-test.sh && IMPL=compiler-backend/javascript-node run test-minimal && IMPL=compiler-backend/javascript-node run test-extended ;;
+        test-javascript-compiler)       $project_root/compiler-backend/javascript/build-for-test.sh && IMPL=compiler-backend/javascript run test-minimal && IMPL=compiler-backend/javascript run test-extended ;;
         test-sexp-parser)               $project_root/sexp-parser/build-for-test.sh && $project_root/dev-env/spec-runner/run.sh sexp-parser/specification $project_root/sexp-parser/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
         test-parser)                    $project_root/parser/build-for-test.sh && $project_root/dev-env/spec-runner/run.sh parser/specification $project_root/parser/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
         test-standard-library)          $project_root/standard-library/build-for-test.sh && $project_root/dev-env/spec-runner/run.sh standard-library/specification $project_root/standard-library/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;

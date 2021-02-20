@@ -26,3 +26,8 @@ $project_root/compiler-backend/haskell/build.sh
 cp "$($project_root/dev-env/builddir.sh haskell-compiler)/compiler" "$project_root/bin/reuse-haskell"
 cp "$($project_root/dev-env/builddir.sh haskell-compiler)/data/Pervasives.hs" "$project_root/bin/data/Pervasives.hs"
 cp "$($project_root/dev-env/builddir.sh haskell-compiler)/data/preamble.hs" "$project_root/bin/data/preamble.hs"
+
+$project_root/compiler-backend/javascript/build.sh
+cp "$($project_root/dev-env/builddir.sh javascript-compiler)/compiler" "$project_root/bin/reuse-javascript"
+cp "$($project_root/dev-env/builddir.sh javascript-compiler)/data/pervasives.js" "$project_root/bin/data/pervasives.js"
+cp "$($project_root/dev-env/builddir.sh javascript-compiler)/data/preamble.js" "$project_root/bin/data/preamble.js"

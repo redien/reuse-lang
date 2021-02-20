@@ -1,0 +1,234 @@
+
+(def prefix-type-variable (identifier)
+     (string-prepend 39 (string-prepend 84 (identifier-name identifier))))
+
+(def prefix-constructor (constructor)
+     (string-prepend 67 constructor))
+
+(def reserved-identifiers ()
+     (list data-var data-import data-default data-case data-class data-do data-else data-false data-for 
+           data-function data-if data-in data-new data-true data-try data-with data-while data-break
+           data-const data-continue data-catch data-debugger data-delete data-export data-extends data-enum
+           data-finally data-instanceof data-null data-return data-super data-switch data-this data-throw
+           data-typeof data-void data-await))
+
+(def token-is-reserved? (token)
+     (and (<= token -2000) (> token -3000)))
+
+(def escape-identifier (identifier)
+     (match (token-is-reserved? (identifier-token identifier))
+            True   (string-prepend 95 (identifier-name identifier))
+            False  (string-flatmap escape-char (identifier-name identifier))))
+
+(def operator-translation-map ()
+     (dictionary-of (list
+        (Pair (data-+) (data-int32-plus))
+        (Pair (data--) (data-int32-minus))
+        (Pair (data-*) (data-int32-multiply))
+        (Pair (data-/) (data-int32-divide))
+        (Pair (data-%) (data-int32-modulus))
+        (Pair (data-&) (data-int32-and)))))
+
+(def translate-identifier (identifier)
+     (match (token-is-operator? (identifier-token identifier))
+            True   (match (dictionary-get (identifier-name identifier) (operator-translation-map))
+                          (Some translation)  translation
+                          None                (escape-identifier identifier))
+            False  (escape-identifier identifier)))
+
+(def translate-less-than (translate-expression expressions)
+     (match expressions
+            (Cons a (Cons b (Cons then-case (Cons else-case Empty))))
+                (wrap-in-brackets (join (list (translate-expression a)
+                                              (data-less-than)
+                                              (translate-expression b)
+                                              (data-space)
+                                              (data-question-mark)
+                                              (data-space)
+                                              (translate-expression then-case)
+                                              (data-space)
+                                              (data-colon)
+                                              (data-space)
+                                              (translate-expression else-case))))
+            _
+                (data-compile-error)))
+
+(def wrap-in-angle-brackets (s)
+     (join (list (data-open-array) s (data-close-array))))
+
+(def translate-constructor (translator identifier)
+     (pipe (list-map translator)
+           (list-cons (prefix-constructor (escape-identifier identifier)))
+           (string-join (data-comma))
+           wrap-in-angle-brackets))
+
+(def translate-pattern (pattern)
+     (match pattern
+            (Capture _)
+                (data-capture)
+            (IntegerPattern integer _)
+                (string-from-int32 integer)
+            (ConstructorPattern identifier Empty _)
+                (prefix-constructor (escape-identifier identifier))
+            (ConstructorPattern identifier patterns _)
+                (translate-constructor translate-pattern identifier patterns)))
+
+(def translate-captures (pattern)
+     (match pattern
+            (Capture identifier)
+                (list (escape-identifier identifier))
+            (IntegerPattern _ __)
+                (list-empty)
+            (ConstructorPattern _ patterns __)
+                (list-flatmap translate-captures patterns)))
+
+(def translate-rule (translate-expression rule)
+     (match rule
+            (Pair pattern expression)
+                 (join (list (translate-pattern pattern)
+                             (data-comma)
+                             (wrap-in-brackets (string-join (data-comma) (translate-captures pattern)))
+                             (data-lambda-arrow)
+                             (translate-expression expression)))))
+
+(def translate-match-expression (translate-expression expression)
+     (pipe (list-map (translate-rule translate-expression))
+           (string-join (data-comma))
+           wrap-in-angle-brackets
+           (fn (rules)
+               (list (data-match-func) (wrap-in-brackets (join (list (translate-expression expression) (data-comma) rules)))))
+           (string-join (data-space))))
+
+(def translate-function-application' (translate-expression expressions)
+     (match expressions
+            (Cons function Empty)
+                    (join (list (translate-expression function) (wrap-in-brackets (string-empty))))
+            (Cons function args)
+                    (join (list (translate-expression function)
+                                (join (list-map (. wrap-in-brackets translate-expression) args))))
+            Empty
+                    (data-compile-error)))
+
+(def translate-function-application (translate-expression expressions)
+     (match expressions
+            (Cons (Variable identifier) rest)
+                    (match (= (identifier-token identifier) (identifier-int32-less-than))
+                           True  (translate-less-than translate-expression rest)
+                           False (translate-function-application' translate-expression expressions))
+            _
+                    (translate-function-application' translate-expression expressions)))
+
+(def translate-argument-list (arguments)
+     (match (list-empty? arguments)
+            True   (wrap-in-brackets (string-empty))
+            False  (string-join (data-lambda-arrow) (list-map escape-identifier arguments))))
+
+(def translate-lambda (translate-expression arguments expression)
+     (join (list (translate-argument-list arguments)
+                 (data-lambda-arrow)
+                 (translate-expression expression))))
+
+(def translate-expression (expression)
+     (match expression
+            (Lambda arguments expression _)
+                (wrap-in-brackets (translate-lambda translate-expression arguments expression))
+            (Constructor identifier Empty _)
+                (prefix-constructor (escape-identifier identifier))
+            (Constructor identifier expressions _)
+                ((translate-constructor translate-expression identifier) expressions)
+            (FunctionApplication expressions _)
+                (translate-function-application translate-expression expressions)
+            (IntegerConstant integer _)
+                (string-from-int32 integer)
+            (Variable identifier)
+                (translate-identifier identifier)
+            (Match expression rules _)
+                (translate-match-expression translate-expression expression rules)))
+
+(def translate-function-definition (identifier arguments expression)
+     (join (list (data-var)
+                 (data-space)
+                 (escape-identifier identifier)
+                 (data-space)
+                 (data-equals)
+                 (data-space)
+                 (translate-lambda translate-expression arguments expression)
+                 (data-end-statement))))
+
+(def constructor-identifier (constructor)
+     (match constructor
+            (SimpleConstructor identifier)
+                identifier
+            (ComplexConstructor identifier _ __)
+                identifier))
+
+(def translate-constructor-definition (constructor)
+     (join (list (data-var)
+                 (data-space)
+                 (prefix-constructor (escape-identifier (constructor-identifier constructor)))
+                 (data-space)
+                 (data-equals)
+                 (data-space)
+                 (data-open-block)
+                 (prefix-constructor (escape-identifier (constructor-identifier constructor)))
+                 (data-colon)
+                 (data-true)
+                 (data-close-block)
+                 (data-end-statement))))
+
+(def translate-type-definition (name parameters constructors)
+     (string-join (string-of-char 10) (list-map translate-constructor-definition constructors)))
+
+(def translate-definition (definition)
+     (match definition
+            (FunctionDefinition identifier _ arguments expression __)
+                (translate-function-definition identifier arguments expression)
+            (TypeDefinition name _ parameters constructors __)
+                (translate-type-definition name parameters constructors)
+            (TargetDefinition _ data)
+                (string-from-slice data)))
+
+(def translate-export (definition)
+     (match definition
+            (FunctionDefinition identifier True arguments _ __)
+                (match (identifier-module identifier)
+                       ModuleSelf
+                            (list (join (list (escape-identifier identifier)
+                                              (data-colon)
+                                              (data-open-bracket)
+                                              (string-join (data-comma) (list-map escape-identifier arguments))
+                                              (data-close-bracket)
+                                              (data-lambda-arrow)
+                                              (escape-identifier identifier)
+                                              (join (list-map (. wrap-in-brackets escape-identifier) arguments)))))
+                       _
+                            (list-empty))
+            _
+                (list-empty)))
+
+(def translate-exports (definitions)
+     (join (list (string-of-char 10)
+                 (data-module)
+                 (data-dot)
+                 (data-exports)
+                 (data-equals)
+                 (data-open-block)
+                 (string-of-char 10)
+                 (data-indent)
+                 (string-join (join (list (data-comma) (string-of-char 10) (data-indent)))
+                              (list-flatmap translate-export definitions))
+                 (string-of-char 10)
+                 (data-close-block)
+                 (data-end-statement))))
+
+(def generate-source (module-name definitions)
+     ((pipe (list-map translate-definition)
+            (string-join (string-of-char 10))
+            ((flip string-concat) (translate-exports definitions)))
+        definitions))
+
+(def internal-symbols ()
+     (add-identifiers (reserved-identifiers) -2000
+     (default-identifiers)))
+
+(def perform-transformations? () True)
