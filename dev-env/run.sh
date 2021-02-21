@@ -7,7 +7,7 @@ run() {
     case $1 in
         test)                           run test-string-gen && run test-sexp-parser && run test-parser && run test-compilers && run test-interpreter && run test-standard-library;;
         test-interpreter)               $project_root/interpreter/build-for-test.sh && IMPL=interpreter run test-minimal && IMPL=interpreter run test-extended ;;
-        test-compilers)                 run test-haskell-compiler && run test-ocaml-compiler ;;
+        test-compilers)                 run test-ocaml-compiler && run test-haskell-compiler && run test-javascript-compiler ;;
         test-module-compiler)           $project_root/compiler-backend/module/build-for-test.sh && IMPL=compiler-backend/module run test-minimal && IMPL=compiler-backend/module run test-extended ;;
         test-ocaml-compiler)            $project_root/compiler-backend/ocaml/build-for-test.sh && IMPL=compiler-backend/ocaml run test-minimal && IMPL=compiler-backend/ocaml run test-extended ;;
         test-haskell-compiler)          $project_root/compiler-backend/haskell/build-for-test.sh && IMPL=compiler-backend/haskell run test-minimal && IMPL=compiler-backend/haskell run test-extended ;;

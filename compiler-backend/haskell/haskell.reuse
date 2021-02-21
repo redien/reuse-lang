@@ -10,13 +10,27 @@
            data-forall data-foreign data-import data-instance data-infix data-infixl data-infixr
            data-newtype data-where))
 
+(def capital? (char)
+     (match (>= char 65)
+            False   False
+            True
+     (match (<= char 90)
+            True    True
+            False   False)))
+
+(def capitalized? (s)
+     (string-every? capital? (string-take 1 s)))
+
 (def token-is-reserved? (token)
      (and (<= token -2000) (> token -3000)))
 
 (def escape-identifier (identifier)
      (match (token-is-reserved? (identifier-token identifier))
             True   (string-prepend 95 (identifier-name identifier))
-            False  (string-flatmap escape-char (identifier-name identifier))))
+            False
+     (match (capitalized? (identifier-name identifier))
+            True  (string-prepend 95 (string-flatmap escape-char (identifier-name identifier)))
+            False (string-flatmap escape-char (identifier-name identifier)))))
 
 (def operator-translation-map ()
      (dictionary-of (list
