@@ -30,6 +30,7 @@ For languages who has some support for unicode we would like to support it to th
 - Identifiers can contain any number of unicode characters.
 - Identifiers that are mostly alpha-numeric will be easy to read and use.
 - Identifiers can contain a single unicode character without making it harder to read. For example `has-foo?` will translate to `has_foo` (unless there is another identifier called `has-foo!` for example in which case the result might be `has_foo2`.)
+- Encoded identifers are shorter which means there's less code to write to a file and less code for the target language compiler to parse.
 
 # Disadvantages
 
