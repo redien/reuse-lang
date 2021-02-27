@@ -22,14 +22,6 @@
             True   (string-prepend 95 (identifier-name identifier))
             False  (string-flatmap escape-char (identifier-name identifier))))
 
-(def join' (strings)
-     (source-string-join (string-empty) strings))
-
-(def wrap-in-brackets' (string)
-     (source-string-concat (SourceStringChar 40)
-     (source-string-concat string
-                           (SourceStringChar 41))))
-
 (def operator-translation-map ()
      (dictionary-of (list
         (Pair (data-+) (SourceString (data-int32-plus)))

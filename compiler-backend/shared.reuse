@@ -20,3 +20,11 @@
                 (add-identifiers rest (- offset 1) (dictionary-set (identifier) (Pair offset (identifier)) dictionary))
             Empty
                 dictionary))
+
+(pub def join' (strings)
+         (source-string-join (string-empty) strings))
+
+(pub def wrap-in-brackets' (string)
+         (source-string-concat (SourceStringChar 40)
+         (source-string-concat string
+                               (SourceStringChar 41))))
