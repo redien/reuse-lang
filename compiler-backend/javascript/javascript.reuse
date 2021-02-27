@@ -12,7 +12,7 @@
 (def escape-identifier (identifier)
      (match (token-is-reserved? (identifier-token identifier))
             True   (SourceString (string-prepend 95 (identifier-name identifier)))
-            False  (SourceStringIdentifier (identifier-name identifier))))
+            False  (SourceStringIdentifier identifier)))
 
 (def translate-constructor-identifier (identifier)
      (source-string-concat (SourceStringChar 67) (escape-identifier identifier)))

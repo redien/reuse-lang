@@ -26,8 +26,8 @@
             True   (SourceString (string-prepend 95 (identifier-name identifier)))
             False
      (match (capitalized? (identifier-name identifier))
-            True  (source-string-concat (SourceStringChar 95) (SourceStringIdentifier (identifier-name identifier)))
-            False (SourceStringIdentifier (identifier-name identifier)))))
+            True  (source-string-concat (SourceStringChar 95) (SourceStringIdentifier identifier))
+            False (SourceStringIdentifier identifier))))
 
 (def translate-constructor-identifier (constructor)
      (source-string-concat (SourceStringChar 67) (escape-identifier constructor)))

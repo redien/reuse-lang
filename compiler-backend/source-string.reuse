@@ -2,14 +2,11 @@
 (pub typ source-string SourceStringEmpty
                        (SourceStringChar int32)
                        (SourceString string)
-                       (SourceStringIdentifier string)
+                       (SourceStringIdentifier identifier)
                        (SourceStringConcat source-string source-string))
 
 (pub def source-string (string)
          (SourceString string))
-
-(pub def source-string-identifier (string)
-         (SourceStringIdentifier string))
 
 (pub def source-string-empty ()
          SourceStringEmpty)
@@ -48,5 +45,5 @@
                 SourceStringEmpty           (string-empty)
                 (SourceStringChar c)        (string-of-char c)
                 (SourceString s)            s
-                (SourceStringIdentifier i)  (escape-identifier' i)
+                (SourceStringIdentifier i)  (escape-identifier' (identifier-name i))
                 (SourceStringConcat a b)    (string-concat (source-string-to-string a) (source-string-to-string b))))
