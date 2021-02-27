@@ -1,0 +1,33 @@
+
+(pub typ source-string SourceStringEmpty
+                       (SourceStringChar int32)
+                       (SourceString string)
+                       (SourceStringIdentifier string)
+                       (SourceStringConcat source-string source-string))
+
+(pub def source-string (string)
+         (SourceString string))
+
+(pub def source-string-empty ()
+         SourceStringEmpty)
+
+(pub def source-string-concat (a b)
+         (SourceStringConcat a b))
+
+(pub def source-string-to-string (string)
+         (match string
+                SourceStringEmpty           (string-empty)
+                (SourceStringChar c)        (string-of-char c)
+                (SourceString s)            s
+                (SourceStringIdentifier i)  i
+                (SourceStringConcat a b)    (string-concat (source-string-to-string a) (source-string-to-string b))))
+
+(pub def source-string-join (separator strings)
+         (match strings
+                (Cons first rest)
+                    (list-foldl (fn (string joined)
+                                    (source-string-concat joined (source-string-concat (SourceString separator) string)))
+                                first
+                                rest)
+                Empty
+                    (source-string-empty)))
