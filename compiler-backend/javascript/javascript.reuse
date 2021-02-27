@@ -1,10 +1,4 @@
 
-(def prefix-type-variable (identifier)
-     (string-prepend 39 (string-prepend 84 (identifier-name identifier))))
-
-(def prefix-constructor (constructor)
-     (string-prepend 67 constructor))
-
 (def reserved-identifiers ()
      (list data-var data-import data-default data-case data-class data-do data-else data-false data-for 
            data-function data-if data-in data-new data-true data-try data-with data-while data-break
@@ -17,8 +11,11 @@
 
 (def escape-identifier (identifier)
      (match (token-is-reserved? (identifier-token identifier))
-            True   (string-prepend 95 (identifier-name identifier))
-            False  (string-flatmap escape-char (identifier-name identifier))))
+            True   (SourceString (string-prepend 95 (identifier-name identifier)))
+            False  (SourceStringIdentifier (identifier-name identifier))))
+
+(def translate-constructor-identifier (identifier)
+     (source-string-concat (SourceStringChar 67) (escape-identifier identifier)))
 
 (def operator-translation-map ()
      (dictionary-of (list
@@ -33,8 +30,8 @@
      (match (token-is-operator? (identifier-token identifier))
             True   (match (dictionary-get (identifier-name identifier) (operator-translation-map))
                           (Some translation)  translation
-                          None                (SourceString (escape-identifier identifier)))
-            False  (SourceString (escape-identifier identifier))))
+                          None                (escape-identifier identifier))
+            False  (escape-identifier identifier)))
 
 (def translate-less-than (translate-expression expressions)
      (match expressions
@@ -58,7 +55,7 @@
 
 (def translate-constructor (translator identifier)
      (pipe (list-map translator)
-           (list-cons (SourceString (prefix-constructor (escape-identifier identifier))))
+           (list-cons (translate-constructor-identifier identifier))
            (source-string-join (data-comma))
            wrap-in-angle-brackets))
 
@@ -69,14 +66,14 @@
             (IntegerPattern integer _)
                 (SourceString (string-from-int32 integer))
             (ConstructorPattern identifier Empty _)
-                (SourceString (prefix-constructor (escape-identifier identifier)))
+                (translate-constructor-identifier identifier)
             (ConstructorPattern identifier patterns _)
                 (translate-constructor translate-pattern identifier patterns)))
 
 (def translate-captures (pattern)
      (match pattern
             (Capture identifier)
-                (list (SourceString (escape-identifier identifier)))
+                (list (escape-identifier identifier))
             (IntegerPattern _ __)
                 (list-empty)
             (ConstructorPattern _ patterns __)
@@ -121,7 +118,7 @@
 (def translate-argument-list (arguments)
      (match (list-empty? arguments)
             True   (wrap-in-brackets' (source-string-empty))
-            False  (source-string-join (data-lambda-arrow) (list-map (. source-string escape-identifier) arguments))))
+            False  (source-string-join (data-lambda-arrow) (list-map escape-identifier arguments))))
 
 (def translate-lambda (translate-expression arguments expression)
      (join' (list (translate-argument-list arguments)
@@ -133,7 +130,7 @@
             (Lambda arguments expression _)
                 (wrap-in-brackets' (translate-lambda translate-expression arguments expression))
             (Constructor identifier Empty _)
-                (SourceString (prefix-constructor (escape-identifier identifier)))
+                (translate-constructor-identifier identifier)
             (Constructor identifier expressions _)
                 ((translate-constructor translate-expression identifier) expressions)
             (FunctionApplication expressions _)
@@ -148,7 +145,7 @@
 (def translate-function-definition (identifier arguments expression)
      (join' (list (SourceString (data-var))
                   (SourceString (data-space))
-                  (SourceString (escape-identifier identifier))
+                  (escape-identifier identifier)
                   (SourceString (data-space))
                   (SourceString (data-equals))
                   (SourceString (data-space))
@@ -165,12 +162,12 @@
 (def translate-constructor-definition (constructor)
      (join' (list (SourceString (data-var))
                   (SourceString (data-space))
-                  (SourceString (prefix-constructor (escape-identifier (constructor-identifier constructor))))
+                  (translate-constructor-identifier (constructor-identifier constructor))
                   (SourceString (data-space))
                   (SourceString (data-equals))
                   (SourceString (data-space))
                   (SourceString (data-open-block))
-                  (SourceString (prefix-constructor (escape-identifier (constructor-identifier constructor))))
+                  (translate-constructor-identifier (constructor-identifier constructor))
                   (SourceString (data-colon))
                   (SourceString (data-true))
                   (SourceString (data-close-block))
@@ -193,14 +190,14 @@
             (FunctionDefinition identifier True arguments _ __)
                 (match (identifier-module identifier)
                        ModuleSelf
-                            (list (join' (list (SourceString (escape-identifier identifier))
+                            (list (join' (list (escape-identifier identifier)
                                                (SourceString (data-colon))
                                                (SourceString (data-open-bracket))
-                                               (source-string-join (data-comma) (list-map (. source-string escape-identifier) arguments))
+                                               (source-string-join (data-comma) (list-map escape-identifier arguments))
                                                (SourceString (data-close-bracket))
                                                (SourceString (data-lambda-arrow))
-                                               (SourceString (escape-identifier identifier))
-                                               (join' (list-map (. wrap-in-brackets' (. source-string escape-identifier)) arguments)))))
+                                               (escape-identifier identifier)
+                                               (join' (list-map (. wrap-in-brackets' escape-identifier) arguments)))))
                        _
                             (list-empty))
             _
@@ -215,7 +212,7 @@
                   (SourceString (data-open-block))
                   (SourceStringChar 10)
                   (SourceString (data-indent))
-                  (source-string-join (join (list (data-comma) (string-of-char 10) (data-indent)))
+                  (source-string-join (string-join (string-of-char 10) (list (data-comma) (data-indent)))
                                       (list-flatmap translate-export definitions))
                   (SourceStringChar 10)
                   (SourceString (data-close-block))

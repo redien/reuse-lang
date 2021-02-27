@@ -8,18 +8,37 @@
 (pub def source-string (string)
          (SourceString string))
 
+(pub def source-string-identifier (string)
+         (SourceStringIdentifier string))
+
 (pub def source-string-empty ()
          SourceStringEmpty)
 
 (pub def source-string-concat (a b)
          (SourceStringConcat a b))
 
+(def is-alphanumeric (char)
+     (match (and (>= char 65) (<= char 90))
+            True   True
+            False
+     (match (and (>= char 48) (<= char 57))
+            True   True
+            False  (and (>= char 97) (<= char 122)))))
+
+(def escape-char' (char)
+     (match (is-alphanumeric char)
+            True   (string-of-char char)
+            False  (string-prepend 95 (string-from-int32 char))))
+
+(def escape-identifier' (identifier)
+     (string-flatmap escape-char' identifier))
+
 (pub def source-string-to-string (string)
          (match string
                 SourceStringEmpty           (string-empty)
                 (SourceStringChar c)        (string-of-char c)
                 (SourceString s)            s
-                (SourceStringIdentifier i)  i
+                (SourceStringIdentifier i)  (escape-identifier' i)
                 (SourceStringConcat a b)    (string-concat (source-string-to-string a) (source-string-to-string b))))
 
 (pub def source-string-join (separator strings)

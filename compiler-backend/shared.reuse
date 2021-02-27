@@ -1,19 +1,4 @@
 
-(def join (list) (string-join (string-empty) list))
-
-(def is-alphanumeric (char)
-     (match (and (>= char 65) (<= char 90))
-            True   True
-            False
-     (match (and (>= char 48) (<= char 57))
-            True   True
-            False  (and (>= char 97) (<= char 122)))))
-
-(def escape-char (char)
-     (match (is-alphanumeric char)
-            True   (string-of-char char)
-            False  (string-prepend 95 (string-from-int32 char))))
-
 (def add-identifiers (identifiers offset dictionary)
      (match identifiers
             (Cons identifier rest)

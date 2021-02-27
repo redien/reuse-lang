@@ -1,10 +1,4 @@
 
-(def prefix-type-variable (identifier)
-     (string-prepend 39 (string-prepend 84 (identifier-name identifier))))
-
-(def prefix-constructor (constructor)
-     (string-prepend 67 constructor))
-
 (def reserved-identifiers ()
      (list data-assert data-asr data-begin data-constraint data-do data-done data-downto data-type data-if
            data-then data-else data-with data-of data-end data-in data-fun data-let data-open data-and
@@ -13,14 +7,6 @@
            data-lsr data-lxor data-method data-mod data-module data-mutable data-new data-nonrec data-object
            data-private data-rec data-sig data-struct data-try data-val data-virtual data-when data-while
            data-parser data-value data-to data-slice))
-
-(def token-is-reserved? (token)
-     (and (<= token -2000) (> token -3000)))
-
-(def escape-identifier (identifier)
-     (match (token-is-reserved? (identifier-token identifier))
-            True   (string-prepend 95 (identifier-name identifier))
-            False  (string-flatmap escape-char (identifier-name identifier))))
 
 (def operator-translation-map ()
      (dictionary-of (list
@@ -31,12 +17,27 @@
         (Pair (data-%) (SourceString (data-int32-modulus)))
         (Pair (data-&) (SourceString (data-int32-and))))))
 
+(def token-is-reserved? (token)
+     (and (<= token -2000) (> token -3000)))
+
+(def translate-type-variable (identifier)
+     (source-string-concat (SourceStringChar 39)
+     (source-string-concat (SourceStringChar 84) (SourceStringIdentifier (identifier-name identifier)))))
+
+(def escape-identifier (identifier)
+     (match (token-is-reserved? (identifier-token identifier))
+            True   (SourceStringConcat (SourceStringChar 95) (SourceString (identifier-name identifier)))
+            False  (SourceStringIdentifier (identifier-name identifier))))
+
+(def translate-constructor-identifier (identifier)
+     (source-string-concat (SourceStringChar 67) (escape-identifier identifier)))
+
 (def translate-identifier (identifier)
      (match (token-is-operator? (identifier-token identifier))
             True   (match (dictionary-get (identifier-name identifier) (operator-translation-map))
                           (Some translation)  translation
-                          None                (SourceStringIdentifier (escape-identifier identifier)))
-            False  (SourceStringIdentifier (escape-identifier identifier))))
+                          None                (SourceStringIdentifier (identifier-name identifier)))
+            False  (escape-identifier identifier)))
 
 (def translate-less-than (translate-expression expressions)
      (match expressions
@@ -62,7 +63,7 @@
            (source-string-join (data-comma))
            wrap-in-brackets'
            (fn (parameters)
-               (list (SourceString (prefix-constructor (escape-identifier identifier)))
+               (list (translate-constructor-identifier identifier)
                      (SourceString (data-space))
                      parameters))
            join'
@@ -71,11 +72,11 @@
 (def translate-pattern (pattern)
      (match pattern
             (Capture identifier)
-                (SourceString (escape-identifier identifier))
+                (escape-identifier identifier)
             (IntegerPattern integer _)
                 (join' (list (SourceString (string-from-int32 integer)) (SourceStringChar 108)))
             (ConstructorPattern identifier Empty _)
-                (SourceString (prefix-constructor (escape-identifier identifier)))
+                (translate-constructor-identifier identifier)
             (ConstructorPattern identifier patterns _)
                 ((translate-constructor translate-pattern identifier) patterns)))
 
@@ -112,7 +113,7 @@
 (def translate-argument-list (arguments)
      (match (list-empty? arguments)
             True  (SourceString (wrap-in-brackets (string-empty)))
-            False (source-string-join (data-space) (list-map (. source-string escape-identifier) arguments))))
+            False (source-string-join (data-space) (list-map escape-identifier arguments))))
 
 (def translate-lambda (translate-expression arguments expression)
      (join' (list (SourceString (data-fun))
@@ -126,7 +127,7 @@
             (Lambda arguments expression _)
                 (wrap-in-brackets' (translate-lambda translate-expression arguments expression))
             (Constructor identifier Empty _)
-                (SourceString (prefix-constructor (escape-identifier identifier)))
+                (translate-constructor-identifier identifier)
             (Constructor identifier expressions _)
                 ((translate-constructor translate-expression identifier) expressions)
             (FunctionApplication expressions _)
@@ -140,20 +141,20 @@
 
 (def translate-function-definition (identifier arguments expression)
      (join' (list (SourceString (data-let-rec))
-                  (SourceString (escape-identifier identifier))
+                  (escape-identifier identifier)
                   (SourceString (data-equals))
                   (translate-lambda translate-expression arguments expression)
                   (SourceString (data-definition-end)))))
 
 (def translate-simple-type (identifier parameters)
      (match (list-any? (. (identifier-equal? identifier) type-parameter-identifier) parameters)
-            False  (SourceString (escape-identifier identifier))
-            True   (SourceString (prefix-type-variable identifier))))
+            False  (escape-identifier identifier)
+            True   (translate-type-variable identifier)))
 
 (def translate-complex-types (translate-types name types)
      ((pipe (translate-types (data-comma))
             wrap-in-brackets'
-            (fn (types) (list types (SourceString (data-space)) (SourceString (escape-identifier name))))
+            (fn (types) (list types (SourceString (data-space)) (escape-identifier name)))
             join')
         types))
 
@@ -179,7 +180,7 @@
         types))
 
 (def translate-complex-constructor-definition (name type types parameters)
-     (join' (list (SourceString (prefix-constructor (escape-identifier name)))
+     (join' (list (translate-constructor-identifier name)
                   (SourceString (data-colon))
                   (translate-types parameters (data-star) types)
                   (SourceString (data-arrow))
@@ -188,7 +189,7 @@
 (def translate-constructor-definition (type parameters constructor)
      (match constructor
             (SimpleConstructor identifier)
-                (SourceString (prefix-constructor (escape-identifier identifier)))
+                (translate-constructor-identifier identifier)
             (ComplexConstructor identifier types _)
                 (translate-complex-constructor-definition identifier type types parameters)))
 
@@ -200,7 +201,7 @@
 (def translate-type-parameter-for-definition (parameter)
      (match parameter
             (UniversalParameter identifier)
-                (SourceString (prefix-type-variable identifier))
+                (translate-type-variable identifier)
             (ExistentialParameter _)
                 SourceStringEmpty))
 
@@ -216,11 +217,11 @@
 (def translate-type-name' (name parameters parameter-string)
      (match (list-empty? parameters)
             True
-                (SourceString (escape-identifier name))
+                (escape-identifier name)
             False
                 (join' (list (wrap-in-brackets' parameter-string)
                              (SourceString (data-space))
-                             (SourceString (escape-identifier name))))))
+                             (escape-identifier name)))))
 
 (def translate-type-name (name parameters)
      (translate-type-name' name parameters (translate-type-parameters parameters)))
