@@ -2,7 +2,8 @@
 (def generate-source (module-name definitions)
      ((pipe (list-filter (. (module-equal? ModuleSelf) definition-module))
             (list-map definition-to-sexp)
-            stringify-sexps)
+            stringify-sexps
+            source-string)
         definitions))
 
 (def internal-symbols ()

@@ -30,6 +30,7 @@ $project_root/reusec --language ocaml\
                      $project_root/compiler-frontend/identifier-validation.strings\
                      $project_root/compiler-frontend/identifier-validation.reuse\
                      $project_root/compiler-frontend/common.strings\
+                     $project_root/compiler-backend/source-string.reuse\
                      $project_root/compiler-backend/shared.reuse\
                      $script_path/module.strings\
                      $script_path/module.reuse\

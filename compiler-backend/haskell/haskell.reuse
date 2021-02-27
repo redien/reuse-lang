@@ -278,8 +278,7 @@
      ((pipe (list-map translate-definition)
             (list-cons (translate-module-declaration module-name))
             (list-cons (SourceString (data-language-exts)))
-            (source-string-join (string-of-char 10))
-            source-string-to-string)
+            (source-string-join (string-of-char 10)))
          definitions))
 
 (def internal-symbols ()

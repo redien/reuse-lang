@@ -1,6 +1,7 @@
 
 (typ cli-program (CliTime (fn (int32) cli-program))
                  (CliMaxHeapSize (fn (int32) cli-program))
+                 (CliRenderSource source-string (fn (string) cli-program))
                  (CliReadFiles (list (pair module-reference string)) (fn ((list source-file)) cli-program))
                  (CliWriteFiles (list (pair string string)) (fn () cli-program))
                  (CliOutput string (fn () cli-program))
@@ -89,6 +90,7 @@
                            (Result source)
                               (CliTime (fn (end-generate)
                               (CliTime (fn (start-write-files)
+                              (CliRenderSource source (fn (source)
                               (CliWriteFiles (list (Pair output-path source)) (fn ()
                               (CliTime (fn (end-write-files)
                               (CliMaxHeapSize (fn (max-heap-size)
@@ -99,7 +101,7 @@
                                                  start-generate end-generate
                                                  start-read-files end-read-files
                                                  start-write-files end-write-files (fn ()
-                              (CliExit 0)))))))))))))
+                              (CliExit 0)))))))))))))))
                            (Error error)
                               (CliError (error-to-string file-entries error) (fn ()
                               (CliExit 1)))))))))))))))))

@@ -221,8 +221,7 @@
 (def generate-source (module-name definitions)
      ((pipe (list-map translate-definition)
             (source-string-join (string-of-char 10))
-            ((flip source-string-concat) (translate-exports definitions))
-            source-string-to-string)
+            ((flip source-string-concat) (translate-exports definitions)))
         definitions))
 
 (def internal-symbols ()

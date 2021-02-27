@@ -17,6 +17,16 @@
 (pub def source-string-concat (a b)
          (SourceStringConcat a b))
 
+(pub def source-string-join (separator strings)
+         (match strings
+                (Cons first rest)
+                    (list-foldl (fn (string joined)
+                                    (source-string-concat joined (source-string-concat (SourceString separator) string)))
+                                first
+                                rest)
+                Empty
+                    (source-string-empty)))
+
 (def is-alphanumeric (char)
      (match (and (>= char 65) (<= char 90))
             True   True
@@ -40,13 +50,3 @@
                 (SourceString s)            s
                 (SourceStringIdentifier i)  (escape-identifier' i)
                 (SourceStringConcat a b)    (string-concat (source-string-to-string a) (source-string-to-string b))))
-
-(pub def source-string-join (separator strings)
-         (match strings
-                (Cons first rest)
-                    (list-foldl (fn (string joined)
-                                    (source-string-concat joined (source-string-concat (SourceString separator) string)))
-                                first
-                                rest)
-                Empty
-                    (source-string-empty)))

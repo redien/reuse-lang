@@ -245,8 +245,7 @@
 
 (def generate-source (module-name definitions)
      ((pipe (list-map translate-definition)
-            (source-string-join (string-of-char 10))
-            source-string-to-string)
+            (source-string-join (string-of-char 10)))
         definitions))
 
 (def internal-symbols ()

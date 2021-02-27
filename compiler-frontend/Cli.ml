@@ -26,6 +26,7 @@ while true do
           CCliError (error, k) -> Printf.eprintf "%s\n" (reuse_string_to_ml error) ; current := k ()
         | CCliOutput (output, k) -> Printf.printf "%s" (reuse_string_to_ml output) ; current := k ()
         | CCliTime (k) -> current := k (Int32.of_float ((Sys.time ()) *. 1000000.0))
+        | CCliRenderSource (source_string, k) -> current := k (source_45string_45to_45string source_string)
         | CCliMaxHeapSize (k) -> current := k (Int32.of_int ((Gc.stat ()).top_heap_words * (Sys.word_size / 8)))
         | CCliWriteFiles (files, k) -> write_files files ; current := k ()
         | CCliReadFiles (files, k) -> current := k (read_files files)
