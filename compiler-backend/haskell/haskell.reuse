@@ -1,6 +1,4 @@
 
-(def identifier-int32 () -10000)
-
 (def reserved-identifiers ()
      (list data-if data-then data-else data-with data-of data-end data-in data-type data-let
            data-class data-do data-module data-data data-case data-deriving data-family data-default
@@ -18,16 +16,10 @@
 (def capitalized? (s)
      (string-every? capital? (string-take 1 s)))
 
-(def token-is-reserved? (token)
-     (and (<= token -2000) (> token -3000)))
-
 (def escape-identifier (identifier)
-     (match (token-is-reserved? (identifier-token identifier))
-            True   (SourceString (string-prepend 95 (identifier-name identifier)))
-            False
      (match (capitalized? (identifier-name identifier))
             True  (source-string-concat (SourceStringChar 95) (SourceStringIdentifier identifier))
-            False (SourceStringIdentifier identifier))))
+            False (SourceStringIdentifier identifier)))
 
 (def translate-constructor-identifier (constructor)
      (source-string-concat (SourceStringChar 67) (escape-identifier constructor)))
@@ -280,10 +272,5 @@
             (list-cons (SourceString (data-language-exts)))
             (source-string-join (string-of-char 10)))
          definitions))
-
-(def internal-symbols ()
-     (dictionary-set (data-int32) (Pair (identifier-int32) (data-int32))
-     (add-identifiers (reserved-identifiers) -2000
-     (default-identifiers))))
 
 (def perform-transformations? () True)

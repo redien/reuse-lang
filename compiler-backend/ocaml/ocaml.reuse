@@ -17,17 +17,17 @@
         (Pair (data-%) (SourceString (data-int32-modulus)))
         (Pair (data-&) (SourceString (data-int32-and))))))
 
-(def token-is-reserved? (token)
-     (and (<= token -2000) (> token -3000)))
-
 (def translate-type-variable (identifier)
      (source-string-concat (SourceStringChar 39)
      (source-string-concat (SourceStringChar 84) (SourceStringIdentifier identifier))))
 
 (def escape-identifier (identifier)
-     (match (token-is-reserved? (identifier-token identifier))
-            True   (SourceStringConcat (SourceStringChar 95) (SourceString (identifier-name identifier)))
-            False  (SourceStringIdentifier identifier)))
+     (SourceStringIdentifier identifier))
+
+(def translate-type-identifier (identifier)
+     (match (identifier-is? identifier (identifier-slice))
+            True   (SourceString (data-slice-type))
+            False  (escape-identifier identifier)))
 
 (def translate-constructor-identifier (identifier)
      (source-string-concat (SourceStringChar 67) (escape-identifier identifier)))
@@ -148,13 +148,13 @@
 
 (def translate-simple-type (identifier parameters)
      (match (list-any? (. (identifier-equal? identifier) type-parameter-identifier) parameters)
-            False  (escape-identifier identifier)
+            False  (translate-type-identifier identifier)
             True   (translate-type-variable identifier)))
 
 (def translate-complex-types (translate-types name types)
      ((pipe (translate-types (data-comma))
             wrap-in-brackets'
-            (fn (types) (list types (SourceString (data-space)) (escape-identifier name)))
+            (fn (types) (list types (SourceString (data-space)) (translate-type-identifier name)))
             join')
         types))
 
@@ -247,9 +247,5 @@
      ((pipe (list-map translate-definition)
             (source-string-join (string-of-char 10)))
         definitions))
-
-(def internal-symbols ()
-     (add-identifiers (reserved-identifiers) -2000
-     (default-identifiers)))
 
 (def perform-transformations? () True)

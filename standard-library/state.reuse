@@ -1,5 +1,5 @@
 
-(typ (state s v) (Operation (fn (s) (pair s v))))
+(pub typ (state s v) (Operation (fn (s) (pair s v))))
 
 (pub def state-run (state operation)
      (match operation

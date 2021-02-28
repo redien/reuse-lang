@@ -1,9 +1,9 @@
 
 (typ cli-program (CliTime (fn (int32) cli-program))
                  (CliMaxHeapSize (fn (int32) cli-program))
-                 (CliRenderSource source-string (fn (string) cli-program))
+                 (CliRenderSource source-string (fn (slice) cli-program))
                  (CliReadFiles (list (pair module-reference string)) (fn ((list source-file)) cli-program))
-                 (CliWriteFiles (list (pair string string)) (fn () cli-program))
+                 (CliWriteFiles (list (pair string slice)) (fn () cli-program))
                  (CliOutput string (fn () cli-program))
                  (CliError string (fn () cli-program))
                  (CliExit int32))

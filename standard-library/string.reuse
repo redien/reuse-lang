@@ -3,9 +3,9 @@
                  (FTNode2 int32 string-node string-node)
                  (FTNode3 int32 string-node string-node string-node))
 
-(typ string FTEmpty
-            (FTSingle string-node)
-            (FTDeep (list string-node) string (list string-node)))
+(pub typ string FTEmpty
+                (FTSingle string-node)
+                (FTDeep (list string-node) string (list string-node)))
 
 (pub def string-empty ()
      FTEmpty)

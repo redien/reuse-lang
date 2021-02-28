@@ -41,7 +41,7 @@
      ((pipe (list-filter (. (module-equal? ModuleSelf) definition-module))
             (list-map definition-to-sexp)
             stringify-sexps
-            source-string)
+            source-string-string)
         definitions))
 
 (def compiler-backend-module ()
@@ -52,7 +52,7 @@
            (compiler-backend-module)))
 
 (def parse (file-entries)
-     (parse-source-files (with-local-transform-keywords (internal-symbols)) file-entries))
+     (parse-source-files (with-local-transform-keywords (default-identifiers)) file-entries))
 
 (def transform (backend definitions)
      (match (compiler-backend-perform-transformations? backend)

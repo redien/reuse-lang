@@ -18,7 +18,7 @@ let performance = getenv "REUSE_TIME" = "true";;
 open StdinWrapper;;
 
 let string_gen_start = Unix.gettimeofday ();;
-let string_gen_output = string_45gen (read_stdin ());;
+let string_gen_output = string_gen (read_stdin ());;
 let string_gen_end = Unix.gettimeofday ();;
 let string_gen_time = string_gen_end -. string_gen_start;;
 

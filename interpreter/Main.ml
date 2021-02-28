@@ -37,15 +37,15 @@ let read_file m path =
     really_input channel buffer 0 length ;
     close_in channel;
     CSourceFile (m, path, buffer);;
-let read_files m files = list_45map (read_file m) files;;
-let read_modules modules = if (list_45size modules) > 0l then read_files stdlib_module stdlib_paths else CEmpty;;
+let read_files m files = list_map (read_file m) files;;
+let read_modules modules = if (list_size2 modules) > 0l then read_files stdlib_module stdlib_paths else CEmpty;;
 
 let current = ref (CEventArguments argv);;
 
 while true do
-    match (on_45event !current) with
+    match (on_event !current) with
           CCommandError (error) -> Printf.eprintf "%s\n" (reuse_string_to_ml error) ; exit 1
         | CCommandOutput (output) -> Printf.printf "%s" (reuse_string_to_ml output) ; exit 0
         | CCommandReadStdin (state) -> current := CEventReadStdin (read_stdin (), state)
-        | CCommandReadFiles (file_paths, modules, state) -> current := CEventReadFiles (list_45concat (read_modules modules) (read_files CModuleSelf file_paths), state)
+        | CCommandReadFiles (file_paths, modules, state) -> current := CEventReadFiles (list_concat (read_modules modules) (read_files CModuleSelf file_paths), state)
 done

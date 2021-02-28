@@ -15,8 +15,21 @@ $project_root/reusec --language ocaml\
                      $project_root/bootstrap/data/pervasives.ml\
                      $build_dir/test.reuse
 
-$project_root/compiler-backend/ocaml/compile-stdin-test.sh $build_dir test.ml test.out
+printf "\
+$(cat $build_dir/Test.ml)\n\
+open StdinWrapper;;\n\
+Printf.printf \"%%s\" (reuse_string_to_ml (reuse_main (read_stdin ())))\n" > "$build_dir/Test.ml.2.ml"
 
-echo "" | $build_dir/test.out
+cp $project_root/compiler-backend/ocaml/StdinWrapper.ml $build_dir
+
+ocamlc.opt -I "$build_dir" \
+           "$build_dir/StdinWrapper.ml" \
+           "$build_dir/Test.ml.2.ml" \
+           -o "$build_dir/source.out"
+
+rm "$build_dir/Test.ml.2.ml"
+chmod +x "$build_dir/source.out"
+
+echo "" | $build_dir/source.out
 result=$?
 exit $result

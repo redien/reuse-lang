@@ -19,3 +19,5 @@ slice-size                |slice-size
 slice-get                 |slice-get
 slice-concat              |slice-concat
 slice-foldl               |slice-foldl
+slice                     |slice
+int32                     |int32

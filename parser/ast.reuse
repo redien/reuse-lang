@@ -74,6 +74,11 @@
      (match identifier
             (Identifier _ __ ___ ____ id)  id))
 
+(pub def identifier-is? (identifier id)
+     (match (identifier-id' identifier)
+            (Some a)  (= a id)
+            None      False))
+
 (def identifier-with-id' (id identifier)
      (match identifier
             (Identifier _1 _2 _3 _4 _)  (Identifier _1 _2 _3 _4 id)))
@@ -130,12 +135,12 @@
             _
                 Empty))
 
-(def identifiers-from-definition (definition)
+(pub def identifiers-from-definition (definition)
      (match definition
             (TypeDefinition name _ __ constructors ___)
                 (Cons name (list-map constructor-identifier constructors))
             (FunctionDefinition name _ arguments __ ___)
-                (Cons name arguments)
+                (Cons name Empty)
             (TargetDefinition _ __)
                 Empty))
 

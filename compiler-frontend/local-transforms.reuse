@@ -35,17 +35,17 @@
      (result-concat (list-map (transform-special-form token transformer) definitions)))
 
 (def transform-pipe (source-reference expressions range)
-     (Lambda (list (Identifier (identifier-sparkle-x) (data-sparkle-x) source-reference range None))
+     (Lambda (list (Identifier (identifier-sparkle-x) (data-sparkle-x) source-reference range (Some -1)))
              (list-foldl (fn (expression composed)
                              (FunctionApplication (list expression composed) range))
-                         (Variable (Identifier (identifier-sparkle-x) (data-sparkle-x) source-reference range None))
+                         (Variable (Identifier (identifier-sparkle-x) (data-sparkle-x) source-reference range (Some -1)))
                          expressions)
              range))
 
-(def transform-list (source-reference expressions range)
+(def transform-list (cons empty source-reference expressions range)
      (list-foldr (fn (expression composed)
-                     (Constructor (Identifier (identifier-cons) (data-Cons) source-reference range None) (list expression composed) range))
-                 (Constructor (Identifier (identifier-empty) (data-Empty) source-reference range None) Empty range)
+                     (Constructor cons (list expression composed) range))
+                 (Constructor empty Empty range)
                  expressions))
 
 (def transform-match-expression (expression pairs range)
@@ -59,9 +59,24 @@
              (transform-match-expression expression pairs range))))
          definition))
 
+(def find-constructor (token definitions)
+     (list-find-first (fn (identifier) (= token (identifier-token identifier)))
+                    (list-flatmap identifiers-from-definition definitions)))
+
+(def transform-list-special-form (definitions)
+     (match (find-constructor (identifier-cons) definitions)
+          None
+               (result-return definitions)
+          (Some cons)
+     (match (find-constructor (identifier-empty) definitions)
+          None
+               (result-return definitions)
+          (Some empty)
+               (transform-special-forms (identifier-list) (transform-list cons empty) definitions))))
+
 (def local-transforms (definitions)
-     (result-bind definitions                                                         (fn (definitions)
-     (result-bind (transform-special-forms (identifier-pipe) transform-pipe definitions)     (fn (definitions)
-     (result-bind (transform-special-forms (identifier-list) transform-list definitions)     (fn (definitions)
-     (result-bind (result-concat (list-map transform-match-expressions definitions))  (fn (definitions)
+     (result-bind definitions                                                                          (fn (definitions)
+     (result-bind (transform-special-forms (identifier-pipe) transform-pipe definitions)               (fn (definitions)
+     (result-bind (transform-list-special-form definitions)                                            (fn (definitions)
+     (result-bind (result-concat (list-map transform-match-expressions definitions))                   (fn (definitions)
      (result-return definitions))))))))))

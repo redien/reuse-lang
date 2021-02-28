@@ -6,7 +6,6 @@ pipe-operator       | |>
 colon               | : 
 star                | * 
 unit                | unit 
-int32               |int32
 int32-plus          |Int32.add
 int32-multiply      |Int32.mul
 int32-minus         |Int32.sub
@@ -19,6 +18,7 @@ int32               |Int32.of_int
 comma               |,
 with                |with
 slice               |slice
+slice-type          |_slice
 definition-end      |;;
 let-rec             |let rec 
 constant            |_constant_

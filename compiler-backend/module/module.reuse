@@ -3,8 +3,11 @@
      ((pipe (list-filter (. (module-equal? ModuleSelf) definition-module))
             (list-map definition-to-sexp)
             stringify-sexps
-            source-string)
+            source-string-string)
         definitions))
+
+(def reserved-identifiers ()
+     (list-empty))
 
 (def internal-symbols ()
      (default-identifiers))

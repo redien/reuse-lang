@@ -1,5 +1,5 @@
 
-(typ (dictionary value) (Dictionary (array (list (pair string value)))))
+(pub typ (dictionary value) (Dictionary (array (list (pair string value)))))
 
 (pub def dictionary-empty () (Dictionary (array-empty)))
 

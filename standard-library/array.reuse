@@ -1,6 +1,6 @@
 
 (typ array-color ArrayRed ArrayBlack)
-(typ (array value) ArrayEmpty
+(pub typ (array value) ArrayEmpty
                    (ArrayTree array-color (array value) (pair int32 value) (array value)))
 
 (pub def array-empty () ArrayEmpty)

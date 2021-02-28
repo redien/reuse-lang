@@ -144,7 +144,7 @@
 
 (def parser-bind-symbol! (identifier)
      (state-bind (state-modify (parser-context-bind-symbol identifier)) (fn (state)
-     (parser-return (identifier-with-id' (Some (- 1 (parser-context-symbol-id state))) identifier)))))
+     (parser-return (identifier-with-id' (Some (- (parser-context-symbol-id state) 1)) identifier)))))
 
 (def parser-get-source-reference ()
      (state-bind (state-get) (fn (state)
