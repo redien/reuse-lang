@@ -4,6 +4,7 @@ output-key                   |--output
 stdlib                       |--stdlib
 parser-flag                  |--parser
 module-flag                  |--module
+language-flag                |--language
 diagnostics-flag             |--diagnostics
 read-files                   |read files (μs)
 write-files                  |write files (μs)

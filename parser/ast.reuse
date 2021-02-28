@@ -102,7 +102,7 @@
             (FunctionDefinition identifier ___ ____ _____ ______)  (identifier-source-reference identifier)
             (TargetDefinition source-reference _)           source-reference))
 
-(def definition-module (definition)
+(pub def definition-module (definition)
      (source-reference-module (definition-source-reference definition)))
 
 (def definition-public? (definition)

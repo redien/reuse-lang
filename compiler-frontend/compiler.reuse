@@ -1,11 +1,63 @@
 
+(typ compiler-backend (Backend string
+                               (list string)
+                               (list string)
+                               (fn (string (list definition)) source-string)
+                               boolean))
+
+(def compiler-backend-name (backend)
+     (match backend
+            (Backend name _ __ ___ ____)
+               name))
+
+(def compiler-backend-preamble-files (backend)
+     (match backend
+            (Backend _ files __ ___ ____)
+               files))
+
+(def compiler-backend-pervasives-files (backend)
+     (match backend
+            (Backend _ __ files ___ ____)
+               files))
+
+(def compiler-backend-generate-source (backend module-name definitions)
+     (match backend
+            (Backend _ __ ___ generate ____)
+               (generate module-name definitions)))
+
+(def compiler-backend-perform-transformations? (backend)
+     (match backend
+            (Backend _ __ ___ ____ transform?)
+               transform?))
+
+(def compiler-backend-ocaml ()
+     (Backend (data-ocaml-language)
+              (list (data-preamble-filename))
+              (list (data-pervasives-filename))
+              generate-source
+              (perform-transformations?)))
+
+(def generate-source-module (module-name definitions)
+     ((pipe (list-filter (. (module-equal? ModuleSelf) definition-module))
+            (list-map definition-to-sexp)
+            stringify-sexps
+            source-string)
+        definitions))
+
+(def compiler-backend-module ()
+     (Backend (data-module-language) Empty Empty generate-source-module False))
+
+(def compiler-backends ()
+     (list (compiler-backend-ocaml)
+           (compiler-backend-module)))
+
 (def parse (file-entries)
      (parse-source-files (with-local-transform-keywords (internal-symbols)) file-entries))
 
-(def transform (definitions)
-     (match (perform-transformations?)
+(def transform (backend definitions)
+     (match (compiler-backend-perform-transformations? backend)
             False  definitions
             True   (local-transforms (validate-reserved-identifiers definitions))))
 
-(def generate (module-name definitions)
-     (result-map (generate-source module-name) definitions))
+(def generate (backend module-name definitions)
+     (result-map (compiler-backend-generate-source backend module-name) definitions))
