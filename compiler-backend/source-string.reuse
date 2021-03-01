@@ -3,6 +3,7 @@
                        (SourceStringChar int32)
                        (SourceString string)
                        (SourceStringIdentifier identifier)
+                       (SourceStringIdentifierForceLowercase identifier)
                        (SourceStringConcat source-string source-string))
 
 (pub def source-string-string (string)

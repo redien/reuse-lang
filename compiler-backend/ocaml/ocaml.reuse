@@ -24,6 +24,9 @@
 (def escape-identifier (identifier)
      (SourceStringIdentifier identifier))
 
+(def lowercase-identifier (identifier)
+     (SourceStringIdentifierForceLowercase identifier))
+
 (def translate-type-identifier (identifier)
      (match (identifier-is? identifier (identifier-slice))
             True   (SourceString (data-slice-type))
@@ -37,7 +40,7 @@
             True   (match (dictionary-get (identifier-name identifier) (operator-translation-map))
                           (Some translation)  translation
                           None                (SourceStringIdentifier identifier))
-            False  (escape-identifier identifier)))
+            False  (SourceStringIdentifier identifier)))
 
 (def translate-less-than (translate-expression expressions)
      (match expressions
@@ -113,7 +116,7 @@
 (def translate-argument-list (arguments)
      (match (list-empty? arguments)
             True  (SourceString (wrap-in-brackets (string-empty)))
-            False (source-string-join (data-space) (list-map escape-identifier arguments))))
+            False (source-string-join (data-space) (list-map lowercase-identifier arguments))))
 
 (def translate-lambda (translate-expression arguments expression)
      (join' (list (SourceString (data-fun))
@@ -141,7 +144,7 @@
 
 (def translate-function-definition (identifier arguments expression)
      (join' (list (SourceString (data-let-rec))
-                  (escape-identifier identifier)
+                  (lowercase-identifier identifier)
                   (SourceString (data-equals))
                   (translate-lambda translate-expression arguments expression)
                   (SourceString (data-definition-end)))))
@@ -217,11 +220,11 @@
 (def translate-type-name' (name parameters parameter-string)
      (match (list-empty? parameters)
             True
-                (escape-identifier name)
+                (lowercase-identifier name)
             False
                 (join' (list (wrap-in-brackets' parameter-string)
                              (SourceString (data-space))
-                             (escape-identifier name)))))
+                             (lowercase-identifier name)))))
 
 (def translate-type-name (name parameters)
      (translate-type-name' name parameters (translate-type-parameters parameters)))

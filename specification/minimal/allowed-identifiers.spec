@@ -1,4 +1,20 @@
 
+Should allow uppercase identifiers
+| (typ A B)
+| (typ (C A) (D A))
+| (def A () 1)
+| (def E (A _) A)
+> (E 1 A)
+= 1
+
+Should allow lowercase identifiers
+| (typ a b)
+| (typ (c a) (d a))
+| (def a () 1)
+| (def e (a _) a)
+> (e 1 a)
+= 1
+
 Should allow defining boolean type
 | (typ boolean True False)
 > (match True True 1 False 2)

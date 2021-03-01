@@ -19,9 +19,11 @@ let write_file path content =
     close_out channel;;
 let write_files files = ignore (list_map (fun p -> match p with CPair (path, content) -> write_file path content) files);;
 
-let add_char c buffer =
+let add_char lowercase c buffer =
     let c = (Char.chr (Int32.to_int c)) in
-    if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') then
+    if lowercase && (c >= 'A' && c <= 'Z') then
+        (Buffer.add_char buffer (Char.chr ((Char.code c) + 32)); buffer)
+    else if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') then
         (Buffer.add_char buffer c; buffer)
     else if (c == '-') then
         (Buffer.add_char buffer '_'; buffer)
@@ -56,7 +58,7 @@ let remove_integers buffer start =
         if c >= '0' && c <= '9' then
             Buffer.truncate buffer start;;
 
-let encode_identifier buffer identifier =
+let encode_identifier buffer identifier lowercase =
     match identifier_id identifier with
         | CSome (id) ->
             (match Hashtbl.find_opt identifiers id with
@@ -66,7 +68,7 @@ let encode_identifier buffer identifier =
                  | None ->
                      let name = identifier_name identifier in
                      let previousLength = Buffer.length buffer in
-                     let buffer = string_foldl add_char buffer name in
+                     let buffer = string_foldl (add_char lowercase) buffer name in
                      remove_integers buffer previousLength;
                      add_suffix buffer previousLength identifier;
                      let substring = substring_from buffer previousLength in
@@ -81,7 +83,8 @@ let rec source_string_to_buffer buffer source_string =
         | CSourceStringEmpty          -> buffer
         | CSourceStringChar (c)       -> Buffer.add_char buffer (Char.chr (Int32.to_int c)); buffer
         | CSourceString (s)           -> Buffer.add_string buffer (reuse_string_to_ml s); buffer
-        | CSourceStringIdentifier (i) -> encode_identifier buffer i
+        | CSourceStringIdentifier (i) -> encode_identifier buffer i false
+        | CSourceStringIdentifierForceLowercase (i) -> encode_identifier buffer i true
         | CSourceStringConcat (a, b)  -> ignore (source_string_to_buffer buffer a); ignore (source_string_to_buffer buffer b); buffer;;
 
 let current = ref (cli_main data_path argv);;
