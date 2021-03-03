@@ -1,7 +1,8 @@
 
 (pub typ identifier-transformation
          IdentifierTransformationNone
-         IdentifierTransformationLowercase)
+         IdentifierTransformationLowercase
+         IdentifierTransformationCapitalize)
 
 (pub typ source-string SourceStringEmpty
                        (SourceStringChar int32)

@@ -27,6 +27,9 @@
 (def lowercase-identifier (identifier)
      (SourceStringIdentifier identifier IdentifierTransformationLowercase))
 
+(def capitalize-identifier (identifier)
+     (SourceStringIdentifier identifier IdentifierTransformationCapitalize))
+
 (def translate-type-identifier (identifier)
      (match (identifier-is? identifier (identifier-slice))
             True   (SourceString (data-slice-type))

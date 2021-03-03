@@ -19,14 +19,25 @@ let write_file path content =
     close_out channel;;
 let write_files files = ignore (list_map (fun p -> match p with CPair (path, content) -> write_file path content) files);;
 
-let add_char c buffer =
-    let c = (Char.chr (Int32.to_int c)) in
+let add_char i buffer =
+    let c = Char.chr i in
     if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') then
         (Buffer.add_char buffer c; buffer)
     else if (c == '-') then
         (Buffer.add_char buffer '_'; buffer)
     else
         buffer;;
+
+let add_char_identity c buffer =
+    let i = Int32.to_int c in
+    add_char i buffer;;
+
+let add_char_lowercase c buffer =
+    let i = Int32.to_int c in
+    if i >= 65 && i <= 90 then
+        (Buffer.add_char buffer (Char.chr (i + 32)); buffer)
+    else
+        add_char i buffer;;
 
 let identifiers = Hashtbl.create 1000;;
 let rendered_identifiers = Hashtbl.create 1000;;
@@ -56,7 +67,7 @@ let remove_integers buffer start =
         if c >= '0' && c <= '9' then
             Buffer.truncate buffer start;;
 
-let encode_identifier buffer identifier =
+let encode_identifier buffer identifier transformation =
     match identifier_id identifier with
         | CSome (id) ->
             (match Hashtbl.find_opt identifiers id with
@@ -66,7 +77,12 @@ let encode_identifier buffer identifier =
                  | None ->
                      let name = identifier_name identifier in
                      let previousLength = Buffer.length buffer in
-                     let buffer = string_foldl add_char buffer name in
+                     let buffer = match transformation with
+                        | CIdentifierTransformationNone -> string_foldl add_char_identity buffer name
+                        | CIdentifierTransformationLowercase -> string_foldl add_char_lowercase buffer name
+                        | CIdentifierTransformationCapitalize -> (match string_first name with
+                                | CSome (c) -> Buffer.add_char buffer (Char.uppercase_ascii (Char.chr (Int32.to_int c))); string_foldl add_char_identity buffer (string_rest name)
+                                | CNone     -> buffer) in
                      remove_integers buffer previousLength;
                      add_suffix buffer previousLength identifier;
                      let substring = substring_from buffer previousLength in
@@ -78,11 +94,11 @@ let encode_identifier buffer identifier =
 
 let rec source_string_to_buffer buffer source_string =
     match source_string with
-        | CSourceStringEmpty          -> buffer
-        | CSourceStringChar (c)       -> Buffer.add_char buffer (Char.chr (Int32.to_int c)); buffer
-        | CSourceString (s)           -> Buffer.add_string buffer (reuse_string_to_ml s); buffer
-        | CSourceStringIdentifier (i) -> encode_identifier buffer i
-        | CSourceStringConcat (a, b)  -> ignore (source_string_to_buffer buffer a); ignore (source_string_to_buffer buffer b); buffer;;
+        | CSourceStringEmpty                          -> buffer
+        | CSourceStringChar (c)                       -> Buffer.add_char buffer (Char.chr (Int32.to_int c)); buffer
+        | CSourceString (s)                           -> Buffer.add_string buffer (reuse_string_to_ml s); buffer
+        | CSourceStringIdentifier (i, transformation) -> encode_identifier buffer i transformation
+        | CSourceStringConcat (a, b)                  -> ignore (source_string_to_buffer buffer a); ignore (source_string_to_buffer buffer b); buffer;;
 
 let current = ref (cli_main data_path argv);;
 

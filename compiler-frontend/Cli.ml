@@ -19,16 +19,25 @@ let write_file path content =
     close_out channel;;
 let write_files files = ignore (list_map (fun p -> match p with CPair (path, content) -> write_file path content) files);;
 
-let add_char lowercase c buffer =
-    let c = (Char.chr (Int32.to_int c)) in
-    if lowercase && (c >= 'A' && c <= 'Z') then
-        (Buffer.add_char buffer (Char.chr ((Char.code c) + 32)); buffer)
-    else if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') then
+let add_char i buffer =
+    let c = Char.chr i in
+    if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') then
         (Buffer.add_char buffer c; buffer)
     else if (c == '-') then
         (Buffer.add_char buffer '_'; buffer)
     else
         buffer;;
+
+let add_char_identity c buffer =
+    let i = Int32.to_int c in
+    add_char i buffer;;
+
+let add_char_lowercase c buffer =
+    let i = Int32.to_int c in
+    if i >= 65 && i <= 90 then
+        (Buffer.add_char buffer (Char.chr (i + 32)); buffer)
+    else
+        add_char i buffer;;
 
 let identifiers = Hashtbl.create 1000;;
 let rendered_identifiers = Hashtbl.create 1000;;
@@ -68,10 +77,12 @@ let encode_identifier buffer identifier transformation =
                  | None ->
                      let name = identifier_name identifier in
                      let previousLength = Buffer.length buffer in
-                     let encoder = match transformation with
-                        | CIdentifierTransformationNone -> add_char false
-                        | CIdentifierTransformationLowercase -> add_char true in
-                     let buffer = string_foldl encoder buffer name in
+                     let buffer = match transformation with
+                        | CIdentifierTransformationNone -> string_foldl add_char_identity buffer name
+                        | CIdentifierTransformationLowercase -> string_foldl add_char_lowercase buffer name
+                        | CIdentifierTransformationCapitalize -> (match string_first name with
+                                | CSome (c) -> Buffer.add_char buffer (Char.uppercase_ascii (Char.chr (Int32.to_int c))); string_foldl add_char_identity buffer (string_rest name)
+                                | CNone     -> buffer) in
                      remove_integers buffer previousLength;
                      add_suffix buffer previousLength identifier;
                      let substring = substring_from buffer previousLength in
