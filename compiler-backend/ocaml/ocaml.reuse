@@ -27,16 +27,13 @@
 (def lowercase-identifier (identifier)
      (SourceStringIdentifier identifier IdentifierTransformationLowercase))
 
-(def capitalize-identifier (identifier)
-     (SourceStringIdentifier identifier IdentifierTransformationCapitalize))
-
 (def translate-type-identifier (identifier)
      (match (identifier-is? identifier (identifier-slice))
             True   (SourceString (data-slice-type))
             False  (escape-identifier identifier)))
 
 (def translate-constructor-identifier (identifier)
-     (source-string-concat (SourceStringChar 67) (escape-identifier identifier)))
+     (SourceStringIdentifier identifier IdentifierTransformationCapitalize))
 
 (def translate-identifier (identifier)
      (match (token-is-operator? (identifier-token identifier))

@@ -28,7 +28,7 @@ let data_path = (Filename.dirname Sys.executable_name) ^ Filename.dir_sep ^ "dat
 let stdlib_paths = List.map (fun name -> data_path ^ name) [
     "standard-library.reuse";
 ] |> ml_string_list_to_reuse;;
-let stdlib_module = CModulePath (ml_string_to_reuse "standard-library", CTrue);;
+let stdlib_module = ModulePath (ml_string_to_reuse "standard-library", True);;
 
 let read_file m path =
     let channel = open_in (reuse_string_to_ml path) in
@@ -36,16 +36,16 @@ let read_file m path =
     let buffer = Bytes.create length in
     really_input channel buffer 0 length ;
     close_in channel;
-    CSourceFile (m, path, buffer);;
+    SourceFile (m, path, buffer);;
 let read_files m files = list_map (read_file m) files;;
-let read_modules modules = if (list_size2 modules) > 0l then read_files stdlib_module stdlib_paths else CEmpty;;
+let read_modules modules = if (list_size2 modules) > 0l then read_files stdlib_module stdlib_paths else Empty;;
 
-let current = ref (CEventArguments argv);;
+let current = ref (EventArguments argv);;
 
 while true do
     match (on_event !current) with
-          CCommandError (error) -> Printf.eprintf "%s\n" (reuse_string_to_ml error) ; exit 1
-        | CCommandOutput (output) -> Printf.printf "%s" (reuse_string_to_ml output) ; exit 0
-        | CCommandReadStdin (state) -> current := CEventReadStdin (read_stdin (), state)
-        | CCommandReadFiles (file_paths, modules, state) -> current := CEventReadFiles (list_concat (read_modules modules) (read_files CModuleSelf file_paths), state)
+          CommandError (error) -> Printf.eprintf "%s\n" (reuse_string_to_ml error) ; exit 1
+        | CommandOutput (output) -> Printf.printf "%s" (reuse_string_to_ml output) ; exit 0
+        | CommandReadStdin (state) -> current := EventReadStdin (read_stdin (), state)
+        | CommandReadFiles (file_paths, modules, state) -> current := EventReadFiles (list_concat (read_modules modules) (read_files ModuleSelf file_paths), state)
 done

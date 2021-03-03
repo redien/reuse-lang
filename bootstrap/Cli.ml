@@ -10,14 +10,14 @@ let read_file m path =
     let buffer = Bytes.create length in
     really_input channel buffer 0 length ;
     close_in channel;
-    CSourceFile (m, path, buffer);;
+    SourceFile (m, path, buffer);;
 let read_files files = list_map (pair_map read_file) files;;
 
 let write_file path content =
     let channel = open_out (reuse_string_to_ml path) in
     output_bytes channel content;
     close_out channel;;
-let write_files files = ignore (list_map (fun p -> match p with CPair (path, content) -> write_file path content) files);;
+let write_files files = ignore (list_map (fun p -> match p with Pair (path, content) -> write_file path content) files);;
 
 let add_char i buffer =
     let c = Char.chr i in
@@ -69,7 +69,7 @@ let remove_integers buffer start =
 
 let encode_identifier buffer identifier transformation =
     match identifier_id identifier with
-        | CSome (id) ->
+        | Some (id) ->
             (match Hashtbl.find_opt identifiers id with
                  | Some (encoded) ->
                     Buffer.add_string buffer encoded;
@@ -78,40 +78,40 @@ let encode_identifier buffer identifier transformation =
                      let name = identifier_name identifier in
                      let previousLength = Buffer.length buffer in
                      let buffer = match transformation with
-                        | CIdentifierTransformationNone -> string_foldl add_char_identity buffer name
-                        | CIdentifierTransformationLowercase -> string_foldl add_char_lowercase buffer name
-                        | CIdentifierTransformationCapitalize -> (match string_first name with
-                                | CSome (c) -> Buffer.add_char buffer (Char.uppercase_ascii (Char.chr (Int32.to_int c))); string_foldl add_char_identity buffer (string_rest name)
-                                | CNone     -> buffer) in
+                        | IdentifierTransformationNone -> string_foldl add_char_identity buffer name
+                        | IdentifierTransformationLowercase -> string_foldl add_char_lowercase buffer name
+                        | IdentifierTransformationCapitalize -> (match string_first name with
+                                | Some (c) -> Buffer.add_char buffer (Char.uppercase_ascii (Char.chr (Int32.to_int c))); string_foldl add_char_identity buffer (string_rest name)
+                                | None     -> buffer) in
                      remove_integers buffer previousLength;
                      add_suffix buffer previousLength identifier;
                      let substring = substring_from buffer previousLength in
                      Hashtbl.add identifiers id substring;
                      Hashtbl.add rendered_identifiers substring true;
                      buffer)
-        | CNone ->
+        | None ->
             buffer;;
 
 let rec source_string_to_buffer buffer source_string =
     match source_string with
-        | CSourceStringEmpty                          -> buffer
-        | CSourceStringChar (c)                       -> Buffer.add_char buffer (Char.chr (Int32.to_int c)); buffer
-        | CSourceString (s)                           -> Buffer.add_string buffer (reuse_string_to_ml s); buffer
-        | CSourceStringIdentifier (i, transformation) -> encode_identifier buffer i transformation
-        | CSourceStringConcat (a, b)                  -> ignore (source_string_to_buffer buffer a); ignore (source_string_to_buffer buffer b); buffer;;
+        | SourceStringEmpty                          -> buffer
+        | SourceStringChar (c)                       -> Buffer.add_char buffer (Char.chr (Int32.to_int c)); buffer
+        | SourceString (s)                           -> Buffer.add_string buffer (reuse_string_to_ml s); buffer
+        | SourceStringIdentifier (i, transformation) -> encode_identifier buffer i transformation
+        | SourceStringConcat (a, b)                  -> ignore (source_string_to_buffer buffer a); ignore (source_string_to_buffer buffer b); buffer;;
 
 let current = ref (cli_main data_path argv);;
 
 while true do
     match !current with
-          CCliError (error, k) -> Printf.eprintf "%s\n" (reuse_string_to_ml error) ; current := k ()
-        | CCliOutput (output, k) -> Printf.printf "%s" (reuse_string_to_ml output) ; current := k ()
-        | CCliTime (k) -> current := k (Int32.of_float ((Sys.time ()) *. 1000000.0))
-        | CCliRenderSource (source_string, k) ->
+          CliError (error, k) -> Printf.eprintf "%s\n" (reuse_string_to_ml error) ; current := k ()
+        | CliOutput (output, k) -> Printf.printf "%s" (reuse_string_to_ml output) ; current := k ()
+        | CliTime (k) -> current := k (Int32.of_float ((Sys.time ()) *. 1000000.0))
+        | CliRenderSource (source_string, k) ->
             initialize_source_renderer ();
             current := k (Buffer.to_bytes (source_string_to_buffer (Buffer.create 32768) source_string))
-        | CCliMaxHeapSize (k) -> current := k (Int32.of_int ((Gc.stat ()).top_heap_words * (Sys.word_size / 8)))
-        | CCliWriteFiles (files, k) -> write_files files ; current := k ()
-        | CCliReadFiles (files, k) -> current := k (read_files files)
-        | CCliExit (status) -> exit (Int32.to_int status)
+        | CliMaxHeapSize (k) -> current := k (Int32.of_int ((Gc.stat ()).top_heap_words * (Sys.word_size / 8)))
+        | CliWriteFiles (files, k) -> write_files files ; current := k ()
+        | CliReadFiles (files, k) -> current := k (read_files files)
+        | CliExit (status) -> exit (Int32.to_int status)
 done

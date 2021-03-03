@@ -12,8 +12,6 @@ int32-minus         |Int32.sub
 int32-divide        |Int32.div
 int32-modulus       |Int32.rem
 int32-and           |Int32.logand
-cempty              |CEmpty
-ccons               |CCons
 int32               |Int32.of_int 
 comma               |,
 with                |with

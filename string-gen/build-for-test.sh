@@ -26,8 +26,8 @@ if performance then
     (Printf.printf "%f" string_gen_time ; exit 0)
 else
     match string_gen_output with
-          CResult (result) -> Printf.printf "%s" (reuse_string_to_ml result) ; exit 0
-        | CError (error) -> Printf.eprintf "%s" (reuse_string_to_ml error) ; exit 1;;
+          Result (result) -> Printf.printf "%s" (reuse_string_to_ml result) ; exit 0
+        | Error (error) -> Printf.eprintf "%s" (reuse_string_to_ml error) ; exit 1;;
 
 END_OF_SOURCE
 
