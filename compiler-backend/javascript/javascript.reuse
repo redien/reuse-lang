@@ -7,7 +7,7 @@
            data-typeof data-void data-await))
 
 (def escape-identifier (identifier)
-     (SourceStringIdentifier identifier))
+     (SourceStringIdentifier identifier IdentifierTransformationNone))
 
 (def translate-constructor-identifier (identifier)
      (source-string-concat (SourceStringChar 67) (escape-identifier identifier)))

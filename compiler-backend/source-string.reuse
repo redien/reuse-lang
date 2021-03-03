@@ -1,9 +1,12 @@
 
+(pub typ identifier-transformation
+         IdentifierTransformationNone
+         IdentifierTransformationLowercase)
+
 (pub typ source-string SourceStringEmpty
                        (SourceStringChar int32)
                        (SourceString string)
-                       (SourceStringIdentifier identifier)
-                       (SourceStringIdentifierForceLowercase identifier)
+                       (SourceStringIdentifier identifier identifier-transformation)
                        (SourceStringConcat source-string source-string))
 
 (pub def source-string-string (string)

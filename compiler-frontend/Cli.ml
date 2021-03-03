@@ -58,7 +58,7 @@ let remove_integers buffer start =
         if c >= '0' && c <= '9' then
             Buffer.truncate buffer start;;
 
-let encode_identifier buffer identifier lowercase =
+let encode_identifier buffer identifier transformation =
     match identifier_id identifier with
         | CSome (id) ->
             (match Hashtbl.find_opt identifiers id with
@@ -68,7 +68,10 @@ let encode_identifier buffer identifier lowercase =
                  | None ->
                      let name = identifier_name identifier in
                      let previousLength = Buffer.length buffer in
-                     let buffer = string_foldl (add_char lowercase) buffer name in
+                     let encoder = match transformation with
+                        | CIdentifierTransformationNone -> add_char false
+                        | CIdentifierTransformationLowercase -> add_char true in
+                     let buffer = string_foldl encoder buffer name in
                      remove_integers buffer previousLength;
                      add_suffix buffer previousLength identifier;
                      let substring = substring_from buffer previousLength in
@@ -80,12 +83,11 @@ let encode_identifier buffer identifier lowercase =
 
 let rec source_string_to_buffer buffer source_string =
     match source_string with
-        | CSourceStringEmpty          -> buffer
-        | CSourceStringChar (c)       -> Buffer.add_char buffer (Char.chr (Int32.to_int c)); buffer
-        | CSourceString (s)           -> Buffer.add_string buffer (reuse_string_to_ml s); buffer
-        | CSourceStringIdentifier (i) -> encode_identifier buffer i false
-        | CSourceStringIdentifierForceLowercase (i) -> encode_identifier buffer i true
-        | CSourceStringConcat (a, b)  -> ignore (source_string_to_buffer buffer a); ignore (source_string_to_buffer buffer b); buffer;;
+        | CSourceStringEmpty                          -> buffer
+        | CSourceStringChar (c)                       -> Buffer.add_char buffer (Char.chr (Int32.to_int c)); buffer
+        | CSourceString (s)                           -> Buffer.add_string buffer (reuse_string_to_ml s); buffer
+        | CSourceStringIdentifier (i, transformation) -> encode_identifier buffer i transformation
+        | CSourceStringConcat (a, b)                  -> ignore (source_string_to_buffer buffer a); ignore (source_string_to_buffer buffer b); buffer;;
 
 let current = ref (cli_main data_path argv);;
 

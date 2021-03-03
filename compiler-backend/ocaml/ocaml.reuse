@@ -19,13 +19,13 @@
 
 (def translate-type-variable (identifier)
      (source-string-concat (SourceStringChar 39)
-     (source-string-concat (SourceStringChar 84) (SourceStringIdentifier identifier))))
+     (source-string-concat (SourceStringChar 84) (SourceStringIdentifier identifier IdentifierTransformationNone))))
 
 (def escape-identifier (identifier)
-     (SourceStringIdentifier identifier))
+     (SourceStringIdentifier identifier IdentifierTransformationNone))
 
 (def lowercase-identifier (identifier)
-     (SourceStringIdentifierForceLowercase identifier))
+     (SourceStringIdentifier identifier IdentifierTransformationLowercase))
 
 (def translate-type-identifier (identifier)
      (match (identifier-is? identifier (identifier-slice))
@@ -39,8 +39,8 @@
      (match (token-is-operator? (identifier-token identifier))
             True   (match (dictionary-get (identifier-name identifier) (operator-translation-map))
                           (Some translation)  translation
-                          None                (SourceStringIdentifier identifier))
-            False  (SourceStringIdentifier identifier)))
+                          None                (SourceStringIdentifier identifier IdentifierTransformationNone))
+            False  (SourceStringIdentifier identifier IdentifierTransformationNone)))
 
 (def translate-less-than (translate-expression expressions)
      (match expressions
