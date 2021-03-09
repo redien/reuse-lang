@@ -116,6 +116,12 @@
             (FunctionDefinition _ public? __ ___ ____)      public?
             (TargetDefinition _ __)                         False))
 
+(def definition-identifier (definition)
+     (match definition
+            (TypeDefinition identifier _ __ ___ ____)       (Some identifier)
+            (FunctionDefinition identifier _ __ ___ ____)   (Some identifier)
+            (TargetDefinition _ __)                         None))
+
 (def constructor-identifier (constructor)
      (match constructor
             (ComplexConstructor identifier _ __)  identifier
@@ -143,6 +149,12 @@
                 (Cons name Empty)
             (TargetDefinition _ __)
                 Empty))
+
+(pub def public-identifiers (definitions)
+     ((pipe (list-filter definition-public?)
+            (list-map definition-identifier)
+            (list-flatmap list-from-maybe))
+        definitions))
 
 (pub def over-match-pair-expression (f pair)
      (match pair

@@ -1,9 +1,10 @@
 
-(typ compiler-backend (Backend string
-                               (list string)
-                               (list string)
-                               (fn (string (list definition)) source-string)
-                               boolean))
+(typ (compiler-backend compilation-result)
+     (Backend string
+              (list string)
+              (list string)
+              (fn (string (list definition)) compilation-result)
+              boolean))
 
 (def compiler-backend-name (backend)
      (match backend
@@ -41,7 +42,8 @@
      ((pipe (list-filter (. (module-equal? ModuleSelf) definition-module))
             (list-map definition-to-sexp)
             stringify-sexps
-            source-string-string)
+            source-string-string
+            (pair-cons (list-empty)))
         definitions))
 
 (def compiler-backend-module ()

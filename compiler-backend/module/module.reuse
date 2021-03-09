@@ -3,7 +3,8 @@
      ((pipe (list-filter (. (module-equal? ModuleSelf) definition-module))
             (list-map definition-to-sexp)
             stringify-sexps
-            source-string-string)
+            source-string-string
+            (pair-cons (list-empty)))
         definitions))
 
 (def reserved-identifiers ()

@@ -38,7 +38,7 @@ let read_file m path =
     close_in channel;
     SourceFile (m, path, buffer);;
 let read_files m files = list_map (read_file m) files;;
-let read_modules modules = if (list_size2 modules) > 0l then read_files stdlib_module stdlib_paths else Empty;;
+let read_modules modules = if (list_size modules) > 0l then read_files stdlib_module stdlib_paths else Empty;;
 
 let current = ref (EventArguments argv);;
 

@@ -248,7 +248,8 @@
 
 (def generate-source (module-name definitions)
      ((pipe (list-map translate-definition)
-            (source-string-join (string-of-char 10)))
+            (source-string-join (string-of-char 10))
+            (pair-cons (list-map (pair-cons IdentifierTransformationLowercase) (public-identifiers definitions))))
         definitions))
 
 (def perform-transformations? () True)

@@ -216,7 +216,8 @@
 (def generate-source (module-name definitions)
      ((pipe (list-map translate-definition)
             (source-string-join (string-of-char 10))
-            ((flip source-string-concat) (translate-exports definitions)))
+            ((flip source-string-concat) (translate-exports definitions))
+            (pair-cons (list-map (pair-cons IdentifierTransformationNone) (public-identifiers definitions))))
         definitions))
 
 (def perform-transformations? () True)

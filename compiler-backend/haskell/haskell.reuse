@@ -270,7 +270,8 @@
      ((pipe (list-map translate-definition)
             (list-cons (translate-module-declaration module-name))
             (list-cons (SourceString (data-language-exts)))
-            (source-string-join (string-of-char 10)))
+            (source-string-join (string-of-char 10))
+            (pair-cons (list-map (pair-cons IdentifierTransformationNone) (public-identifiers definitions))))
          definitions))
 
 (def perform-transformations? () True)

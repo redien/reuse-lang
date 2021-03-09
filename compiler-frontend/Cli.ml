@@ -100,6 +100,13 @@ let rec source_string_to_buffer buffer source_string =
         | SourceStringIdentifier (i, transformation) -> encode_identifier buffer i transformation
         | SourceStringConcat (a, b)                  -> ignore (source_string_to_buffer buffer a); ignore (source_string_to_buffer buffer b); buffer;;
 
+let add_identifiers identifiers =
+    let buffer = Buffer.create 1024 in
+    let add_identifier transformation identifier =
+        ignore (encode_identifier buffer identifier transformation) in
+    let identifier_list = list_foldr List.cons [] identifiers in
+    List.iter (pair_map add_identifier) identifier_list;;
+
 let current = ref (cli_main data_path argv);;
 
 while true do
@@ -107,8 +114,9 @@ while true do
           CliError (error, k) -> Printf.eprintf "%s\n" (reuse_string_to_ml error) ; current := k ()
         | CliOutput (output, k) -> Printf.printf "%s" (reuse_string_to_ml output) ; current := k ()
         | CliTime (k) -> current := k (Int32.of_float ((Sys.time ()) *. 1000000.0))
-        | CliRenderSource (source_string, k) ->
+        | CliRenderSource (Pair (public_identifiers, source_string), k) ->
             initialize_source_renderer ();
+            add_identifiers public_identifiers;
             current := k (Buffer.to_bytes (source_string_to_buffer (Buffer.create 32768) source_string))
         | CliMaxHeapSize (k) -> current := k (Int32.of_int ((Gc.stat ()).top_heap_words * (Sys.word_size / 8)))
         | CliWriteFiles (files, k) -> write_files files ; current := k ()
