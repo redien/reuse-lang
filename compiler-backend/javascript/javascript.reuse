@@ -10,7 +10,7 @@
      (SourceStringIdentifier identifier IdentifierTransformationNone))
 
 (def translate-constructor-identifier (identifier)
-     (source-string-concat (SourceStringChar 67) (escape-identifier identifier)))
+     (escape-identifier identifier))
 
 (def operator-translation-map ()
      (dictionary-of (list
