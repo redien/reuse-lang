@@ -2,7 +2,7 @@
 (def parts-are-empty? (parts)
      (match parts
             Empty              True
-            (Cons part Empty)  (string-empty? part)
+            (Cons part Empty)  (string-is-empty? part)
             _                  False))
 
 (def transform-line (line)

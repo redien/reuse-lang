@@ -189,7 +189,7 @@
 
 
 
-(pub def string-empty? (string)
+(pub def string-is-empty? (string)
      (match (string-first string)
             (Some _)  False
             None      True))
@@ -277,8 +277,8 @@
      (match (string-first a)
             (Some xa) (match (string-first b)
             (Some xb) (and (= xa xb) (string-equal? (string-rest a) (string-rest b)))
-            None      (string-empty? a))
-            None      (string-empty? b)))
+            None      (string-is-empty? a))
+            None      (string-is-empty? b)))
 
 (pub def string-index-of (index substring string)
      (match (>= index (string-size string))
@@ -315,7 +315,7 @@
 (def string-to-int32' (string)
      (match string
             (Cons 45 string)
-                (match (list-empty? string)
+                (match (list-is-empty? string)
                        True   None
                        False  (maybe-map (fn (x) (* -1 x)) (string-to-int32' string)))
             (Cons x rest)

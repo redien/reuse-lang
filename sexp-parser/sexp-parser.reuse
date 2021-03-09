@@ -41,7 +41,7 @@
                     (match (string-to-int32 name)
                            (Some integer)   (next next-index symbols (Integer integer (Range index next-index)))
                            None
-                    (match (string-empty? name)
+                    (match (string-is-empty? name)
                            False  (intern-string index next-index name symbols next)
                            True   (end index)))))
 

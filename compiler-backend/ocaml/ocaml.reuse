@@ -114,7 +114,7 @@
                     (translate-function-application' translate-expression expressions)))
 
 (def translate-argument-list (arguments)
-     (match (list-empty? arguments)
+     (match (list-is-empty? arguments)
             True  (SourceString (wrap-in-brackets (string-empty)))
             False (source-string-join (data-space) (list-map lowercase-identifier arguments))))
 
@@ -162,7 +162,7 @@
         types))
 
 (def translate-function-type (translate-types return-type argument-types)
-     (match (list-empty? argument-types)
+     (match (list-is-empty? argument-types)
             True   (wrap-in-brackets' (join' (list (SourceString (data-unit)) 
                                                    (SourceString (data-arrow))
                                                    (translate-types (data-arrow) (list return-type)))))
@@ -218,7 +218,7 @@
         parameters))
 
 (def translate-type-name' (name parameters parameter-string)
-     (match (list-empty? parameters)
+     (match (list-is-empty? parameters)
             True
                 (lowercase-identifier name)
             False

@@ -111,7 +111,7 @@
                     (translate-function-application' translate-expression expressions)))
 
 (def translate-argument-list (arguments)
-     (match (list-empty? arguments)
+     (match (list-is-empty? arguments)
             True   (wrap-in-brackets' (source-string-empty))
             False  (source-string-join (data-lambda-arrow) (list-map escape-identifier arguments))))
 

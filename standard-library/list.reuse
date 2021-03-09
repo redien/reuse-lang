@@ -37,7 +37,7 @@
            (Cons x Empty)  (Some x)
            (Cons _ rest)   (list-last rest)))
 
-(pub def list-empty? (list)
+(pub def list-is-empty? (list)
      (match list
             (Cons _ __)
                 False
