@@ -179,6 +179,11 @@
             (Some _)  False
             _         True))
 
+(pub def list-from-maybe (maybe)
+     (match maybe
+            (Some x)  (list x)
+            None      Empty))
+
 (def list-collect-from-indexed-iterator' (predicate iterator initial)
      (match (indexed-iterator-next iterator)
             (Pair None _)         (Pair iterator initial)

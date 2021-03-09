@@ -20,6 +20,9 @@
 (pub def maybe-bind (maybe f)
      (maybe-flatmap f maybe))
 
+(pub def maybe-return (x)
+     (Some x))
+
 (pub def maybe-filter (f maybe)
      (match maybe
             (Some x)
