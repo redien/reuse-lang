@@ -1,9 +1,9 @@
-var slice_45empty = () => new Int8Array();
-var slice_45of = x => { var array = new Int8Array(1); array[0] = x; return array; };
-var slice_45size = slice => slice.length;
-var slice_45get = slice => index => { var x = slice[index]; return x === undefined ? 0 : x; };
-var slice_45concat = a => b => { var array = new Int8Array(a.length + b.length); array.set(a); array.set(b, a.length); return array; };
-var slice_45foldl = f => ys => xs => xs.reduce((a, b) => f(b)(a), ys);
+var slice_empty = () => new Int8Array();
+var slice_of = x => { var array = new Int8Array(1); array[0] = x; return array; };
+var slice_size = slice => slice.length;
+var slice_get = slice => index => { var x = slice[index]; return x === undefined ? 0 : x; };
+var slice_concat = a => b => { var array = new Int8Array(a.length + b.length); array.set(a); array.set(b, a.length); return array; };
+var slice_foldl = f => ys => xs => xs.reduce((a, b) => f(b)(a), ys);
 var int32_add = a => b => a + b | 0;
 var int32_sub = a => b => a - b | 0;
 var int32_mul = a => b => a * b | 0;
