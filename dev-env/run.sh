@@ -23,8 +23,9 @@ run() {
         line-count)                     (cd $project_root ; git ls-files | grep -v 'bootstrap/' | grep -E '\.(reuse|strings)' | xargs wc -l) ;;
         line-count-with-spec)           (cd $project_root ; git ls-files | grep -v 'bootstrap/' | grep -E '\.(reuse|strings|spec)' | xargs wc -l) ;;
         vscode-install)                 ln -s $PWD/$project_root/dev-env/editor-support/vs-code-reuse ~/.vscode/extensions/vs-code-reuse ;;
-        build-docker)                   docker build -t redien/reuse-lang-dev-env $script_path ;;
-        docker)                         docker run --rm -it -v"$PWD/$project_root":/home/opam/reuse-lang redien/reuse-lang-dev-env bash ;;
+        docker)                         run docker-alpine ;;
+        docker-alpine)                  docker build -t redien/reuse-lang-dev-env $script_path/alpine-3.8 && docker run --rm -it -v"$PWD/$project_root":/home/opam/reuse-lang redien/reuse-lang-dev-env bash ;;
+        docker-ubuntu)                  docker build -t redien/reuse-lang-dev-env-ubuntu-20.04 $script_path/ubuntu-20.04 && docker run --rm -it -v"$PWD/$project_root":/root/reuse-lang redien/reuse-lang-dev-env-ubuntu-20.04 bash ;;
     esac
 }
 
