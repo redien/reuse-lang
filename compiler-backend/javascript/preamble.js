@@ -11,6 +11,7 @@ var int32_div = a => b => a / b | 0;
 var int32_mod = a => b => a % b | 0;
 var int32_and = a => b => a & b;
 var $ = {};
+module.exports.$ = $;
 function _match(value, cases) {
     for (var i = 0; i < cases.length; i += 2) {
         var captures = [];
@@ -33,3 +34,4 @@ function _match(value, cases) {
         }
     }
 }
+module.exports.match = _match;
