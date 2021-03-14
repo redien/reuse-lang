@@ -16,18 +16,18 @@ $project_root/reusec --language ocaml\
                      $build_dir/test.reuse
 
 printf "\
-$(cat $build_dir/Test.ml)\n\
+$(cat $build_dir/test.ml)\n\
 open StdinWrapper;;\n\
-Printf.printf \"%%s\" (reuse_string_to_ml (reuse_main (read_stdin ())))\n" > "$build_dir/Test.ml.2.ml"
+Printf.printf \"%%s\" (reuse_string_to_ml (reuse_main (read_stdin ())))\n" > "$build_dir/test.ml.2.ml"
 
 cp $project_root/compiler-backend/ocaml/StdinWrapper.ml $build_dir
 
 ocamlc.opt -I "$build_dir" \
            "$build_dir/StdinWrapper.ml" \
-           "$build_dir/Test.ml.2.ml" \
+           "$build_dir/test.ml.2.ml" \
            -o "$build_dir/source.out"
 
-rm "$build_dir/Test.ml.2.ml"
+rm "$build_dir/test.ml.2.ml"
 chmod +x "$build_dir/source.out"
 
 echo "" | $build_dir/source.out
