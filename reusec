@@ -5,7 +5,7 @@ set -e
 REUSE_ARGS=""
 REUSE_LANGUAGE="ocaml"
 
-LANGUAGES="ocaml, haskell or module"
+LANGUAGES="ocaml, haskell, javascript or module"
 
 usage() {
     echo Usage: $(basename $0) [flags] --output [OUTPUT FILE] [FILE]... >&2
@@ -55,6 +55,7 @@ done
 case $REUSE_LANGUAGE in
     ocaml) ;;
     haskell) ;;
+    javascript) ;;
     module) ;;
     *)
         throw_error Unknown language $REUSE_LANGUAGE. Can be $LANGUAGES.
