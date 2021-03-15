@@ -65,16 +65,20 @@ prop_isomorphic xs = dictionary_to_hs (dictionary_to_reuse xs) == xs
 prop_equivalence :: ReuseDictionary -> Bool
 prop_equivalence xs = dictionary_to_hs (evalReuse xs) == evalHs xs
 
-prop_dictionary_get :: String -> Map.Map String Int32 -> Bool
-prop_dictionary_get k xs = maybe_to_hs (Reuse.dictionary_get (string_to_reuse k) (dictionary_to_reuse xs)) == Map.lookup k xs
+prop_dictionary_get :: String -> ReuseDictionary -> Bool
+prop_dictionary_get k xs = maybe_to_hs (Reuse.dictionary_get (string_to_reuse k) (evalReuse xs)) == Map.lookup k (evalHs xs)
 
-prop_dictionary_entries :: Map.Map String Int32 -> Bool
-prop_dictionary_entries xs = Set.fromList (map (bimap string_to_hs id) (list_pair_to_hs (Reuse.dictionary_entries (dictionary_to_reuse xs)))) == Set.fromList (Map.toList xs)
+prop_dictionary_entries :: ReuseDictionary -> Bool
+prop_dictionary_entries xs = Set.fromList (map (bimap string_to_hs id) (list_pair_to_hs (Reuse.dictionary_entries (evalReuse xs)))) == Set.fromList (Map.toList (evalHs xs))
+
+prop_dictionary_size :: ReuseDictionary -> Bool
+prop_dictionary_size xs = (Reuse.dictionary_size (evalReuse xs)) == fromIntegral (Map.size (evalHs xs))
 
 quickCheckN f = quickCheck (withMaxSuccess 100 f)
 
 main = do
     quickCheckN prop_isomorphic
     quickCheck (withMaxSuccess 100000 prop_equivalence)
+    quickCheckN prop_dictionary_size
     quickCheckN prop_dictionary_get
     quickCheckN prop_dictionary_entries

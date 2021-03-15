@@ -59,3 +59,6 @@
      (match (dictionary-get key dictionary)
             (Some value)  value
             None          default))
+
+(pub def dictionary-size (dictionary)
+     (list-size (dictionary-entries dictionary)))

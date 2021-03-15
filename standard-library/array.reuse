@@ -118,3 +118,6 @@
      (match (array-get index array)
             (Some value)  value
             None          default))
+
+(pub def array-size (array)
+     (list-size (array-entries array)))

@@ -64,11 +64,14 @@ prop_isomorphic xs = array_to_hs (array_to_reuse xs) == xs
 prop_equivalence :: ReuseArray -> Bool
 prop_equivalence xs = array_to_hs (evalReuse xs) == evalHs xs
 
-prop_array_get :: Int32 -> Map.Map Int32 Int32 -> Bool
-prop_array_get k xs = maybe_to_hs (Reuse.array_get k (array_to_reuse xs)) == Map.lookup k xs
+prop_array_get :: Int32 -> ReuseArray -> Bool
+prop_array_get k xs = maybe_to_hs (Reuse.array_get k (evalReuse xs)) == Map.lookup k (evalHs xs)
 
-prop_array_entries :: Map.Map Int32 Int32 -> Bool
-prop_array_entries xs = list_pair_to_hs (Reuse.array_entries (array_to_reuse xs)) == Map.toList xs
+prop_array_entries :: ReuseArray -> Bool
+prop_array_entries xs = list_pair_to_hs (Reuse.array_entries (evalReuse xs)) == Map.toList (evalHs xs)
+
+prop_array_size :: ReuseArray -> Bool
+prop_array_size xs = fromIntegral (Reuse.array_size (evalReuse xs)) == Map.size (evalHs xs)
 
 quickCheckN f = quickCheck (withMaxSuccess 1000 f)
 
@@ -77,3 +80,4 @@ main = do
     quickCheck (withMaxSuccess 100000 prop_equivalence)
     quickCheckN prop_array_get
     quickCheckN prop_array_entries
+    quickCheckN prop_array_size
