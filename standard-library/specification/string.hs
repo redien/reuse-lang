@@ -97,16 +97,16 @@ instance Arbitrary ReuseString where
 
 charToInt = fromIntegral . Char.ord
 
-evalReuse :: ReuseString -> Reuse.Tstring
-evalReuse SEmpty = Reuse.string_45empty
-evalReuse (SAppend x xs) = Reuse.string_45append (charToInt x) (evalReuse xs)
-evalReuse (SPrepend x xs) = Reuse.string_45prepend (charToInt x) (evalReuse xs)
-evalReuse (SSkip x xs) = Reuse.string_45skip x (evalReuse xs)
-evalReuse (STake x xs) = Reuse.string_45take x (evalReuse xs)
-evalReuse (SJoin x xs) = Reuse.string_45join (evalReuse x) (list_to_reuse (map evalReuse xs))
-evalReuse (SReverse xs) = Reuse.string_45reverse (evalReuse xs)
-evalReuse (SRest xs) = Reuse.string_45rest (evalReuse xs)
-evalReuse (SConcat xs ys) = Reuse.string_45concat (evalReuse xs) (evalReuse ys)
+evalReuse :: ReuseString -> Reuse.String
+evalReuse SEmpty = Reuse.string_empty
+evalReuse (SAppend x xs) = Reuse.string_append (charToInt x) (evalReuse xs)
+evalReuse (SPrepend x xs) = Reuse.string_prepend (charToInt x) (evalReuse xs)
+evalReuse (SSkip x xs) = Reuse.string_skip x (evalReuse xs)
+evalReuse (STake x xs) = Reuse.string_take x (evalReuse xs)
+evalReuse (SJoin x xs) = Reuse.string_join (evalReuse x) (list_to_reuse (map evalReuse xs))
+evalReuse (SReverse xs) = Reuse.string_reverse (evalReuse xs)
+evalReuse (SRest xs) = Reuse.string_rest (evalReuse xs)
+evalReuse (SConcat xs ys) = Reuse.string_concat (evalReuse xs) (evalReuse ys)
 
 evalHs :: ReuseString -> String
 evalHs SEmpty = ""
@@ -126,22 +126,22 @@ prop_equivalence :: ReuseString -> Bool
 prop_equivalence xs = string_to_hs (evalReuse xs) == evalHs xs
 
 prop_string_first :: NonEmptyList Char -> Bool
-prop_string_first (NonEmpty s) = maybe_to_hs (Reuse.maybe_45map (Char.chr . fromIntegral) (Reuse.string_45first (string_to_reuse s))) == Just (head s)
+prop_string_first (NonEmpty s) = maybe_to_hs (Reuse.maybe_map (Char.chr . fromIntegral) (Reuse.string_first (string_to_reuse s))) == Just (head s)
 
 prop_string_size :: String -> Bool
-prop_string_size s = (fromIntegral . Reuse.string_45size . string_to_reuse) s == length s
+prop_string_size s = (fromIntegral . Reuse.string_size . string_to_reuse) s == length s
 
 prop_string_every :: Fun Int Bool -> String -> Bool
-prop_string_every (Fn f) xs = bool_to_hs (Reuse.string_45every_63 (bool_to_reuse . f . fromIntegral) (string_to_reuse xs)) == all (f . Char.ord) xs
+prop_string_every (Fn f) xs = bool_to_hs (Reuse.string_every (bool_to_reuse . f . fromIntegral) (string_to_reuse xs)) == all (f . Char.ord) xs
 
 prop_string_any :: Fun Int Bool -> String -> Bool
-prop_string_any (Fn f) xs = bool_to_hs (Reuse.string_45any_63 (bool_to_reuse . f . fromIntegral) (string_to_reuse xs)) == any (f . Char.ord) xs
+prop_string_any (Fn f) xs = bool_to_hs (Reuse.string_any (bool_to_reuse . f . fromIntegral) (string_to_reuse xs)) == any (f . Char.ord) xs
 
 prop_string_to_int32 :: Int32 -> Bool
-prop_string_to_int32 x = (maybe_to_hs . Reuse.string_45to_45int32 . string_to_reuse . show) x == Just x
+prop_string_to_int32 x = (maybe_to_hs . Reuse.string_to_int32 . string_to_reuse . show) x == Just x
 
 prop_string_from_int32 :: Int32 -> Bool
-prop_string_from_int32 x = (string_to_hs . Reuse.string_45from_45int32) x == show x
+prop_string_from_int32 x = (string_to_hs . Reuse.string_from_int32) x == show x
 
 quickCheckN f = quickCheck (withMaxSuccess 1000 f)
 

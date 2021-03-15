@@ -49,10 +49,10 @@ instance Arbitrary ReuseDictionary where
             shrinkToNil DEmpty = []
             shrinkToNil _ = [DEmpty]
 
-evalReuse :: ReuseDictionary -> Reuse.Tdictionary Int32
-evalReuse DEmpty = Reuse.dictionary_45empty
-evalReuse (DSet k v xs) = Reuse.dictionary_45set (string_to_reuse k) v (evalReuse xs)
-evalReuse (DRemove k xs) = Reuse.dictionary_45remove (string_to_reuse k) (evalReuse xs)
+evalReuse :: ReuseDictionary -> Reuse.Dictionary Int32
+evalReuse DEmpty = Reuse.dictionary_empty
+evalReuse (DSet k v xs) = Reuse.dictionary_set (string_to_reuse k) v (evalReuse xs)
+evalReuse (DRemove k xs) = Reuse.dictionary_remove (string_to_reuse k) (evalReuse xs)
 
 evalHs :: ReuseDictionary -> Map.Map String Int32
 evalHs DEmpty = Map.empty
@@ -66,10 +66,10 @@ prop_equivalence :: ReuseDictionary -> Bool
 prop_equivalence xs = dictionary_to_hs (evalReuse xs) == evalHs xs
 
 prop_dictionary_get :: String -> Map.Map String Int32 -> Bool
-prop_dictionary_get k xs = maybe_to_hs (Reuse.dictionary_45get (string_to_reuse k) (dictionary_to_reuse xs)) == Map.lookup k xs
+prop_dictionary_get k xs = maybe_to_hs (Reuse.dictionary_get (string_to_reuse k) (dictionary_to_reuse xs)) == Map.lookup k xs
 
 prop_dictionary_entries :: Map.Map String Int32 -> Bool
-prop_dictionary_entries xs = Set.fromList (map (bimap string_to_hs id) (list_pair_to_hs (Reuse.dictionary_45entries (dictionary_to_reuse xs)))) == Set.fromList (Map.toList xs)
+prop_dictionary_entries xs = Set.fromList (map (bimap string_to_hs id) (list_pair_to_hs (Reuse.dictionary_entries (dictionary_to_reuse xs)))) == Set.fromList (Map.toList xs)
 
 quickCheckN f = quickCheck (withMaxSuccess 100 f)
 

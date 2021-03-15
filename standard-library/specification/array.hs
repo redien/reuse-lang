@@ -48,10 +48,10 @@ instance Arbitrary ReuseArray where
             shrinkToNil AEmpty = []
             shrinkToNil _ = [AEmpty]
 
-evalReuse :: ReuseArray -> Reuse.Tarray Int32
-evalReuse AEmpty = Reuse.array_45empty
-evalReuse (ASet k v xs) = Reuse.array_45set k v (evalReuse xs)
-evalReuse (ARemove k xs) = Reuse.array_45remove k (evalReuse xs)
+evalReuse :: ReuseArray -> Reuse.Array Int32
+evalReuse AEmpty = Reuse.array_empty
+evalReuse (ASet k v xs) = Reuse.array_set k v (evalReuse xs)
+evalReuse (ARemove k xs) = Reuse.array_remove k (evalReuse xs)
 
 evalHs :: ReuseArray -> Map.Map Int32 Int32
 evalHs AEmpty = Map.empty
@@ -65,10 +65,10 @@ prop_equivalence :: ReuseArray -> Bool
 prop_equivalence xs = array_to_hs (evalReuse xs) == evalHs xs
 
 prop_array_get :: Int32 -> Map.Map Int32 Int32 -> Bool
-prop_array_get k xs = maybe_to_hs (Reuse.array_45get k (array_to_reuse xs)) == Map.lookup k xs
+prop_array_get k xs = maybe_to_hs (Reuse.array_get k (array_to_reuse xs)) == Map.lookup k xs
 
 prop_array_entries :: Map.Map Int32 Int32 -> Bool
-prop_array_entries xs = list_pair_to_hs (Reuse.array_45entries (array_to_reuse xs)) == Map.toList xs
+prop_array_entries xs = list_pair_to_hs (Reuse.array_entries (array_to_reuse xs)) == Map.toList xs
 
 quickCheckN f = quickCheck (withMaxSuccess 1000 f)
 

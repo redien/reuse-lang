@@ -5,24 +5,11 @@
            data-forall data-foreign data-import data-instance data-infix data-infixl data-infixr
            data-newtype data-where))
 
-(def capital? (char)
-     (match (>= char 65)
-            False   False
-            True
-     (match (<= char 90)
-            True    True
-            False   False)))
-
-(def capitalized? (s)
-     (string-every? capital? (string-take 1 s)))
-
 (def escape-identifier (identifier)
-     (match (capitalized? (identifier-name identifier))
-            True  (source-string-concat (SourceStringChar 95) (SourceStringIdentifier identifier IdentifierTransformationNone))
-            False (SourceStringIdentifier identifier IdentifierTransformationNone)))
+     (SourceStringIdentifier identifier IdentifierTransformationLowercase))
 
 (def translate-constructor-identifier (constructor)
-     (source-string-concat (SourceStringChar 67) (escape-identifier constructor)))
+     (SourceStringIdentifier constructor IdentifierTransformationCapitalize))
 
 (def operator-translation-map ()
      (dictionary-of (list
@@ -41,12 +28,15 @@
             False  (escape-identifier identifier)))
 
 (def prefix-type-variable (identifier)
-     (translate-identifier identifier))
+     (SourceStringIdentifier identifier IdentifierTransformationLowercase))
 
 (def prefix-type (identifier)
-     (match (= (identifier-token identifier) (identifier-int32))
+     (match (identifier-is? identifier (identifier-slice))
+            True   (SourceString (data-slice-type))
+            False
+     (match (identifier-is? identifier (identifier-int32))
             True   (SourceString (data-Int32))
-            False  (source-string-concat (SourceStringChar 84) (translate-identifier identifier))))
+            False  (SourceStringIdentifier identifier IdentifierTransformationCapitalize))))
 
 (def translate-less-than (translate-expression expressions)
      (match expressions
@@ -266,12 +256,24 @@
                   (SourceString (data-space))
                   (SourceString (data-where)))))
 
+(def definition-to-public-identifier (definition)
+     (match definition
+            (FunctionDefinition name True __ ___ ____)
+                (Some (Pair IdentifierTransformationLowercase name))
+            (TypeDefinition name True __ ___ ____)
+                (Some (Pair IdentifierTransformationCapitalize name))
+            _
+                None))
+
+(def public-identifiers-with-transformations (definitions)
+     (list-flatmap (. list-from-maybe definition-to-public-identifier) definitions))
+
 (def generate-source (module-name definitions)
      ((pipe (list-map translate-definition)
             (list-cons (translate-module-declaration module-name))
             (list-cons (SourceString (data-language-exts)))
             (source-string-join (string-of-char 10))
-            (pair-cons (list-map (pair-cons IdentifierTransformationNone) (public-identifiers definitions))))
+            (pair-cons (public-identifiers-with-transformations definitions)))
          definitions))
 
 (def perform-transformations? () True)

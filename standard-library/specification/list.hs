@@ -94,16 +94,16 @@ instance Arbitrary ReuseList where
             shrinkToNil LEmpty = []
             shrinkToNil _ = [LEmpty]
 
-evalReuse :: ReuseList -> Reuse.Tlist Int32
-evalReuse LEmpty = Reuse.list_45empty
-evalReuse (LCons x xs) = Reuse.list_45cons x (evalReuse xs)
-evalReuse (LRest xs) = Reuse.list_45rest (evalReuse xs)
-evalReuse (LSkip x xs) = Reuse.list_45skip x (evalReuse xs)
-evalReuse (LTake x xs) = Reuse.list_45take x (evalReuse xs)
-evalReuse (LReverse xs) = Reuse.list_45reverse (evalReuse xs)
-evalReuse (LConcat xs ys) = Reuse.list_45concat (evalReuse xs) (evalReuse ys)
-evalReuse (LMap (Fn f) xs) = Reuse.list_45map f (evalReuse xs)
-evalReuse (LFilter (Fn f) xs) = Reuse.list_45filter (bool_to_reuse . f) (evalReuse xs)
+evalReuse :: ReuseList -> Reuse.List Int32
+evalReuse LEmpty = Reuse.list_empty
+evalReuse (LCons x xs) = Reuse.list_cons x (evalReuse xs)
+evalReuse (LRest xs) = Reuse.list_rest (evalReuse xs)
+evalReuse (LSkip x xs) = Reuse.list_skip x (evalReuse xs)
+evalReuse (LTake x xs) = Reuse.list_take x (evalReuse xs)
+evalReuse (LReverse xs) = Reuse.list_reverse (evalReuse xs)
+evalReuse (LConcat xs ys) = Reuse.list_concat (evalReuse xs) (evalReuse ys)
+evalReuse (LMap (Fn f) xs) = Reuse.list_map f (evalReuse xs)
+evalReuse (LFilter (Fn f) xs) = Reuse.list_filter (bool_to_reuse . f) (evalReuse xs)
 
 evalHs :: ReuseList -> [Int32]
 evalHs LEmpty = []
@@ -123,34 +123,34 @@ prop_equivalence :: ReuseList -> Bool
 prop_equivalence xs = list_to_hs (evalReuse xs) == evalHs xs
 
 prop_list_from_range :: Small Int32 -> Small Int32 -> Bool
-prop_list_from_range (Small a) (Small b) = list_to_hs (Reuse.list_45from_45range a b) == [a..(b - 1)]
+prop_list_from_range (Small a) (Small b) = list_to_hs (Reuse.list_from_range a b) == [a..(b - 1)]
 
 prop_list_last :: NonEmptyList Int -> Bool
-prop_list_last (NonEmpty xs) = maybe_to_hs (Reuse.list_45last (list_to_reuse xs)) == Just (last xs)
+prop_list_last (NonEmpty xs) = maybe_to_hs (Reuse.list_last (list_to_reuse xs)) == Just (last xs)
 
 prop_list_size :: [Int] -> Bool
-prop_list_size xs = Reuse.list_45size (list_to_reuse xs) == fromIntegral (length xs)
+prop_list_size xs = Reuse.list_size (list_to_reuse xs) == fromIntegral (length xs)
 
 prop_list_foldl :: Fun (Int, Int) Int -> Int -> Small [Int] -> Bool
-prop_list_foldl (Fn2 f) x (Small xs) = Reuse.list_45foldl f x (list_to_reuse xs) == foldl f x xs
+prop_list_foldl (Fn2 f) x (Small xs) = Reuse.list_foldl f x (list_to_reuse xs) == foldl f x xs
 
 prop_list_flatten :: [[Int]] -> Bool
-prop_list_flatten xs = list_to_hs (Reuse.list_45flatten (list_list_to_reuse xs)) == concat xs
+prop_list_flatten xs = list_to_hs (Reuse.list_flatten (list_list_to_reuse xs)) == concat xs
 
 prop_list_split_at :: Small Int -> [Int] -> Bool
-prop_list_split_at (Small n) xs = pair_list_to_hs (Reuse.list_45split_45at (fromIntegral n) (list_to_reuse xs)) == splitAt n xs
+prop_list_split_at (Small n) xs = pair_list_to_hs (Reuse.list_split_at (fromIntegral n) (list_to_reuse xs)) == splitAt n xs
 
 prop_list_partition_by :: Fun (Int, Int) Bool -> [Int] -> Bool
-prop_list_partition_by (Fn2 f) xs = list_list_to_hs (Reuse.list_45partition_45by (\a b -> bool_to_reuse (f a b)) (list_to_reuse xs)) == Data.List.GroupBy.groupBy f xs
+prop_list_partition_by (Fn2 f) xs = list_list_to_hs (Reuse.list_partition_by (\a b -> bool_to_reuse (f a b)) (list_to_reuse xs)) == Data.List.GroupBy.groupBy f xs
 
 prop_list_every :: Fun Int Bool -> [Int] -> Bool
-prop_list_every (Fn f) xs = bool_to_hs (Reuse.list_45every_63 (bool_to_reuse . f) (list_to_reuse xs)) == all f xs
+prop_list_every (Fn f) xs = bool_to_hs (Reuse.list_every (bool_to_reuse . f) (list_to_reuse xs)) == all f xs
 
 prop_list_any :: Fun Int Bool -> [Int] -> Bool
-prop_list_any (Fn f) xs = bool_to_hs (Reuse.list_45any_63 (bool_to_reuse . f) (list_to_reuse xs)) == any f xs
+prop_list_any (Fn f) xs = bool_to_hs (Reuse.list_any (bool_to_reuse . f) (list_to_reuse xs)) == any f xs
 
 prop_list_zip :: [Int] -> [Int] -> Bool
-prop_list_zip xs ys = list_pair_to_hs (Reuse.list_45zip (list_to_reuse xs) (list_to_reuse ys)) == zip xs ys
+prop_list_zip xs ys = list_pair_to_hs (Reuse.list_zip (list_to_reuse xs) (list_to_reuse ys)) == zip xs ys
 
 quickCheckN f = quickCheck (withMaxSuccess 1000 f)
 
