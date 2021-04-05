@@ -19,6 +19,13 @@ function js_list_to_reuse(l) {
 }
 module.exports.js_list_to_reuse = js_list_to_reuse;
 
+function reuse_list_to_js(l) {
+    var list = [];
+    list_foldl(a => _ => list.push(a))(undefined)(l);
+    return list;
+}
+module.exports.reuse_list_to_js = reuse_list_to_js;
+
 function reuse_string_to_js(s) {
     var bytes = [];
     string_foldl(a => _ => bytes.push(a))(undefined)(s);

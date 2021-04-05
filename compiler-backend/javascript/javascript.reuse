@@ -161,7 +161,9 @@
                                             (SourceString (data-close-bracket))
                                             (SourceString (data-lambda-arrow))
                                             (escape-identifier identifier)
-                                            (join' (list-map (. wrap-in-brackets' escape-identifier) arguments))
+                                            (match (list-is-empty? arguments)
+                                                   True   (wrap-in-brackets' SourceStringEmpty)
+                                                   False  (join' (list-map (. wrap-in-brackets' escape-identifier) arguments)))
                                             (SourceString (data-end-statement))))
                          False  SourceStringEmpty))))
 

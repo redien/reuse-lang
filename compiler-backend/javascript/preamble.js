@@ -1,8 +1,8 @@
-var slice_empty = () => new Int8Array();
-var slice_of = x => { var array = new Int8Array(1); array[0] = x; return array; };
+var slice_empty = () => new Uint8Array();
+var slice_of = x => { var array = new Uint8Array(1); array[0] = x; return array; };
 var slice_size = slice => slice.length;
 var slice_get = slice => index => { var x = slice[index]; return x === undefined ? 0 : x; };
-var slice_concat = a => b => { var array = new Int8Array(a.length + b.length); array.set(a); array.set(b, a.length); return array; };
+var slice_concat = a => b => { var array = new Uint8Array(a.length + b.length); array.set(a); array.set(b, a.length); return array; };
 var slice_foldl = f => ys => xs => xs.reduce((a, b) => f(b)(a), ys);
 var int32_add = a => b => a + b | 0;
 var int32_sub = a => b => a - b | 0;
@@ -19,7 +19,7 @@ function _match(value, cases) {
         if (match) { return cases[i + 1].apply(null, captures); }
     }
 
-    throw new Error("No patterns match");
+    throw "No patterns match";
 
     function match_pattern(value, pattern, captures) {
         if (Array.isArray(pattern)) {
