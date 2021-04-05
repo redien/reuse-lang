@@ -29,7 +29,7 @@
             (Cons _ rest)
                 rest
             Empty
-                Empty)) 
+                Empty))
 
 (pub def list-last (list)
     (match list

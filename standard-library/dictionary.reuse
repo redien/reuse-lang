@@ -43,7 +43,7 @@
             None
                 dictionary))))
 
-(def dictionary-entries (dictionary)
+(pub def dictionary-entries (dictionary)
      (match dictionary
             (Dictionary array)
                (list-flatten (list-map pair-right (array-entries array)))))
