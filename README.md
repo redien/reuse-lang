@@ -151,6 +151,11 @@ Compiler for the Reuse programming language
        --output [FILE]    Write output to FILE
 ```
 
+## Design Restrictions
+
+- Possible to reasonably map reuse to as many target languages as possible.
+- Be able to maintain hundreds of backends for different languages.
+
 ## Design Rationale
 
 - Keeping the language as small as possible
@@ -231,37 +236,40 @@ docker run --rm -it -v $PWD:/home/opam/reuse-lang redien/reuse-lang-dev-env
 
 ```
 type sexp
-     Symbol   string       range
-     Integer  int32        range
-     List     (list sexp)  range
+   | Symbol   string       range
+   | Integer  int32        range
+   | List     (list sexp)  range
 
 type parse-error
-     ParseErrorTooFewClosingBrackets
-     ParseErrorTooManyClosingBrackets
+   | ParseErrorTooFewClosingBrackets
+   | ParseErrorTooManyClosingBrackets
 
 func identifier-range start end
      Range (indexed-iterator-index start) (indexed-iterator-index end)
 
 func parse-symbol iterator end next
      case string-collect-from-indexed-iterator atom-character? iterator
-          Pair next-iterator name ->
+        | Pair next-iterator name
                case string-to-int32 name
-                    Some integer ->  next next-iterator (Integer integer (identifier-range iterator next-iterator))
-                    None         ->
+                  | Some integer
+                    next next-iterator (Integer integer (identifier-range iterator next-iterator))
+                  | None
                case string-empty? name
-                    False ->  next next-iterator (Symbol name (identifier-range iterator next-iterator))
-                    True  ->  end iterator
+                  | False
+                    next next-iterator (Symbol name (identifier-range iterator next-iterator))
+                  | True
+                    end iterator
 
 ...
 
 
 func sexp-to-function-type sexp-to-types sexp-to-type name parameters range
      case parameters
-          Cons (List arg-types _) (Cons return-type Empty) ->
+        | Cons (List arg-types _) (Cons return-type Empty)
                 result-bind   (sexp-to-types arg-types)   func arg-types
                 result-bind   (sexp-to-type return-type)  func return-type
                 result-return (FunctionType arg-types return-type range)
-          _ ->
+        | _
                 Error (MalformedTypeError range)
 ```
 
