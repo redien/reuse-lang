@@ -1,8 +1,8 @@
 
 (def generate-source (module-name definitions)
      ((pipe (list-filter (. (module-equal? ModuleSelf) definition-module))
-            (list-map definition-to-sexp)
-            stringify-sexps
+            (list-map (. (stringify-sexp stringify-sexps) definition-to-sexp))
+            (string-join (string-of-char 10))
             source-string-string
             (pair-cons (list-empty)))
         definitions))
