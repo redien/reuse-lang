@@ -22,7 +22,7 @@ let slice_subslice slice s e =
     if Int32.sub e s <= 0l then
         slice_empty ()
     else
-        Bytes.sub slice (Int32.to_int s') (Int32.to_int e');;
+        Bytes.sub slice (Int32.to_int s') (Int32.to_int (Int32.sub e' s'));;
 let rec id = fun x7 -> x7;;
 let rec const = fun a b -> a;;
 let rec flip = fun f -> (fun b2 a2 -> (f a2 b2));;

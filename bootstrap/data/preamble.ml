@@ -22,4 +22,4 @@ let slice_subslice slice s e =
     if Int32.sub e s <= 0l then
         slice_empty ()
     else
-        Bytes.sub slice (Int32.to_int s') (Int32.to_int e');;
+        Bytes.sub slice (Int32.to_int s') (Int32.to_int (Int32.sub e' s'));;
