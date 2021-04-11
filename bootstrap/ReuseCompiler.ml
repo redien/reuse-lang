@@ -15,6 +15,14 @@ let slice_foldl f ys xs =
         else
             ys in
     slice_foldl 0 f ys xs;;
+let slice_subslice slice s e =
+    let size = slice_size slice in
+    let s' = if s < 0l then 0l else (if s >= size then (Int32.sub size 1l) else s) in
+    let e' = if e < 0l then 0l else (if e >= size then (Int32.sub size 1l) else e) in
+    if Int32.sub e s <= 0l then
+        slice_empty ()
+    else
+        Bytes.sub slice (Int32.to_int s') (Int32.to_int e');;
 let rec id = fun x7 -> x7;;
 let rec const = fun a b -> a;;
 let rec flip = fun f -> (fun b2 a2 -> (f a2 b2));;
@@ -345,6 +353,7 @@ let rec data_slice_size = fun () -> (string_from_list (Cons ((115l),(Cons ((108l
 let rec data_slice_get = fun () -> (string_from_list (Cons ((115l),(Cons ((108l),(Cons ((105l),(Cons ((99l),(Cons ((101l),(Cons ((45l),(Cons ((103l),(Cons ((101l),(Cons ((116l),Empty)))))))))))))))))));;
 let rec data_slice_concat = fun () -> (string_from_list (Cons ((115l),(Cons ((108l),(Cons ((105l),(Cons ((99l),(Cons ((101l),(Cons ((45l),(Cons ((99l),(Cons ((111l),(Cons ((110l),(Cons ((99l),(Cons ((97l),(Cons ((116l),Empty)))))))))))))))))))))))));;
 let rec data_slice_foldl = fun () -> (string_from_list (Cons ((115l),(Cons ((108l),(Cons ((105l),(Cons ((99l),(Cons ((101l),(Cons ((45l),(Cons ((102l),(Cons ((111l),(Cons ((108l),(Cons ((100l),(Cons ((108l),Empty)))))))))))))))))))))));;
+let rec data_slice_subslice = fun () -> (string_from_list (Cons ((115l),(Cons ((108l),(Cons ((105l),(Cons ((99l),(Cons ((101l),(Cons ((45l),(Cons ((115l),(Cons ((117l),(Cons ((98l),(Cons ((115l),(Cons ((108l),(Cons ((105l),(Cons ((99l),(Cons ((101l),Empty)))))))))))))))))))))))))))));;
 let rec data_slice = fun () -> (string_from_list (Cons ((115l),(Cons ((108l),(Cons ((105l),(Cons ((99l),(Cons ((101l),Empty)))))))))));;
 let rec data_int32 = fun () -> (string_from_list (Cons ((105l),(Cons ((110l),(Cons ((116l),(Cons ((51l),(Cons ((50l),Empty)))))))))));;
 let rec identifier_def = fun () -> (-1l);;
@@ -368,10 +377,11 @@ let rec identifier_slice_size = fun () -> (11l);;
 let rec identifier_slice_get = fun () -> (12l);;
 let rec identifier_slice_concat = fun () -> (13l);;
 let rec identifier_slice_foldl = fun () -> (14l);;
-let rec identifier_int32 = fun () -> (15l);;
-let rec identifier_slice = fun () -> (16l);;
-let rec default_symbol_count = fun () -> (17l);;
-let rec intrinsic_identifiers = fun () -> (Cons ((Pair ((identifier_ ()),(data_ ()))),(Cons ((Pair ((identifier__ ()),(data__ ()))),(Cons ((Pair ((identifier_2 ()),(data_2 ()))),(Cons ((Pair ((identifier_3 ()),(data_3 ()))),(Cons ((Pair ((identifier_4 ()),(data_4 ()))),(Cons ((Pair ((identifier_5 ()),(data_5 ()))),(Cons ((Pair ((identifier_int32_less_than ()),(data_int32_less_than ()))),(Cons ((Pair ((identifier_list ()),(data_list ()))),(Cons ((Pair ((identifier_pipe ()),(data_pipe ()))),(Cons ((Pair ((identifier_slice_empty ()),(data_slice_empty ()))),(Cons ((Pair ((identifier_slice_foldl ()),(data_slice_foldl ()))),(Cons ((Pair ((identifier_slice_of ()),(data_slice_of ()))),(Cons ((Pair ((identifier_slice_size ()),(data_slice_size ()))),(Cons ((Pair ((identifier_slice_get ()),(data_slice_get ()))),(Cons ((Pair ((identifier_slice_concat ()),(data_slice_concat ()))),(Cons ((Pair ((identifier_int32 ()),(data_int32 ()))),(Cons ((Pair ((identifier_slice ()),(data_slice ()))),Empty))))))))))))))))))))))))))))))))));;
+let rec identifier_slice_subslice = fun () -> (15l);;
+let rec identifier_int32 = fun () -> (16l);;
+let rec identifier_slice = fun () -> (17l);;
+let rec default_symbol_count = fun () -> (18l);;
+let rec intrinsic_identifiers = fun () -> (Cons ((Pair ((identifier_ ()),(data_ ()))),(Cons ((Pair ((identifier__ ()),(data__ ()))),(Cons ((Pair ((identifier_2 ()),(data_2 ()))),(Cons ((Pair ((identifier_3 ()),(data_3 ()))),(Cons ((Pair ((identifier_4 ()),(data_4 ()))),(Cons ((Pair ((identifier_5 ()),(data_5 ()))),(Cons ((Pair ((identifier_int32_less_than ()),(data_int32_less_than ()))),(Cons ((Pair ((identifier_list ()),(data_list ()))),(Cons ((Pair ((identifier_pipe ()),(data_pipe ()))),(Cons ((Pair ((identifier_slice_empty ()),(data_slice_empty ()))),(Cons ((Pair ((identifier_slice_foldl ()),(data_slice_foldl ()))),(Cons ((Pair ((identifier_slice_of ()),(data_slice_of ()))),(Cons ((Pair ((identifier_slice_size ()),(data_slice_size ()))),(Cons ((Pair ((identifier_slice_get ()),(data_slice_get ()))),(Cons ((Pair ((identifier_slice_concat ()),(data_slice_concat ()))),(Cons ((Pair ((identifier_slice_subslice ()),(data_slice_subslice ()))),(Cons ((Pair ((identifier_int32 ()),(data_int32 ()))),(Cons ((Pair ((identifier_slice ()),(data_slice ()))),Empty))))))))))))))))))))))))))))))))))));;
 let rec default_symbol_table = fun () -> (symbol_table_bind_list (list_map pair_right (intrinsic_identifiers ())) (symbol_table_empty ()));;
 let rec default_scope = fun () -> (parser_scope_set_list (list_map (x (fun x249 -> (Pair (x249,x249))) pair_left) (intrinsic_identifiers ())) (parser_scope_empty ()));;
 let rec default_identifiers = fun () -> (dictionary_set (data_def ()) (Pair ((identifier_def ()),(data_def ()))) (dictionary_set (data_typ ()) (Pair ((identifier_typ ()),(data_typ ()))) (dictionary_set (data_fn ()) (Pair ((identifier_fn ()),(data_fn ()))) (dictionary_set (data_match ()) (Pair ((identifier_match ()),(data_match ()))) (dictionary_set (data_exists ()) (Pair ((identifier_pub ()),(data_exists ()))) (dictionary_set (data_pub ()) (Pair ((identifier_pub ()),(data_pub ()))) (dictionary_of (list_map (fun pair10 -> (Pair ((pair_right pair10),pair10))) (intrinsic_identifiers ())))))))));;

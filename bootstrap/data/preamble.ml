@@ -15,3 +15,11 @@ let slice_foldl f ys xs =
         else
             ys in
     slice_foldl 0 f ys xs;;
+let slice_subslice slice s e =
+    let size = slice_size slice in
+    let s' = if s < 0l then 0l else (if s >= size then (Int32.sub size 1l) else s) in
+    let e' = if e < 0l then 0l else (if e >= size then (Int32.sub size 1l) else e) in
+    if Int32.sub e s <= 0l then
+        slice_empty ()
+    else
+        Bytes.sub slice (Int32.to_int s') (Int32.to_int e');;

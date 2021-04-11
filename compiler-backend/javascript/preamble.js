@@ -4,6 +4,7 @@ var slice_size = slice => slice.length;
 var slice_get = slice => index => { var x = slice[index]; return x === undefined ? 0 : x; };
 var slice_concat = a => b => { var array = new Uint8Array(a.length + b.length); array.set(a); array.set(b, a.length); return array; };
 var slice_foldl = f => ys => xs => xs.reduce((a, b) => f(b)(a), ys);
+var slice_subslice = slice => start => end => slice.subarray(start, end);
 var int32_add = a => b => a + b | 0;
 var int32_sub = a => b => a - b | 0;
 var int32_mul = a => b => a * b | 0;
