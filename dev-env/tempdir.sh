@@ -5,7 +5,7 @@ project_root="$script_path/.."
 
 name="$1"
 date=$(date -u +"%Y-%m-%d-%H-%M")
-random=$(head -c 5 /dev/random | base32)
+random=$(head -c 5 /dev/random | base64 | sed 's/[+\/]/_/g')
 
 basedir="$project_root/generated/$name"
 
