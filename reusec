@@ -26,7 +26,7 @@ throw_error() {
 }
 
 if [ "$(uname)" = "Darwin" ] ; then
-    root_path=$(dirname $(greadlink -f "$0"))
+    root_path=$(dirname $(ruby -e "print File.realpath(\"$0\")"))
 else
     root_path=$(dirname $(readlink -f "$0"))
 fi
