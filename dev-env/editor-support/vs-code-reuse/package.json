@@ -4,6 +4,7 @@
     "description": "Reuse language support",
     "version": "0.0.1",
     "publisher": "jesosk",
+    "repository": { "url": "https://github.com/redien/reuse-lang" },
     "engines": {
         "vscode": "^1.23.0"
     },
