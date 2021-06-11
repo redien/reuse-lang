@@ -6,7 +6,7 @@ set -e
 
 if [[ "$2" == git@* ]]; then
     repo_path="reuse_modules/.tmp.gitrepo.$1-$3"
-    [ -d $repo_path ] || git clone -q "$2" --depth 1 --branch "$3" --single-branch "$repo_path"
+    [ -d $repo_path ] || git clone -q "$2" --depth 1 --branch "$3" --single-branch "$repo_path" >> reuse_modules/.log 2>&1
     cp "$repo_path/$4" reuse_modules/.tmp
 else
     if [ "$(uname)" = "Darwin" ]; then
