@@ -4,23 +4,48 @@ set -e
 
 [ -d reuse_modules ] || mkdir reuse_modules
 
-if [[ "$2" == git@* ]]; then
-    repo_path="reuse_modules/.tmp.gitrepo.$1-$3"
-    [ -d $repo_path ] || git clone -q "$2" --depth 1 --branch "$3" --single-branch "$repo_path" >> reuse_modules/.log 2>&1
-    cp "$repo_path/$4" reuse_modules/.tmp
-else
+date >> reuse_modules/.log
+
+install_file() {
+    local file="$1"
+    local filename="$(basename $file)"
+    local name="${filename%.*}"
+
     if [ "$(uname)" = "Darwin" ]; then
-        curl -o reuse_modules/.tmp -sL "$2"
+        hash=$(shasum -a 256 $file | awk '{print $1}')
     else
-        curl -o reuse_modules/.tmp -sL "$2"
+        hash=$(sha256sum $file | awk '{print $1}')
     fi
-fi
-if [ "$(uname)" = "Darwin" ]; then
-    hash=$(shasum -a 256 reuse_modules/.tmp | awk '{print $1}')
-else
-    hash=$(sha256sum reuse_modules/.tmp | awk '{print $1}')
-fi
 
-echo "$1 $hash"
+    echo "$name $hash"
 
-mv reuse_modules/.tmp reuse_modules/$1-$hash.reuse
+    cp "$file" "reuse_modules/$name-$hash.reuse"
+}
+
+install_module() {
+    if [[ "$1" == git@* ]]; then
+        local repo_name="$(basename $1)"
+        repo_path="reuse_modules/.tmp.gitrepo.$repo_name-$2"
+        [ -d $repo_path ] || git clone -q "$1" --depth 1 --branch "$2" --single-branch "$repo_path" >> reuse_modules/.log 2>&1
+
+        if [ ! -d "$repo_path/release" ]; then
+            >&2 echo "Error: Could not find a release folder in $1"
+            exit 1
+        fi
+
+        for file in $repo_path/release/*.reuse ; do
+            install_file "$file"
+        done
+    else
+        local filename="$(basename $1)"
+        if [ "$(uname)" = "Darwin" ]; then
+            curl -o reuse_modules/$filename -sL "$1"
+        else
+            curl -o reuse_modules/$filename -sL "$1"
+        fi
+        install_file "reuse_modules/$filename"
+        rm "reuse_modules/$filename"
+    fi
+}
+
+install_module $@
