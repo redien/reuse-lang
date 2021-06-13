@@ -37,3 +37,8 @@ function reuse_boolean_to_js(b) {
     return b === True;
 }
 module.exports.reuse_boolean_to_js = reuse_boolean_to_js;
+
+function reuse_pair_to_js(p) {
+    return [p[1], p[2]];
+}
+module.exports.reuse_pair_to_js = reuse_pair_to_js;
