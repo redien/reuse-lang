@@ -1,6 +1,6 @@
 import Data.Int (Int32)
 import qualified Prelude
-import Prelude ((+), (*), (-), (<), (>=), (&&), (.), ($))
+import Prelude ((+), (*), (-), (<), (>=), (<=), (&&), (.), ($))
 import Data.Bits ((.&.))
 import qualified Data.ByteString as ByteString
 _int32_add :: Int32 -> Int32 -> Int32
@@ -39,3 +39,12 @@ slice_foldl f ys xs = slice_foldl 0 f ys xs where
             slice_foldl (i + 1) f (f (Prelude.fromIntegral (ByteString.index xs i)) ys) xs
         else
             ys
+slice_subslice :: ByteString.ByteString -> Int32 -> Int32 -> ByteString.ByteString
+slice_subslice slice s e =
+    let size = slice_size slice in
+    let s' = if s < 0 then 0 else (if s >= size then size - 1 else s) in
+    let e' = if e < 0 then 0 else (if e >= size then size - 1 else e) in
+    if e' - s' <= 0 then
+        slice_empty
+    else
+        ByteString.take (Prelude.fromIntegral (e' - s')) (ByteString.drop (Prelude.fromIntegral s') slice)

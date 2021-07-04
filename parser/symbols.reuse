@@ -21,9 +21,10 @@
 (pub def identifier-slice-get ()         12)
 (pub def identifier-slice-concat ()      13)
 (pub def identifier-slice-foldl ()       14)
-(pub def identifier-int32 ()             15)
-(pub def identifier-slice ()             16)
-(pub def default-symbol-count ()         17)
+(pub def identifier-slice-subslice ()    15)
+(pub def identifier-int32 ()             16)
+(pub def identifier-slice ()             17)
+(pub def default-symbol-count ()         18)
 
 (def intrinsic-identifiers ()
      (list (Pair (identifier-+) (data-+)) (Pair (identifier--) (data--)) (Pair (identifier-*) (data-*))
@@ -33,6 +34,7 @@
            (Pair (identifier-slice-empty) (data-slice-empty)) (Pair (identifier-slice-foldl) (data-slice-foldl))
            (Pair (identifier-slice-of) (data-slice-of)) (Pair (identifier-slice-size) (data-slice-size))
            (Pair (identifier-slice-get) (data-slice-get)) (Pair (identifier-slice-concat) (data-slice-concat))
+           (Pair (identifier-slice-subslice) (data-slice-subslice))
            (Pair (identifier-int32) (data-int32)) (Pair (identifier-slice) (data-slice))))
 
 (def default-symbol-table ()

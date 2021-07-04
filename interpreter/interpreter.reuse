@@ -135,6 +135,13 @@
             _
                 (Error (data-error-slice-op))))
 
+(def eval-slice-subslice (scope stack-trace arguments)
+     (match arguments
+            (Cons (ValueSlice slice) (Cons (ValueInteger start) (Cons (ValueInteger end) Empty)))
+                (return (ValueSlice (slice-subslice slice start end)))
+            _
+                (Error (data-error-slice-op))))
+
 (def eval-function-application (eval-expression stack-trace arguments values scope expression)
      (match (< (list-size values) (list-size arguments))
             True
@@ -242,6 +249,7 @@
                       (Pair (identifier-slice-get)        (ValueIntrinsic eval-slice-get))
                       (Pair (identifier-slice-concat)     (ValueIntrinsic eval-slice-concat))
                       (Pair (identifier-slice-foldl)      (ValueIntrinsic (eval-slice-foldl (apply-function eval-expression))))
+                      (Pair (identifier-slice-subslice)   (ValueIntrinsic eval-slice-subslice))
                       (Pair (identifier-pipe)             (ValueIntrinsic eval-pipe))
                       (Pair (identifier-list)             (ValueIntrinsic eval-list)))
                 scope))
