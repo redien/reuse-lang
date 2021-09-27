@@ -1,7 +1,7 @@
 
 var $textEncoder = typeof TextEncoder != "undefined" ? new TextEncoder() : null;
 var $textDecoder = typeof TextDecoder != "undefined" ? new TextDecoder() : null;
-var $textEncode = $textEncoder ? $textEncoder.encode : Buffer.from;
+var $textEncode = $textEncoder ? $textEncoder.encode.bind($textEncoder) : Buffer.from;
 var $textDecode = $textDecoder ? (bytes => $textDecoder.decode(new Uint8Array(bytes))) : (bytes => Buffer.from(bytes).toString());
 
 function js_string_to_reuse(s) {
