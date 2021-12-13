@@ -11,12 +11,13 @@ mkdir -p generated
 rm generated/build.log > /dev/null 2>&1
 
 function testLine {
+    local result
     if [ "${3:0:1}" == "=" ]; then
         result=$($eval_command "${2}" "${1:2}" 2> generated/error.log)
     else
         result=$($eval_command "${2}" "${1:2}" 2>&1)
     fi
-    status_code="$?"
+    local status_code="$?"
     tests=$((tests+1))
 
     if [ "${3:0:1}" == "=" ]; then
@@ -71,14 +72,11 @@ function testLine {
     fi
 }
 
-echo TAP version 13
-
-program=""
-
-for f in $spec/*.spec
-do
+function runSpec() {
+    local file="$1"
+    local program=""
     while IFS='' read line; do
-        firstChar=${line:0:1}
+        local firstChar=${line:0:1}
         if [ "$firstChar" == ">" ]; then
             IFS='' read expected
             testLine "${line//'\n'/$'\n'}" "${program//'\n'/$'\n'}" "${expected//'\n'/$'\n'}"
@@ -90,8 +88,18 @@ do
                 echo \# $line
             fi
         fi
-    done <$f
-done
+    done <$file
+}
+
+echo TAP version 13
+
+if test -f "$spec"; then
+    runSpec "$spec"
+else
+    for file in $spec/*.spec; do
+        runSpec "$file"
+    done
+fi
 
 echo 1..$tests
 
