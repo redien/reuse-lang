@@ -19,4 +19,5 @@ $project_root/bin/reuse-ocaml --language module\
                               $script_path/result.reuse\
                               $script_path/state.reuse\
                               $script_path/array.reuse\
-                              $script_path/dictionary.reuse
+                              $script_path/dictionary.reuse\
+                              $script_path/bigint.reuse

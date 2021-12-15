@@ -59,3 +59,6 @@ array_to_hs xs = Map.fromList (list_pair_to_hs (Reuse.array_entries xs))
 
 array_to_reuse :: Map.Map Int32 a -> Reuse.Array a
 array_to_reuse xs = Reuse.array_of (list_pair_to_reuse (Map.toList xs))
+
+bigint_to_hs i = read (string_to_hs (Reuse.bigint_to_string i))
+bigint_to_reuse i = Reuse.bigint_from_string (string_to_reuse (show i))

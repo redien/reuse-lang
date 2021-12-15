@@ -22,3 +22,4 @@ test_file string
 test_file list
 test_file dictionary
 test_file array
+test_file bigint
