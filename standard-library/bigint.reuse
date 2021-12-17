@@ -103,6 +103,27 @@
                          True   (Cons carry Empty)
                          False  Empty)))
 
+(def bigint-add-zeroes (n digits)
+     (match n
+            0  digits
+            _  (bigint-add-zeroes (- n 1) (Cons 0 digits))))
+
+(def bigint-multiply-digit (x digits carry)
+     (match digits
+            Empty
+                  (match (> carry 0)
+                         True   (Cons carry Empty)
+                         False  Empty)
+            (Cons y ys)
+                  (Cons (% (+ (* x y) carry) 10) (bigint-multiply-digit x ys (/ (+ (* x y) carry) 10)))))
+
+(def bigint-multiply-parts (a b base)
+     (match a
+            (Cons x xs)
+                  (bigint-add-parts (bigint-add-zeroes base (bigint-multiply-digit x b 0)) (bigint-multiply-parts xs b (+ base 1)) 0)
+            Empty
+                  Empty))
+
 (pub def bigint-subtract (a b)
      (match (Pair a b)
             (Pair (Bigint False a-parts) (Bigint True b-parts))
@@ -128,3 +149,16 @@
                   (bigint-subtract b (bigint-negate a))
             (Pair (Bigint False _) (Bigint True __))
                   (bigint-subtract a (bigint-negate b))))
+
+(pub def bigint-multiply (a b)
+     (match (Pair a b)
+            (Pair (Bigint _ (Cons 0 Empty)) (Bigint __ ___))
+                  (Bigint False (Cons 0 Empty))
+            (Pair (Bigint _ __) (Bigint ___ (Cons 0 Empty)))
+                  (Bigint False (Cons 0 Empty))
+            (Pair (Bigint True a-parts) (Bigint False b-parts))
+                  (Bigint True (bigint-multiply-parts a-parts b-parts 0))
+            (Pair (Bigint False a-parts) (Bigint True b-parts))
+                  (Bigint True (bigint-trim-parts (bigint-multiply-parts a-parts b-parts 0)))
+            (Pair (Bigint _ a-parts) (Bigint __ b-parts))
+                  (Bigint False (bigint-trim-parts (bigint-multiply-parts a-parts b-parts 0)))))

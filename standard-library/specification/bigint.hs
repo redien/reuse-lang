@@ -13,6 +13,7 @@ data ReuseBigint
     | BFrom Int32
     | BAdd ReuseBigint ReuseBigint
     | BSubtract ReuseBigint ReuseBigint
+    | BMultiply ReuseBigint ReuseBigint
     | BNegate ReuseBigint
     deriving Generic
 
@@ -22,6 +23,7 @@ instance Show ReuseBigint where
     show (BFrom a) = "(bigint-from " ++ (show a) ++ ")"
     show (BAdd a b) = "(bigint-add " ++ (show a) ++ " " ++ (show b) ++ ")"
     show (BSubtract a b) = "(bigint-subtract " ++ (show a) ++ " " ++ (show b) ++ ")"
+    show (BMultiply a b) = "(bigint-multiply " ++ (show a) ++ " " ++ (show b) ++ ")"
     show (BNegate a) = "(bigint-negate " ++ (show a) ++ ")"
 
 emptyGen :: Gen ReuseBigint
@@ -47,6 +49,12 @@ subtractGen n = do
     b <- arbitraryReuseBigint (n `div` 2)
     return (BSubtract a b)
 
+multiplyGen :: Int -> Gen ReuseBigint
+multiplyGen n = do
+    a <- arbitraryReuseBigint (n `div` 2)
+    b <- arbitraryReuseBigint (n `div` 2)
+    return (BMultiply a b)
+
 negateGen :: Int -> Gen ReuseBigint
 negateGen n = do
     v <- arbitraryReuseBigint (n - 1)
@@ -54,7 +62,7 @@ negateGen n = do
 
 arbitraryReuseBigint :: Int -> Gen ReuseBigint
 arbitraryReuseBigint 0 = emptyGen
-arbitraryReuseBigint n = frequency [(3, addGen n), (2, negateGen n), (2, fromGen n), (1, subtractGen n), (1, oneGen)]
+arbitraryReuseBigint n = frequency [(3, addGen n), (2, negateGen n), (2, fromGen n), (1, subtractGen n), (1, multiplyGen n), (1, oneGen)]
 
 instance Arbitrary ReuseBigint where
     arbitrary = do
@@ -71,6 +79,7 @@ evalReuse BOne = Reuse.bigint_one
 evalReuse (BFrom v) = Reuse.bigint_from v
 evalReuse (BAdd a b) = Reuse.bigint_add (evalReuse a) (evalReuse b)
 evalReuse (BSubtract a b) = Reuse.bigint_subtract (evalReuse a) (evalReuse b)
+evalReuse (BMultiply a b) = Reuse.bigint_multiply (evalReuse a) (evalReuse b)
 evalReuse (BNegate v) = Reuse.bigint_negate (evalReuse v)
 
 evalHs :: ReuseBigint -> Integer
@@ -79,6 +88,7 @@ evalHs BOne = 1
 evalHs (BFrom v) = fromIntegral v
 evalHs (BAdd a b) = (evalHs a) + (evalHs b)
 evalHs (BSubtract a b) = (evalHs a) - (evalHs b)
+evalHs (BMultiply a b) = (evalHs a) * (evalHs b)
 evalHs (BNegate v) = -(evalHs v)
 
 prop_isomorphic :: Integer -> Bool
@@ -90,9 +100,7 @@ prop_equivalence i = bigint_to_hs (evalReuse i) == evalHs i
 prop_less_than :: Integer -> Integer -> Bool
 prop_less_than a b = bool_to_hs (Reuse.bigint_less_than (bigint_to_reuse a) (bigint_to_reuse b)) == (a < b)
 
-quickCheckN f = quickCheck (withMaxSuccess 1000 f)
-
 main = do
-    quickCheckN prop_isomorphic
-    quickCheck (withMaxSuccess 100000 prop_less_than)
+    quickCheck (withMaxSuccess 1000 prop_isomorphic)
     quickCheck (withMaxSuccess 100000 prop_equivalence)
+    quickCheck (withMaxSuccess 100000 prop_less_than)

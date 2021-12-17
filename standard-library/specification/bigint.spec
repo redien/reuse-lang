@@ -16,8 +16,14 @@ bigint-negate
 > (bigint-to-string (bigint-negate (bigint-zero)))
 = 0
 
+> (bigint-to-string (bigint-negate (bigint-from -1)))
+= 1
+
 
 bigint-from
+> (bigint-to-string (bigint-from -0))
+= 0
+
 > (bigint-to-string (bigint-from 2))
 = 2
 
@@ -172,3 +178,53 @@ bigint-subtract
 
 > (bigint-to-string (bigint-subtract (bigint-one) (bigint-from 100)))
 = -99
+
+
+bigint-multiply
+> (bigint-to-string (bigint-multiply (bigint-zero) (bigint-zero)))
+= 0
+
+> (bigint-to-string (bigint-multiply (bigint-one) (bigint-one)))
+= 1
+
+> (bigint-to-string (bigint-multiply (bigint-one) (bigint-zero)))
+= 0
+
+> (bigint-to-string (bigint-multiply (bigint-zero) (bigint-one)))
+= 0
+
+> (bigint-to-string (bigint-multiply (bigint-from -1) (bigint-one)))
+= -1
+
+> (bigint-to-string (bigint-multiply (bigint-one) (bigint-from -1)))
+= -1
+
+> (bigint-to-string (bigint-multiply (bigint-from -1) (bigint-from -1)))
+= 1
+
+> (bigint-to-string (bigint-multiply (bigint-from 10) (bigint-from 1)))
+= 10
+
+> (bigint-to-string (bigint-multiply (bigint-from 1) (bigint-from 10)))
+= 10
+
+> (bigint-to-string (bigint-multiply (bigint-from 10) (bigint-from 10)))
+= 100
+
+> (bigint-to-string (bigint-multiply (bigint-from 0) (bigint-from 10)))
+= 0
+
+> (bigint-to-string (bigint-multiply (bigint-from 0) (bigint-from -10)))
+= 0
+
+> (bigint-to-string (bigint-multiply (bigint-from -10) (bigint-from 0)))
+= 0
+
+> (bigint-to-string (bigint-multiply (bigint-from 9) (bigint-from 9)))
+= 81
+
+> (bigint-to-string (bigint-multiply (bigint-from 9) (bigint-from 22)))
+= 198
+
+> (bigint-to-string (bigint-multiply (bigint-from 33) (bigint-from 34)))
+= 1122
