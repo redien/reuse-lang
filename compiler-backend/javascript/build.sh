@@ -6,13 +6,13 @@ project_root=$script_path/../..
 build_dir=$($project_root/dev-env/builddir.sh javascript-compiler)
 
 $project_root/parser/build.sh
+$project_root/argument-parser/build.sh
 
 # Build compiler
 $project_root/reusec --language ocaml\
                      --output $build_dir/ReuseCompiler.ml\
                      --module $($project_root/dev-env/builddir.sh parser)/parser.reuse\
-                     $project_root/argument-parser/argument-parser.strings\
-                     $project_root/argument-parser/argument-parser.reuse\
+                     --module $($project_root/dev-env/builddir.sh argument-parser)/argument-parser.reuse\
                      $project_root/compiler-frontend/local-transforms.strings\
                      $project_root/compiler-frontend/local-transforms.reuse\
                      $project_root/compiler-frontend/error-reporting.strings\
