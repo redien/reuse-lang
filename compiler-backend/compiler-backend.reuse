@@ -1,0 +1,32 @@
+
+(typ (compiler-backend compilation-result)
+     (Backend string
+              (list string)
+              (list string)
+              (fn (string (list definition)) compilation-result)
+              boolean))
+
+(def compiler-backend-name (backend)
+     (match backend
+            (Backend name _ __ ___ ____)
+               name))
+
+(def compiler-backend-preamble-files (backend)
+     (match backend
+            (Backend _ files __ ___ ____)
+               files))
+
+(def compiler-backend-pervasives-files (backend)
+     (match backend
+            (Backend _ __ files ___ ____)
+               files))
+
+(def compiler-backend-generate-source (backend module-name definitions)
+     (match backend
+            (Backend _ __ ___ generate ____)
+               (generate module-name definitions)))
+
+(def compiler-backend-perform-transformations? (backend)
+     (match backend
+            (Backend _ __ ___ ____ transform?)
+               transform?))

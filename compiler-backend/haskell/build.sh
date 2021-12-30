@@ -23,6 +23,7 @@ $project_root/reusec --language ocaml\
                      $project_root/compiler-frontend/common.strings\
                      $project_root/compiler-backend/source-string.reuse\
                      $project_root/compiler-backend/shared.reuse\
+                     $project_root/compiler-backend/compiler-backend.reuse\
                      $script_path/haskell.strings\
                      $script_path/haskell.reuse\
                      $project_root/compiler-frontend/path.reuse\
