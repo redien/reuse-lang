@@ -29,18 +29,17 @@ $project_root/reusec --language ocaml\
                      $project_root/compiler-frontend/error-reporting.reuse\
                      $project_root/compiler-frontend/identifier-validation.strings\
                      $project_root/compiler-frontend/identifier-validation.reuse\
-                     $project_root/compiler-frontend/common.strings\
+                     $project_root/compiler-backend/common.strings\
                      $project_root/compiler-backend/source-string.reuse\
                      $project_root/compiler-backend/shared.reuse\
                      $project_root/compiler-backend/compiler-backend.reuse\
                      $script_path/module.strings\
                      $script_path/module.reuse\
                      $project_root/compiler-frontend/path.reuse\
-                     $project_root/compiler-frontend/compiler.reuse\
-                     $project_root/compiler-frontend/cli.strings\
-                     $project_root/compiler-frontend/cli.reuse
+                     $project_root/cli/cli.strings\
+                     $project_root/cli/cli.reuse
 
-cp $project_root/compiler-frontend/Cli.ml $build_dir/Cli.ml
+cp $project_root/cli/Cli.ml $build_dir/Cli.ml
 
 if [ "$1" != "--no-binary" ]; then
     ocamlopt -O3 unix.cmxa \

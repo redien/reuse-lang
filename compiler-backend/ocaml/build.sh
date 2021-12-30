@@ -21,10 +21,10 @@ $project_root/reusec --language ocaml\
                      $project_root/compiler-backend/compiler-backend.reuse\
                      $script_path/ocaml.strings\
                      $script_path/ocaml.reuse\
-                     $project_root/compiler-frontend/cli.strings\
-                     $project_root/compiler-frontend/cli.reuse
+                     $project_root/cli/cli.strings\
+                     $project_root/cli/cli.reuse
 
-cp $project_root/compiler-frontend/Cli.ml $build_dir/Cli.ml
+cp $project_root/cli/Cli.ml $build_dir/Cli.ml
 
 if [ "$1" != "--no-binary" ]; then
     ocamlopt -O3 unix.cmxa \
