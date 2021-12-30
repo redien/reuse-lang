@@ -3,7 +3,7 @@
 (def identifier-cons () -1001)
 (def identifier-empty () -1002)
 
-(def with-local-transform-keywords (dictionary)
+(pub def with-local-transform-keywords (dictionary)
      (dictionary-set (data-sparkle-x) (Pair (identifier-sparkle-x) (data-sparkle-x))
      (dictionary-set (data-Cons) (Pair (identifier-cons) (data-Cons))
      (dictionary-set (data-Empty) (Pair (identifier-empty) (data-Empty))
@@ -74,7 +74,7 @@
           (Some empty)
                (transform-special-forms (identifier-list) (transform-list cons empty) definitions))))
 
-(def local-transforms (definitions)
+(pub def local-transforms (definitions)
      (result-bind definitions                                                                          (fn (definitions)
      (result-bind (transform-special-forms (identifier-pipe) transform-pipe definitions)               (fn (definitions)
      (result-bind (transform-list-special-form definitions)                                            (fn (definitions)

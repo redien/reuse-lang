@@ -1,5 +1,4 @@
 space                        | 
-parse-error                  |parse error 
 fun                          |fun
 type                         |type
 if                           |if
@@ -73,5 +72,3 @@ pub                          |pub
 int32-less-than              |int32-less-than
 pipe                         |pipe
 list                         |list
-module-language              |module
-ocaml-language               |ocaml

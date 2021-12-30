@@ -7,27 +7,20 @@ build_dir=$($project_root/dev-env/builddir.sh ocaml-compiler)
 
 $project_root/parser/build.sh
 $project_root/argument-parser/build.sh
+$project_root/compiler-frontend/build.sh
 
 # Build compiler
 $project_root/reusec --language ocaml\
                      --output $build_dir/ReuseCompiler.ml\
                      --module $($project_root/dev-env/builddir.sh parser)/parser.reuse\
                      --module $($project_root/dev-env/builddir.sh argument-parser)/argument-parser.reuse\
-                     $project_root/compiler-frontend/local-transforms.strings\
-                     $project_root/compiler-frontend/local-transforms.reuse\
-                     $project_root/compiler-frontend/error-reporting.strings\
-                     $project_root/compiler-frontend/error-strings.reuse\
-                     $project_root/compiler-frontend/error-reporting.reuse\
-                     $project_root/compiler-frontend/identifier-validation.strings\
-                     $project_root/compiler-frontend/identifier-validation.reuse\
-                     $project_root/compiler-frontend/common.strings\
+                     --module $($project_root/dev-env/builddir.sh compiler-frontend)/compiler-frontend.reuse\
+                     $project_root/compiler-backend/common.strings\
                      $project_root/compiler-backend/source-string.reuse\
                      $project_root/compiler-backend/shared.reuse\
                      $project_root/compiler-backend/compiler-backend.reuse\
                      $script_path/ocaml.strings\
                      $script_path/ocaml.reuse\
-                     $project_root/compiler-frontend/path.reuse\
-                     $project_root/compiler-frontend/compiler.reuse\
                      $project_root/compiler-frontend/cli.strings\
                      $project_root/compiler-frontend/cli.reuse
 

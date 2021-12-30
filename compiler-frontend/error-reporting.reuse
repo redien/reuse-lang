@@ -52,7 +52,7 @@
                                                  (list (data-File:) (source-file-path file)))))
             None         (data-no-location-information)))
 
-(def error-to-string (files error)
+(pub def error-to-string (files error)
      (match error
             (MalformedDefinitionError range)
                 (i18n-malformed-definition-error range)

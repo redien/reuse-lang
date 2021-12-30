@@ -9,5 +9,5 @@
                                                           (identifier-range identifier)))
             False  (result-lift identifier)))
 
-(def validate-reserved-identifiers (definitions)
+(pub def validate-reserved-identifiers (definitions)
      (result-flatmap (. result-concat (list-map (over-definition-expressions (over-identifiers validate-identifier)))) definitions))

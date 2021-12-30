@@ -1,4 +1,37 @@
 
+(def compiler-backend-ocaml ()
+     (Backend (data-ocaml-language)
+              (list (data-preamble-filename))
+              (list (data-pervasives-filename))
+              generate-source
+              (perform-transformations?)))
+
+(def generate-source-module (module-name definitions)
+     ((pipe (list-filter (. (module-equal? ModuleSelf) definition-module))
+            (list-map (. (stringify-sexp stringify-sexps) definition-to-sexp))
+            (string-join (string-of-char 10))
+            source-string-string
+            (pair-cons (list-empty)))
+        definitions))
+
+(def compiler-backend-module ()
+     (Backend (data-module-language) Empty Empty generate-source-module False))
+
+(def compiler-backends ()
+     (list (compiler-backend-ocaml)
+           (compiler-backend-module)))
+
+(def parse (file-entries)
+     (parse-source-files (with-local-transform-keywords (default-identifiers)) file-entries))
+
+(def transform (backend definitions)
+     (match (compiler-backend-perform-transformations? backend)
+            False  definitions
+            True   (local-transforms (validate-reserved-identifiers definitions))))
+
+(def generate (backend module-name definitions)
+     (result-map (compiler-backend-generate-source backend module-name) definitions))
+
 (typ cli-program (CliTime (fn (int32) cli-program))
                  (CliMaxHeapSize (fn (int32) cli-program))
                  (CliRenderSource (pair (list (pair identifier-transformation identifier)) source-string)
@@ -38,7 +71,7 @@
           arguments))
 
 (def table-to-string (table)
-     (string-join (string-of-char 10) (list-map (string-join (data-space)) table)))
+     (string-join (string-of-char 10) (list-map (string-join (string-of-char 32)) table)))
 
 (def print-diagnostics (arguments file-entries
                         max-heap-size

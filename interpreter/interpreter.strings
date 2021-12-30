@@ -6,6 +6,7 @@ pipe                   |pipe
 list                   |list
 Empty                  |Empty
 Cons                   |Cons
+space                  | 
 error-generic          |Error evaluating expression
 error-int32-op         |Integer operator called with incorrect arguments
 error-slice-op         |Slice operator called with incorrect arguments
