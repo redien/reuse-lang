@@ -8,6 +8,7 @@ build_dir=$($project_root/dev-env/builddir.sh haskell-compiler)
 $project_root/parser/build.sh
 $project_root/argument-parser/build.sh
 $project_root/compiler-frontend/build.sh
+$project_root/compiler-backend/build.sh
 
 # Build compiler
 $project_root/reusec --language ocaml\
@@ -15,10 +16,8 @@ $project_root/reusec --language ocaml\
                      --module $($project_root/dev-env/builddir.sh parser)/parser.reuse\
                      --module $($project_root/dev-env/builddir.sh argument-parser)/argument-parser.reuse\
                      --module $($project_root/dev-env/builddir.sh compiler-frontend)/compiler-frontend.reuse\
+                     --module $($project_root/dev-env/builddir.sh compiler-backend)/compiler-backend.reuse\
                      $project_root/compiler-backend/common.strings\
-                     $project_root/compiler-backend/source-string.reuse\
-                     $project_root/compiler-backend/shared.reuse\
-                     $project_root/compiler-backend/compiler-backend.reuse\
                      $script_path/haskell.strings\
                      $script_path/haskell.reuse\
                      $project_root/cli/cli.strings\
