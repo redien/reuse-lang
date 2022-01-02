@@ -26,4 +26,4 @@ do
     esac
 done
 
-$root_path/bin/reusec $@
+$root_path/bin/reusec $REUSE_ARGS
