@@ -36,11 +36,6 @@ do
     arg="$1"
 
     case $arg in
-        --language)
-            REUSE_LANGUAGE="$2"
-            shift
-            shift
-        ;;
         --help)
             usage
             exit
@@ -52,14 +47,4 @@ do
     esac
 done
 
-case $REUSE_LANGUAGE in
-    ocaml) ;;
-    haskell) ;;
-    javascript) ;;
-    module) ;;
-    *)
-        throw_error Unknown language $REUSE_LANGUAGE. Can be $LANGUAGES.
-    ;;
-esac
-
-$root_path/bin/reuse-$REUSE_LANGUAGE $REUSE_ARGS
+$root_path/bin/reusec $REUSE_ARGS

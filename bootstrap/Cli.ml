@@ -41,10 +41,10 @@ let add_char_lowercase c buffer =
 
 let identifiers = Hashtbl.create 1000;;
 let rendered_identifiers = Hashtbl.create 1000;;
-let initialize_source_renderer () =
+let initialize_source_renderer reserved_identifiers =
     Hashtbl.clear identifiers;
     Hashtbl.clear rendered_identifiers;
-    ignore (list_map (fun identifier -> Hashtbl.add rendered_identifiers (reuse_string_to_ml (identifier ())) true; identifier) (reserved_identifiers ()));;
+    ignore (list_map (fun identifier -> Hashtbl.add rendered_identifiers (reuse_string_to_ml (identifier ())) true; identifier) reserved_identifiers);;
 
 let substring_from buffer offset =
     let length = (Buffer.length buffer) - offset in
@@ -114,8 +114,8 @@ while true do
           CliError (error, k) -> Printf.eprintf "%s\n" (reuse_string_to_ml error) ; current := k ()
         | CliOutput (output, k) -> Printf.printf "%s" (reuse_string_to_ml output) ; current := k ()
         | CliTime (k) -> current := k (Int32.of_float ((Sys.time ()) *. 1000000.0))
-        | CliRenderSource (Pair (public_identifiers, source_string), k) ->
-            initialize_source_renderer ();
+        | CliRenderSource (Pair (public_identifiers, source_string), reserved_identifiers, k) ->
+            initialize_source_renderer reserved_identifiers;
             add_identifiers public_identifiers;
             current := k (Buffer.to_bytes (source_string_to_buffer (Buffer.create 32768) source_string))
         | CliMaxHeapSize (k) -> current := k (Int32.of_int ((Gc.stat ()).top_heap_words * (Sys.word_size / 8)))
