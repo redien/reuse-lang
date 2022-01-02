@@ -27,10 +27,18 @@ build_compiler_module() {
     cp $project_root/compiler-backend/$1/*ervasives.* $build_dir/data/
 }
 
-build_compiler_module haskell
-build_compiler_module javascript
-build_compiler_module ocaml
-build_compiler_module module
+backends="$(cd $project_root/compiler-backend/ && ls -d */ | xargs -n 1 basename)"
+backend_modules=""
+
+echo "(def compiler-backends () (list " > $build_dir/backends.reuse
+
+while IFS= read -r backend; do
+    build_compiler_module $backend
+    echo "(compiler-backend-$backend)" >> $build_dir/backends.reuse
+    backend_modules="$backend_modules --module $build_dir/$backend.reuse"
+done <<< "$backends"
+
+echo "))" >> $build_dir/backends.reuse
 
 # Build compiler
 $project_root/reusec --language ocaml\
@@ -39,10 +47,8 @@ $project_root/reusec --language ocaml\
                      --module $($project_root/dev-env/builddir.sh argument-parser)/argument-parser.reuse\
                      --module $($project_root/dev-env/builddir.sh compiler-frontend)/compiler-frontend.reuse\
                      --module $($project_root/dev-env/builddir.sh compiler-backend)/compiler-backend.reuse\
-                     --module $build_dir/haskell.reuse\
-                     --module $build_dir/ocaml.reuse\
-                     --module $build_dir/javascript.reuse\
-                     --module $build_dir/module.reuse\
+                     $backend_modules\
+                     $build_dir/backends.reuse\
                      $project_root/cli/cli.strings\
                      $project_root/cli/cli.reuse
 

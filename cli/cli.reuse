@@ -1,10 +1,4 @@
 
-(def compiler-backends ()
-     (list (compiler-backend-ocaml)
-           (compiler-backend-module)
-           (compiler-backend-haskell)
-           (compiler-backend-javascript)))
-
 (def parse (file-entries)
      (parse-source-files (with-local-transform-keywords (default-identifiers)) file-entries))
 
