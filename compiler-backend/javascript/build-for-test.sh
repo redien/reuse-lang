@@ -4,4 +4,4 @@ set -e
 script_path=$(dirname "$0")
 project_root=$script_path/../..
 
-$script_path/build.sh
+$project_root/cli/build.sh
