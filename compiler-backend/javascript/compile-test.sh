@@ -3,7 +3,7 @@
 script_path=$(dirname "$0")
 project_root=$script_path/../..
 
-"$($project_root/dev-env/builddir.sh javascript-compiler)/compiler" --stdlib false --output "$2/executable.js" "$1"
+"$($project_root/dev-env/builddir.sh cli)/compiler" --stdlib false --language javascript --output "$2/executable.js" "$1"
 result=$?
 if [ "$result" != "0" ]; then
     >&2 printf "\n in file $1\n"

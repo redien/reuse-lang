@@ -4,29 +4,35 @@
               (list string)
               (list string)
               (fn (string (list definition)) compilation-result)
+              (list (fn () string))
               boolean))
 
 (pub def compiler-backend-name (backend)
      (match backend
-            (Backend name _ __ ___ ____)
+            (Backend name _ __ ___ ____ _____)
                name))
 
 (pub def compiler-backend-preamble-files (backend)
      (match backend
-            (Backend _ files __ ___ ____)
+            (Backend _ files __ ___ ____ _____)
                files))
 
 (pub def compiler-backend-pervasives-files (backend)
      (match backend
-            (Backend _ __ files ___ ____)
+            (Backend _ __ files ___ ____ _____)
                files))
 
 (pub def compiler-backend-generate-source (backend module-name definitions)
      (match backend
-            (Backend _ __ ___ generate ____)
+            (Backend _ __ ___ generate ____ _____)
                (generate module-name definitions)))
+
+(pub def compiler-backend-reserved-identifiers (backend)
+     (match backend
+            (Backend _ __ ___ ____ identifiers _____)
+               identifiers))
 
 (pub def compiler-backend-perform-transformations? (backend)
      (match backend
-            (Backend _ __ ___ ____ transform?)
+            (Backend _ __ ___ ____ _____ transform?)
                transform?))

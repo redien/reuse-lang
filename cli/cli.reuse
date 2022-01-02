@@ -1,25 +1,9 @@
 
-(def compiler-backend-ocaml ()
-     (Backend (data-ocaml-language)
-              (list (data-preamble-filename))
-              (list (data-pervasives-filename))
-              generate-source
-              (perform-transformations?)))
-
-(def generate-source-module (module-name definitions)
-     ((pipe (list-filter (. (module-equal? ModuleSelf) definition-module))
-            (list-map (. (stringify-sexp stringify-sexps) definition-to-sexp))
-            (string-join (string-of-char 10))
-            source-string-string
-            (pair-cons (list-empty)))
-        definitions))
-
-(def compiler-backend-module ()
-     (Backend (data-module-language) Empty Empty generate-source-module False))
-
 (def compiler-backends ()
      (list (compiler-backend-ocaml)
-           (compiler-backend-module)))
+           (compiler-backend-module)
+           (compiler-backend-haskell)
+           (compiler-backend-javascript)))
 
 (def parse (file-entries)
      (parse-source-files (with-local-transform-keywords (default-identifiers)) file-entries))
@@ -35,6 +19,7 @@
 (typ cli-program (CliTime (fn (int32) cli-program))
                  (CliMaxHeapSize (fn (int32) cli-program))
                  (CliRenderSource (pair (list (pair identifier-transformation identifier)) source-string)
+                                  (list (fn () string))
                                   (fn (slice) cli-program))
                  (CliReadFiles (list (pair module-reference string)) (fn ((list source-file)) cli-program))
                  (CliWriteFiles (list (pair string slice)) (fn () cli-program))
@@ -130,7 +115,7 @@
                            (Result source)
                               (CliTime (fn (end-generate)
                               (CliTime (fn (start-write-files)
-                              (CliRenderSource source (fn (source)
+                              (CliRenderSource source (compiler-backend-reserved-identifiers backend) (fn (source)
                               (CliWriteFiles (list (Pair output-path source)) (fn ()
                               (CliTime (fn (end-write-files)
                               (CliMaxHeapSize (fn (max-heap-size)

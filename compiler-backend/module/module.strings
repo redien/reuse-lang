@@ -1,2 +1,3 @@
 preamble-filename   |preamble.reuse
 pervasives-filename |pervasives.reuse
+module-language     |module

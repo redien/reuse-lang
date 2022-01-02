@@ -37,3 +37,4 @@ dot                 |.
 language-exts       |{-# LANGUAGE ExistentialQuantification, BangPatterns #-}
 pervasives-filename |Pervasives.hs
 preamble-filename   |preamble.hs
+haskell-language    |haskell

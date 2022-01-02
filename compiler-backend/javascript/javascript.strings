@@ -1,4 +1,5 @@
 compile-error       |*compile error*
+javascript-language |javascript
 preamble-filename   |preamble.js
 pervasives-filename |pervasives.js
 int32-plus          |int32_add

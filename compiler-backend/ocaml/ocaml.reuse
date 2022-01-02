@@ -252,4 +252,10 @@
             (pair-cons (list-map (pair-cons IdentifierTransformationLowercase) (public-identifiers definitions))))
         definitions))
 
-(def perform-transformations? () True)
+(pub def compiler-backend-ocaml ()
+     (Backend (data-ocaml-language)
+              (list (data-preamble-filename))
+              (list (data-pervasives-filename))
+              generate-source
+              (reserved-identifiers)
+              True))

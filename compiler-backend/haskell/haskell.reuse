@@ -276,4 +276,10 @@
             (pair-cons (public-identifiers-with-transformations definitions)))
          definitions))
 
-(def perform-transformations? () True)
+(pub def compiler-backend-haskell ()
+     (Backend (data-haskell-language)
+              (list (data-preamble-filename))
+              (list (data-pervasives-filename))
+              generate-source
+              (reserved-identifiers)
+              True))

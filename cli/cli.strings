@@ -16,4 +16,4 @@ generate-time                |code generation (μs)
 standard-library-filename    |standard-library.reuse
 parser-filename              |parser.reuse
 module-language              |module
-ocaml-language               |ocaml
+true                         |true
