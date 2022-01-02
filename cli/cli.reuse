@@ -1,4 +1,16 @@
 
+(def usage (modules)
+    (string-join (string-of-char 10) (list
+          (data-usage1)
+          (string-empty)
+          (data-usage2)
+          (string-empty)
+          (data-usage3)
+          (data-usage4)
+          (data-usage5)
+          (string-empty)
+          (string-concat (data-usage6) (string-join (string-of-char 32) (list-map compiler-backend-name modules))))))
+
 (def parse (file-entries)
      (parse-source-files (with-local-transform-keywords (default-identifiers)) file-entries))
 
@@ -76,6 +88,9 @@
 
 (def cli-main (data-path argv)
      (match (parse-arguments argv)
+          (CliArguments Empty Empty)
+               (CliError (usage (compiler-backends)) (fn ()
+               (CliExit 1)))
           (CliArguments _ Empty)
                (CliError (data-no-input-files) (fn ()
                (CliExit 1)))

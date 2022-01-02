@@ -15,5 +15,11 @@ transform-time               |ast transformation (μs)
 generate-time                |code generation (μs)
 standard-library-filename    |standard-library.reuse
 parser-filename              |parser.reuse
-module-language              |module
 true                         |true
+usage                        |usage
+usage1                       |Usage: reusec [flags] --output [OUTPUT FILE] [FILE]...
+usage2                       |Compiler for the Reuse programming language
+usage3                       |       --stdlib [BOOL]    Include the standard library, default: true
+usage4                       |       --language [LANG]  Target language to compile to.
+usage5                       |       --output [FILE]    Write output to FILE
+usage6                       |Languages: 

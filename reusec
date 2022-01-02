@@ -3,27 +3,6 @@
 set -e
 
 REUSE_ARGS=""
-REUSE_LANGUAGE="ocaml"
-
-LANGUAGES="ocaml, haskell, javascript or module"
-
-usage() {
-    echo Usage: $(basename $0) [flags] --output [OUTPUT FILE] [FILE]... >&2
-    echo >&2
-    echo Compiler for the Reuse programming language>&2
-    echo >&2
-    echo "       --stdlib [BOOL]    Include the standard library, default: true" >&2
-    echo "       --language [LANG]  Target language to compile to." >&2
-    echo "                          Can be $LANGUAGES." >&2
-    echo "       --output [FILE]    Write output to FILE" >&2
-}
-
-throw_error() {
-    echo $(basename $0): $@ >&2
-    echo >&2
-    usage
-    exit 1
-}
 
 if [ "$(uname)" = "Darwin" ] ; then
     root_path=$(dirname $(ruby -e "print File.realpath(\"$0\")"))
@@ -37,7 +16,7 @@ do
 
     case $arg in
         --help)
-            usage
+            $root_path/bin/reusec
             exit
         ;;
         *)
@@ -47,4 +26,4 @@ do
     esac
 done
 
-$root_path/bin/reusec $REUSE_ARGS
+$root_path/bin/reusec $@
