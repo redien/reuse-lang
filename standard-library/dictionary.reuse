@@ -62,3 +62,8 @@
 
 (pub def dictionary-size (dictionary)
      (list-size (dictionary-entries dictionary)))
+
+(pub def dictionary-has? (key dictionary)
+     (match (dictionary-get key dictionary)
+            (Some _)  True
+            None      False))
