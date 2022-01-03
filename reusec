@@ -2,28 +2,10 @@
 
 set -e
 
-REUSE_ARGS=""
-
 if [ "$(uname)" = "Darwin" ] ; then
     root_path=$(dirname $(ruby -e "print File.realpath(\"$0\")"))
 else
     root_path=$(dirname $(readlink -f "$0"))
 fi
 
-while [[ $# -gt 0 ]]
-do
-    arg="$1"
-
-    case $arg in
-        --help)
-            $root_path/bin/reusec
-            exit
-        ;;
-        *)
-            REUSE_ARGS="$REUSE_ARGS $arg"
-            shift
-        ;;
-    esac
-done
-
-$root_path/bin/reusec $REUSE_ARGS
+$root_path/bin/reusec $@
