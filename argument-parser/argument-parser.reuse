@@ -14,13 +14,13 @@
                 (match (is-key? first)
                        True
                             (parse-arguments' (list-rest (list-rest arguments))
-                                              (Cons (Pair first second) kv-args)
+                                              (Cons (Pair (string-skip 2 first) second) kv-args)
                                               inputs)
                        False
                             (match (is-flag? first)
                                    True
                                         (parse-arguments' (list-rest arguments)
-                                                          (Cons (Pair (string-concat (data-single-dash) first) (data-true)) kv-args)
+                                                          (Cons (Pair (string-skip 1 first) (data-true)) kv-args)
                                                           inputs)
                                    False
                                         (parse-arguments' (list-rest arguments)
@@ -33,7 +33,7 @@
                        False
                             (match (is-flag? first)
                                    True
-                                        (CliArguments (list-reverse (Cons (Pair (string-concat (data-single-dash) first) (data-true)) kv-args)) (list-reverse inputs))
+                                        (CliArguments (list-reverse (Cons (Pair (string-skip 1 first) (data-true)) kv-args)) (list-reverse inputs))
                                    False
                                         (CliArguments (list-reverse kv-args) (list-reverse (Cons first inputs)))))
             Empty

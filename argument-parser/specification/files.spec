@@ -13,12 +13,12 @@ Parse three files
 
 Should parse files after parameters
 > --key value file1
-= --key=value,file1
+= key=value,file1
 
 Should parse files before parameters
 > file1 --key value
-= --key=value,file1
+= key=value,file1
 
 Should parse files between parameters
 > --key value file1 --key2 value
-= --key=value,--key2=value,file1
+= key=value,key2=value,file1

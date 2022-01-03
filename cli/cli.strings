@@ -1,11 +1,11 @@
 no-input-files               |No input files
 no-output-path               |No output file specified, please use the --output [file] flag.
-output-key                   |--output
-stdlib                       |--stdlib
-parser-flag                  |--parser
-module-flag                  |--module
-language-flag                |--language
-diagnostics-flag             |--diagnostics
+output-key                   |output
+stdlib                       |stdlib
+parser-flag                  |parser
+module-flag                  |module
+language-flag                |language
+diagnostics-flag             |diagnostics
 read-files                   |read files (μs)
 write-files                  |write files (μs)
 bytes-read                   |read files (bytes)
