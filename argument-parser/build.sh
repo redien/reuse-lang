@@ -2,7 +2,6 @@
 set -e
 
 project_root=$(dirname "$0")/..
-
 build_dir=$($project_root/dev-env/builddir.sh argument-parser)
 
 $project_root/bin/reusec --language module\

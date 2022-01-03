@@ -5,6 +5,9 @@
 (def is-key? (argument)
      (string-equal? (data-double-dash) (string-take 2 argument)))
 
+(def is-flag? (argument)
+     (string-equal? (data-single-dash) (string-take 1 argument)))
+
 (def parse-arguments' (arguments kv-args inputs)
      (match arguments
             (Cons first (Cons second rest))
@@ -14,15 +17,25 @@
                                               (Cons (Pair first second) kv-args)
                                               inputs)
                        False
-                            (parse-arguments' (list-rest arguments)
-                                              kv-args
-                                              (Cons first inputs)))
+                            (match (is-flag? first)
+                                   True
+                                        (parse-arguments' (list-rest arguments)
+                                                          (Cons (Pair (string-concat (data-single-dash) first) (data-true)) kv-args)
+                                                          inputs)
+                                   False
+                                        (parse-arguments' (list-rest arguments)
+                                                          kv-args
+                                                          (Cons first inputs))))
             (Cons first Empty)
                 (match (is-key? first)
                        True
                             (CliErrorMissingValue first)
                        False
-                            (CliArguments (list-reverse kv-args) (list-reverse (Cons first inputs))))
+                            (match (is-flag? first)
+                                   True
+                                        (CliArguments (list-reverse (Cons (Pair (string-concat (data-single-dash) first) (data-true)) kv-args)) (list-reverse inputs))
+                                   False
+                                        (CliArguments (list-reverse kv-args) (list-reverse (Cons first inputs)))))
             Empty
                 (CliArguments (list-reverse kv-args) (list-reverse inputs))))
 
