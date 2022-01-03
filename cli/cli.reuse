@@ -92,9 +92,6 @@
           (CliArguments Empty Empty)
                (CliError (usage (compiler-backends)) (fn ()
                (CliExit 1)))
-          (CliArguments _ Empty)
-               (CliError (data-no-input-files) (fn ()
-               (CliExit 1)))
           (CliErrorMissingValue key)
                (CliError key (fn ()
                (CliExit 1)))
@@ -104,6 +101,11 @@
      (match (dictionary-has? (data-h) arguments)
             True
                   (CliError (usage (compiler-backends)) (fn ()
+                  (CliExit 1)))
+            False
+     (match (list-is-empty? input-files)
+            True
+                  (CliError (data-no-input-files) (fn ()
                   (CliExit 1)))
             False
      (match (find-backend arguments)  backend
@@ -147,4 +149,4 @@
                               (CliExit 1)))))))))))))))))
                None
                     (CliError (data-no-output-path) (fn ()
-                    (CliExit 1)))))))))))))))
+                    (CliExit 1))))))))))))))))
