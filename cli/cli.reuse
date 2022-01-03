@@ -8,8 +8,9 @@
           (data-usage3)
           (data-usage4)
           (data-usage5)
+          (data-usage6)
           (string-empty)
-          (string-concat (data-usage6) (string-join (string-of-char 32) (list-map compiler-backend-name modules))))))
+          (string-concat (data-usage7) (string-join (string-of-char 32) (list-map compiler-backend-name modules))))))
 
 (def parse (file-entries)
      (parse-source-files (with-local-transform-keywords (default-identifiers)) file-entries))
@@ -100,6 +101,11 @@
           (CliArguments argument-list input-files)
      (match (dictionary-of argument-list)
             arguments
+     (match (dictionary-has? (data-h) arguments)
+            True
+                  (CliError (usage (compiler-backends)) (fn ()
+                  (CliExit 1)))
+            False
      (match (find-backend arguments)  backend
      (CliTime (fn (start-read-files)
      (CliReadFiles (list-concat (list-map (fn (filename) (Pair ModuleSelf (string-concat data-path filename))) (compiler-backend-preamble-files backend))
@@ -141,4 +147,4 @@
                               (CliExit 1)))))))))))))))))
                None
                     (CliError (data-no-output-path) (fn ()
-                    (CliExit 1))))))))))))))
+                    (CliExit 1)))))))))))))))
