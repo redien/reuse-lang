@@ -13,6 +13,7 @@ $project_root/reusec --language ocaml\
                      --output $build_dir/Interpreter.ml\
                      --module $($project_root/dev-env/builddir.sh parser)/parser.reuse\
                      --module $($project_root/dev-env/builddir.sh argument-parser)/argument-parser.reuse\
+                     --module $($project_root/dev-env/builddir.sh compiler-backend)/compiler-backend.reuse\
                      --module $($project_root/dev-env/builddir.sh compiler-frontend)/compiler-frontend.reuse\
                      $project_root/compiler-backend/common.strings\
                      $script_path/interpreter.strings\

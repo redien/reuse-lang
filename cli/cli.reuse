@@ -12,17 +12,6 @@
           (string-empty)
           (string-concat (data-usage7) (string-join (string-of-char 32) (list-map compiler-backend-name modules))))))
 
-(def parse (file-entries)
-     (parse-source-files (with-local-transform-keywords (default-identifiers)) file-entries))
-
-(def transform (backend definitions)
-     (match (compiler-backend-perform-transformations? backend)
-            False  definitions
-            True   (local-transforms (validate-reserved-identifiers definitions))))
-
-(def generate (backend module-name definitions)
-     (result-map (compiler-backend-generate-source backend module-name) definitions))
-
 (typ cli-program (CliTime (fn (int32) cli-program))
                  (CliMaxHeapSize (fn (int32) cli-program))
                  (CliRenderSource (pair (list (pair identifier-transformation identifier)) source-string)
@@ -44,21 +33,14 @@
      (maybe-bind (dictionary-get (data-language-flag) arguments)  (fn (language)
      (list-find-first (. (string-equal? language) compiler-backend-name) (compiler-backends))))))
 
-(def module-name-and-path (open? path)
-     (Pair (ModulePath (path-filename-without-extension path) open?) path))
-
-(def standard-library-files (backend data-path)
-     (Cons (path-join (list data-path (data-standard-library-filename)))
-           (list-map (fn (filename) (path-join (list data-path filename))) (compiler-backend-pervasives-files backend))))
-
 (def modules-from-arguments (backend data-path arguments)
      ((pipe (list-filter (. (string-equal? (data-module-flag)) pair-left))
             (list-map (. (module-name-and-path False) pair-right))
             (match (flag-is-true? (data-parser-flag) False (dictionary-of arguments))
-                   True   (list-cons (module-name-and-path True (path-join (list data-path (data-parser-filename)))))
+                   True   (list-cons (parser-module backend data-path))
                    False  id)
             (match (flag-is-true? (data-stdlib) True (dictionary-of arguments))
-                   True   (list-concat (list-map (module-name-and-path True) (standard-library-files backend data-path)))
+                   True   (list-concat (standard-library-module backend data-path))
                    False  id))
           arguments))
 
@@ -110,7 +92,7 @@
             False
      (match (find-backend arguments)  backend
      (CliTime (fn (start-read-files)
-     (CliReadFiles (list-concat (list-map (fn (filename) (Pair ModuleSelf (string-concat data-path filename))) (compiler-backend-preamble-files backend))
+     (CliReadFiles (list-concat (preamble-files backend data-path)
                    (list-concat (modules-from-arguments backend data-path argument-list)
                                 (list-map (pair-cons ModuleSelf) input-files)))
                           (fn (file-entries)

@@ -13,8 +13,6 @@ max-heap-size                |max heap size (bytes)
 parse-time                   |parsing (μs)
 transform-time               |ast transformation (μs)
 generate-time                |code generation (μs)
-standard-library-filename    |standard-library.reuse
-parser-filename              |parser.reuse
 true                         |true
 usage                        |usage
 usage1                       |Usage: reusec [flags] --output [OUTPUT FILE] [FILE]...

@@ -15,8 +15,8 @@ build_compiler_module() {
                          --output $build_dir/$1.reuse\
                          --module $($project_root/dev-env/builddir.sh parser)/parser.reuse\
                          --module $($project_root/dev-env/builddir.sh argument-parser)/argument-parser.reuse\
-                         --module $($project_root/dev-env/builddir.sh compiler-frontend)/compiler-frontend.reuse\
                          --module $($project_root/dev-env/builddir.sh compiler-backend)/compiler-backend.reuse\
+                         --module $($project_root/dev-env/builddir.sh compiler-frontend)/compiler-frontend.reuse\
                          $project_root/compiler-backend/common.strings\
                          $project_root/compiler-backend/$1/$1.strings\
                          $project_root/compiler-backend/$1/$1.reuse
@@ -45,8 +45,8 @@ $project_root/reusec --language ocaml\
                      --output $build_dir/ReuseCompiler.ml\
                      --module $($project_root/dev-env/builddir.sh parser)/parser.reuse\
                      --module $($project_root/dev-env/builddir.sh argument-parser)/argument-parser.reuse\
-                     --module $($project_root/dev-env/builddir.sh compiler-frontend)/compiler-frontend.reuse\
                      --module $($project_root/dev-env/builddir.sh compiler-backend)/compiler-backend.reuse\
+                     --module $($project_root/dev-env/builddir.sh compiler-frontend)/compiler-frontend.reuse\
                      $backend_modules\
                      $build_dir/backends.reuse\
                      $project_root/cli/cli.strings\
