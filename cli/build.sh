@@ -7,8 +7,8 @@ build_dir=$($project_root/dev-env/builddir.sh cli)
 
 $project_root/parser/build.sh
 $project_root/argument-parser/build.sh
-$project_root/compiler-frontend/build.sh
 $project_root/compiler-backend/build.sh
+$project_root/compiler-frontend/build.sh
 
 build_compiler_module() {
     $project_root/reusec --language module\
