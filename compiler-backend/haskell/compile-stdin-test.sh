@@ -16,8 +16,6 @@ main = do
 
 END_OF_SOURCE
 
-
-cp $project_root/standard-library/Reuse.hs $1
 cp $script_path/StdinWrapper.hs $1
 
 ghc "$1/$2" "$1/Reuse.hs" "$1/StdinWrapper.hs" "$1/$2.2.hs" -o "$1/$3"
