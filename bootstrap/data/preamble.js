@@ -11,6 +11,12 @@ var int32_mul = a => b => a * b | 0;
 var int32_div = a => b => a / b | 0;
 var int32_mod = a => b => a % b | 0;
 var int32_and = a => b => a & b;
+function _trampoline(f) {
+    while (typeof f === 'function') {
+        f = f();
+    }
+    return f;
+}
 var $ = {};
 module.exports.$ = $;
 function _match(value, cases) {
