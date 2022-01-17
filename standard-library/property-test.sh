@@ -7,9 +7,10 @@ build_dir=$($project_root/dev-env/builddir.sh standard-library)
 
 $script_path/build.sh
 
-$project_root/bin/reuse-haskell --output $build_dir/ReuseStdlib.hs\
-                                --stdlib false\
-                                $build_dir/standard-library.reuse
+$project_root/bin/reusec --language haskell\
+                         --output $build_dir/ReuseStdlib.hs\
+                         --stdlib false\
+                         $build_dir/standard-library.reuse
 
 test_file() {
     echo Testing properties of $1
