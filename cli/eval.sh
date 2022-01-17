@@ -14,7 +14,7 @@ if [ "$result" != "0" ]; then
     exit $result
 fi
 
-$project_root/compiler-backend/$IMPL/compile-nostdlib-test.sh "$build_dir/$SOURCE" "$build_dir/executable.out"
+$project_root/compiler-backend/$IMPL/compile-nostdlib-test.sh "$build_dir" "$SOURCE" "executable.out"
 $build_dir/executable.out
 
 exit $?

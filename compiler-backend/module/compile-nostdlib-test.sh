@@ -2,9 +2,9 @@
 
 project_root=$(dirname $0)/../..
 
-cat > "$2" << EOF
+cat > "$1/$3" << EOF
 #!/usr/bin/env bash
-$($project_root/dev-env/builddir.sh interpreter)/interpreter $1
+$($project_root/dev-env/builddir.sh interpreter)/interpreter $1/$2
 EOF
 
-chmod +x "$2"
+chmod +x "$1/$3"
