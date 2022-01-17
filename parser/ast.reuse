@@ -233,3 +233,25 @@
                 (result-return (Match expression rules range))))))
             _
                 (result-return expression)))
+
+(pub def function-definition-is-tail-recursive? (name expression)
+     (match expression
+            (FunctionApplication (Cons (Variable f) rest) _)
+                (identifier-equal? name f)
+            (Match _ rules __)
+                (list-any? (. (function-definition-is-tail-recursive? name) pair-right) rules)
+            _
+                False))
+
+(pub def over-tail-recursive-call (name f expression)
+     (match expression
+            (FunctionApplication (Cons (Variable applied-name) rest) range)
+                (match (identifier-equal? name applied-name)
+                       True   (f rest range)
+                       False  expression)
+            (Match expression rules range)
+                (Match expression
+                       (list-map (pair-map-right (over-tail-recursive-call name f)) rules)
+                       range)
+            _
+                expression))

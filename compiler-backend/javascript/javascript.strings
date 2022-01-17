@@ -9,6 +9,7 @@ int32-divide        |int32_div
 int32-modulus       |int32_mod
 int32-and           |int32_and
 slice               |slice
+trampoline          |_trampoline
 var                 |var
 return              |return
 function            |function
