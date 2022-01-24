@@ -234,7 +234,7 @@
             _
                 (result-return expression)))
 
-(pub def function-definition-is-tail-recursive? (name expression)
+(pub def expression-calls-function-in-tail-position? (name expression)
      (match expression
             (FunctionApplication (Cons (Variable f) rest) _)
                 (identifier-equal? name f)
@@ -243,7 +243,7 @@
                                (match pair
                                       (Pair pattern expression)
                                             (and (not (list-any? (identifier-equal? name) (captured-identifiers-from-pattern pattern)))
-                                                 (function-definition-is-tail-recursive? name expression))))
+                                                 (expression-calls-function-in-tail-position? name expression))))
                            rules)
             _
                 False))

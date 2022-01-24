@@ -9,6 +9,11 @@ Should optimize tail-recursive calls with multiple arguments
 > (count-up 10000 0)
 = 10000
 
+Should not optimize call if shadowed by function argument
+| (def f (x f) (f x))
+> (f 1 (fn (x) x))
+= 1
+
 Should not optimize call if the function name was shadowed by a pattern matching capture
 | (typ (pair a b) (Pair a b))
 | (def f (x) (match x (Pair f a) (f a)))

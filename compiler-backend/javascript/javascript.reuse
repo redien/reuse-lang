@@ -167,7 +167,8 @@
                 (translate-expression expression)))
 
 (def translate-main-function-definition (identifier arguments expression)
-     (match (function-definition-is-tail-recursive? identifier expression)
+     (match (and (list-every? (. not (identifier-equal? identifier)) arguments)
+                 (expression-calls-function-in-tail-position? identifier expression))
             True   (source-string-join (data-space) (list
                         (SourceString (data-var))
                         (escape-identifier identifier)
