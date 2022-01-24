@@ -137,6 +137,13 @@
             (Match expression rules _)
                 (translate-match-expression translate-expression translate-rule expression rules)))
 
+(def mark-as-return-value (source)
+     (join' (list (SourceString (data-open-bracket))
+                  (SourceString (data-open-block))
+                  (SourceString (data-return-value-marker))
+                  source
+                  (SourceString (data-close-block))
+                  (SourceString (data-close-bracket)))))
 
 (def translate-tail-recursive-match-rule (name translate-tail-recursive-function translate-expression rule)
      (match rule
@@ -149,7 +156,7 @@
      (match expression
             (FunctionApplication (Cons (Variable applied-name) arguments) range)
                 (match (identifier-equal? name applied-name)
-                       True   (translate-expression (Lambda Empty (FunctionApplication (Cons (Variable name) arguments) range) range))
+                       True   (mark-as-return-value (translate-expression (Lambda Empty (FunctionApplication (Cons (Variable name) arguments) range) range)))
                        False  (translate-expression expression))
             (Match expression rules range)
                 (translate-match-expression translate-expression
