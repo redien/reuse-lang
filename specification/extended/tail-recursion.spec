@@ -26,3 +26,8 @@ Should optimize the correct call if one is shadowed but one is a tail call
 | (def f (x) (match x (A f a) (f a) (B _ a) (f (A (fn (x) x) a))))
 > (f (A (fn (x) x) 1))
 = 1
+
+Should be able to return lambdas from a tail-recursive function
+| (def f (x) (match x 1 (fn () 2) 0 (f 1)))
+> ((f 0))
+= 2
