@@ -83,7 +83,7 @@
                               (SourceString (data-lambda-arrow))
                               (translate-expression expression)))))
 
-(def translate-match-expression (translate-expression expression)
+(def translate-match-expression (translate-expression translate-rule expression)
      (pipe (list-map (translate-rule translate-expression))
            (source-string-join (data-comma))
            wrap-in-angle-brackets
@@ -135,13 +135,29 @@
             (Variable identifier)
                 (translate-identifier identifier)
             (Match expression rules _)
-                (translate-match-expression translate-expression expression rules)))
+                (translate-match-expression translate-expression translate-rule expression rules)))
 
-(def transform-tail-recursive-function (identifier expression)
-     (over-tail-recursive-call identifier
-                               (fn (arguments range)
-                                   (Lambda Empty (FunctionApplication (Cons (Variable identifier) arguments) range) range))
-                               expression))
+
+(def translate-tail-recursive-match-rule (name translate-tail-recursive-function translate-expression rule)
+     (match rule
+            (Pair pattern expression)
+                  (match (list-any? (identifier-equal? name) (captured-identifiers-from-pattern pattern))
+                         True   (translate-rule translate-expression rule)
+                         False  (translate-rule (translate-tail-recursive-function name) rule))))
+
+(def translate-tail-recursive-function (name expression)
+     (match expression
+            (FunctionApplication (Cons (Variable applied-name) arguments) range)
+                (match (identifier-equal? name applied-name)
+                       True   (translate-expression (Lambda Empty (FunctionApplication (Cons (Variable name) arguments) range) range))
+                       False  (translate-expression expression))
+            (Match expression rules range)
+                (translate-match-expression translate-expression
+                                            (translate-tail-recursive-match-rule name translate-tail-recursive-function)
+                                            expression
+                                            rules)
+            _
+                (translate-expression expression)))
 
 (def translate-main-function-definition (identifier arguments expression)
      (match (function-definition-is-tail-recursive? identifier expression)
@@ -157,7 +173,7 @@
                         (SourceString (data-equals))
                         (translate-argument-list arguments)
                         (SourceString (data-lambda-arrow))
-                        (translate-expression (transform-tail-recursive-function identifier expression))
+                        (translate-tail-recursive-function identifier expression)
                         (SourceString (data-end-statement))
                         (SourceString (data-return))
                         (SourceString (data-trampoline))

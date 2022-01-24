@@ -132,7 +132,7 @@
             (UniversalParameter identifier)    identifier
             (ExistentialParameter identifier)  identifier))
 
-(def captured-identifiers-from-pattern (pattern)
+(pub def captured-identifiers-from-pattern (pattern)
      (match pattern
             (Capture identifier)
                 (list identifier)
