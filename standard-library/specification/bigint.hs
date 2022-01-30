@@ -3,6 +3,7 @@ import Debug.Trace
 import GHC.Generics
 import Test.QuickCheck
 import Test.QuickCheck.Modifiers (NonEmptyList (..))
+import Test.QuickCheck.Monadic (monadicIO, pick, pre, run, assert)
 import Data.Int
 import qualified ReuseStdlib as Reuse
 import Conversions
@@ -97,10 +98,17 @@ prop_isomorphic i = bigint_to_hs (bigint_to_reuse i) == i
 prop_equivalence :: ReuseBigint -> Bool
 prop_equivalence i = bigint_to_hs (evalReuse i) == evalHs i
 
+prop_equivalence_backend :: String -> String -> ReuseBigint -> Property
+prop_equivalence_backend lang source xs = monadicIO $ do
+    result <- run $ evalExpr lang source $ "(bigint-to-string " ++ (show xs) ++ ")"
+    assert $ (read result) == evalHs xs
+
 prop_less_than :: Integer -> Integer -> Bool
 prop_less_than a b = bool_to_hs (Reuse.bigint_less_than (bigint_to_reuse a) (bigint_to_reuse b)) == (a < b)
 
 main = do
+    quickCheck $ withMaxSuccess 100 $ prop_equivalence_backend "javascript" "executable.js"
+    quickCheck $ withMaxSuccess 100 $ prop_equivalence_backend "ocaml" "executable.ml"
     quickCheck (withMaxSuccess 1000 prop_isomorphic)
     quickCheck (withMaxSuccess 100000 prop_equivalence)
     quickCheck (withMaxSuccess 100000 prop_less_than)

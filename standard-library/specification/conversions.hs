@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 module Conversions where
 import qualified ReuseStdlib as Reuse
 import qualified Data.Map as Map
@@ -8,6 +9,95 @@ import System.Process
 import Control.Concurrent
 import System.Directory (removeFile)
 import System.IO (hGetContents, hPutStr, hSeek, openBinaryTempFile, SeekMode (..))
+import Test.QuickCheck
+import GHC.Generics
+
+data ReusePredicate
+    = AlwaysTrue
+    | AlwaysFalse
+    | LessThan Int32
+    deriving Generic
+
+instance Show ReusePredicate where
+    show AlwaysTrue = "(const True)"
+    show AlwaysFalse = "(const False)"
+    show (LessThan x) = "((flip <) " ++ (show x) ++ ")"
+
+alwaysTrueGen :: Gen ReusePredicate
+alwaysTrueGen = do
+    return AlwaysTrue
+
+alwaysFalseGen :: Gen ReusePredicate
+alwaysFalseGen = do
+    return AlwaysFalse
+
+lessThanGen :: Int -> Gen ReusePredicate
+lessThanGen n = do
+    x <- arbitrary
+    return (LessThan x)
+
+arbitraryReusePredicate :: Int -> Gen ReusePredicate
+arbitraryReusePredicate 0 = alwaysFalseGen
+arbitraryReusePredicate n = frequency [(1, alwaysTrueGen), (1, lessThanGen n)]
+
+instance Arbitrary ReusePredicate where
+    arbitrary = do
+        x <- oneof [arbitraryReusePredicate 1, arbitraryReusePredicate 2, arbitraryReusePredicate 3, sized arbitraryReusePredicate]
+        return x
+    shrink x = shrinkToNil x ++ genericShrink x
+        where
+            shrinkToNil AlwaysFalse = []
+            shrinkToNil _ = [AlwaysFalse]
+
+predReuse :: ReusePredicate -> Int32 -> Reuse.Boolean
+predReuse AlwaysTrue = const Reuse.True
+predReuse AlwaysFalse = const Reuse.False
+predReuse (LessThan n) = \x -> bool_to_reuse $ x < n
+
+predHs :: ReusePredicate -> Int32 -> Bool
+predHs AlwaysTrue = const True
+predHs AlwaysFalse = const False
+predHs (LessThan n) = \x -> x < n
+
+
+data ReuseUnaryFunction
+    = UIdentity
+    | UConst Int32
+    deriving Generic
+
+instance Show ReuseUnaryFunction where
+    show UIdentity = "id"
+    show (UConst x) = "(const " ++ (show x) ++ ")"
+
+identityGen :: Gen ReuseUnaryFunction
+identityGen = do
+    return UIdentity
+
+constGen :: Gen ReuseUnaryFunction
+constGen = do
+    x <- arbitrary
+    return (UConst x)
+
+arbitraryReuseUnaryFunction :: Int -> Gen ReuseUnaryFunction
+arbitraryReuseUnaryFunction _ = oneof [identityGen, constGen]
+
+instance Arbitrary ReuseUnaryFunction where
+    arbitrary = do
+        x <- oneof [arbitraryReuseUnaryFunction 1, arbitraryReuseUnaryFunction 2, arbitraryReuseUnaryFunction 3, sized arbitraryReuseUnaryFunction]
+        return x
+    shrink x = shrinkToNil x ++ genericShrink x
+        where
+            shrinkToNil UIdentity = []
+            shrinkToNil _ = [UIdentity]
+
+unaryReuse :: ReuseUnaryFunction -> Int32 -> Int32
+unaryReuse UIdentity = id
+unaryReuse (UConst x) = const x
+
+unaryHs :: ReuseUnaryFunction -> Int32 -> Int32
+unaryHs UIdentity = id
+unaryHs (UConst x) = const x
+
 
 evalExpr :: String -> String -> String -> IO String
 evalExpr lang source expr = do

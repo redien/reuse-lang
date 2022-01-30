@@ -3,6 +3,7 @@ import Debug.Trace
 import GHC.Generics
 import Test.QuickCheck
 import Test.QuickCheck.Modifiers (NonEmptyList (..))
+import Test.QuickCheck.Monadic (monadicIO, pick, pre, run, assert)
 import Data.Int
 import Data.List
 import Data.List.GroupBy
@@ -17,8 +18,8 @@ data ReuseList
     | LTake Int32 ReuseList
     | LReverse ReuseList
     | LConcat ReuseList ReuseList
-    | LMap (Fun Int32 Int32) ReuseList
-    | LFilter (Fun Int32 Bool) ReuseList
+    | LMap ReuseUnaryFunction ReuseList
+    | LFilter ReusePredicate ReuseList
     deriving Generic
 
 instance Show ReuseList where
@@ -102,8 +103,8 @@ evalReuse (LSkip x xs) = Reuse.list_skip x (evalReuse xs)
 evalReuse (LTake x xs) = Reuse.list_take x (evalReuse xs)
 evalReuse (LReverse xs) = Reuse.list_reverse (evalReuse xs)
 evalReuse (LConcat xs ys) = Reuse.list_concat (evalReuse xs) (evalReuse ys)
-evalReuse (LMap (Fn f) xs) = Reuse.list_map f (evalReuse xs)
-evalReuse (LFilter (Fn f) xs) = Reuse.list_filter (bool_to_reuse . f) (evalReuse xs)
+evalReuse (LMap f xs) = Reuse.list_map (unaryReuse f) (evalReuse xs)
+evalReuse (LFilter f xs) = Reuse.list_filter (predReuse f) (evalReuse xs)
 
 evalHs :: ReuseList -> [Int32]
 evalHs LEmpty = []
@@ -113,14 +114,19 @@ evalHs (LSkip x xs) = drop (fromIntegral x) (evalHs xs)
 evalHs (LTake x xs) = take (fromIntegral x) (evalHs xs)
 evalHs (LReverse xs) = reverse (evalHs xs)
 evalHs (LConcat xs ys) = (evalHs xs) ++ (evalHs ys)
-evalHs (LMap (Fn f) xs) = map f (evalHs xs)
-evalHs (LFilter (Fn f) xs) = filter f (evalHs xs)
+evalHs (LMap f xs) = map (unaryHs f) (evalHs xs)
+evalHs (LFilter f xs) = filter (predHs f) (evalHs xs)
 
 prop_isomorphic :: [Int] -> Bool
 prop_isomorphic xs = list_to_hs (list_to_reuse xs) == xs
 
 prop_equivalence :: ReuseList -> Bool
 prop_equivalence xs = list_to_hs (evalReuse xs) == evalHs xs
+
+prop_equivalence_backend :: String -> String -> ReuseList -> Property
+prop_equivalence_backend lang source xs = monadicIO $ do
+    result <- run $ evalExpr lang source $ "(string-join (string-of-char 32) (list-map string-from-int32 " ++ (show xs) ++ "))"
+    assert $ (map read (words result)) == evalHs xs
 
 prop_list_from_range :: Small Int32 -> Small Int32 -> Bool
 prop_list_from_range (Small a) (Small b) = list_to_hs (Reuse.list_from_range a b) == [a..(b - 1)]
@@ -155,6 +161,8 @@ prop_list_zip xs ys = list_pair_to_hs (Reuse.list_zip (list_to_reuse xs) (list_t
 quickCheckN f = quickCheck (withMaxSuccess 1000 f)
 
 main = do
+    quickCheck $ withMaxSuccess 100 $ prop_equivalence_backend "javascript" "executable.js"
+    quickCheck $ withMaxSuccess 100 $ prop_equivalence_backend "ocaml" "executable.ml"
     quickCheckN prop_isomorphic
     quickCheck (withMaxSuccess 100000 prop_equivalence)
     quickCheckN prop_list_from_range
