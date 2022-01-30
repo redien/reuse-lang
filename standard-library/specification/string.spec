@@ -1,4 +1,15 @@
 
+string-from-int32
+> (string-from-int32 0)
+= 0
+
+> (string-from-int32 10)
+= 10
+
+> (string-from-int32 -1)
+= -1
+
+
 string-foldr
 > (string-from-list (string-foldr list-cons (list-empty) (string-from-list Empty)))
 = 
