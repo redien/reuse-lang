@@ -36,3 +36,9 @@ Should be able to return lambdas from a tail-recursive function
 | (def f (x) (match x 1 (fn () 2) 0 (f 1)))
 > ((f 0))
 = 2
+
+Nested calls should work even if one is in tail position
+| (typ tree (Tree tree tree) (Leaf int32))
+| (def foldl (f accumulator tree) (match tree (Leaf x) (f x accumulator) (Tree a b) (foldl f (foldl f accumulator b) a)))
+> (foldl + 1 (Tree (Tree (Leaf 3) (Tree (Leaf 6) (Leaf 6))) (Leaf 26)))
+= 42

@@ -11,6 +11,7 @@ int32-and           |int32_and
 slice               |slice
 trampoline          |_trampoline
 return-value-marker |_k:
+tailcall            |_tailcall
 var                 |var
 return              |return
 function            |function

@@ -156,7 +156,12 @@
      (match expression
             (FunctionApplication (Cons (Variable applied-name) arguments) range)
                 (match (identifier-equal? name applied-name)
-                       True   (mark-as-return-value (translate-expression (Lambda Empty (FunctionApplication (Cons (Variable name) arguments) range) range)))
+                       True   (mark-as-return-value (source-string-join (data-space) (list
+                                    (SourceString (data-open-bracket))
+                                    (SourceString (data-close-bracket))
+                                    (SourceString (data-lambda-arrow))
+                                    (SourceString (data-tailcall))
+                                    (join' (list-map (. wrap-in-brackets' translate-expression) arguments)))))
                        False  (translate-expression expression))
             (Match expression rules range)
                 (translate-match-expression translate-expression
@@ -177,7 +182,7 @@
                         (SourceString (data-lambda-arrow))
                         (SourceString (data-open-block))
                         (SourceString (data-var))
-                        (escape-identifier identifier)
+                        (SourceString (data-tailcall))
                         (SourceString (data-equals))
                         (translate-argument-list arguments)
                         (SourceString (data-lambda-arrow))
@@ -186,7 +191,7 @@
                         (SourceString (data-return))
                         (SourceString (data-trampoline))
                         (SourceString (data-open-bracket))
-                        (escape-identifier identifier)
+                        (SourceString (data-tailcall))
                         (join' (list-map (. wrap-in-brackets' escape-identifier) arguments))
                         (SourceString (data-close-bracket))
                         (SourceString (data-end-statement))

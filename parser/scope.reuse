@@ -29,9 +29,9 @@
             (ParserScope symbols parent)
                 (match (array-get (identifier-token identifier) symbols)
                        None    (parser-scope-resolve identifier parent)
-                       id      (identifier-with-id' id identifier))
+                       id      (identifier-with-id id identifier))
             (ParserScopeRoot symbols)
-                (identifier-with-id' (array-get (identifier-token identifier) symbols) identifier)))
+                (identifier-with-id (array-get (identifier-token identifier) symbols) identifier)))
 
 (def parser-scope-set-list (symbols scope)
      (list-foldl (pair-map parser-scope-set') scope symbols))

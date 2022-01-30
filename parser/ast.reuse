@@ -54,7 +54,7 @@
      (match identifier
             (Identifier _ name __ ___ ____)  name))
 
-(def identifier-with-name (name identifier)
+(pub def identifier-with-name (name identifier)
      (match identifier
             (Identifier _1 _ _2 _3 _4)
                 (Identifier _1 name _2 _3 _4)))
@@ -79,7 +79,7 @@
             (Some a)  (= a id)
             None      False))
 
-(def identifier-with-id' (id identifier)
+(def identifier-with-id (id identifier)
      (match identifier
             (Identifier _1 _2 _3 _4 _)  (Identifier _1 _2 _3 _4 id)))
 
