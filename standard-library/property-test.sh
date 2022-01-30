@@ -5,6 +5,7 @@ script_path=$(dirname "$0")
 project_root=$script_path/..
 build_dir=$($project_root/dev-env/builddir.sh standard-library)
 
+$project_root/cli/build.sh
 $script_path/build.sh
 
 $project_root/bin/reusec --language haskell\

@@ -4,6 +4,16 @@ import qualified Data.Map as Map
 import qualified Data.Char as Char
 import Data.Int
 import Data.Bifunctor
+import System.Process
+import Control.Concurrent
+import System.Directory (removeFile)
+import System.IO (hGetContents, hPutStr, hSeek, openBinaryTempFile, SeekMode (..))
+
+evalExpr :: String -> String -> String -> IO String
+evalExpr lang source expr = do
+    (_, out, _, h) <- runInteractiveCommand $ "IMPL=" ++ lang ++ " SOURCE=" ++ source ++ " ./standard-library/eval.sh '' '" ++ expr ++ "'"
+    waitForProcess h
+    hGetContents out
 
 list_to_reuse :: [a] -> Reuse.List a
 list_to_reuse = foldr Reuse.list_cons Reuse.list_empty

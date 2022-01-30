@@ -3,6 +3,7 @@ import Debug.Trace
 import GHC.Generics
 import Test.QuickCheck
 import Test.QuickCheck.Modifiers (NonEmptyList (..))
+import Test.QuickCheck.Monadic (monadicIO, pick, pre, run, assert)
 import Data.Int
 import Data.List
 import qualified Data.Char as Char
@@ -21,29 +22,35 @@ data ReuseString
     | SConcat ReuseString ReuseString
     deriving Generic
 
+show_list_of_reuse_strings :: [ReuseString] -> String
+show_list_of_reuse_strings xs = "(list " ++ (unwords (map show xs)) ++ ")"
+
 instance Show ReuseString where
     show SEmpty = "(string-empty)"
     show (SAppend x xs) = "(string-append " ++ (show (Char.ord x)) ++ " " ++ (show xs) ++ ")"
     show (SPrepend x xs) = "(string-prepend " ++ (show (Char.ord x)) ++ " " ++ (show xs) ++ ")"
     show (SSkip x xs) = "(string-skip " ++ (show x) ++ " " ++ (show xs) ++ ")"
     show (STake x xs) = "(string-take " ++ (show x) ++ " " ++ (show xs) ++ ")"
-    show (SJoin sep xs) = "(string-join " ++ (show sep) ++ " " ++ (show xs) ++ ")"
+    show (SJoin sep xs) = "(string-join " ++ (show sep) ++ " " ++ (show_list_of_reuse_strings xs) ++ ")"
     show (SReverse xs) = "(string-reverse " ++ (show xs) ++ ")"
     show (SRest xs) = "(string-rest " ++ (show xs) ++ ")"
     show (SConcat xs ys) = "(string-concat " ++ (show xs) ++ " " ++ (show ys) ++ ")"
+
+genSafeChar :: Gen Char
+genSafeChar = elements ['A'..'Z']
 
 emptyGen :: Gen ReuseString
 emptyGen = return SEmpty
 
 appendGen :: Int -> Gen ReuseString
 appendGen n = do
-    x <- arbitrary
+    x <- genSafeChar
     xs <- arbitraryReuseString (n - 1)
     return (SAppend x xs)
 
 prependGen :: Int -> Gen ReuseString
 prependGen n = do
-    x <- arbitrary
+    x <- genSafeChar
     xs <- arbitraryReuseString (n - 1)
     return (SPrepend x xs)
 
@@ -125,6 +132,11 @@ prop_isomorphic xs = string_to_hs (string_to_reuse xs) == xs
 prop_equivalence :: ReuseString -> Bool
 prop_equivalence xs = string_to_hs (evalReuse xs) == evalHs xs
 
+prop_equivalence_backend :: String -> String -> ReuseString -> Property
+prop_equivalence_backend lang source xs = monadicIO $ do
+    result <- run $ evalExpr lang source (show xs)
+    assert $ result == evalHs xs
+
 prop_string_first :: NonEmptyList Char -> Bool
 prop_string_first (NonEmpty s) = maybe_to_hs (Reuse.maybe_map (Char.chr . fromIntegral) (Reuse.string_first (string_to_reuse s))) == Just (head s)
 
@@ -145,7 +157,10 @@ prop_string_from_int32 x = (string_to_hs . Reuse.string_from_int32) x == show x
 
 quickCheckN f = quickCheck (withMaxSuccess 1000 f)
 
+main :: IO ()
 main = do
+    quickCheck $ withMaxSuccess 100 $ prop_equivalence_backend "javascript" "executable.js"
+    quickCheck $ withMaxSuccess 100 $ prop_equivalence_backend "ocaml" "executable.ml"
     quickCheckN prop_isomorphic
     quickCheck (withMaxSuccess 100000 prop_equivalence)
     quickCheckN prop_string_first
