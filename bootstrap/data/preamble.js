@@ -12,8 +12,8 @@ var int32_div = a => b => a / b | 0;
 var int32_mod = a => b => a % b | 0;
 var int32_and = a => b => a & b;
 function _trampoline(f) {
-    while (typeof f === 'function') {
-        f = f();
+    while (f._k) {
+        f = f._k();
     }
     return f;
 }
