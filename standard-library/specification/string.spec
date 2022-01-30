@@ -1,4 +1,60 @@
 
+string-foldr
+> (string-from-list (string-foldr list-cons (list-empty) (string-from-list Empty)))
+= 
+
+> (string-from-list (string-foldr list-cons (list-empty) (string-from-list (list 65))))
+= A
+
+> (string-from-list (string-foldr list-cons (list-empty) (string-from-list (list 65 66))))
+= AB
+
+> (string-from-list (string-foldr list-cons (list-empty) (string-from-list (list 65 66 67))))
+= ABC
+
+> (string-from-list (string-foldr list-cons (list-empty) (string-from-list (list 65 66 67 68 69 70 71 72 73))))
+= ABCDEFGHI
+
+
+string-foldl
+> (string-from-list (string-foldl list-cons (list-empty) (string-from-list Empty)))
+= 
+
+> (string-from-list (string-foldl list-cons (list-empty) (string-from-list (list 65))))
+= A
+
+> (string-from-list (string-foldl list-cons (list-empty) (string-from-list (list 65 66))))
+= BA
+
+> (string-from-list (string-foldl list-cons (list-empty) (string-from-list (list 65 66 67))))
+= CBA
+
+> (string-from-list (string-foldl list-cons (list-empty) (string-from-list (list 65 66 67 68 69 70 71 72 73))))
+= IHGFEDCBA
+
+> (string-from-list (string-foldl list-cons (list-empty) (string-from-list (list 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85))))
+= UTSRQPONMLKJIHGFEDCBA
+
+
+string-from-list
+> (string-from-list Empty)
+= 
+
+> (string-from-list (list 65))
+= A
+
+> (string-from-list (list 65 66))
+= AB
+
+> (string-from-list (list 65 66 67))
+= ABC
+
+> (string-from-list (list 65 66 67 68 69 70 71 72 73))
+= ABCDEFGHI
+
+> (string-from-list (list-from-range 65 84))
+= ABCDEFGHIJKLMNOPQRS
+
 string-from-unicode-code-point
 > (string-from-boolean (string-equal? (string-from-list (list 127)) (string-from-unicode-code-point 127)))
 = True
@@ -106,8 +162,14 @@ string-concat
 > (string-concat (string-from-list (list 65 66 67 68 69)) (string-from-list (list 70 71 72 73 74)))
 = ABCDEFGHIJ
 
+> (string-concat (string-from-list (list 65 66 67 68 69 70 71 72)) (string-from-list (list 73 74 75 76 77 78 79 80)))
+= ABCDEFGHIJKLMNOP
+
 > (string-concat (string-from-list (list 65 66 67 68 69 70 71 72 73)) (string-from-list (list 74 75 76 77 78 79 80 81 82)))
 = ABCDEFGHIJKLMNOPQR
+
+> (string-concat (string-from-list (list 65 66 67 68 69 70 71 72 73 74 75)) (string-from-list (list 76 77 78 79 80 81 82 83 84 85 86)))
+= ABCDEFGHIJKLMNOPQRSTUV
 
 > (string-concat (string-from-list (list-from-range 65 71)) (string-from-list (list-from-range 65 69)))
 = ABCDEFABCD
@@ -197,7 +259,6 @@ string-join
 
 > (string-join (string-of-char 44) (list (string-of-char 65)))
 = A
-
 
 
 string-split
