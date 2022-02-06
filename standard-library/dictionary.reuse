@@ -67,3 +67,9 @@
      (match (dictionary-get key dictionary)
             (Some _)  True
             None      False))
+
+(pub def dictionary-values (dictionary)
+     (list-map pair-right (dictionary-entries dictionary)))
+
+(pub def dictionary-keys (dictionary)
+     (list-map pair-left (dictionary-entries dictionary)))

@@ -200,6 +200,8 @@
 (pub def dictionary-get-or (key default dictionary) (match (dictionary-get key dictionary) (Some value) value None default))
 (pub def dictionary-size (dictionary) (list-size (dictionary-entries dictionary)))
 (pub def dictionary-has? (key dictionary) (match (dictionary-get key dictionary) (Some _) True None False))
+(pub def dictionary-values (dictionary) (list-map pair-right (dictionary-entries dictionary)))
+(pub def dictionary-keys (dictionary) (list-map pair-left (dictionary-entries dictionary)))
 (typ bigint (Bigint boolean (list int32)))
 (def bigint-trim-parts-reversed (parts) (match parts (Cons x Empty) parts (Cons x xs) (match (= x 0) True (bigint-trim-parts-reversed xs) False parts) Empty Empty))
 (def bigint-trim-parts (parts) (list-reverse (bigint-trim-parts-reversed (list-reverse parts))))
