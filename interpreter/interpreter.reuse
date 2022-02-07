@@ -6,9 +6,9 @@
 (def sequence (xs) (result-concat xs))
 (def map (f xs) (result-map f xs))
 
-(def identifier-main () -2000)
-(def identifier-Empty () -2001)
-(def identifier-Cons () -2002)
+(def identifier-main () 2000)
+(def identifier-Empty () 2001)
+(def identifier-Cons () 2002)
 
 (def eval-error ()
      (Error (data-error-generic)))

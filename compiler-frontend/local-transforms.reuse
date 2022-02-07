@@ -1,7 +1,7 @@
 
-(def identifier-sparkle-x () -1000)
-(def identifier-cons () -1001)
-(def identifier-empty () -1002)
+(def identifier-sparkle-x () 1000)
+(def identifier-cons () 1001)
+(def identifier-empty () 1002)
 
 (pub def with-local-transform-keywords (identifiers)
      (list-concat identifiers (list

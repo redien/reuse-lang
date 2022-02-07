@@ -98,9 +98,12 @@
 (def default-scope (symbols)
      (parser-scope-set-list (list-map (. (fn (x) (Pair x x)) pair-left) (dictionary-values symbols)) (parser-scope-empty)))
 
+(def max-symbol-id (symbols)
+     (list-foldl (fn (x xs) (max xs ((. pair-left pair-right) x))) 0 (dictionary-entries symbols)))
+
 (def parser-run (symbols parser)
      (match (state-run (ParserContext (SourceReference (string-empty) ModuleSelf)
-                                      (Pair (dictionary-size symbols) symbols)
+                                      (Pair (+ (max-symbol-id symbols) 1) symbols)
                                       (default-scope symbols)
                                       (default-scope symbols)
                                       (symbol-table-bind-list (dictionary-keys symbols) (symbol-table-empty))
