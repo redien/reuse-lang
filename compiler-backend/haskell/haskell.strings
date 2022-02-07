@@ -33,6 +33,9 @@ infixl              |infixl
 infixr              |infixr
 newtype             |newtype
 where               |where
+::                  |::
+open-bracket        |(
+close-bracket       |)
 dot                 |.
 language-exts       |{-# LANGUAGE ExistentialQuantification, BangPatterns #-}
 pervasives-filename |Pervasives.hs
