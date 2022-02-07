@@ -14,8 +14,7 @@ $project_root/bin/reusec --language module\
                          $project_root/parser/source-file.reuse\
                          $project_root/parser/scope.reuse\
                          $project_root/parser/symbol-table.reuse\
-                         $project_root/parser/symbols.strings\
-                         $project_root/parser/symbols.reuse\
                          $project_root/parser/parser-context.strings\
                          $project_root/parser/parser-context.reuse\
+                         $project_root/parser/parser.strings\
                          $project_root/parser/parser.reuse

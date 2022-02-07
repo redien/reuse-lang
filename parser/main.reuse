@@ -18,7 +18,7 @@
 
 (def reuse-main (stdin)
      ((pipe (fn (stdin) (list (SourceFile ModuleSelf (string-empty) stdin)))
-            (parse-source-files (default-identifiers))
+            (parse-source-files (list-empty))
             (result-either (. stringify-sexps definitions-to-sexps)
                            stringify-error))
           stdin))

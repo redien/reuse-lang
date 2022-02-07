@@ -1,7 +1,4 @@
 
-(pub def parse (file-entries)
-     (parse-source-files (with-local-transform-keywords (default-identifiers)) file-entries))
-
 (pub def transform (backend definitions)
      (match (compiler-backend-perform-transformations? backend)
             False  definitions

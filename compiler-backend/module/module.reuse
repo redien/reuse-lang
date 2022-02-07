@@ -7,9 +7,6 @@
             (pair-cons (list-empty)))
         definitions))
 
-(def internal-symbols ()
-     (default-identifiers))
-
 (pub def compiler-backend-module ()
      (Backend (data-module-language)
               Empty

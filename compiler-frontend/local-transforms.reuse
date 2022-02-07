@@ -3,11 +3,11 @@
 (def identifier-cons () -1001)
 (def identifier-empty () -1002)
 
-(pub def with-local-transform-keywords (dictionary)
-     (dictionary-set (data-sparkle-x) (Pair (identifier-sparkle-x) (data-sparkle-x))
-     (dictionary-set (data-Cons) (Pair (identifier-cons) (data-Cons))
-     (dictionary-set (data-Empty) (Pair (identifier-empty) (data-Empty))
-     dictionary))))
+(pub def with-local-transform-keywords (identifiers)
+     (list-concat identifiers (list
+          (Pair (identifier-sparkle-x) (data-sparkle-x))
+          (Pair (identifier-cons) (data-Cons))
+          (Pair (identifier-empty) (data-Empty)))))
 
 (def expression-is-token? (token expression)
      (match expression
