@@ -12,6 +12,8 @@
 (pub def = (a b) (not (or (< a b) (> a b))))
 (pub def <= (a b) (or (< a b) (= a b)))
 (pub def >= (a b) (or (> a b) (= a b)))
+(pub def max (a b) (int32-less-than a b b a))
+(pub def min (a b) (int32-less-than a b a b))
 (pub typ (pair a b) (Pair a b))
 (pub def pair-cons (a b) (Pair a b))
 (pub def pair-left (pair) (match pair (Pair x _) x))

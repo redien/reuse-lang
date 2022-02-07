@@ -30,3 +30,8 @@
 (pub def >= (a b)
      (or (> a b) (= a b)))
 
+(pub def max (a b)
+     (int32-less-than a b b a))
+
+(pub def min (a b)
+     (int32-less-than a b a b))
