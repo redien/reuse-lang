@@ -106,7 +106,7 @@
                            definitions
                     (CliTime (fn (end-parse)
                     (CliTime (fn (start-transform)
-                    (match (transform backend definitions)
+                    (match (compiler-backend-transform-definitions backend definitions)
                            definitions
                     (CliTime (fn (end-transform)
                     (CliTime (fn (start-generate)

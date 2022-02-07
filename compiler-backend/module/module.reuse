@@ -13,4 +13,4 @@
               Empty
               generate-source
               Empty
-              False))
+              (result-map id)))

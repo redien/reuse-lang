@@ -290,4 +290,4 @@
               (list (data-pervasives-filename))
               generate-source
               (reserved-identifiers)
-              True))
+              (. local-transforms validate-reserved-identifiers)))

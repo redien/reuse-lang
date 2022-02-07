@@ -1,9 +1,4 @@
 
-(pub def transform (backend definitions)
-     (match (compiler-backend-perform-transformations? backend)
-            False  definitions
-            True   (local-transforms (validate-reserved-identifiers definitions))))
-
 (pub def generate (backend module-name definitions)
      (result-map (compiler-backend-generate-source backend module-name) definitions))
 

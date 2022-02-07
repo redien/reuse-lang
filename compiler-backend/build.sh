@@ -14,4 +14,8 @@ $project_root/reusec --language module\
                      $project_root/compiler-backend/source-string.reuse\
                      $project_root/compiler-backend/common.strings\
                      $project_root/compiler-backend/shared.reuse\
+                     $project_root/compiler-backend/local-transforms.strings\
+                     $project_root/compiler-backend/local-transforms.reuse\
+                     $project_root/compiler-backend/identifier-validation.strings\
+                     $project_root/compiler-backend/identifier-validation.reuse\
                      $project_root/compiler-backend/compiler-backend.reuse
