@@ -37,7 +37,7 @@ where               |where
 open-bracket        |(
 close-bracket       |)
 dot                 |.
-language-exts       |{-# LANGUAGE ExistentialQuantification, BangPatterns #-}
+language-exts       |{-# LANGUAGE ExistentialQuantification #-}
 pervasives-filename |Pervasives.hs
 preamble-filename   |preamble.hs
 haskell-language    |haskell

@@ -78,7 +78,7 @@
 (def translate-pattern (pattern)
      (match pattern
             (Capture identifier)
-                (source-string-concat (SourceStringChar 33) (escape-identifier identifier))
+                (escape-identifier identifier)
             (IntegerPattern integer _)
                 (match (< integer 0)
                        True   (SourceString (wrap-in-brackets (string-from-int32 integer)))
@@ -124,7 +124,7 @@
                     (translate-function-application' translate-expression expressions)))
 
 (def translate-argument-list (arguments)
-     (source-string-join (data-space) (list-map (pipe escape-identifier (source-string-concat (SourceStringChar 33))) arguments)))
+     (source-string-join (data-space) (list-map escape-identifier arguments)))
 
 (def translate-lambda (translate-expression arguments expression)
      (match (list-is-empty? arguments)
@@ -198,9 +198,8 @@
             (FunctionType argument-types return-type _)
                 (translate-function-type translate-types return-type argument-types)))
 
-(def translate-types (parameters f separator types)
-     ((pipe (list-map (pipe (translate-type (translate-types parameters id) parameters)
-                            f))
+(def translate-types (parameters separator types)
+     ((pipe (list-map (translate-type (translate-types parameters) parameters))
             (source-string-join separator))
         types))
 
@@ -214,7 +213,7 @@
 (def translate-complex-constructor-definition (name types parameters)
      (join' (list (translate-constructor-identifier name)
                   (source-space)
-                  (translate-types parameters (source-string-concat (SourceStringChar 33)) (data-space) types))))
+                  (translate-types parameters (data-space) types))))
 
 (def translate-constructor-definition (parameters constructor)
      (match constructor
