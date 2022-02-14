@@ -83,17 +83,26 @@
             (ConstructorPattern identifier patterns _)
                 ((translate-constructor translate-pattern identifier) patterns)))
 
-(def translate-rule (translate-expression rule)
+(def translate-rule (translate-expression n rule)
      (match rule
             (Pair pattern expression)
-                 (join' (list (translate-pattern pattern) (SourceString (data-arrow)) (translate-expression expression)))))
+                 (join-lines (list
+                    (line n (list (SourceString (data-vertical-bar))
+                                  (translate-pattern pattern)
+                                  (SourceString (data-arrow))))
+                    (line (+ n 1) (list (translate-expression (+ n 1) expression)))))))
 
-(def translate-match-expression (translate-expression expression)
-     (pipe (list-map (translate-rule translate-expression))
-           (source-string-join (data-vertical-bar))
+(def translate-match-expression (translate-expression n expression)
+     (pipe (list-map (translate-rule translate-expression n))
+           (source-string-join (string-empty))
            (fn (rules)
-               (list (SourceString (data-match)) (translate-expression expression) (SourceString (data-with)) rules))
-           (source-string-join (data-space))))
+               (list (SourceString (data-match))
+                     (source-space)
+                     (translate-expression n expression)
+                     (source-space)
+                     (SourceString (data-with))
+                     rules))
+           (source-string-join (string-empty))))
 
 (def translate-function-application' (translate-expression expressions)
      (match expressions
@@ -125,22 +134,22 @@
                   (SourceString (data-arrow))
                   (translate-expression expression))))
 
-(def translate-expression (expression)
+(def translate-expression (n expression)
      (match expression
             (Lambda arguments expression _)
-                (wrap-in-brackets' (translate-lambda translate-expression arguments expression))
+                (wrap-in-brackets' (translate-lambda (translate-expression n) arguments expression))
             (Constructor identifier Empty _)
                 (translate-constructor-identifier identifier)
             (Constructor identifier expressions _)
-                ((translate-constructor translate-expression identifier) expressions)
+                ((translate-constructor (translate-expression n) identifier) expressions)
             (FunctionApplication expressions _)
-                (wrap-in-brackets' (translate-function-application translate-expression expressions))
+                (wrap-in-brackets' (translate-function-application (translate-expression n) expressions))
             (IntegerConstant integer _)
                 (wrap-in-brackets' (SourceString (string-concat (string-from-int32 integer) (string-of-char 108))))
             (Variable identifier)
                 (translate-identifier identifier)
             (Match expression rules _)
-                (wrap-in-brackets' ((translate-match-expression translate-expression expression) rules))))
+                (wrap-in-brackets' (translate-match-expression translate-expression (+ n 1) expression rules))))
 
 (def translate-function-definition (identifier arguments expression)
      (join-lines (list
@@ -149,7 +158,7 @@
                       (source-space)
                       (translate-argument-list arguments)
                       (SourceString (data-equals))))
-        (line 1 (list (translate-expression expression)
+        (line 1 (list (translate-expression 1 expression)
                       (SourceString (data-definition-end)))))))
 
 (def translate-simple-type (identifier parameters)
