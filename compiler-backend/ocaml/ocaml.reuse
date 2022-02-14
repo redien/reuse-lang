@@ -63,7 +63,7 @@
 
 (def translate-constructor (translator identifier)
      (pipe (list-map translator)
-           (source-string-join (data-comma))
+           (source-string-join (string-concat (data-comma) (string-of-char 32)))
            wrap-in-brackets'
            (fn (parameters)
                (list (translate-constructor-identifier identifier)
