@@ -1,19 +1,4 @@
 
-(def indent (n)
-     (string-repeat (string-of-char 32) (* n 4)))
-
-(def line (n parts)
-     (source-string-concat (SourceString (indent n)) (source-string-join (string-empty) parts)))
-
-(def newline ()
-     (string-of-char 10))
-
-(def join-lines (lines)
-     (source-string-concat (SourceString (newline)) (source-string-join (newline) lines)))
-
-(def source-space ()
-     (SourceString (data-space)))
-
 (def reserved-identifiers ()
      (list data-var data-import data-default data-case data-class data-do data-else data-false data-for 
            data-function data-if data-in data-new data-true data-try data-with data-while data-break

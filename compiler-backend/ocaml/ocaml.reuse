@@ -143,11 +143,14 @@
                 (wrap-in-brackets' ((translate-match-expression translate-expression expression) rules))))
 
 (def translate-function-definition (identifier arguments expression)
-     (join' (list (SourceString (data-let-rec))
-                  (lowercase-identifier identifier)
-                  (SourceString (data-equals))
-                  (translate-lambda translate-expression arguments expression)
-                  (SourceString (data-definition-end)))))
+     (join-lines (list
+        (line 0 (list (SourceString (data-let-rec))
+                      (lowercase-identifier identifier)
+                      (source-space)
+                      (translate-argument-list arguments)
+                      (SourceString (data-equals))))
+        (line 1 (list (translate-expression expression)
+                      (SourceString (data-definition-end)))))))
 
 (def translate-simple-type (identifier parameters)
      (match (list-any? (. (identifier-equal? identifier) type-parameter-identifier) parameters)
@@ -198,7 +201,7 @@
 
 (def translate-constructor-definitions (type parameters constructors)
      ((pipe (list-map (translate-constructor-definition type parameters))
-            (source-string-join (data-vertical-bar)))
+            (source-string-join (string-concat (newline) (string-concat (indent 1) (data-vertical-bar)))))
         constructors))
 
 (def translate-type-parameter-for-definition (parameter)
@@ -223,19 +226,22 @@
                 (lowercase-identifier name)
             False
                 (join' (list (wrap-in-brackets' parameter-string)
-                             (SourceString (data-space))
+                             (source-space)
                              (lowercase-identifier name)))))
 
 (def translate-type-name (name parameters)
      (translate-type-name' name parameters (translate-type-parameters parameters)))
 
 (def translate-type-definition (name parameters constructors)
-     (join' (list (SourceString (data-type))
-                  (SourceString (data-space))
-                  (translate-type-name name parameters)
-                  (SourceString (data-equals))
-                  (translate-constructor-definitions (translate-type-name name parameters) parameters constructors)
-                  (SourceString (data-definition-end)))))
+     (join-lines (list
+        (line 0 (list (SourceString (data-type))
+                      (source-space)
+                      (translate-type-name name parameters)
+                      (source-space)
+                      (SourceString (data-equals))))
+        (line 1 (list (SourceString (data-vertical-bar))
+                      (translate-constructor-definitions (translate-type-name name parameters) parameters constructors)
+                      (SourceString (data-definition-end)))))))
 
 (def translate-definition (definition)
      (match definition

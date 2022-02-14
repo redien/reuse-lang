@@ -39,3 +39,18 @@
          (source-string-concat (SourceStringChar 40)
          (source-string-concat string
                                (SourceStringChar 41))))
+
+(pub def indent (n)
+     (string-repeat (string-of-char 32) (* n 4)))
+
+(pub def line (n parts)
+     (source-string-concat (SourceString (indent n)) (source-string-join (string-empty) parts)))
+
+(pub def newline ()
+     (string-of-char 10))
+
+(pub def join-lines (lines)
+     (source-string-concat (SourceString (newline)) (source-string-join (newline) lines)))
+
+(pub def source-space ()
+     (SourceString (data-space)))
