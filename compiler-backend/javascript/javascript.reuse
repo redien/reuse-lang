@@ -8,6 +8,9 @@
 (def newline ()
      (string-of-char 10))
 
+(def join-lines (lines)
+     (source-string-concat (SourceString (newline)) (source-string-join (newline) lines)))
+
 (def source-space ()
      (SourceString (data-space)))
 
@@ -63,7 +66,7 @@
 (def translate-constructor (translator identifier)
      (pipe (list-map translator)
            (list-cons (translate-constructor-identifier identifier))
-           (source-string-join (data-comma))
+           (source-string-join (string-concat (data-comma) (string-of-char 32)))
            wrap-in-angle-brackets))
 
 (def translate-pattern (pattern)
@@ -86,22 +89,28 @@
             (ConstructorPattern _ patterns __)
                 (list-flatmap translate-captures patterns)))
 
-(def translate-rule (translate-expression rule)
+(def translate-rule (n translate-expression rule)
      (match rule
             (Pair pattern expression)
-                 (join' (list (translate-pattern pattern)
-                              (SourceString (data-comma))
-                              (wrap-in-brackets' (source-string-join (data-comma) (translate-captures pattern)))
-                              (SourceString (data-lambda-arrow))
-                              (translate-expression expression)))))
+                 (join-lines (list
+                        (line n (list (translate-pattern pattern)
+                                      (SourceString (data-comma))
+                                      (source-space)
+                                      (wrap-in-brackets' (source-string-join (string-concat (data-comma) (string-of-char 32)) (translate-captures pattern)))
+                                      (SourceString (data-lambda-arrow))))
+                        (line (+ n 1) (list (translate-expression (+ n 1) expression)))))))
 
-(def translate-match-expression (translate-expression translate-rule expression)
-     (pipe (list-map (translate-rule translate-expression))
-           (source-string-join (data-comma))
-           wrap-in-angle-brackets
-           (fn (rules)
-               (list (SourceString (data-match-func)) (wrap-in-brackets' (join' (list (translate-expression expression) (SourceString (data-comma)) rules)))))
-           (source-string-join (data-space))))
+(def translate-match-expression (n translate-expression translate-rule expression rules)
+     (source-string-join (string-empty) (list
+            (SourceString (data-match-func))
+            (SourceString (data-open-bracket))
+            (translate-expression n expression)
+            (SourceString (data-comma))
+            (source-space)
+            (SourceString (data-open-array))
+            (source-string-join (data-comma) (list-map (translate-rule (+ n 1) translate-expression) rules))
+            (SourceString (data-close-array))
+            (SourceString (data-close-bracket)))))
 
 (def translate-function-application' (translate-expression expressions)
      (match expressions
@@ -132,22 +141,22 @@
                   (SourceString (data-lambda-arrow))
                   (translate-expression expression))))
 
-(def translate-expression (expression)
+(def translate-expression (n expression)
      (match expression
             (Lambda arguments expression _)
-                (wrap-in-brackets' (translate-lambda translate-expression arguments expression))
+                (wrap-in-brackets' (translate-lambda (translate-expression n) arguments expression))
             (Constructor identifier Empty _)
                 (translate-constructor-identifier identifier)
             (Constructor identifier expressions _)
-                ((translate-constructor translate-expression identifier) expressions)
+                ((translate-constructor (translate-expression n) identifier) expressions)
             (FunctionApplication expressions _)
-                (translate-function-application translate-expression expressions)
+                (translate-function-application (translate-expression n) expressions)
             (IntegerConstant integer _)
                 (SourceString (string-from-int32 integer))
             (Variable identifier)
                 (translate-identifier identifier)
             (Match expression rules _)
-                (translate-match-expression translate-expression translate-rule expression rules)))
+                (translate-match-expression n translate-expression translate-rule expression rules)))
 
 (def mark-as-return-value (source)
      (join' (list (SourceString (data-open-bracket))
@@ -157,31 +166,33 @@
                   (SourceString (data-close-block))
                   (SourceString (data-close-bracket)))))
 
-(def translate-tail-recursive-match-rule (name translate-tail-recursive-function translate-expression rule)
+(def translate-tail-recursive-match-rule (name translate-tail-recursive-function n translate-expression rule)
      (match rule
             (Pair pattern expression)
                   (match (list-any? (identifier-equal? name) (captured-identifiers-from-pattern pattern))
-                         True   (translate-rule translate-expression rule)
-                         False  (translate-rule (translate-tail-recursive-function name) rule))))
+                         True   (translate-rule n translate-expression rule)
+                         False  (translate-rule n (translate-tail-recursive-function name) rule))))
 
-(def translate-tail-recursive-function (name expression)
+(def translate-tail-recursive-function (name n expression)
      (match expression
             (FunctionApplication (Cons (Variable applied-name) arguments) range)
                 (match (identifier-equal? name applied-name)
-                       True   (mark-as-return-value (source-string-join (data-space) (list
+                       True   (mark-as-return-value (source-string-join (string-empty) (list
                                     (SourceString (data-open-bracket))
                                     (SourceString (data-close-bracket))
                                     (SourceString (data-lambda-arrow))
                                     (SourceString (data-tailcall))
-                                    (join' (list-map (. wrap-in-brackets' translate-expression) arguments)))))
-                       False  (translate-expression expression))
+                                    (source-space)
+                                    (join' (list-map (. wrap-in-brackets' (translate-expression n)) arguments)))))
+                       False  (translate-expression n expression))
             (Match expression rules range)
-                (translate-match-expression translate-expression
+                (translate-match-expression n
+                                            translate-expression
                                             (translate-tail-recursive-match-rule name translate-tail-recursive-function)
                                             expression
                                             rules)
             _
-                (translate-expression expression)))
+                (translate-expression n expression)))
 
 (def translate-main-function-definition (identifier arguments expression)
      (match (and (list-every? (. not (identifier-equal? identifier)) arguments)
@@ -204,7 +215,8 @@
                                       (source-space)
                                       (translate-argument-list arguments)
                                       (SourceString (data-lambda-arrow))))
-                        (source-string-concat (translate-tail-recursive-function identifier expression) (SourceString (data-end-statement)))
+                        (line 1 (list (source-string-concat (translate-tail-recursive-function identifier 1 expression)
+                                                            (SourceString (data-end-statement)))))
                         (line 1 (list (SourceString (data-return))
                                       (source-space)
                                       (SourceString (data-trampoline))
@@ -223,7 +235,7 @@
                                       (source-space)
                                       (translate-argument-list arguments)
                                       (SourceString (data-lambda-arrow))))
-                        (line 1 (list (translate-expression expression)
+                        (line 1 (list (translate-expression 1 expression)
                                       (SourceString (data-end-statement))))))))
 
 (def translate-export-statement (identifier arguments)
