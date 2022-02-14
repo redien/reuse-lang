@@ -1,4 +1,27 @@
 
+string-repeat
+> (string-repeat (string-of-char 65) 1)
+= A
+
+> (string-repeat (string-of-char 65) 2)
+= AA
+
+> (string-repeat (string-of-char 65) 3)
+= AAA
+
+> (string-repeat (string-of-char 65) 0)
+= 
+
+> (string-repeat (string-of-char 65) -1)
+= 
+
+> (string-repeat (string-empty) 1)
+= 
+
+> (string-repeat (string-prepend 65 (string-prepend 66 (string-empty))) 2)
+= ABAB
+
+
 string-from-int32
 > (string-from-int32 0)
 = 0

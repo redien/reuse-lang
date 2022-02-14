@@ -229,6 +229,9 @@
 (pub def string-reverse (string)
      (string-foldl string-prepend (string-empty) string))
 
+(pub def string-repeat (string n)
+     (list-foldl (.2 (string-concat string) (flip const)) (string-empty) (list-from-range 0 n)))
+
 (pub def string-substring (start size string)
      (string-take size (string-skip start string)))
 
