@@ -215,7 +215,7 @@
                                       (source-space)
                                       (translate-argument-list arguments)
                                       (SourceString (data-lambda-arrow))))
-                        (line 1 (list (source-string-concat (translate-tail-recursive-function identifier 1 expression)
+                        (line 2 (list (source-string-concat (translate-tail-recursive-function identifier 2 expression)
                                                             (SourceString (data-end-statement)))))
                         (line 1 (list (SourceString (data-return))
                                       (source-space)
@@ -255,11 +255,11 @@
                    (SourceString (data-end-statement)))))
 
 (def translate-function-definition (identifier public? arguments expression)
-     (source-string-join (newline) (list
-            (translate-main-function-definition identifier arguments expression)
+     (source-string-join (newline) (list-flatten (list
+            (list (translate-main-function-definition identifier arguments expression))
             (match public?
-                   True   (translate-export-statement identifier arguments)
-                   False  SourceStringEmpty))))
+                   True   (list (translate-export-statement identifier arguments))
+                   False  Empty)))))
 
 (def constructor-identifier (constructor)
      (match constructor
@@ -270,32 +270,33 @@
 
 (def translate-constructor-definition (public? constructor)
      (match (translate-constructor-identifier (constructor-identifier constructor))
-            identifier  (source-string-join (newline) (list
-                (line 0 (list (SourceString (data-var))
-                              (source-space)
-                              identifier
-                              (source-space)
-                              (SourceString (data-equals))
-                              (source-space)
-                              (SourceString (data-open-block))
-                              (source-space)
-                              identifier
-                              (SourceString (data-colon))
-                              (source-space)
-                              (SourceString (data-true))
-                              (source-space)
-                              (SourceString (data-close-block))
-                              (SourceString (data-end-statement))))
-                (match public?
-                       True   (source-string-join (string-empty) (list
-                                    (SourceString (data-module.exports.))
-                                    identifier
-                                    (source-space)
-                                    (SourceString (data-equals))
-                                    (source-space)
-                                    identifier
-                                    (SourceString (data-end-statement))))
-                       False  SourceStringEmpty)))))
+            identifier
+                (line 0 (list-concat (list
+                        (SourceString (data-var))
+                        (source-space)
+                        identifier
+                        (source-space)
+                        (SourceString (data-equals))
+                        (source-space)
+                        (SourceString (data-open-block))
+                        (source-space)
+                        identifier
+                        (SourceString (data-colon))
+                        (source-space)
+                        (SourceString (data-true))
+                        (source-space)
+                        (SourceString (data-close-block))
+                        (SourceString (data-end-statement)))
+                        (match public?
+                               True   (list (SourceString (newline))
+                                            (SourceString (data-module.exports.))
+                                            identifier
+                                            (source-space)
+                                            (SourceString (data-equals))
+                                            (source-space)
+                                            identifier
+                                            (SourceString (data-end-statement)))
+                               False  Empty)))))
 
 (def translate-type-definition (name public? parameters constructors)
      (source-string-join (string-of-char 10) (list-map (translate-constructor-definition public?) constructors)))
@@ -311,7 +312,7 @@
 
 (def generate-source (module-name definitions)
      ((pipe (list-map translate-definition)
-            (source-string-join (string-of-char 10))
+            (source-string-join (string-repeat (string-of-char 10) 2))
             (pair-cons (list-map (pair-cons IdentifierTransformationNone) (public-identifiers definitions))))
         definitions))
 
