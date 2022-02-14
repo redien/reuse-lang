@@ -164,11 +164,8 @@
             False (join-lines (list
                     (line 0 (list name
                                   (source-space)
-                                  (SourceString (data-equals))
-                                  (SourceString (data-backslash))
-                                  (source-space)
                                   (translate-argument-list arguments)
-                                  (SourceString (data-arrow))))
+                                  (SourceString (data-equals))))
                     (line 1 (list (translate-expression 1 expression)))))))
 
 (def translate-simple-type (identifier parameters)
