@@ -55,4 +55,5 @@ lambda-arrow        | =>
 single-quote        |'
 dot                 |.
 exports             |exports
-indent              |    
+module.exports.     |module.exports.
+};                  |};
