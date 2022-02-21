@@ -23,5 +23,7 @@ Should ignore space between separator and identifier
 = (def data-s () (string-from-list (list 65)))
 
 Should transform separate lines
-> a|A\\nb|B
-= (def data-a () (string-from-list (list 65)))\\n(def data-b () (string-from-list (list 66)))
+> a|A
+> b|B
+= (def data-a () (string-from-list (list 65)))
+= (def data-b () (string-from-list (list 66)))

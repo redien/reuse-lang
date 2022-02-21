@@ -12,59 +12,60 @@ rm generated/build.log > /dev/null 2>&1
 
 function testLine {
     local result
-    if [ "${3:0:1}" == "=" ]; then
-        result=$($eval_command "${2}" "${1:2}" 2> generated/error.log)
+    if test "$4" = "="; then
+        "$eval_command" "$2" "$1" > generated/test_result 2> generated/error.log
     else
-        result=$($eval_command "${2}" "${1:2}" 2>&1)
+        "$eval_command" "$2" "$1" > generated/test_result 2>&1
     fi
     local status_code="$?"
+    result="$(cat generated/test_result)"
     tests=$((tests+1))
 
-    if [ "${3:0:1}" == "=" ]; then
-        if [ "$status_code" != "0" ]; then
+    if test "$4" = "="; then
+        if test "$status_code" != "0"; then
             echo "not ok $tests - program returned non-zero status code"
             echo "---"
-            echo "  expression:  '${1:2}'"
-            echo "  program:     '${2}'"
+            echo "  expression:  '$1'"
+            echo "  program:     '$2'"
             echo "  status-code: '$status_code'"
             echo "  error:"
             echo "$(cat generated/error.log)"
             echo "..."
             failing=$((failing+1))
 
-        elif [ "$result" == "${3:2}" ]; then
-            echo "ok $tests - ${1:2} = $result"
+        elif test "$result" = "$3"; then
+            echo "ok $tests - $1 = $result"
             passing=$((passing+1))
 
         else
-            echo "not ok $tests - expected '${3:2}' but got '$result'"
+            echo "not ok $tests - expected '$3' but got '$result'"
             echo "---"
-            echo "  expression: '${1:2}'"
-            echo "  program:    '${2}'"
-            echo "  expected:   '${3:2}'"
+            echo "  expression: '$1'"
+            echo "  program:    '$2'"
+            echo "  expected:   '$3'"
             echo "  actual:     '$result'"
             echo "..."
             failing=$((failing+1))
         fi
     
     else
-        if [ "$status_code" == "0" ]; then
+        if test "$status_code" = "0"; then
             echo "not ok $tests - expected program to return a non-zero status code"
             echo "---"
             echo "  status-code:   '$status_code'"
             echo "..."
             failing=$((failing+1))
 
-        elif [[ "$result" == *"${3:2}"* ]]; then
-            echo "ok $tests - Error contains '${3:2}'"
+        elif [[ "$result" == *"$3"* ]]; then
+            echo "ok $tests - Error contains '$3'"
             passing=$((passing+1))
 
         else
-            echo "not ok $tests - expected '$result' to contain '${3:2}'"
+            echo "not ok $tests - expected '$result' to contain '$3'"
             echo "---"
-            echo "  expression: '${1:2}'"
-            echo "  program:    '${2}'"
-            echo "  expected:   '${3:2}'"
+            echo "  expression: '$1'"
+            echo "  program:    '$2'"
+            echo "  expected:   '$3'"
             echo "  actual:     '$result'"
             echo "..."
             failing=$((failing+1))
@@ -75,16 +76,37 @@ function testLine {
 function runSpec() {
     local file="$1"
     local program=""
+    local expression=""
+    local expected=""
     while IFS='' read line; do
         local firstChar=${line:0:1}
-        if [ "$firstChar" == ">" ]; then
-            IFS='' read expected
-            testLine "${line//'\n'/$'\n'}" "${program//'\n'/$'\n'}" "${expected//'\n'/$'\n'}"
+        if test "$firstChar" = "?" || test "$firstChar" = "="; then
+            while test "${line:0:1}" = "$firstChar"; do
+                if test -z "$expected"; then
+                    expected="${line:2}"
+                else
+                    printf -v expected '%s\n%s' "$expected" "${line:2}"
+                fi
+                IFS='' read line
+            done
+            testLine "$expression" "$program" "$expected" "$firstChar"
             program=""
-        elif [ "$firstChar" == "|" ]; then
-            program="$program${line:2}"
+            expression=""
+            expected=""
+        elif test "$firstChar" = ">"; then
+            if test -z "$expression"; then
+                expression="${line:2}"
+            else
+                printf -v expression '%s\n%s' "$expression" "${line:2}"
+            fi
+        elif test "$firstChar" = "|"; then
+            if test -z "$program"; then
+                program="${line:2}"
+            else
+                printf -v program '%s\n%s' "$program" "${line:2}"
+            fi
         else
-            if [ "$line" != "" ]; then
+            if test "$line" != ""; then
                 echo \# $line
             fi
         fi
@@ -107,6 +129,6 @@ echo \# tests $tests
 echo \# pass  $passing
 echo \# fail  $failing
 
-if [ "$failing" != "0" ]; then
+if test "$failing" != "0"; then
     exit 1
 fi
