@@ -38,16 +38,48 @@
           False
                rest))
 
+(def format-pattern (pattern)
+     (match pattern
+            (IntegerPattern value _)
+               (string-from-int32 value)
+            (Capture identifier)
+               (identifier-name identifier)
+            (ConstructorPattern identifier patterns _)
+               (list-with-space (Cons
+                    (identifier-name identifier)
+                    (list-map format-pattern patterns)))))
+
+(def format-match-rule (format-expression depth rule)
+     (match rule
+            (Pair pattern expression)
+               (string-join (string-empty) (list
+                    (format-pattern pattern)
+                    (indent (+ depth 3))
+                    (format-expression (+ depth 3) expression)))))
+
+(def format-match-rules (format-expression depth rules)
+     (string-join (indent depth) (list-map (format-match-rule format-expression depth) rules)))
+
 (def format-expression (depth expression)
      (match expression
             (IntegerConstant integer _)
                 (string-from-int32 integer)
             (Variable identifier)
                 (identifier-name identifier)
-            (Lambda arguments expression range)
-                (space)
-            (Match expression pairs range)
-                (space)
+            (Lambda arguments expression _)
+                (list-without-space (list
+                    (data-fn)
+                    (space)
+                    (list-with-space (list-map identifier-name arguments))
+                    (indent (+ depth 4))
+                    (format-expression (+ depth 4) expression)))
+            (Match expression rules range)
+                (list-without-space (list
+                    (data-match)
+                    (space)
+                    (format-expression depth expression)
+                    (indent (+ depth 7))
+                    (format-match-rules format-expression (+ depth 7) rules)))
             (Constructor identifier expressions range)
                 (space)
             (FunctionApplication expressions range)

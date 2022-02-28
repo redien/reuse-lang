@@ -18,5 +18,6 @@ pub                                 |pub
 def                                 |def
 typ                                 |typ
 exists                              |exists
+match                               |match
 open-bracket                        |(
 close-bracket                       |)
