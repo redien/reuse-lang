@@ -81,7 +81,13 @@
                     (indent (+ depth 7))
                     (format-match-rules format-expression (+ depth 7) rules)))
             (Constructor identifier expressions range)
-                (space)
+                (match expressions
+                       Empty
+                         (identifier-name identifier)
+                       _
+                         (list-with-space (Cons
+                              (identifier-name identifier)
+                              (list-map (format-expression depth) expressions))))
             (FunctionApplication expressions range)
                 (space)))
 
