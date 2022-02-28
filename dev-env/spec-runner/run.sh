@@ -13,12 +13,13 @@ rm generated/build.log > /dev/null 2>&1
 function testLine {
     local result
     if test "$4" = "="; then
-        "$eval_command" "$2" "$1" > generated/test_result 2> generated/error.log
+        result="$("$eval_command" "$2" "$1" 2> generated/error.log; printf '%s' 'x')"
     else
-        "$eval_command" "$2" "$1" > generated/test_result 2>&1
+        result="$("$eval_command" "$2" "$1" 2>&1; printf '%s' 'x')"
     fi
+    result="${result%x}"
+
     local status_code="$?"
-    result="$(cat generated/test_result)"
     tests=$((tests+1))
 
     if test "$4" = "="; then
@@ -47,7 +48,7 @@ function testLine {
             echo "..."
             failing=$((failing+1))
         fi
-    
+
     else
         if test "$status_code" = "0"; then
             echo "not ok $tests - expected program to return a non-zero status code"
