@@ -89,7 +89,7 @@
                               (identifier-name identifier)
                               (list-map (format-expression depth) expressions))))
             (FunctionApplication expressions range)
-                (space)))
+                (list-with-space (list-map (format-expression depth) expressions))))
 
 (def format-type (type)
      (match type
@@ -107,7 +107,7 @@
      (match constructor
             (SimpleConstructor identifier)
                (identifier-name identifier)
-            (ComplexConstructor identifier types ___)
+            (ComplexConstructor identifier types _)
                (list-with-space (Cons (identifier-name identifier) (list-map format-type types)))))
 
 (def format-type-parameter (parameter)
