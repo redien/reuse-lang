@@ -67,7 +67,9 @@
             False
                ((pipe (list-map format-definition)
                       (string-join (string-repeat (string-of-char 10) 2))
-                      ((flip string-concat) (string-of-char 10)))
+                      ((flip string-concat) (string-of-char 10))
+                      (string-concat (string-of-char 10))
+                      (string-concat (string-of-char 10)))
                      definitions)))
 
 (def definition-file-path (definition)
