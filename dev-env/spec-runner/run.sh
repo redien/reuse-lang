@@ -83,7 +83,7 @@ function runSpec() {
         local firstChar=${line:0:1}
         if test "$firstChar" = "?" || test "$firstChar" = "="; then
             while test "${line:0:1}" = "$firstChar"; do
-                if test -z "$expected"; then
+                if test -z "$expected" && ! test -z "${line:2}"; then
                     expected="${line:2}"
                 else
                     printf -v expected '%s\n%s' "$expected" "${line:2}"
@@ -95,13 +95,13 @@ function runSpec() {
             expression=""
             expected=""
         elif test "$firstChar" = ">"; then
-            if test -z "$expression"; then
+            if test -z "$expression" && ! test -z "${line:2}"; then
                 expression="${line:2}"
             else
                 printf -v expression '%s\n%s' "$expression" "${line:2}"
             fi
         elif test "$firstChar" = "|"; then
-            if test -z "$program"; then
+            if test -z "$program" && ! test -z "${line:2}"; then
                 program="${line:2}"
             else
                 printf -v program '%s\n%s' "$program" "${line:2}"
