@@ -16,12 +16,56 @@
              MalformedSexpTooFewClosingBrackets            (data-MalformedSexpTooFewClosingBrackets  )
              MalformedSexpTooManyClosingBrackets           (data-MalformedSexpTooManyClosingBrackets )))
 
+(def space ()
+     (string-of-char 32))
+
+(def indent (n)
+     (string-concat (string-of-char 10) (string-repeat (space) n)))
+
+(def add-modifiers (public? rest)
+     (match public?
+          True
+               (Cons (data-pub) rest)
+          False
+               rest))
+
+(def format-expression (expression)
+     (match expression
+            (IntegerConstant integer _)
+                (string-from-int32 integer)
+            (Variable identifier)
+                (space)
+            (Lambda arguments expression range)
+                (space)
+            (Match expression pairs range)
+                (space)
+            (Constructor identifier expressions range)
+                (space)
+            (FunctionApplication expressions range)
+                (space)))
+
+(def format-definition (definition)
+     (match definition
+            (TypeDefinition identifier public? parameters constructors _)
+               (space)
+            (FunctionDefinition name public? arguments expression range)
+               (wrap-in-brackets (string-join (string-empty) (add-modifiers public? (list
+                    (data-def)
+                    (space)
+                    (identifier-name name)
+                    (space)
+                    (wrap-in-brackets (string-join (space) (list-map identifier-name arguments)))
+                    (indent 5)
+                    (format-expression expression)))))
+            (TargetDefinition _ data)
+                (string-from-slice data)))
+
 (def format-file (definitions)
      (match (list-is-empty? definitions)
             True
                (string-empty)
             False
-               ((pipe (list-map (. stringify-sexps (. definitions-to-sexps list-from)))
+               ((pipe (list-map format-definition)
                       (string-join (string-repeat (string-of-char 10) 2))
                       ((flip string-concat) (string-of-char 10)))
                      definitions)))

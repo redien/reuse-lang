@@ -13,3 +13,8 @@ ErrorReservedIdentifier             |ErrorReservedIdentifier
 MalformedSexpTooFewClosingBrackets  |MalformedSexpTooFewClosingBrackets
 MalformedSexpTooManyClosingBrackets |MalformedSexpTooManyClosingBrackets
 success                             |success
+fn                                  |fn
+pub                                 |pub
+def                                 |def
+open-bracket                        |(
+close-bracket                       |)
