@@ -16,5 +16,7 @@ success                             |success
 fn                                  |fn
 pub                                 |pub
 def                                 |def
+typ                                 |typ
+exists                              |exists
 open-bracket                        |(
 close-bracket                       |)

@@ -19,8 +19,17 @@
 (def space ()
      (string-of-char 32))
 
+(def newline ()
+     (string-of-char 10))
+
 (def indent (n)
-     (string-concat (string-of-char 10) (string-repeat (space) n)))
+     (string-concat (newline) (string-repeat (space) n)))
+
+(def list-with-space (items)
+     (wrap-in-brackets (string-join (space) items)))
+
+(def list-without-space (items)
+     (wrap-in-brackets (string-join (string-empty) items)))
 
 (def add-modifiers (public? rest)
      (match public?
@@ -29,12 +38,12 @@
           False
                rest))
 
-(def format-expression (expression)
+(def format-expression (depth expression)
      (match expression
             (IntegerConstant integer _)
                 (string-from-int32 integer)
             (Variable identifier)
-                (space)
+                (identifier-name identifier)
             (Lambda arguments expression range)
                 (space)
             (Match expression pairs range)
@@ -44,19 +53,63 @@
             (FunctionApplication expressions range)
                 (space)))
 
+(def format-type (type)
+     (match type
+          (SimpleType identifier)
+               (identifier-name identifier)
+          (ComplexType identifier parameters _)
+               (list-with-space (Cons (identifier-name identifier) (list-map format-type parameters)))
+          (FunctionType argument-types return-type _)
+               (list-with-space (list
+                    (data-fn)
+                    (list-with-space (list-map format-type argument-types))
+                    (format-type return-type)))))
+
+(def format-type-constructor (constructor)
+     (match constructor
+            (SimpleConstructor identifier)
+               (identifier-name identifier)
+            (ComplexConstructor identifier types ___)
+               (list-with-space (Cons (identifier-name identifier) (list-map format-type types)))))
+
+(def format-type-parameter (parameter)
+     (match parameter
+          (UniversalParameter identifier)
+               (identifier-name identifier)
+          (ExistentialParameter identifier)
+               (list-with-space (list (data-exists) (identifier-name identifier)))))
+
+(def format-type-definition-name (name parameters)
+     (match parameters
+          Empty
+               (identifier-name name)
+          _
+               (list-with-space (Cons (identifier-name name) (list-map format-type-parameter parameters)))))
+
+(def format-type-definition-constructors (constructors)
+     (match constructors
+          (Cons constructor Empty)
+               (string-concat (space) (format-type-constructor constructor))
+          _
+               (string-concat (indent 5) (string-join (indent 5) (list-map format-type-constructor constructors)))))
+
 (def format-definition (definition)
      (match definition
-            (TypeDefinition identifier public? parameters constructors _)
-               (space)
+            (TypeDefinition name public? parameters constructors _)
+               (list-without-space (add-modifiers public? (list
+                    (data-typ)
+                    (space)
+                    (format-type-definition-name name parameters)
+                    (format-type-definition-constructors constructors))))
             (FunctionDefinition name public? arguments expression range)
-               (wrap-in-brackets (string-join (string-empty) (add-modifiers public? (list
+               (list-without-space (add-modifiers public? (list
                     (data-def)
                     (space)
                     (identifier-name name)
                     (space)
                     (wrap-in-brackets (string-join (space) (list-map identifier-name arguments)))
                     (indent 5)
-                    (format-expression expression)))))
+                    (format-expression 5 expression))))
             (TargetDefinition _ data)
                 (string-from-slice data)))
 
@@ -66,10 +119,9 @@
                (string-empty)
             False
                ((pipe (list-map format-definition)
-                      (string-join (string-repeat (string-of-char 10) 2))
-                      ((flip string-concat) (string-of-char 10))
-                      (string-concat (string-of-char 10))
-                      (string-concat (string-of-char 10)))
+                      (string-join (string-repeat (newline) 2))
+                      ((flip string-concat) (newline))
+                      (string-concat (string-repeat (newline) 2)))
                      definitions)))
 
 (def definition-file-path (definition)
