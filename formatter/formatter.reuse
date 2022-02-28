@@ -1,0 +1,48 @@
+
+(def stringify-error (error)
+     (match error
+            (MalformedDefinitionError            _)        (data-MalformedDefinitionError            )
+            (MalformedTypeDefinitionError        _)        (data-MalformedTypeDefinitionError        )
+            (MalformedFunctionDefinitionError    _ __)     (data-MalformedFunctionDefinitionError    )
+            (MalformedFunctionNameError          _)        (data-MalformedFunctionNameError          )
+            (MalformedExpressionError            _)        (data-MalformedExpressionError            )
+            (MalformedMatchExpressionError       _)        (data-MalformedMatchExpressionError       )
+            (MalformedSymbolError                _)        (data-MalformedSymbolError                )
+            (MalformedConstructorError           _)        (data-MalformedConstructorError           )
+            (MalformedTypeError                  _)        (data-MalformedTypeError                  )
+            (ErrorNotDefined                     _ __ ___) (data-ErrorNotDefined                     )
+            (ErrorAlreadyDefined                 _)        (data-ErrorAlreadyDefined                 )
+            (ErrorReservedIdentifier             _ __ ___) (data-ErrorReservedIdentifier             )
+             MalformedSexpTooFewClosingBrackets            (data-MalformedSexpTooFewClosingBrackets  )
+             MalformedSexpTooManyClosingBrackets           (data-MalformedSexpTooManyClosingBrackets )))
+
+(def format-file (definitions)
+     (match (list-is-empty? definitions)
+            True
+               (string-empty)
+            False
+               ((pipe (list-map (. stringify-sexps (. definitions-to-sexps list-from)))
+                      (string-join (string-repeat (string-of-char 10) 2))
+                      ((flip string-concat) (string-of-char 10)))
+                     definitions)))
+
+(def definition-file-path (definition)
+     (source-reference-file-path (definition-source-reference definition)))
+
+(def definitions-partition-by-file-name (definitions)
+     (list-partition-by (fn (a b) (string-equal? (definition-file-path a) (definition-file-path b)))))
+
+(def first-file-path (definitions)
+     (maybe-map definition-file-path (list-first definitions)))
+
+(def format-definitions (definitions)
+     (match (first-file-path definitions)
+            (Some file-path)
+               (list (Pair file-path (string-to-slice (format-file definitions))))
+            None
+               Empty))
+
+(pub def format-source-files (files)
+     (result-bimap format-definitions
+                   stringify-error
+                   (parse-source-files (list-empty) files)))

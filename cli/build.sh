@@ -9,6 +9,7 @@ $project_root/parser/build.sh
 $project_root/argument-parser/build.sh
 $project_root/compiler-backend/build.sh
 $project_root/compiler-frontend/build.sh
+$project_root/formatter/build.sh
 
 build_compiler_module() {
     $project_root/reusec --language module\
@@ -45,6 +46,7 @@ $project_root/reusec --language ocaml\
                      --output $build_dir/ReuseCompiler.ml\
                      --module $($project_root/dev-env/builddir.sh parser)/parser.reuse\
                      --module $($project_root/dev-env/builddir.sh argument-parser)/argument-parser.reuse\
+                     --module $($project_root/dev-env/builddir.sh formatter)/formatter.reuse\
                      --module $($project_root/dev-env/builddir.sh compiler-backend)/compiler-backend.reuse\
                      --module $($project_root/dev-env/builddir.sh compiler-frontend)/compiler-frontend.reuse\
                      $backend_modules\

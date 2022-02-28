@@ -21,5 +21,7 @@ usage3                       |       --stdlib [BOOL]    Include the standard lib
 usage4                       |       --language [LANG]  Target language to compile to
 usage5                       |       --output [FILE]    Write output to FILE
 usage6                       |       -h                 Print usage information
-usage7                       |Languages: 
+usage7                       |       -f                 Format input files by writing directly to them
+usage8                       |Languages: 
 h                            |h
+f                            |f

@@ -9,8 +9,9 @@
           (data-usage4)
           (data-usage5)
           (data-usage6)
+          (data-usage7)
           (string-empty)
-          (string-concat (data-usage7) (string-join (string-of-char 32) (list-map compiler-backend-name modules))))))
+          (string-concat (data-usage8) (string-join (string-of-char 32) (list-map compiler-backend-name modules))))))
 
 (typ cli-program (CliTime (fn (int32) cli-program))
                  (CliMaxHeapSize (fn (int32) cli-program))
@@ -69,6 +70,16 @@
             False
                (k)))
 
+(def format-input-files (input-files)
+     (CliReadFiles (list-map (pair-cons ModuleSelf) input-files) (fn (source-files)
+     (match (format-source-files source-files)
+            (Result files-to-write)
+                  (CliWriteFiles files-to-write (fn ()
+                  (CliExit 0)))
+            (Error error-message)
+                  (CliError error-message (fn ()
+                  (CliExit 1)))))))
+
 (def cli-main (data-path argv)
      (match (parse-arguments argv)
           (CliArguments Empty Empty)
@@ -89,6 +100,10 @@
             True
                   (CliError (data-no-input-files) (fn ()
                   (CliExit 1)))
+            False
+     (match (dictionary-has? (data-f) arguments)
+            True
+                  (format-input-files input-files)
             False
      (match (find-backend arguments)  backend
      (CliTime (fn (start-read-files)
@@ -131,4 +146,4 @@
                               (CliExit 1)))))))))))))))))
                None
                     (CliError (data-no-output-path) (fn ()
-                    (CliExit 1))))))))))))))))
+                    (CliExit 1)))))))))))))))))
