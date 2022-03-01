@@ -13,13 +13,14 @@ rm generated/build.log > /dev/null 2>&1
 function testLine {
     local result
     if test "$4" = "="; then
-        result="$("$eval_command" "$2" "$1" 2> generated/error.log; printf '%s' 'x')"
+        "$eval_command" "$2" "$1" > generated/test_result 2> generated/error.log
     else
-        result="$("$eval_command" "$2" "$1" 2>&1; printf '%s' 'x')"
+        "$eval_command" "$2" "$1" > generated/test_result 2>&1
     fi
+    local status_code="$?"
+    result="$(cat generated/test_result; printf '%s' 'x')"
     result="${result%x}"
 
-    local status_code="$?"
     tests=$((tests+1))
 
     if test "$4" = "="; then
