@@ -4,6 +4,7 @@ We'd like a way of annotating functions or types so that some code external to t
 - Unit-test cases
 - REST endpoints
 - Generating code based on type definitions such as getters/setters or lenses.
+- Generate wrapper classes for object-oriented languages
 
 # Changes
 
@@ -29,6 +30,9 @@ We'd like a way of annotating functions or types so that some code external to t
 
 - Arguably the keywords could just be added to the function names themselves.
   - Calling code would then be coupled to the other uses of this code since they have to specify the keywords.
+
+- A fully fledged macro system could do this and more.
+  - Some use-cases would still need an external compiler step but macros would allow us to define new syntax like this.
 
 # Open Questions
 
