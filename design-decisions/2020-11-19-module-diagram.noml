@@ -1,24 +1,18 @@
 #ranker: tight-tree
 
 [cli] -> [argument-parser]
-[cli] -> [compiler]
+[cli] -> [backend]
 [cli] -> [error-reporting]
+[cli] -> [parser]
 
-[compiler] -> [identifier-validation]
-[compiler] -> [local-transforms]
-[compiler] -> [<reference> backend]
-[compiler] -> [parser]
+[backend] -> [identifier-validation]
+[backend] -> [local-transforms]
+[backend] -> [parser]
 
-[<reference> backend] -> [shared]
-[<reference> backend] -> [symbols]
-
-[symbols] -> [scope]
 [parser-context] -> [scope]
 [parser] -> [scope]
 
-[symbols] -> [symbol-table]
 [parser-context] -> [symbol-table]
-[parser-context] -> [symbols]
 
 [parser] -> [parser-context]
 [parser] -> [string-gen]
