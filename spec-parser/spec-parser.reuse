@@ -3,25 +3,43 @@
      (SpecSuccessful string string)
      (SpecFailed string string))
 
+(def line-matches (first-char line)
+     (= first-char (maybe-or-else 0 (string-first line))))
+
 (def collect-lines (first-char lines)
-     (string-join (string-of-char 10) (list-map (string-skip 2) (list-filter (pipe string-first (maybe-or-else 0) (= first-char)) lines))))
+     (string-join (string-of-char 10) (list-map (string-skip 2) (list-filter (line-matches first-char) lines))))
 
 (def commit-requirement (result)
      (match result
             (Pair lines requirements)
-               (Pair (list-empty) (Cons (SpecSuccessful (collect-lines 62 lines) (collect-lines 61 lines)) requirements))))
+               (match (list-reverse lines)
+                      lines-reversed
+                         (Pair (list-empty) (Cons (SpecSuccessful (collect-lines 62 lines-reversed) (collect-lines 61 lines-reversed)) requirements)))))
 
 (def append-line (line result)
      (match result
             (Pair lines requirements)
                (Pair (Cons line lines) requirements)))
 
+(def previous-line-is-assertion? (result)
+     (match result
+            (Pair (Cons line _) __)
+               (line-matches 61 line)
+            _
+               False))
+
 (def reduce-spec (line result)
      (match (string-first line)
             (Some 61)
-               (commit-requirement (append-line line result))
+               (append-line line result)
+            (Some 62)
+               (match (previous-line-is-assertion? result)
+                      True
+                         (append-line line (commit-requirement result))
+                      False
+                         (append-line line result))
             _
-               (append-line line result)))
+               result))
 
 (pub def parse-spec (file)
-     (list-reverse (pair-right (list-foldl reduce-spec (Pair (list-empty) (list-empty)) (string-split 10 (string-from-slice file))))))
+     (list-reverse (pair-right (commit-requirement (list-foldl reduce-spec (Pair (list-empty) (list-empty)) (string-split 10 (string-from-slice file)))))))
