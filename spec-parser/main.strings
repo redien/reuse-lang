@@ -1,0 +1,6 @@
+equal     |=
+comma     |,
+pipe      ||
+error     |*error*
+expression|expression
+expected  |expected

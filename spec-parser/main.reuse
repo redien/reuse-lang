@@ -1,0 +1,13 @@
+
+(def stringify-requirement (requirement)
+     (match requirement
+            (SpecSuccessful expression expected)
+               (string-join (string-empty) (list (data-expected) (data-equal) expected (data-comma) (data-expression) (data-equal) expression))
+            (SpecFailed expression expected)
+               (string-empty)))
+
+(def stringify-parameters (requirements)
+     (string-join (data-pipe) (list-map stringify-requirement requirements)))
+
+(def reuse-main (stdin)
+     (stringify-parameters (parse-spec stdin)))
