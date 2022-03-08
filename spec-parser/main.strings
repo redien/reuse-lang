@@ -4,3 +4,5 @@ pipe      ||
 error     |*error*
 expression|expression
 expected  |expected
+success   |ExpectSuccess:
+failure   |ExpectFailure:

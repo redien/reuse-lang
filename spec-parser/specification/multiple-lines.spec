@@ -3,12 +3,19 @@ Expression should accept several lines
 > > expr
 > > ession
 > = expected
-= expected=expected,expression=expr
+= ExpectSuccess:expected=expected,expression=expr
 = ession
 
 Assertion should accept several lines
 > > expression
 > = expe
 > = cted
-= expected=expe
+= ExpectSuccess:expected=expe
+= cted,expression=expression
+
+Failure assertion should accept several lines
+> > expression
+> ? expe
+> ? cted
+= ExpectFailure:expected=expe
 = cted,expression=expression
