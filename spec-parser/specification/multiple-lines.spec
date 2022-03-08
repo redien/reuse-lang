@@ -19,3 +19,11 @@ Failure assertion should accept several lines
 > ? cted
 = ExpectFailure:expected=expe
 = cted,expression=expression
+
+Context should accept several lines
+> | con
+> | text
+> > expression
+> = expected
+= ExpectSuccess:expected=expected,expression=expression,context=con
+= text

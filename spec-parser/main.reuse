@@ -1,10 +1,18 @@
 
 (def stringify-requirement (requirement)
      (match requirement
-            (ExpectSuccess expression expected)
-               (string-join (string-empty) (list (data-success) (data-expected) (data-equal) expected (data-comma) (data-expression) (data-equal) expression))
-            (ExpectFailure expression expected)
-               (string-join (string-empty) (list (data-failure) (data-expected) (data-equal) expected (data-comma) (data-expression) (data-equal) expression))))
+            (ExpectSuccess context expression expected)
+               (match (string-is-empty? context)
+                      True
+                         (string-join (string-empty) (list (data-success) (data-expected) (data-equal) expected (data-comma) (data-expression) (data-equal) expression))
+                      False
+                         (string-join (string-empty) (list (data-success) (data-expected) (data-equal) expected (data-comma) (data-expression) (data-equal) expression (data-comma) (data-context) (data-equal) context)))
+            (ExpectFailure context expression expected)
+               (match (string-is-empty? context)
+                      True
+                        (string-join (string-empty) (list (data-failure) (data-expected) (data-equal) expected (data-comma) (data-expression) (data-equal) expression))
+                      False
+                        (string-join (string-empty) (list (data-failure) (data-expected) (data-equal) expected (data-comma) (data-expression) (data-equal) expression (data-comma) (data-context) (data-equal) context)))))
 
 (def stringify-parameters (requirements)
      (string-join (data-pipe) (list-map stringify-requirement requirements)))
