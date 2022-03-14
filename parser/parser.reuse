@@ -12,7 +12,7 @@
         (Pair (identifier-typ) (data-typ))
         (Pair (identifier-fn) (data-fn))
         (Pair (identifier-match) (data-match))
-        (Pair (identifier-pub) (data-exists))
+        (Pair (identifier-exists) (data-exists))
         (Pair (identifier-pub) (data-pub)))))
 
 (pub typ error  (MalformedDefinitionError range)
