@@ -6,7 +6,7 @@
 (def identifier-exists ()           -5)
 (def identifier-pub ()              -6)
 
-(def with-default-identifiers (other-symbols)
+(def with-language-identifiers (other-symbols)
      (list-concat other-symbols (list
         (Pair (identifier-def) (data-def))
         (Pair (identifier-typ) (data-typ))
@@ -340,10 +340,10 @@
      (parser-return (list-flatten definitions)))))))
 
 (pub def parse-source-files (symbols files)
-     ((pipe (list-partition-by (fn (a b) (module-equal? (source-file-module a) (source-file-module b))))
+     ((pipe (list-partition-by source-file-in-same-module?)
             (list-map parse-module)
             parser-sequence
-            (parser-run (dictionary-of (list-map (fn (x) (Pair (pair-right x) x)) (with-default-identifiers symbols))))
+            (parser-run (with-language-identifiers symbols))
             (result-map list-flatten))
         files))
 

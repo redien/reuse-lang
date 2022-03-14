@@ -27,6 +27,9 @@
             (SourceFile _ __ content)
                 (slice-size content)))
 
+(pub def source-file-in-same-module? (a b)
+     (module-equal? (source-file-module a) (source-file-module b)))
+
 (def last-n-chars (n path)
      (string-substring (- (string-size path) n) n path))
 
