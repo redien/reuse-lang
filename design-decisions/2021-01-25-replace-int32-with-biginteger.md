@@ -36,3 +36,7 @@
   - Now we have two integers to choose from and need to convert between.
   - We can only use operator symbols for one type.
   - Additional maintenance and implementation complexity.
+
+# Current Status
+
+- Under Consideration

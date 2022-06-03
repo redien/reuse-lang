@@ -32,3 +32,7 @@
   - The most portable solution.
   - Additional language primitives are needed to reduce allocations when building substrings.
   - The tokenizer could always be rewritten in reuse if the allocation issues are solved.
+
+# Current Status
+
+- Implementation Planned

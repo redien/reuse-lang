@@ -37,3 +37,7 @@ We'd like a way of annotating functions or types so that some code external to t
 # Open Questions
 
 - Should user-defined annotations have a prefix like in Java? (`@Annotation`)
+
+# Current Status
+
+- Under Consideration

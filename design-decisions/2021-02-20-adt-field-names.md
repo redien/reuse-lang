@@ -29,3 +29,7 @@ Optional changes:
 # Alternative solutions
 
 - Do not generate accessors
+
+# Current Status
+
+- Under Consideration

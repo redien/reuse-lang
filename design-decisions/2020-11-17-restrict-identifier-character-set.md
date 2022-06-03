@@ -36,3 +36,7 @@
   - The backends will no longer need to encode identifiers since the character set is restricted.
   - There's currently no evidence that custom operators are needed.
   - They could always be added on top of the proposed solution
+
+# Current Status
+
+- Not implemented

@@ -3,15 +3,15 @@
 Not all unicode characters are valid identifiers in the target languages. We would like to encode these characters
 so that every identifier is unique and can still be used relatively easily.
 
-Currently all bytes that represent alpha-numeric characters in ASCII are encoded as is and all other bytes are encoded as an underscore followed the integer byte value.
+Currently all bytes that represent alpha-numeric characters in ASCII are encoded as is and all other bytes are encoded as an underscore followed by the integer byte value.
 
 For some languages where identifiers have limited character sets we want an encoding that:
 
 - does not break when identifiers have unicode characters
 - the identifiers that do not contain unicode characters should look the same
-- dashes (-) should be converted a word separator if available. For example in C it should be an underscore (\_).
+- dashes (-) should be converted to a word separator if available. For example in C it should be an underscore (\_).
 
-For languages who has some support for unicode we would like to support it to the extent possible.
+For languages that have some support for unicode we would like to support it to the extent possible.
 
 # Changes
 
@@ -45,3 +45,7 @@ For languages who has some support for unicode we would like to support it to th
   - Use a hash of the original identifier as the suffix then continue by incrementing
   - This improves the runtime since we can reduce the number of collisions.
   - Increases the size of all identifiers translating to the same string
+
+# Current Status
+
+- Implemented
