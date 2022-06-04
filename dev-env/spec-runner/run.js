@@ -92,7 +92,7 @@ console.log('TAP version 13');
 
 if (fs.statSync(specPath).isDirectory) {
     fs.readdirSync(specPath).forEach(filename => {
-        if (filename.indexOf('.spec') !== -1) {
+        if (filename.indexOf('.spec') === filename.length - 5) {
             testSpecFile(path.join(specPath, filename));
         }
     });
