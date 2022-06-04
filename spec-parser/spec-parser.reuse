@@ -1,7 +1,8 @@
 
 (pub typ spec-requirement
      (ExpectSuccess string string string)
-     (ExpectFailure string string string))
+     (ExpectFailure string string string)
+     (Comment string))
 
 (def line-matches (first-char line)
      (= first-char (maybe-or-else 0 (string-first line))))
@@ -18,11 +19,13 @@
 (def commit-requirement (result)
      (match result
             (Pair lines requirements)
-               (match (list-any? (line-matches 63) lines)
-                      True
+               (match (Pair (list-is-empty? lines) (list-any? (line-matches 63) lines))
+                      (Pair False True)
                          (Pair (list-empty) (Cons (collect-failure (list-reverse lines)) requirements))
-                      False
-                         (Pair (list-empty) (Cons (collect-success (list-reverse lines)) requirements)))))
+                      (Pair False False)
+                         (Pair (list-empty) (Cons (collect-success (list-reverse lines)) requirements))
+                      (Pair True _)
+                         result)))
 
 (def append-line (line result)
      (match result
@@ -35,6 +38,17 @@
                (or (line-matches 63 line) (line-matches 61 line))
             _
                False))
+
+(def commit-comment (line result)
+     (match (previous-line-is-assertion? result)
+            True
+               (match (commit-requirement result)
+                      (Pair lines requirements)
+                         (Pair lines (Cons (Comment line) requirements)))
+            False
+               (match result
+                      (Pair lines requirements)
+                         (Pair lines (Cons (Comment line) requirements)))))
 
 (def append-non-assertion (line result)
      (match (previous-line-is-assertion? result)
@@ -54,7 +68,9 @@
             (Some 124)
                (append-non-assertion line result)
             _
-               result))
+               (match (string-is-empty? line)
+                      True   result
+                      False  (commit-comment line result))))
 
 (pub def parse-spec (file)
      (list-reverse (pair-right (commit-requirement (list-foldl reduce-spec (Pair (list-empty) (list-empty)) (string-split 10 (string-from-slice file)))))))

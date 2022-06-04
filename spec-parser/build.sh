@@ -8,3 +8,8 @@ $project_root/bin/reusec --language module\
                          --output $build_dir/spec-parser.reuse\
                          $project_root/spec-parser/spec-parser.strings\
                          $project_root/spec-parser/spec-parser.reuse
+
+$project_root/bin/reusec --language javascript\
+                         --output $build_dir/spec-parser.js\
+                         $project_root/spec-parser/spec-parser.strings\
+                         $project_root/spec-parser/spec-parser.reuse

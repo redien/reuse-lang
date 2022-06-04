@@ -1,6 +1,8 @@
 
 (def stringify-requirement (requirement)
      (match requirement
+            (Comment comment)
+               (string-join (string-empty) (list (data-comment) comment))
             (ExpectSuccess context expression expected)
                (match (string-is-empty? context)
                       True
