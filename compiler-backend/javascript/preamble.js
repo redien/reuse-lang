@@ -1,5 +1,5 @@
 var slice_empty = () => new Uint8Array();
-var slice_of = x => { var array = new Uint8Array(1); array[0] = x; return array; };
+var slice_of_u8 = x => count => { var array = new Uint8Array(count); array.fill(x, 0, count); return array; };
 var slice_size = slice => slice.length;
 var slice_get = slice => index => { var x = slice[index]; return x === undefined ? 0 : x; };
 var slice_concat = a => b => { var array = new Uint8Array(a.length + b.length); array.set(a); array.set(b, a.length); return array; };

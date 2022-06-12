@@ -363,7 +363,7 @@
      (string-collect-from-slice' predicate index slice (string-empty)))
 
 (pub def string-to-slice (string)
-     (string-foldl (fn (c slice) (slice-concat slice (slice-of c))) (slice-empty) string))
+     (string-foldl (fn (c slice) (slice-concat slice (slice-of-u8 c 1))) (slice-empty) string))
 
 (pub def string-from-slice (slice)
      (slice-foldl string-append (string-empty) slice))

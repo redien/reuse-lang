@@ -73,7 +73,7 @@ int32-less-than              |int32-less-than
 pipe                         |pipe
 list                         |list
 slice-empty                  |slice-empty
-slice-of                     |slice-of
+slice-of-u8                  |slice-of-u8
 slice-size                   |slice-size
 slice-get                    |slice-get
 slice-concat                 |slice-concat

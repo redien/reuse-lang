@@ -16,10 +16,10 @@ _int32_and :: Int32 -> Int32 -> Int32
 _int32_and a b = a .&. b
 slice_empty :: ByteString.ByteString
 slice_empty = ByteString.empty
-slice_of :: Int32 -> ByteString.ByteString
-slice_of x =
-    if x >= 0 && x < 256 then
-        ByteString.singleton (Prelude.fromIntegral x)
+slice_of_u8 :: Int32 -> Int32 -> ByteString.ByteString
+slice_of_u8 x count =
+    if x >= 0 && x < 256 && count >= 1 then
+        ByteString.replicate (Prelude.fromIntegral count) (Prelude.fromIntegral x)
     else
         ByteString.singleton 0
 slice_size :: ByteString.ByteString -> Int32

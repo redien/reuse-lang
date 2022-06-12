@@ -96,10 +96,10 @@
 (def eval-slice-empty (scope stack-trace arguments)
      (return (ValueSlice (slice-empty))))
 
-(def eval-slice-of (scope stack-trace arguments)
+(def eval-slice-of-u8 (scope stack-trace arguments)
      (match arguments
-            (Cons (ValueInteger a) Empty)
-                (return (ValueSlice (slice-of a)))
+            (Cons (ValueInteger a) (Cons (ValueInteger count) Empty))
+                (return (ValueSlice (slice-of-u8 a count)))
             _
                 (Error (data-error-slice-op))))
 
@@ -244,7 +244,7 @@
                       (Pair (identifier-&)                (ValueIntrinsic (eval-int32-operator &)))
                       (Pair (identifier-int32-less-than)  (ValueIntrinsic eval-int32-less-than))
                       (Pair (identifier-slice-empty)      (ValueIntrinsic eval-slice-empty))
-                      (Pair (identifier-slice-of)         (ValueIntrinsic eval-slice-of))
+                      (Pair (identifier-slice-of-u8)      (ValueIntrinsic eval-slice-of-u8))
                       (Pair (identifier-slice-size)       (ValueIntrinsic eval-slice-size))
                       (Pair (identifier-slice-get)        (ValueIntrinsic eval-slice-get))
                       (Pair (identifier-slice-concat)     (ValueIntrinsic eval-slice-concat))

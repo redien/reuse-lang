@@ -133,7 +133,7 @@
 (pub def string-from-int32 (integer) (string-from-list (string-from-int32' integer)))
 (def string-collect-from-slice' (predicate index slice initial) (match (< index (slice-size slice)) False (Pair index initial) True (match (predicate (slice-get slice index)) True (string-collect-from-slice' predicate (+ index 1) slice (string-append (slice-get slice index) initial)) False (Pair index initial))))
 (pub def string-collect-from-slice (predicate index slice) (string-collect-from-slice' predicate index slice (string-empty)))
-(pub def string-to-slice (string) (string-foldl (fn (c slice) (slice-concat slice (slice-of c))) (slice-empty) string))
+(pub def string-to-slice (string) (string-foldl (fn (c slice) (slice-concat slice (slice-of-u8 c 1))) (slice-empty) string))
 (pub def string-from-slice (slice) (slice-foldl string-append (string-empty) slice))
 (def string-collect-from-indexed-iterator' (predicate iterator initial) (match (indexed-iterator-next iterator) (Pair None _) (Pair iterator initial) (Pair (Some x) next) (match (predicate x) True (string-collect-from-indexed-iterator' predicate next (string-append x initial)) False (Pair iterator initial))))
 (pub def string-collect-from-indexed-iterator (predicate iterator) (string-collect-from-indexed-iterator' predicate iterator (string-empty)))
