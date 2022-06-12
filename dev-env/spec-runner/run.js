@@ -27,12 +27,14 @@ function testSpecFile(filePath) {
         match(testCase, [
             [parser.ExpectSuccess, $, $, $], createTestCase('success'),
             [parser.ExpectFailure, $, $, $], createTestCase('failure'),
-            [parser.Comment, $], comment => ({ type: 'comment', comment })
+            [parser.Comment, $], comment => ({ type: 'comment', comment: parser.reuse_string_to_js(comment) })
         ])
     , parser.parse_spec(input)));
 
     testCases.forEach(testCase => {
         var result = child_process.spawnSync(command, [testCase.context, testCase.expression]);
+        var stderr = result.stderr.toString('utf8');
+        var stdout = result.stdout.toString('utf8');
 
         if (testCase.type === 'success') {
             if (result.status !== 0) {
@@ -42,19 +44,19 @@ function testSpecFile(filePath) {
                 console.log("  program:     '" + testCase.context + "'");
                 console.log("  status-code: '" + result.status + "'");
                 console.log("  error:");
-                console.log(result.stderr);
+                console.log(stderr);
                 console.log("...");
                 failing++;
-            } else if (result.stdout.toString() === testCase.expected.toString()) {
-                console.log("ok " + total + " - " + testCase.expression + " = " + result.stdout);
+            } else if (stdout === testCase.expected) {
+                console.log("ok " + total + " - " + testCase.expression + " = " + stdout);
                 passing++;
             } else {
-                console.log("not ok " + total + " - expected '" + testCase.expected + "' but got '" + result.stdout + "'");
+                console.log("not ok " + total + " - expected '" + testCase.expected + "' but got '" + stdout + "'");
                 console.log("---");
                 console.log("  expression: '" + testCase.expression + "'");
                 console.log("  program:    '" + testCase.context + "'");
                 console.log("  expected:   '" + testCase.expected + "'");
-                console.log("  actual:     '" + result.stdout + "'");
+                console.log("  actual:     '" + stdout + "'");
                 console.log("...");
                 failing++;
             }
@@ -64,24 +66,24 @@ function testSpecFile(filePath) {
                 console.log("---");
                 console.log("  expression:  '" + testCase.expression + "'");
                 console.log("  program:     '" + testCase.context + "'");
-                console.log("  actual:      '" + result.stdout + "'");
+                console.log("  actual:      '" + stdout + "'");
                 console.log("...");
                 failing++;
-            } else if (result.stderr.indexOf(testCase.expected) !== -1) {
+            } else if (stderr.indexOf(testCase.expected) !== -1) {
                 console.log("ok " + total + " - Error contains '" + testCase.expected + "'");
                 passing++;
             } else {
-                console.log("not ok " + total + " - expected '" + result.stderr + "' to contain '" + testCase.expected + "'");
+                console.log("not ok " + total + " - expected '" + stderr + "' to contain '" + testCase.expected + "'");
                 console.log("---");
                 console.log("  expression: '" + testCase.expression + "'");
                 console.log("  program:    '" + testCase.context + "'");
                 console.log("  expected:   '" + testCase.expected + "'");
-                console.log("  actual:     '" + result.stderr + "'");
+                console.log("  actual:     '" + stderr + "'");
                 console.log("...");
                 failing++;
             }
         } else {
-            console.log('# ' + parser.reuse_string_to_js(testCase.comment));
+            console.log('# ' + testCase.comment);
         }
 
         total++;
