@@ -2,10 +2,14 @@
 (pub typ source-file  (SourceFile module-reference string slice))
 (pub typ source-file-type SourceFileTypeReuse
                           SourceFileTypeStrings
+                          SourceFileTypeSpecification
                           SourceFileTypeTargetLanguage)
 
-(pub def source-file-of (module path iterator)
-     (SourceFile module path iterator))
+(pub def source-file-of (module path content)
+     (SourceFile module path content))
+
+(pub def source-file-generated (content)
+     (SourceFile ModuleSelf (data-reuse-file-ending) content))
 
 (pub def source-file-module (file)
      (match file
@@ -39,4 +43,14 @@
             False
      (match (string-equal? (last-n-chars 8 (source-file-path file)) (data-strings-file-ending))
             True   SourceFileTypeStrings
-            False  SourceFileTypeTargetLanguage)))
+            False
+     (match (string-equal? (last-n-chars 5 (source-file-path file)) (data-spec-file-ending))
+            True   SourceFileTypeSpecification
+            False  SourceFileTypeTargetLanguage))))
+
+(pub def source-file-type-equal? (a b)
+     (match a
+            SourceFileTypeReuse  (match b SourceFileTypeReuse True _ False)
+            SourceFileTypeStrings  (match b SourceFileTypeStrings True _ False)
+            SourceFileTypeSpecification  (match b SourceFileTypeSpecification True _ False)
+            SourceFileTypeTargetLanguage  (match b SourceFileTypeTargetLanguage True _ False)))

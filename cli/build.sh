@@ -5,6 +5,7 @@ script_path=$(dirname "$0")
 project_root=$script_path/..
 build_dir=$($project_root/dev-env/builddir.sh cli)
 
+$project_root/spec-parser/build.sh
 $project_root/parser/build.sh
 $project_root/argument-parser/build.sh
 $project_root/compiler-backend/build.sh
@@ -14,6 +15,7 @@ $project_root/formatter/build.sh
 build_compiler_module() {
     $project_root/reusec --language module\
                          --output $build_dir/$1.reuse\
+                         --module $($project_root/dev-env/builddir.sh spec-parser)/spec-parser.reuse\
                          --module $($project_root/dev-env/builddir.sh parser)/parser.reuse\
                          --module $($project_root/dev-env/builddir.sh argument-parser)/argument-parser.reuse\
                          --module $($project_root/dev-env/builddir.sh compiler-backend)/compiler-backend.reuse\
@@ -44,6 +46,7 @@ echo "))" >> $build_dir/backends.reuse
 # Build compiler
 $project_root/reusec --language ocaml\
                      --output $build_dir/ReuseCompiler.ml\
+                     --module $($project_root/dev-env/builddir.sh spec-parser)/spec-parser.reuse\
                      --module $($project_root/dev-env/builddir.sh parser)/parser.reuse\
                      --module $($project_root/dev-env/builddir.sh argument-parser)/argument-parser.reuse\
                      --module $($project_root/dev-env/builddir.sh formatter)/formatter.reuse\

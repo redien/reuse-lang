@@ -332,6 +332,7 @@
      (match (source-file-type file)
             SourceFileTypeStrings         (parse-strings-file file)
             SourceFileTypeReuse           (parse-reuse-file file)
+            SourceFileTypeSpecification   (parse-target-file file)
             SourceFileTypeTargetLanguage  (parse-target-file file)))
 
 (def parse-module (files)

@@ -25,3 +25,7 @@ usage7                       |       -f                 Format input files by wr
 usage8                       |Languages: 
 h                            |h
 f                            |f
+internal-generate-tests      |internal-generate-tests
+test-case-start              |(def test-case-
+test-case-middle             | () 
+test-case-end                |)

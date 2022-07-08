@@ -37,6 +37,7 @@ throw               |throw
 typeof              |typeof
 void                |void
 await               |await
+module              |module
 end-statement       |;
 equals              |=
 empty-object        |{}
@@ -54,6 +55,14 @@ colon               |:
 lambda-arrow        | => 
 single-quote        |'
 dot                 |.
+double-quote        |"
 exports             |exports
 module.exports.     |module.exports.
 };                  |};
+tap-version         |console.log('TAP version 13');
+line-comment-start  |console.log("# 
+line-comment-end    |");
+test-assertion      |var passed = 0; var failed = 0; var $assert = (expr, a, b) => { if (a !== b) { console.log('not ok ' + (passed + failed) + " - expected '" + expr + "' to equal '" + b + "' but got '" + a + "'"); failed++; } else { console.log("ok " + (passed + failed) + " - " + expr + " = " + b); passed++; }};
+test-case           |test_case_
+assertion-call      |$assert
+test-end            |console.log('1..' + (passed+failed)); console.log('# tests ' + (passed+failed)); console.log('# pass ' + passed); console.log('# fail ' + failed); if (failed !== 0) { process.exit(-1); }

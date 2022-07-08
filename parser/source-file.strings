@@ -1,2 +1,3 @@
 strings-file-ending       |.strings
 reuse-file-ending         |.reuse
+spec-file-ending          |.spec

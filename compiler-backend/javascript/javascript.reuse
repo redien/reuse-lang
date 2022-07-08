@@ -4,7 +4,7 @@
            data-function data-if data-in data-new data-true data-try data-with data-while data-break
            data-const data-continue data-catch data-debugger data-delete data-export data-extends data-enum
            data-finally data-instanceof data-null data-return data-super data-switch data-this data-throw
-           data-typeof data-void data-await))
+           data-typeof data-void data-await data-module))
 
 (def escape-identifier (identifier)
      (SourceStringIdentifier identifier IdentifierTransformationNone))
@@ -301,10 +301,38 @@
             (pair-cons (list-map (pair-cons IdentifierTransformationNone) (public-identifiers definitions))))
         definitions))
 
+(def test-case-call (test-number)
+     (source-string-string (string-concat (string-concat (data-test-case) (string-from-int32 test-number)) (wrap-in-brackets (string-empty)))))
+
+(def generate-assertion (test-number requirement)
+     (match requirement
+        (ExpectSuccess context expression expected)
+            (source-string-join (string-of-char 32) (list
+                (source-string-string (data-assertion-call))
+                (source-string-string (data-open-bracket))
+                (source-string-string (string-concat (data-double-quote) (string-concat expression (data-double-quote))))
+                (source-string-string (data-comma))
+                (test-case-call test-number)
+                (source-string-string (data-comma))
+                (source-string-string expected)
+                (source-string-string (data-close-bracket))))
+        (Comment comment)
+            (source-string-string (string-concat (data-line-comment-start) (string-concat comment (data-line-comment-end))))
+        _
+            (source-string-empty)))
+
+(def generate-tests (numbered-requirements)
+     (source-string-join (string-repeat (string-of-char 10) 2)
+         (Cons (source-string-string (data-test-assertion))
+         (Cons (source-string-string (data-tap-version))
+         (list-concat (list-map (pair-map generate-assertion) numbered-requirements)
+                      (list (source-string-string (data-test-end))))))))
+
 (pub def compiler-backend-javascript ()
      (Backend (data-javascript-language)
               (list (data-preamble-filename))
               (list (data-pervasives-filename))
               generate-source
+              generate-tests
               (reserved-identifiers)
               (. local-transforms validate-reserved-identifiers)))

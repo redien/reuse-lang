@@ -7,10 +7,14 @@
             (pair-cons (list-empty)))
         definitions))
 
+(def generate-tests (definitions)
+     (source-string-empty))
+
 (pub def compiler-backend-module ()
      (Backend (data-module-language)
               Empty
               Empty
               generate-source
+              generate-tests
               Empty
               (result-map id)))

@@ -297,10 +297,14 @@
             (pair-cons (public-identifiers-with-transformations definitions)))
          definitions))
 
+(def generate-tests (definitions)
+     (source-string-empty))
+
 (pub def compiler-backend-haskell ()
      (Backend (data-haskell-language)
               (list (data-preamble-filename))
               (list (data-pervasives-filename))
               generate-source
+              generate-tests
               (reserved-identifiers)
               (. local-transforms validate-reserved-identifiers)))

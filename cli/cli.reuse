@@ -80,31 +80,78 @@
                   (CliError error-message (fn ()
                   (CliExit 1)))))))
 
-(def cli-main (data-path argv)
-     (match (parse-arguments argv)
-          (CliArguments Empty Empty)
-               (CliError (usage (compiler-backends)) (fn ()
-               (CliExit 1)))
-          (CliErrorMissingValue key)
-               (CliError key (fn ()
-               (CliExit 1)))
-          (CliArguments argument-list input-files)
+(def test-case (test-number expression context)
+     (string-join (string-empty) (list
+        context
+        (data-test-case-start)
+        (string-from-int32 test-number)
+        (data-test-case-middle)
+        expression
+        (data-test-case-end)
+     )))
+
+(def test-case-from-requirement (test-number requirement)
+     (match requirement
+        (ExpectSuccess context expression expected)
+            (test-case test-number expression context)
+        _
+            (string-empty)))
+
+(def test-cases-from-requirements (requirements)
+     (list-foldr (. string-concat (pair-map test-case-from-requirement)) (string-empty) requirements))
+
+(def compile-requirements (backend requirements)
+     ((pipe test-cases-from-requirements
+            (. source-file-generated string-to-slice)
+            list-from
+            (parse-source-files (with-local-transform-keywords (intrinsic-identifiers)))
+            (compiler-backend-transform-definitions backend)
+            (result-map (. pair-right (compiler-backend-generate-source backend (string-empty)))))
+       requirements))
+
+(def list-with-indexes (lst)
+     (list-zip (list-from-range 0 (list-size lst)) lst))
+
+(def parse-specification-files (file-entries)
+     ((pipe (list-filter (. (source-file-type-equal? SourceFileTypeSpecification) source-file-type))
+            (list-flatmap (. parse-spec source-file-content))
+            list-with-indexes)
+       file-entries))
+
+(def test-preamble (file-entries)
+     ((pipe (list-filter (pipe source-file-type (source-file-type-equal? SourceFileTypeSpecification) not))
+            (list-map (. string-from-slice source-file-content))
+            (string-join (string-of-char 10))
+            source-string-string)
+       file-entries))
+
+(def generate-tests-from-input-files (input-files data-path argument-list)
      (match (dictionary-of argument-list)
             arguments
-     (match (dictionary-has? (data-h) arguments)
-            True
-                  (CliError (usage (compiler-backends)) (fn ()
+     (match (dictionary-get (data-output-key) arguments)
+            None
+                  (CliError (data-no-output-path) (fn ()
                   (CliExit 1)))
-            False
-     (match (list-is-empty? input-files)
-            True
-                  (CliError (data-no-input-files) (fn ()
-                  (CliExit 1)))
-            False
-     (match (dictionary-has? (data-f) arguments)
-            True
-                  (format-input-files input-files)
-            False
+            (Some output-path)
+     (match (find-backend arguments)  backend
+     (CliReadFiles (list-concat (preamble-files backend data-path)
+                                (list-map (pair-cons ModuleSelf) input-files)) (fn (file-entries)
+     (match (parse-specification-files file-entries)
+            numbered-requirements
+     (match (compile-requirements backend numbered-requirements)
+            (Result test-cases)
+                   (match (compiler-backend-generate-tests backend numbered-requirements)
+                            assertions
+                                (CliRenderSource (Pair Empty (source-string-join (string-empty) (list (test-preamble file-entries) test-cases assertions))) (compiler-backend-reserved-identifiers backend) (fn (source)
+                                (CliWriteFiles (list (Pair output-path source)) (fn ()
+                                (CliExit 0))))))
+            (Error error)
+                  (CliError (error-to-string (list-empty) error) (fn ()
+                  (CliExit 1)))))))))))
+
+(def compile-input-files (input-files data-path argument-list)
+     (match (dictionary-of argument-list)
+            arguments
      (match (find-backend arguments)  backend
      (CliTime (fn (start-read-files)
      (CliReadFiles (list-concat (preamble-files backend data-path)
@@ -146,4 +193,35 @@
                               (CliExit 1)))))))))))))))))
                None
                     (CliError (data-no-output-path) (fn ()
-                    (CliExit 1)))))))))))))))))
+                    (CliExit 1)))))))))))))
+
+(def cli-main (data-path argv)
+     (match (parse-arguments argv)
+          (CliArguments Empty Empty)
+               (CliError (usage (compiler-backends)) (fn ()
+               (CliExit 1)))
+          (CliErrorMissingValue key)
+               (CliError key (fn ()
+               (CliExit 1)))
+          (CliArguments argument-list input-files)
+     (match (dictionary-of argument-list)
+            arguments
+     (match (dictionary-has? (data-h) arguments)
+            True
+                  (CliError (usage (compiler-backends)) (fn ()
+                  (CliExit 1)))
+            False
+     (match (list-is-empty? input-files)
+            True
+                  (CliError (data-no-input-files) (fn ()
+                  (CliExit 1)))
+            False
+     (match (dictionary-has? (data-f) arguments)
+            True
+                  (format-input-files input-files)
+            False
+     (match (dictionary-has? (data-internal-generate-tests) arguments)
+            True
+                  (generate-tests-from-input-files input-files data-path argument-list)
+            False
+                  (compile-input-files input-files data-path argument-list))))))))

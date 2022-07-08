@@ -6,10 +6,12 @@ project_root=$script_path/..
 build_dir=$($project_root/dev-env/builddir.sh compiler-backend)
 
 $project_root/parser/build.sh
+$project_root/spec-parser/build.sh
 
 # Build compiler
 $project_root/reusec --language module\
                      --output $build_dir/compiler-backend.reuse\
+                     --module $($project_root/dev-env/builddir.sh spec-parser)/spec-parser.reuse\
                      --module $($project_root/dev-env/builddir.sh parser)/parser.reuse\
                      $project_root/compiler-backend/source-string.reuse\
                      $project_root/compiler-backend/common.strings\
