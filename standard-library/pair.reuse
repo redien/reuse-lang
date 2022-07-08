@@ -4,6 +4,9 @@
 (pub def pair-cons (a b)
      (Pair a b))
 
+(pub def pair-dup (a)
+     (Pair a a))
+
 (pub def pair-left (pair)
      (match pair
             (Pair x _)  x))
