@@ -5,7 +5,7 @@ project_root=$script_path/..
 
 run() {
     case $1 in
-        test)                           run test-string-gen && run test-sexp-parser && run test-parser && run test-compilers && run test-interpreter && run test-standard-library;;
+        test)                           run test-string-gen && run test-sexp-parser && run test-parser && run test-formatter && run test-compilers && run test-interpreter && run test-standard-library;;
         test-interpreter)               >&2 echo "Testing interpreter" && $project_root/interpreter/build.sh && $project_root/dev-env/spec-runner/run.js specification/minimal $project_root/interpreter/eval.sh | $project_root/dev-env/tap-format/tap-format.sh && $project_root/dev-env/spec-runner/run.js specification/extended $project_root/interpreter/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
         test-compilers)                 run test-ocaml-compiler && run test-haskell-compiler && run test-javascript-compiler && run test-module-compiler ;;
         test-module-compiler)           >&2 echo "Testing module backend" && $project_root/interpreter/build.sh && $project_root/cli/build.sh && IMPL=module SOURCE=executable.reuse run test-minimal && IMPL=module SOURCE=executable.reuse run test-extended ;;

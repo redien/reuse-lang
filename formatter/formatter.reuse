@@ -1,20 +1,16 @@
 
 (def stringify-error (error)
      (match error
-            (MalformedDefinitionError            _)        (data-MalformedDefinitionError            )
-            (MalformedTypeDefinitionError        _)        (data-MalformedTypeDefinitionError        )
-            (MalformedFunctionDefinitionError    _ __)     (data-MalformedFunctionDefinitionError    )
-            (MalformedFunctionNameError          _)        (data-MalformedFunctionNameError          )
-            (MalformedExpressionError            _)        (data-MalformedExpressionError            )
-            (MalformedMatchExpressionError       _)        (data-MalformedMatchExpressionError       )
-            (MalformedSymbolError                _)        (data-MalformedSymbolError                )
-            (MalformedConstructorError           _)        (data-MalformedConstructorError           )
-            (MalformedTypeError                  _)        (data-MalformedTypeError                  )
-            (ErrorNotDefined                     _ __ ___) (data-ErrorNotDefined                     )
-            (ErrorAlreadyDefined                 _)        (data-ErrorAlreadyDefined                 )
-            (ErrorReservedIdentifier             _ __ ___) (data-ErrorReservedIdentifier             )
-             MalformedSexpTooFewClosingBrackets            (data-MalformedSexpTooFewClosingBrackets  )
-             MalformedSexpTooManyClosingBrackets           (data-MalformedSexpTooManyClosingBrackets )))
+            ParseErrorTooFewClosingBrackets   (data-ParseErrorTooFewClosingBrackets)
+            ParseErrorTooManyClosingBrackets  (data-ParseErrorTooManyClosingBrackets)))
+
+(def language-identifiers ()
+     (list (Pair (data-def) (Pair -1 (data-def)))
+           (Pair (data-typ) (Pair -2 (data-typ)))
+           (Pair (data-fn) (Pair -3 (data-fn)))
+           (Pair (data-match) (Pair -4 (data-match)))
+           (Pair (data-exists) (Pair -5 (data-exists)))
+           (Pair (data-pub) (Pair -6 (data-pub)))))
 
 (def space ()
      (string-of-char 32))
@@ -40,14 +36,10 @@
 
 (def format-pattern (pattern)
      (match pattern
-            (IntegerPattern value _)
-               (string-from-int32 value)
-            (Capture identifier)
-               (identifier-name identifier)
-            (ConstructorPattern identifier patterns _)
-               (list-with-space (Cons
-                    (identifier-name identifier)
-                    (list-map format-pattern patterns)))))
+            (List patterns _)
+               (list-with-space (list-map format-pattern patterns))
+            x
+               (stringify-sexp x)))
 
 (def format-match-rule (format-expression depth rule)
      (match rule
@@ -62,67 +54,57 @@
 
 (def format-expression (depth expression)
      (match expression
-            (IntegerConstant integer _)
-                (string-from-int32 integer)
-            (Variable identifier)
-                (identifier-name identifier)
-            (Lambda arguments expression _)
+            (List (Cons (Symbol -3 _ __) (Cons arguments (Cons expression Empty))) ____)
                 (list-without-space (list
                     (data-fn)
                     (space)
-                    (list-with-space (list-map identifier-name arguments))
+                    (stringify-sexp arguments)
                     (indent (+ depth 4))
                     (format-expression (+ depth 4) expression)))
-            (Match expression rules range)
+            (List (Cons (Symbol -4 _ __) (Cons expression rules)) range)
                 (list-without-space (list
                     (data-match)
                     (space)
                     (format-expression depth expression)
                     (indent (+ depth 7))
-                    (format-match-rules format-expression (+ depth 7) rules)))
-            (Constructor identifier expressions range)
-                (match expressions
-                       Empty
-                         (identifier-name identifier)
-                       _
-                         (list-with-space (Cons
-                              (identifier-name identifier)
-                              (list-map (format-expression depth) expressions))))
-            (FunctionApplication expressions range)
-                (list-with-space (list-map (format-expression depth) expressions))))
+                    (format-match-rules format-expression (+ depth 7) (list-pairs rules))))
+            (List expressions range)
+                (list-with-space (list-map (format-expression depth) expressions))
+            x
+                (stringify-sexp x)))
 
 (def format-type (type)
      (match type
-          (SimpleType identifier)
-               (identifier-name identifier)
-          (ComplexType identifier parameters _)
-               (list-with-space (Cons (identifier-name identifier) (list-map format-type parameters)))
-          (FunctionType argument-types return-type _)
+          (List (Cons (Symbol -3 _ __) (Cons (List argument-types ___) (Cons return-type Empty))) ____)
                (list-with-space (list
                     (data-fn)
                     (list-with-space (list-map format-type argument-types))
-                    (format-type return-type)))))
+                    (format-type return-type)))
+          (List (Cons identifier parameters) _)
+               (list-with-space (Cons (stringify-sexp identifier) (list-map format-type parameters)))
+          x
+               (stringify-sexp x)))
 
 (def format-type-constructor (constructor)
      (match constructor
-            (SimpleConstructor identifier)
-               (identifier-name identifier)
-            (ComplexConstructor identifier types _)
-               (list-with-space (Cons (identifier-name identifier) (list-map format-type types)))))
+            (List (Cons identifier types) _)
+               (list-with-space (Cons (stringify-sexp identifier) (list-map format-type types)))
+            x
+               (stringify-sexp x)))
 
 (def format-type-parameter (parameter)
      (match parameter
-          (UniversalParameter identifier)
-               (identifier-name identifier)
-          (ExistentialParameter identifier)
-               (list-with-space (list (data-exists) (identifier-name identifier)))))
+          (List (Cons (Symbol -5 _ __) (Cons identifier Empty)) ___)
+               (list-with-space (list (data-exists) (stringify-sexp identifier)))
+          _
+               (stringify-sexp parameter)))
 
 (def format-type-definition-name (name parameters)
      (match parameters
           Empty
-               (identifier-name name)
+               (stringify-sexp name)
           _
-               (list-with-space (Cons (identifier-name name) (list-map format-type-parameter parameters)))))
+               (list-with-space (Cons (stringify-sexp name) (list-map format-type-parameter parameters)))))
 
 (def format-type-definition-constructors (constructors)
      (match constructors
@@ -131,25 +113,41 @@
           _
                (string-concat (indent 5) (string-join (indent 5) (list-map format-type-constructor constructors)))))
 
+(def format-type-definition (public? name parameters constructors)
+     (list-without-space (add-modifiers public? (list
+          (data-typ)
+          (space)
+          (format-type-definition-name name parameters)
+          (format-type-definition-constructors constructors)))))
+
+(def format-function-definition (public? name arguments expression)
+     (list-without-space (add-modifiers public? (list
+          (data-def)
+          (space)
+          (stringify-sexp name)
+          (space)
+          (wrap-in-brackets (string-join (space) (list-map stringify-sexp arguments)))
+          (indent 5)
+          (format-expression 5 expression)))))
+
 (def format-definition (definition)
      (match definition
-            (TypeDefinition name public? parameters constructors _)
-               (list-without-space (add-modifiers public? (list
-                    (data-typ)
-                    (space)
-                    (format-type-definition-name name parameters)
-                    (format-type-definition-constructors constructors))))
-            (FunctionDefinition name public? arguments expression range)
-               (list-without-space (add-modifiers public? (list
-                    (data-def)
-                    (space)
-                    (identifier-name name)
-                    (space)
-                    (wrap-in-brackets (string-join (space) (list-map identifier-name arguments)))
-                    (indent 5)
-                    (format-expression 5 expression))))
-            (TargetDefinition _ data)
-                (string-from-slice data)))
+            (List (Cons (Symbol -6 _ __) (Cons (Symbol -2 _ __) (Cons (List (Cons name parameters) ___) constructors))) range)
+               (format-type-definition True name parameters constructors)
+            (List (Cons (Symbol -6 _ __)(Cons (Symbol -2 _ __) (Cons name constructors))) range)
+               (format-type-definition True name Empty constructors)
+            (List (Cons (Symbol -2 _ __) (Cons (List (Cons name parameters) ___) constructors)) range)
+               (format-type-definition False name parameters constructors)
+            (List (Cons (Symbol -2 _ __) (Cons name constructors)) range)
+               (format-type-definition False name Empty constructors)
+            
+            (List (Cons (Symbol -6 _ __) (Cons (Symbol -1 _ __) (Cons name (Cons (List arguments ___) (Cons expression Empty))))) range)
+               (format-function-definition True name arguments expression)
+            (List (Cons (Symbol -1 _ __) (Cons name (Cons (List arguments ___) (Cons expression Empty)))) range)
+               (format-function-definition False name arguments expression)
+
+            _
+               (string-empty)))
 
 (def format-file (definitions)
      (match (list-is-empty? definitions)
@@ -159,26 +157,17 @@
                ((pipe (list-map format-definition)
                       (string-join (string-repeat (newline) 2))
                       ((flip string-concat) (newline))
-                      (string-concat (string-repeat (newline) 2)))
+                      (string-concat (newline)))
                      definitions)))
 
-(def definition-file-path (definition)
-     (source-reference-file-path (definition-source-reference definition)))
+(def format-source-file (file)
+     ((pipe source-file-content
+            (parse-sexps (Pair 0 (dictionary-of (language-identifiers))))
+            (result-bimap (pipe pair-right format-file string-to-slice) stringify-error))
+          file))
 
-(def definitions-partition-by-file-name (definitions)
-     (list-partition-by (fn (a b) (string-equal? (definition-file-path a) (definition-file-path b)))))
-
-(def first-file-path (definitions)
-     (maybe-map definition-file-path (list-first definitions)))
-
-(def format-definitions (definitions)
-     (match (first-file-path definitions)
-            (Some file-path)
-               (list (Pair file-path (string-to-slice (format-file definitions))))
-            None
-               Empty))
+(def result-from-pair (pair)
+     (result-map (pair-cons (pair-left pair)) (pair-right pair)))
 
 (pub def format-source-files (files)
-     (result-bimap format-definitions
-                   stringify-error
-                   (parse-source-files (list-empty) files)))
+     (result-concat (list-map (pipe pair-dup (pair-bimap source-file-path format-source-file) result-from-pair) files)))
