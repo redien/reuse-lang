@@ -7,5 +7,6 @@ def                                 |def
 typ                                 |typ
 exists                              |exists
 match                               |match
+list                                |list
 open-bracket                        |(
 close-bracket                       |)
