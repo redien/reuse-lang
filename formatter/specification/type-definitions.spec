@@ -67,3 +67,17 @@ Complex types should be formatted on one line
 =      (B (a b))
 =      C)
 = 
+
+Type definitions with public modifier
+> (pub typ a A)
+= 
+= (pub typ a A)
+= 
+
+Type definitions with multiple constructors should have the constructors on individual lines
+> (pub typ ab A B)
+= 
+= (pub typ ab
+=      A
+=      B)
+= 

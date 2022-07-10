@@ -30,7 +30,7 @@
 (def add-modifiers (public? rest)
      (match public?
           True
-               (Cons (data-pub) rest)
+               (Cons (data-pub) (Cons (space) rest))
           False
                rest))
 
