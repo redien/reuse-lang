@@ -54,19 +54,18 @@
 (def format-match-rules (format-expression depth rules)
      (string-join (indent depth) (list-map (format-match-rule format-expression depth) rules)))
 
-(def expression-longer-than? (size expression)
-      (> (string-size (stringify-sexp expression)) size))
-
 (def format-list-expression (format-expression depth expressions)
-     (match (<= (list-size expressions) 2)
-            False
-               (match (list-any? (expression-longer-than? 19) expressions)
-                      True
-                         (string-join (indent (+ depth 3)) (list-map (format-expression (+ depth 3)) expressions))
+     (match (string-join (space) (list-map (format-expression depth) expressions))
+            stringified
+               (match (<= (list-size expressions) 2)
                       False
-                         (stringify-sexps expressions))
-            True
-               (stringify-sexps expressions)))
+                         (match (>= (string-size stringified) 58)
+                                True
+                                   (string-join (indent (+ depth 3)) (list-map (format-expression (+ depth 3)) expressions))
+                                False
+                                   stringified)
+                      True
+                         stringified)))
 
 (def format-expression (depth expression)
      (match expression
