@@ -121,14 +121,18 @@
           (format-type-definition-constructors constructors)))))
 
 (def format-function-definition (public? name arguments expression)
-     (list-without-space (add-modifiers public? (list
-          (data-def)
-          (space)
-          (stringify-sexp name)
-          (space)
-          (wrap-in-brackets (string-join (space) (list-map stringify-sexp arguments)))
-          (indent 5)
-          (format-expression 5 expression)))))
+     (list-without-space (add-modifiers public? (list-flatten (list
+          (list (data-def)
+                (space)
+                (stringify-sexp name)
+                (space)
+                (wrap-in-brackets (string-join (space) (list-map stringify-sexp arguments))))
+          (match expression
+                 (Integer _ __)
+                    (list (space))
+                 _
+                    (list (indent 5)))
+          (list (format-expression 5 expression)))))))
 
 (def format-definition (definition)
      (match definition

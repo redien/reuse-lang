@@ -26,8 +26,7 @@ Should format constructors
 Function application should just be kept on one line
 > (def g (x y) 1) (def f () (g 2 3))
 = 
-= (def g (x y)
-=      1)
+= (def g (x y) 1)
 = 
 = (def f ()
 =      (g 2 3))
