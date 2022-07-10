@@ -8,5 +8,6 @@ typ                                 |typ
 exists                              |exists
 match                               |match
 list                                |list
+pipe                                |pipe
 open-bracket                        |(
 close-bracket                       |)

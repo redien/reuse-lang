@@ -11,7 +11,8 @@
            (Pair (data-match) (Pair -4 (data-match)))
            (Pair (data-exists) (Pair -5 (data-exists)))
            (Pair (data-pub) (Pair -6 (data-pub)))
-           (Pair (data-list) (Pair -7 (data-list)))))
+           (Pair (data-list) (Pair -7 (data-list)))
+           (Pair (data-pipe) (Pair -8 (data-pipe)))))
 
 (def space ()
      (string-of-char 32))
@@ -56,21 +57,21 @@
 (def expression-longer-than? (size expression)
       (> (string-size (stringify-sexp expression)) size))
 
-(def format-list-expression (format-expression depth expressions)
+(def format-list-expression (format-expression form depth expressions)
      (match (list-any? (expression-longer-than? 19) expressions)
             True
-               (list-without-space (list (data-list)
+               (list-without-space (list form
                                          (indent (+ depth 3))
                                          (string-join (indent (+ depth 3)) (list-map (format-expression (+ depth 3)) expressions))))
             False
-               (list-with-space (list (data-list) (stringify-sexps expressions)))))
+               (list-with-space (list form (stringify-sexps expressions)))))
 
 (def format-expression (depth expression)
      (match expression
-            (List (Cons (Symbol -7 _ __) (Cons ___ Empty)) ____)
-                (stringify-sexp expression)
-            (List (Cons (Symbol -7 _ __) expressions) ____)
-                (format-list-expression format-expression depth expressions)
+            (List (Cons (Symbol -7 _ __) (Cons first (Cons second rest))) ____)
+                (format-list-expression format-expression (data-list) depth (Cons first (Cons second rest)))
+            (List (Cons (Symbol -8 _ __) (Cons first (Cons second rest))) ____)
+                (format-list-expression format-expression (data-pipe) depth (Cons first (Cons second rest)))
             (List (Cons (Symbol -3 _ __) (Cons arguments (Cons expression Empty))) ____)
                 (list-without-space (list
                     (data-fn)
