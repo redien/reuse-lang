@@ -2723,7 +2723,7 @@ let rec format_list_expression format_expression3 depth5 expressions23 =
          | stringified -> 
             (match (x6 (list_size expressions23) (2l)) with
                  | False -> 
-                    (match (x7 (string_size stringified) (58l)) with
+                    (match (x7 (string_size stringified) (78l)) with
                          | True -> 
                             (string_join (indent2 (Int32.add depth5 (3l))) (list_map (format_expression3 (Int32.add depth5 (3l))) expressions23))
                          | False -> 

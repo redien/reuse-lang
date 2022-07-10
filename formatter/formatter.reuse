@@ -59,7 +59,7 @@
             stringified
                (match (<= (list-size expressions) 2)
                       False
-                         (match (>= (string-size stringified) 58)
+                         (match (>= (string-size stringified) 78)
                                 True
                                    (string-join (indent (+ depth 3)) (list-map (format-expression (+ depth 3)) expressions))
                                 False

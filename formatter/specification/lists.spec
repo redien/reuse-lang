@@ -6,33 +6,33 @@ Lists of a single item should be formatted on one line
 =      (list 1))
 = 
 
-> (def foo () (list abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ1234567890))
+> (def foo () (list abcdefghijklmnopqrstabcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ1234567890))
 = 
 = (def foo ()
-=      (list abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ1234567890))
+=      (list abcdefghijklmnopqrstabcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ1234567890))
 = 
 
 Should format sub-expressions independently
-> (def foo () (list (list 1 abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ1234567890)))
+> (def foo () (list (list 1 abcdefghijklmnopqrstabcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ1234567890)))
 = 
 = (def foo ()
 =      (list (list
 =         1
-=         abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ1234567890)))
+=         abcdefghijklmnopqrstabcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ1234567890)))
 = 
 
 Lists should be formatted on a single line if it fits within 60 characters
-> (def foo () (list abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ 1))
+> (def foo () (list abcdefghijklmnopqrstabcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ 1))
 = 
 = (def foo ()
-=      (list abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ 1))
+=      (list abcdefghijklmnopqrstabcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ 1))
 = 
 
 Lists should be formatted with an item per line if it's 60 or more characters
-> (def foo () (list abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ1 1))
+> (def foo () (list abcdefghijklmnopqrstabcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ1 1))
 = 
 = (def foo ()
 =      (list
-=         abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ1
+=         abcdefghijklmnopqrstabcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ1
 =         1))
 = 
