@@ -48,8 +48,8 @@
             (Pair pattern expression)
                (string-join (string-empty) (list
                     (format-pattern pattern)
-                    (indent (+ depth 3))
-                    (format-expression (+ depth 3) expression)))))
+                    (indent (+ depth 4))
+                    (format-expression (+ depth 4) expression)))))
 
 (def format-match-rules (format-expression depth rules)
      (string-join (indent depth) (list-map (format-match-rule format-expression depth) rules)))
@@ -61,7 +61,7 @@
                       False
                          (match (>= (string-size stringified) 78)
                                 True
-                                   (string-join (indent (+ depth 3)) (list-map (format-expression (+ depth 3)) expressions))
+                                   (string-join (indent (+ depth 4)) (list-map (format-expression (+ depth 4)) expressions))
                                 False
                                    stringified)
                       True

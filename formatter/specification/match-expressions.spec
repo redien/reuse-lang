@@ -5,7 +5,7 @@ Match expressions should have one line for patterns and one for expression, both
 = (def f (x)
 =      (match x
 =             a
-=                1))
+=                 1))
 = 
 
 > (def f (x) (match x 1 x 2 0))
@@ -13,9 +13,9 @@ Match expressions should have one line for patterns and one for expression, both
 = (def f (x)
 =      (match x
 =             1
-=                x
+=                 x
 =             2
-=                0))
+=                 0))
 = 
 
 > (typ (a x) (A x x)) (def f (x) (match x (A y z) z))
@@ -25,5 +25,16 @@ Match expressions should have one line for patterns and one for expression, both
 = (def f (x)
 =      (match x
 =             (A y z)
-=                z))
+=                 z))
+= 
+
+Nested match expressions should have proper indentation
+> (def f (x) (match x a (match x a 1)))
+= 
+= (def f (x)
+=      (match x
+=             a
+=                 (match x
+=                        a
+=                            1)))
 = 

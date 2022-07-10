@@ -2713,7 +2713,7 @@ let rec format_pattern pattern10 =
 let rec format_match_rule format_expression depth3 rule2 = 
     (match rule2 with
          | (Pair (pattern11, expression46)) -> 
-            (string_join (string_empty ()) (Cons ((format_pattern pattern11), (Cons ((indent2 (Int32.add depth3 (3l))), (Cons ((format_expression (Int32.add depth3 (3l)) expression46), Empty))))))));;
+            (string_join (string_empty ()) (Cons ((format_pattern pattern11), (Cons ((indent2 (Int32.add depth3 (4l))), (Cons ((format_expression (Int32.add depth3 (4l)) expression46), Empty))))))));;
 
 let rec format_match_rules format_expression2 depth4 rules5 = 
     (string_join (indent2 depth4) (list_map (format_match_rule format_expression2 depth4) rules5));;
@@ -2725,7 +2725,7 @@ let rec format_list_expression format_expression3 depth5 expressions23 =
                  | False -> 
                     (match (x7 (string_size stringified) (78l)) with
                          | True -> 
-                            (string_join (indent2 (Int32.add depth5 (3l))) (list_map (format_expression3 (Int32.add depth5 (3l))) expressions23))
+                            (string_join (indent2 (Int32.add depth5 (4l))) (list_map (format_expression3 (Int32.add depth5 (4l))) expressions23))
                          | False -> 
                             stringified)
                  | True -> 

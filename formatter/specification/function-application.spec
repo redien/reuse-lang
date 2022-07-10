@@ -17,8 +17,18 @@ Should format sub-expressions independently
 = 
 = (def foo ()
 =      (bar (bar
-=         1
-=         abcdefghijklmnopqrstabcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ1234567890)))
+=          1
+=          abcdefghijklmnopqrstabcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ1234567890)))
+= 
+
+> (def foo () (bar 1 (bar 1 abcdefghijklmnopqrstabcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ1234567890)))
+= 
+= (def foo ()
+=      (bar
+=          1
+=          (bar
+=              1
+=              abcdefghijklmnopqrstabcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ1234567890)))
 = 
 
 Function application of a function with a single argument should be formatted on one line
@@ -46,14 +56,14 @@ Function application should be formatted with an argument per line if it's 80 or
 = 
 = (def foo ()
 =      (bar
-=         abcdefghijklmnopqrstabcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ12
-=         1))
+=          abcdefghijklmnopqrstabcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ12
+=          1))
 = 
 
 > (def foo () (abcdefghijklmnopqrstabcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ12 bar 1))
 = 
 = (def foo ()
 =      (abcdefghijklmnopqrstabcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ12
-=         bar
-=         1))
+=          bar
+=          1))
 = 
