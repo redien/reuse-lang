@@ -57,21 +57,19 @@
 (def expression-longer-than? (size expression)
       (> (string-size (stringify-sexp expression)) size))
 
-(def format-list-expression (format-expression form depth expressions)
-     (match (list-any? (expression-longer-than? 19) expressions)
-            True
-               (list-without-space (list form
-                                         (indent (+ depth 3))
-                                         (string-join (indent (+ depth 3)) (list-map (format-expression (+ depth 3)) expressions))))
+(def format-list-expression (format-expression depth expressions)
+     (match (<= (list-size expressions) 2)
             False
-               (list-with-space (list form (stringify-sexps expressions)))))
+               (match (list-any? (expression-longer-than? 19) expressions)
+                      True
+                         (string-join (indent (+ depth 3)) (list-map (format-expression (+ depth 3)) expressions))
+                      False
+                         (stringify-sexps expressions))
+            True
+               (stringify-sexps expressions)))
 
 (def format-expression (depth expression)
      (match expression
-            (List (Cons (Symbol -7 _ __) (Cons first (Cons second rest))) ____)
-                (format-list-expression format-expression (data-list) depth (Cons first (Cons second rest)))
-            (List (Cons (Symbol -8 _ __) (Cons first (Cons second rest))) ____)
-                (format-list-expression format-expression (data-pipe) depth (Cons first (Cons second rest)))
             (List (Cons (Symbol -3 _ __) (Cons arguments (Cons expression Empty))) ____)
                 (list-without-space (list
                     (data-fn)
@@ -87,7 +85,7 @@
                     (indent (+ depth 7))
                     (format-match-rules format-expression (+ depth 7) (list-pairs rules))))
             (List expressions range)
-                (list-with-space (list-map (format-expression depth) expressions))
+                (wrap-in-brackets (format-list-expression format-expression depth expressions))
             x
                 (stringify-sexp x)))
 
