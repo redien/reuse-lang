@@ -34,19 +34,28 @@
 (def transform-special-forms (token transformer definitions)
      (result-concat (list-map (transform-special-form token transformer) definitions)))
 
+(def generated-x-variable (source-reference range)
+     (Identifier (identifier-sparkle-x) (data-sparkle-x) source-reference range (Some -1)))
+
 (def transform-pipe (source-reference expressions range)
-     (Lambda (list (Identifier (identifier-sparkle-x) (data-sparkle-x) source-reference range (Some -1)))
-             (list-foldl (fn (expression composed)
-                             (FunctionApplication (list expression composed) range))
-                         (Variable (Identifier (identifier-sparkle-x) (data-sparkle-x) source-reference range (Some -1)))
-                         expressions)
-             range))
+     (match expressions
+            (Cons value expressions)
+                    (list-foldl
+                        (fn (expression composed)
+                            (FunctionApplication (list expression composed) range))
+                        value
+                        expressions)
+            Empty
+                (Lambda
+                    (list (generated-x-variable source-reference range))
+                    (Variable (generated-x-variable source-reference range))
+                    range)))
 
 (def transform-dot (source-reference expressions range)
-     (Lambda (list (Identifier (identifier-sparkle-x) (data-sparkle-x) source-reference range (Some -1)))
+     (Lambda (list (generated-x-variable source-reference range))
              (list-foldr (fn (expression composed)
                              (FunctionApplication (list expression composed) range))
-                         (Variable (Identifier (identifier-sparkle-x) (data-sparkle-x) source-reference range (Some -1)))
+                         (Variable (generated-x-variable source-reference range))
                          expressions)
              range))
 
