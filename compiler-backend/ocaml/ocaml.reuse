@@ -1,25 +1,32 @@
 
 (def reserved-identifiers ()
-     (list data-assert data-asr data-begin data-constraint data-do data-done data-downto data-type data-if
-           data-then data-else data-with data-of data-end data-in data-fun data-let data-open data-and
-           data-or data-as data-class data-exception data-external data-false data-true data-for data-function
-           data-functor data-if data-include data-inherit data-initializer data-land data-lazy data-lor data-lsl
-           data-lsr data-lxor data-method data-mod data-module data-mutable data-new data-nonrec data-object
-           data-private data-rec data-sig data-struct data-try data-val data-virtual data-when data-while
-           data-parser data-value data-to data-slice))
+     (list-flatten (list
+         (list data-assert data-asr data-begin data-constraint data-do data-done)
+         (list data-downto data-type data-if data-then data-else data-with data-of)
+         (list data-end data-in data-fun data-let data-open data-and data-or data-as)
+         (list data-class data-exception data-external data-false data-true data-for)
+         (list data-function data-functor data-if data-include data-inherit)
+         (list data-initializer data-land data-lazy data-lor data-lsl data-lsr)
+         (list data-lxor data-method data-mod data-module data-mutable data-new)
+         (list data-nonrec data-object data-private data-rec data-sig data-struct)
+         (list data-try data-val data-virtual data-when data-while data-parser)
+         (list data-value data-to data-slice))))
 
 (def operator-translation-map ()
      (dictionary-of (list
-        (Pair (data-+) (SourceString (data-int32-plus)))
-        (Pair (data--) (SourceString (data-int32-minus)))
-        (Pair (data-*) (SourceString (data-int32-multiply)))
-        (Pair (data-/) (SourceString (data-int32-divide)))
-        (Pair (data-%) (SourceString (data-int32-modulus)))
-        (Pair (data-&) (SourceString (data-int32-and))))))
+         (Pair (data-+) (SourceString (data-int32-plus)))
+         (Pair (data--) (SourceString (data-int32-minus)))
+         (Pair (data-*) (SourceString (data-int32-multiply)))
+         (Pair (data-/) (SourceString (data-int32-divide)))
+         (Pair (data-%) (SourceString (data-int32-modulus)))
+         (Pair (data-&) (SourceString (data-int32-and))))))
 
 (def translate-type-variable (identifier)
-     (source-string-concat (SourceStringChar 39)
-     (source-string-concat (SourceStringChar 84) (SourceStringIdentifier identifier IdentifierTransformationNone))))
+     (source-string-concat
+         (SourceStringChar 39)
+         (source-string-concat
+             (SourceStringChar 84)
+             (SourceStringIdentifier identifier IdentifierTransformationNone))))
 
 (def escape-identifier (identifier)
      (SourceStringIdentifier identifier IdentifierTransformationNone))
@@ -29,35 +36,42 @@
 
 (def translate-type-identifier (identifier)
      (match (identifier-is? identifier (identifier-slice))
-            True   (SourceString (data-slice-type))
-            False  (escape-identifier identifier)))
+            True
+                (SourceString (data-slice-type))
+            False
+                (escape-identifier identifier)))
 
 (def translate-constructor-identifier (identifier)
      (SourceStringIdentifier identifier IdentifierTransformationCapitalize))
 
 (def translate-identifier (identifier)
      (match (token-is-operator? (identifier-token identifier))
-            True   (match (dictionary-get (identifier-name identifier) (operator-translation-map))
-                          (Some translation)  translation
-                          None                (SourceStringIdentifier identifier IdentifierTransformationNone))
-            False  (SourceStringIdentifier identifier IdentifierTransformationNone)))
+            True
+                (match (dictionary-get (identifier-name identifier) (operator-translation-map))
+                       (Some translation)
+                           translation
+                       None
+                           (SourceStringIdentifier identifier IdentifierTransformationNone))
+            False
+                (SourceStringIdentifier identifier IdentifierTransformationNone)))
 
 (def translate-less-than (translate-expression expressions)
      (match expressions
             (Cons a (Cons b (Cons then-case (Cons else-case Empty))))
-                (join' (list (SourceString (data-if))
-                             (SourceString (data-space))
-                             (translate-expression a)
-                             (SourceString (data-less-than))
-                             (translate-expression b)
-                             (SourceString (data-space))
-                             (SourceString (data-then))
-                             (SourceString (data-space))
-                             (translate-expression then-case)
-                             (SourceString (data-space))
-                             (SourceString (data-else))
-                             (SourceString (data-space))
-                             (translate-expression else-case)))
+                (join' (list
+                    (SourceString (data-if))
+                    (SourceString (data-space))
+                    (translate-expression a)
+                    (SourceString (data-less-than))
+                    (translate-expression b)
+                    (SourceString (data-space))
+                    (SourceString (data-then))
+                    (SourceString (data-space))
+                    (translate-expression then-case)
+                    (SourceString (data-space))
+                    (SourceString (data-else))
+                    (SourceString (data-space))
+                    (translate-expression else-case)))
             _
                 (SourceString (data-compile-error))))
 
@@ -68,9 +82,10 @@
          (source-string-join (string-concat (data-comma) (string-of-char 32)))
          wrap-in-brackets'
          (fn (parameters)
-             (list (translate-constructor-identifier identifier)
-                   (SourceString (data-space))
-                   parameters))
+             (list
+                 (translate-constructor-identifier identifier)
+                 (SourceString (data-space))
+                 parameters))
          join'
          wrap-in-brackets'))
 
@@ -88,11 +103,12 @@
 (def translate-rule (translate-expression n rule)
      (match rule
             (Pair pattern expression)
-                 (join-lines (list
-                    (line n (list (SourceString (data-vertical-bar))
-                                  (translate-pattern pattern)
-                                  (SourceString (data-arrow))))
-                    (line (+ n 1) (list (translate-expression (+ n 1) expression)))))))
+                (join-lines (list
+                    ((line n) (list
+                        (SourceString (data-vertical-bar))
+                        (translate-pattern pattern)
+                        (SourceString (data-arrow))))
+                    ((line (+ n 1)) (list (translate-expression (+ n 1) expression)))))))
 
 (def translate-match-expression (translate-expression n expression rules)
      (pipe
@@ -100,43 +116,50 @@
          (list-map (translate-rule translate-expression n))
          (source-string-join (string-empty))
          (fn (rules)
-             (list (SourceString (data-match))
-                   (source-space)
-                   (translate-expression n expression)
-                   (source-space)
-                   (SourceString (data-with))
-                   rules))
+             (list
+                 (SourceString (data-match))
+                 (source-space)
+                 (translate-expression n expression)
+                 (source-space)
+                 (SourceString (data-with))
+                 rules))
          (source-string-join (string-empty))))
 
 (def translate-function-application' (translate-expression expressions)
      (match expressions
             (Cons no-args-function Empty)
-                    (join' (list (translate-expression no-args-function)
-                                 (SourceString (data-space))
-                                 (SourceString (wrap-in-brackets (string-empty)))))
+                (join' (list
+                    (translate-expression no-args-function)
+                    (SourceString (data-space))
+                    (SourceString (wrap-in-brackets (string-empty)))))
             _
-                    (source-string-join (data-space) (list-map translate-expression expressions))))
+                (source-string-join (data-space) (list-map translate-expression expressions))))
 
 (def translate-function-application (translate-expression expressions)
      (match expressions
             (Cons (Variable identifier) rest)
-                    (match (= (identifier-token identifier) (identifier-int32-less-than))
-                           True  (translate-less-than translate-expression rest)
-                           False (translate-function-application' translate-expression expressions))
+                (match (= (identifier-token identifier) (identifier-int32-less-than))
+                       True
+                           (translate-less-than translate-expression rest)
+                       False
+                           (translate-function-application' translate-expression expressions))
             _
-                    (translate-function-application' translate-expression expressions)))
+                (translate-function-application' translate-expression expressions)))
 
 (def translate-argument-list (arguments)
      (match (list-is-empty? arguments)
-            True  (SourceString (wrap-in-brackets (string-empty)))
-            False (source-string-join (data-space) (list-map lowercase-identifier arguments))))
+            True
+                (SourceString (wrap-in-brackets (string-empty)))
+            False
+                (source-string-join (data-space) (list-map lowercase-identifier arguments))))
 
 (def translate-lambda (translate-expression arguments expression)
-     (join' (list (SourceString (data-fun))
-                  (SourceString (data-space))
-                  (translate-argument-list arguments)
-                  (SourceString (data-arrow))
-                  (translate-expression expression))))
+     (join' (list
+         (SourceString (data-fun))
+         (SourceString (data-space))
+         (translate-argument-list arguments)
+         (SourceString (data-arrow))
+         (translate-expression expression))))
 
 (def translate-expression (n expression)
      (match expression
@@ -157,33 +180,41 @@
 
 (def translate-function-definition (identifier arguments expression)
      (join-lines (list
-        (line 0 (list (SourceString (data-let-rec))
-                      (lowercase-identifier identifier)
-                      (source-space)
-                      (translate-argument-list arguments)
-                      (SourceString (data-equals))))
-        (line 1 (list (translate-expression 1 expression)
-                      (SourceString (data-definition-end)))))))
+         ((line 0) (list
+             (SourceString (data-let-rec))
+             (lowercase-identifier identifier)
+             (source-space)
+             (translate-argument-list arguments)
+             (SourceString (data-equals))))
+         ((line 1) (list (translate-expression 1 expression) (SourceString (data-definition-end)))))))
 
 (def translate-simple-type (identifier parameters)
-     (match (list-any? (. (identifier-equal? identifier) type-parameter-identifier) parameters)
-            False  (translate-type-identifier identifier)
-            True   (translate-type-variable identifier)))
+     (match (list-any?
+         (. (identifier-equal? identifier) type-parameter-identifier)
+         parameters)
+            False
+                (translate-type-identifier identifier)
+            True
+                (translate-type-variable identifier)))
 
 (def translate-complex-types (translate-types name types)
      (pipe
          types
          (translate-types (data-comma))
          wrap-in-brackets'
-         (fn (types) (list types (SourceString (data-space)) (translate-type-identifier name)))
+         (fn (types)
+             (list types (SourceString (data-space)) (translate-type-identifier name)))
          join'))
 
 (def translate-function-type (translate-types return-type argument-types)
      (match (list-is-empty? argument-types)
-            True   (wrap-in-brackets' (join' (list (SourceString (data-unit)) 
-                                                   (SourceString (data-arrow))
-                                                   (translate-types (data-arrow) (list return-type)))))
-            False  (wrap-in-brackets' (translate-types (data-arrow) (list-concat argument-types (list return-type))))))
+            True
+                (wrap-in-brackets' (join' (list
+                    (SourceString (data-unit))
+                    (SourceString (data-arrow))
+                    (translate-types (data-arrow) (list return-type)))))
+            False
+                (wrap-in-brackets' (translate-types (data-arrow) (list-concat argument-types (list return-type))))))
 
 (def translate-type (translate-types parameters type)
      (match type
@@ -201,11 +232,12 @@
          (source-string-join separator)))
 
 (def translate-complex-constructor-definition (name type types parameters)
-     (join' (list (translate-constructor-identifier name)
-                  (SourceString (data-colon))
-                  (translate-types parameters (data-star) types)
-                  (SourceString (data-arrow))
-                  type)))
+     (join' (list
+         (translate-constructor-identifier name)
+         (SourceString (data-colon))
+         (translate-types parameters (data-star) types)
+         (SourceString (data-arrow))
+         type)))
 
 (def translate-constructor-definition (type parameters constructor)
      (match constructor
@@ -232,9 +264,11 @@
          parameters
          (list-map translate-type-parameter-for-definition)
          (list-filter (fn (parameter)
-                          (match parameter
-                                 SourceStringEmpty  False
-                                 _                  True)))
+             (match parameter
+                    SourceStringEmpty
+                        False
+                    _
+                        True)))
          (source-string-join (data-comma))))
 
 (def translate-type-name' (name parameters parameter-string)
@@ -242,23 +276,29 @@
             True
                 (lowercase-identifier name)
             False
-                (join' (list (wrap-in-brackets' parameter-string)
-                             (source-space)
-                             (lowercase-identifier name)))))
+                (join' (list
+                    (wrap-in-brackets' parameter-string)
+                    (source-space)
+                    (lowercase-identifier name)))))
 
 (def translate-type-name (name parameters)
      (translate-type-name' name parameters (translate-type-parameters parameters)))
 
 (def translate-type-definition (name parameters constructors)
      (join-lines (list
-        (line 0 (list (SourceString (data-type))
-                      (source-space)
-                      (translate-type-name name parameters)
-                      (source-space)
-                      (SourceString (data-equals))))
-        (line 1 (list (SourceString (data-vertical-bar))
-                      (translate-constructor-definitions (translate-type-name name parameters) parameters constructors)
-                      (SourceString (data-definition-end)))))))
+         ((line 0) (list
+             (SourceString (data-type))
+             (source-space)
+             (translate-type-name name parameters)
+             (source-space)
+             (SourceString (data-equals))))
+         ((line 1) (list
+             (SourceString (data-vertical-bar))
+             (translate-constructor-definitions
+                 (translate-type-name name parameters)
+                 parameters
+                 constructors)
+             (SourceString (data-definition-end)))))))
 
 (def translate-definition (definition)
      (match definition
@@ -274,12 +314,15 @@
          definitions
          (list-map translate-definition)
          (source-string-join (string-of-char 10))
-         (pair-cons (list-map (pair-cons IdentifierTransformationLowercase) (public-identifiers definitions)))))
+         (pair-cons (list-map
+             (pair-cons IdentifierTransformationLowercase)
+             (public-identifiers definitions)))))
 
 (pub def compiler-backend-ocaml ()
-     (Backend (data-ocaml-language)
-              (list (data-preamble-filename))
-              (list (data-pervasives-filename))
-              generate-source
-              (reserved-identifiers)
-              (. local-transforms validate-reserved-identifiers)))
+     (Backend
+         (data-ocaml-language)
+         (list (data-preamble-filename))
+         (list (data-pervasives-filename))
+         generate-source
+         (reserved-identifiers)
+         (. local-transforms validate-reserved-identifiers)))

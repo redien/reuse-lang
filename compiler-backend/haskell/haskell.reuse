@@ -1,9 +1,11 @@
 
 (def reserved-identifiers ()
-     (list data-if data-then data-else data-with data-of data-end data-in data-type data-let
-           data-class data-do data-module data-data data-case data-deriving data-family data-default
-           data-forall data-foreign data-import data-instance data-infix data-infixl data-infixr
-           data-newtype data-where))
+     (list-flatten (list
+         (list data-if data-then data-else data-with data-of data-end data-in)
+         (list data-type data-let data-class data-do data-module data-data)
+         (list data-case data-deriving data-family data-default data-forall)
+         (list data-foreign data-import data-instance data-infix data-infixl)
+         (list data-infixr data-newtype data-where))))
 
 (def escape-identifier (identifier)
      (SourceStringIdentifier identifier IdentifierTransformationLowercase))

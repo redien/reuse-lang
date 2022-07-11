@@ -1,30 +1,34 @@
 
 (pub typ identifier-transformation
-         IdentifierTransformationNone
-         IdentifierTransformationLowercase
-         IdentifierTransformationCapitalize)
+     IdentifierTransformationNone
+     IdentifierTransformationLowercase
+     IdentifierTransformationCapitalize)
 
-(pub typ source-string SourceStringEmpty
-                       (SourceStringChar int32)
-                       (SourceString string)
-                       (SourceStringIdentifier identifier identifier-transformation)
-                       (SourceStringConcat source-string source-string))
+(pub typ source-string
+     SourceStringEmpty
+     (SourceStringChar int32)
+     (SourceString string)
+     (SourceStringIdentifier identifier identifier-transformation)
+     (SourceStringConcat source-string source-string))
 
 (pub def source-string-string (string)
-         (SourceString string))
+     (SourceString string))
 
 (pub def source-string-empty ()
-         SourceStringEmpty)
+     SourceStringEmpty)
 
 (pub def source-string-concat (a b)
-         (SourceStringConcat a b))
+     (SourceStringConcat a b))
 
 (pub def source-string-join (separator strings)
-         (match strings
-                (Cons first rest)
-                    (list-foldl (fn (string joined)
-                                    (source-string-concat joined (source-string-concat (SourceString separator) string)))
-                                first
-                                rest)
-                Empty
-                    (source-string-empty)))
+     (match strings
+            (Cons first rest)
+                (list-foldl
+                    (fn (string joined)
+                        (source-string-concat
+                            joined
+                            (source-string-concat (SourceString separator) string)))
+                    first
+                    rest)
+            Empty
+                (source-string-empty)))

@@ -1,13 +1,17 @@
 
 (def identifier-sparkle-x () 1000)
+
 (def identifier-cons () 1001)
+
 (def identifier-empty () 1002)
 
 (pub def with-local-transform-keywords (identifiers)
-     (list-concat identifiers (list
-          (Pair (identifier-sparkle-x) (data-sparkle-x))
-          (Pair (identifier-cons) (data-Cons))
-          (Pair (identifier-empty) (data-Empty)))))
+     (list-concat
+         identifiers
+         (list
+             (Pair (identifier-sparkle-x) (data-sparkle-x))
+             (Pair (identifier-cons) (data-Cons))
+             (Pair (identifier-empty) (data-Empty)))))
 
 (def expression-is-token? (token expression)
      (match expression
@@ -20,32 +24,41 @@
      (pipe
          (list-first expressions)
          (maybe-map (expression-is-token? token))
-         (maybe-else (fn () False))))
+         (maybe-else (fn ()
+             False))))
 
 (def transform-special-form (token transformer definition)
      (over-definition-expressions
-     (over-subexpressions
-     (over-function-application
-         (fn (expressions range)
+         (over-subexpressions (over-function-application (fn (expressions range)
              (result-return (match (first-expression-is-token? token expressions)
-                                   True   (transformer (definition-source-reference definition) (list-rest expressions) range)
-                                   False  (FunctionApplication expressions range))))))
+                    True
+                        (transformer
+                            (definition-source-reference definition)
+                            (list-rest expressions)
+                            range)
+                    False
+                        (FunctionApplication expressions range))))))
          definition))
 
 (def transform-special-forms (token transformer definitions)
      (result-concat (list-map (transform-special-form token transformer) definitions)))
 
 (def generated-x-variable (source-reference range)
-     (Identifier (identifier-sparkle-x) (data-sparkle-x) source-reference range (Some -1)))
+     (Identifier
+         (identifier-sparkle-x)
+         (data-sparkle-x)
+         source-reference
+         range
+         (Some -1)))
 
 (def transform-pipe (source-reference expressions range)
      (match expressions
             (Cons value expressions)
-                    (list-foldl
-                        (fn (expression composed)
-                            (FunctionApplication (list expression composed) range))
-                        value
-                        expressions)
+                (list-foldl
+                    (fn (expression composed)
+                        (FunctionApplication (list expression composed) range))
+                    value
+                    expressions)
             Empty
                 (Lambda
                     (list (generated-x-variable source-reference range))
@@ -53,44 +66,50 @@
                     range)))
 
 (def transform-dot (source-reference expressions range)
-     (Lambda (list (generated-x-variable source-reference range))
-             (list-foldr (fn (expression composed)
-                             (FunctionApplication (list expression composed) range))
-                         (Variable (generated-x-variable source-reference range))
-                         expressions)
-             range))
+     (Lambda
+         (list (generated-x-variable source-reference range))
+         (list-foldr
+             (fn (expression composed)
+                 (FunctionApplication (list expression composed) range))
+             (Variable (generated-x-variable source-reference range))
+             expressions)
+         range))
 
 (def transform-list (cons empty source-reference expressions range)
-     (list-foldr (fn (expression composed)
-                     (Constructor cons (list expression composed) range))
-                 (Constructor empty Empty range)
-                 expressions))
+     (list-foldr
+         (fn (expression composed)
+             (Constructor cons (list expression composed) range))
+         (Constructor empty Empty range)
+         expressions))
 
 (def transform-match-expression (expression pairs range)
      (result-return (Match expression pairs range)))
 
 (def transform-match-expressions (definition)
      (over-definition-expressions
-     (over-subexpressions
-     (over-match-expression
-         (fn (expression pairs range)
+         (over-subexpressions (over-match-expression (fn (expression pairs range)
              (transform-match-expression expression pairs range))))
          definition))
 
 (def find-constructor (token definitions)
-     (list-find-first (fn (identifier) (= token (identifier-token identifier)))
-                    (list-flatmap identifiers-from-definition definitions)))
+     (list-find-first
+         (fn (identifier)
+             (= token (identifier-token identifier)))
+         (list-flatmap identifiers-from-definition definitions)))
 
 (def transform-list-special-form (definitions)
      (match (find-constructor (identifier-cons) definitions)
-          None
-               (result-return definitions)
-          (Some cons)
-     (match (find-constructor (identifier-empty) definitions)
-          None
-               (result-return definitions)
-          (Some empty)
-               (transform-special-forms (identifier-list) (transform-list cons empty) definitions))))
+            None
+                (result-return definitions)
+            (Some cons)
+                (match (find-constructor (identifier-empty) definitions)
+                       None
+                           (result-return definitions)
+                       (Some empty)
+                           (transform-special-forms
+                               (identifier-list)
+                               (transform-list cons empty)
+                               definitions))))
 
 (pub def local-transforms (definitions)
      (result-bind definitions                                                                          (fn (definitions)

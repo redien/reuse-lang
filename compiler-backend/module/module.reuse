@@ -9,9 +9,10 @@
          (pair-cons (list-empty))))
 
 (pub def compiler-backend-module ()
-     (Backend (data-module-language)
-              Empty
-              Empty
-              generate-source
-              Empty
-              (result-map id)))
+     (Backend
+         (data-module-language)
+         Empty
+         Empty
+         generate-source
+         Empty
+         (result-map id)))
