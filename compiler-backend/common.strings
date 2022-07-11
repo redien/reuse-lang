@@ -71,6 +71,7 @@ pub                          |pub
 &                            |&
 int32-less-than              |int32-less-than
 pipe                         |pipe
+dot                          |.
 list                         |list
 slice-empty                  |slice-empty
 slice-of-u8                  |slice-of-u8

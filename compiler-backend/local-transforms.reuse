@@ -42,6 +42,14 @@
                          expressions)
              range))
 
+(def transform-dot (source-reference expressions range)
+     (Lambda (list (Identifier (identifier-sparkle-x) (data-sparkle-x) source-reference range (Some -1)))
+             (list-foldr (fn (expression composed)
+                             (FunctionApplication (list expression composed) range))
+                         (Variable (Identifier (identifier-sparkle-x) (data-sparkle-x) source-reference range (Some -1)))
+                         expressions)
+             range))
+
 (def transform-list (cons empty source-reference expressions range)
      (list-foldr (fn (expression composed)
                      (Constructor cons (list expression composed) range))
@@ -77,6 +85,7 @@
 (pub def local-transforms (definitions)
      (result-bind definitions                                                                          (fn (definitions)
      (result-bind (transform-special-forms (identifier-pipe) transform-pipe definitions)               (fn (definitions)
+     (result-bind (transform-special-forms (identifier-dot) transform-dot definitions)                 (fn (definitions)
      (result-bind (transform-list-special-form definitions)                                            (fn (definitions)
      (result-bind (result-concat (list-map transform-match-expressions definitions))                   (fn (definitions)
-     (result-return definitions))))))))))
+     (result-return definitions))))))))))))
