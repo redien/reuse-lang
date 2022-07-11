@@ -1,13 +1,26 @@
 
 (def identifier-is-reserved? (identifier)
-     (string-equal? (string-substring 0 3 (identifier-name identifier)) (data-sparkle)))
+     (string-equal?
+         (string-substring 0 3 (identifier-name identifier))
+         (data-sparkle)))
+
+(def invalid-identifier-error (identifier)
+     (ErrorReservedIdentifier
+         (identifier-name identifier)
+         (identifier-source-reference identifier)
+         (identifier-range identifier)))
 
 (def validate-identifier (identifier)
      (match (identifier-is-reserved? identifier)
-            True   (result-error (ErrorReservedIdentifier (identifier-name identifier)
-                                                          (identifier-source-reference identifier)
-                                                          (identifier-range identifier)))
-            False  (result-lift identifier)))
+            True
+                (result-error (invalid-identifier-error identifier))
+            False
+                (result-lift identifier)))
+
+(def validate-identifiers-in-definition (definition)
+     (over-definition-expressions (over-identifiers validate-identifier) definition))
 
 (pub def validate-reserved-identifiers (definitions)
-     (result-flatmap (. result-concat (list-map (over-definition-expressions (over-identifiers validate-identifier)))) definitions))
+     (result-flatmap
+         (. result-concat (list-map validate-identifiers-in-definition))
+         definitions))
