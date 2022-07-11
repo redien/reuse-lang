@@ -1,11 +1,12 @@
 
 (def generate-source (module-name definitions)
-     ((pipe (list-filter (. (module-equal? ModuleSelf) definition-module))
-            (list-map (. stringify-sexp definition-to-sexp))
-            (string-join (string-of-char 10))
-            source-string-string
-            (pair-cons (list-empty)))
-        definitions))
+     (pipe
+         definitions
+         (list-filter (. (module-equal? ModuleSelf) definition-module))
+         (list-map (. stringify-sexp definition-to-sexp))
+         (string-join (string-of-char 10))
+         source-string-string
+         (pair-cons (list-empty))))
 
 (pub def compiler-backend-module ()
      (Backend (data-module-language)

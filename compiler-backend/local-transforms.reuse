@@ -17,9 +17,10 @@
                 False))
 
 (def first-expression-is-token? (token expressions)
-     ((pipe (maybe-map (expression-is-token? token))
-            (maybe-else (fn () False)))
-        (list-first expressions)))
+     (pipe
+         (list-first expressions)
+         (maybe-map (expression-is-token? token))
+         (maybe-else (fn () False))))
 
 (def transform-special-form (token transformer definition)
      (over-definition-expressions

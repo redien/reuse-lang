@@ -8,15 +8,16 @@
      (ValueSlice iterable))
 
 (def value-function-to-string (arguments expression)
-     ((pipe expression-to-sexp
-            list-from
-            stringify-sexps
-            (string-concat (data-space))
-            (string-concat (wrap-in-brackets (string-join (data-space) (list-map identifier-name arguments))))
-            (string-concat (data-space))
-            (string-concat (data-fn))
-            wrap-in-brackets)
-         expression))
+     (pipe
+         expression
+         expression-to-sexp
+         list-from
+         stringify-sexps
+         (string-concat (data-space))
+         (string-concat (wrap-in-brackets (string-join (data-space) (list-map identifier-name arguments))))
+         (string-concat (data-space))
+         (string-concat (data-fn))
+         wrap-in-brackets))
 
 (def value-to-string (value)
      (match value
@@ -27,11 +28,11 @@
                        Empty
                             name
                        _
-                            ((pipe (list-map value-to-string)
-                                   (list-cons name)
-                                   (string-join (data-space))
-                                   wrap-in-brackets)
-                                values))
+                            (pipe values
+                                  (list-map value-to-string)
+                                  (list-cons name)
+                                  (string-join (data-space))
+                                  wrap-in-brackets))
             (ValueClosure arguments expression scope)
                 (value-function-to-string arguments expression)
             (ValueFunction arguments expression)

@@ -340,12 +340,13 @@
      (parser-return (list-flatten definitions)))))))
 
 (pub def parse-source-files (symbols files)
-     ((pipe (list-partition-by source-file-in-same-module?)
-            (list-map parse-module)
-            parser-sequence
-            (parser-run (with-language-identifiers symbols))
-            (result-map list-flatten))
-        files))
+     (pipe
+         files
+         (list-partition-by source-file-in-same-module?)
+         (list-map parse-module)
+         parser-sequence
+         (parser-run (with-language-identifiers symbols))
+         (result-map list-flatten)))
 
 
 

@@ -62,7 +62,8 @@
                 (SourceString (data-compile-error))))
 
 (def translate-constructor (translator identifier constructor)
-     ((pipe
+     (pipe
+         constructor
          (list-map translator)
          (source-string-join (string-concat (data-comma) (string-of-char 32)))
          wrap-in-brackets'
@@ -71,8 +72,7 @@
                    (SourceString (data-space))
                    parameters))
          join'
-         wrap-in-brackets')
-        constructor))
+         wrap-in-brackets'))
 
 (def translate-pattern (pattern)
      (match pattern
@@ -95,7 +95,8 @@
                     (line (+ n 1) (list (translate-expression (+ n 1) expression)))))))
 
 (def translate-match-expression (translate-expression n expression rules)
-     ((pipe
+     (pipe
+         rules
          (list-map (translate-rule translate-expression n))
          (source-string-join (string-empty))
          (fn (rules)
@@ -105,8 +106,7 @@
                    (source-space)
                    (SourceString (data-with))
                    rules))
-         (source-string-join (string-empty)))
-        rules))
+         (source-string-join (string-empty))))
 
 (def translate-function-application' (translate-expression expressions)
      (match expressions
@@ -171,11 +171,12 @@
             True   (translate-type-variable identifier)))
 
 (def translate-complex-types (translate-types name types)
-     ((pipe (translate-types (data-comma))
-            wrap-in-brackets'
-            (fn (types) (list types (SourceString (data-space)) (translate-type-identifier name)))
-            join')
-        types))
+     (pipe
+         types
+         (translate-types (data-comma))
+         wrap-in-brackets'
+         (fn (types) (list types (SourceString (data-space)) (translate-type-identifier name)))
+         join'))
 
 (def translate-function-type (translate-types return-type argument-types)
      (match (list-is-empty? argument-types)
@@ -194,9 +195,10 @@
                 (translate-function-type translate-types return-type argument-types)))
 
 (def translate-types (parameters separator types)
-     ((pipe (list-map (translate-type (translate-types parameters) parameters))
-            (source-string-join separator))
-        types))
+     (pipe
+         types
+         (list-map (translate-type (translate-types parameters) parameters))
+         (source-string-join separator)))
 
 (def translate-complex-constructor-definition (name type types parameters)
      (join' (list (translate-constructor-identifier name)
@@ -213,9 +215,10 @@
                 (translate-complex-constructor-definition identifier type types parameters)))
 
 (def translate-constructor-definitions (type parameters constructors)
-     ((pipe (list-map (translate-constructor-definition type parameters))
-            (source-string-join (string-concat (newline) (string-concat (indent 1) (data-vertical-bar)))))
-        constructors))
+     (pipe
+         constructors
+         (list-map (translate-constructor-definition type parameters))
+         (source-string-join (string-concat (newline) (string-concat (indent 1) (data-vertical-bar))))))
 
 (def translate-type-parameter-for-definition (parameter)
      (match parameter
@@ -225,13 +228,14 @@
                 SourceStringEmpty))
 
 (def translate-type-parameters (parameters)
-     ((pipe (list-map translate-type-parameter-for-definition)
-            (list-filter (fn (parameter)
-                             (match parameter
-                                    SourceStringEmpty  False
-                                    _                  True)))
-            (source-string-join (data-comma)))
-        parameters))
+     (pipe
+         parameters
+         (list-map translate-type-parameter-for-definition)
+         (list-filter (fn (parameter)
+                          (match parameter
+                                 SourceStringEmpty  False
+                                 _                  True)))
+         (source-string-join (data-comma))))
 
 (def translate-type-name' (name parameters parameter-string)
      (match (list-is-empty? parameters)
@@ -266,10 +270,11 @@
                 (SourceString (string-from-slice data))))
 
 (def generate-source (module-name definitions)
-     ((pipe (list-map translate-definition)
-            (source-string-join (string-of-char 10))
-            (pair-cons (list-map (pair-cons IdentifierTransformationLowercase) (public-identifiers definitions))))
-        definitions))
+     (pipe
+         definitions
+         (list-map translate-definition)
+         (source-string-join (string-of-char 10))
+         (pair-cons (list-map (pair-cons IdentifierTransformationLowercase) (public-identifiers definitions)))))
 
 (pub def compiler-backend-ocaml ()
      (Backend (data-ocaml-language)

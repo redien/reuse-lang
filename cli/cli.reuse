@@ -35,15 +35,16 @@
      (list-find-first (. (string-equal? language) compiler-backend-name) (compiler-backends))))))
 
 (def modules-from-arguments (backend data-path arguments)
-     ((pipe (list-filter (. (string-equal? (data-module-flag)) pair-left))
-            (list-map (. (module-name-and-path False) pair-right))
-            (match (flag-is-true? (data-parser-flag) False (dictionary-of arguments))
-                   True   (list-cons (parser-module backend data-path))
-                   False  id)
-            (match (flag-is-true? (data-stdlib) True (dictionary-of arguments))
-                   True   (list-concat (standard-library-module backend data-path))
-                   False  id))
-          arguments))
+     (pipe
+         arguments
+         (list-filter (. (string-equal? (data-module-flag)) pair-left))
+         (list-map (. (module-name-and-path False) pair-right))
+         (match (flag-is-true? (data-parser-flag) False (dictionary-of arguments))
+                True   (list-cons (parser-module backend data-path))
+                False  id)
+         (match (flag-is-true? (data-stdlib) True (dictionary-of arguments))
+                True   (list-concat (standard-library-module backend data-path))
+                False  id)))
 
 (def table-to-string (table)
      (string-join (string-of-char 10) (list-map (string-join (string-of-char 32)) table)))

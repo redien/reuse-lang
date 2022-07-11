@@ -151,10 +151,11 @@
                 Empty))
 
 (pub def public-identifiers (definitions)
-     ((pipe (list-filter definition-public?)
-            (list-map definition-identifier)
-            (list-flatmap list-from-maybe))
-        definitions))
+     (pipe
+         definitions
+         (list-filter definition-public?)
+         (list-map definition-identifier)
+         (list-flatmap list-from-maybe)))
 
 (pub def over-match-pair-expression (f pair)
      (match pair

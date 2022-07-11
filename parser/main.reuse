@@ -17,8 +17,8 @@
              MalformedSexpTooManyClosingBrackets           (data-MalformedSexpTooManyClosingBrackets )))
 
 (def reuse-main (stdin)
-     ((pipe (fn (stdin) (list (SourceFile ModuleSelf (string-empty) stdin)))
-            (parse-source-files (list-empty))
-            (result-either (. stringify-sexps definitions-to-sexps)
-                           stringify-error))
-          stdin))
+     (pipe
+         stdin
+         (fn (stdin) (list (SourceFile ModuleSelf (string-empty) stdin)))
+         (parse-source-files (list-empty))
+         (result-either (. stringify-sexps definitions-to-sexps) stringify-error)))

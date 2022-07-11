@@ -173,17 +173,19 @@
             True
                (string-empty)
             False
-               ((pipe (list-map format-definition)
-                      (string-join (string-repeat (newline) 2))
-                      ((flip string-concat) (newline))
-                      (string-concat (newline)))
-                     definitions)))
+               (pipe
+                   definitions
+                   (list-map format-definition)
+                   (string-join (string-repeat (newline) 2))
+                   ((flip string-concat) (newline))
+                   (string-concat (newline)))))
 
 (def format-source-file (file)
-     ((pipe source-file-content
-            (parse-sexps (Pair 0 (dictionary-of (language-identifiers))))
-            (result-bimap (. string-to-slice format-file pair-right) stringify-error))
-          file))
+     (pipe
+         file
+         source-file-content
+         (parse-sexps (Pair 0 (dictionary-of (language-identifiers))))
+         (result-bimap (. string-to-slice format-file pair-right) stringify-error)))
 
 (def result-from-pair (pair)
      (result-map (pair-cons (pair-left pair)) (pair-right pair)))

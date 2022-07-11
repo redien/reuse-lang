@@ -309,10 +309,10 @@
                 accumulator
             (Cons x rest)
                 (maybe-flatmap (fn (accumulator)
-                    ((pipe
-                            (maybe-filter string-point-is-digit)
-                            (maybe-flatmap (string-to-int32''' string-to-int32'' rest accumulator)))
-                        (Some x)))
+                    (pipe
+                        (Some x)
+                        (maybe-filter string-point-is-digit)
+                        (maybe-flatmap (string-to-int32''' string-to-int32'' rest accumulator))))
                     accumulator)))
 
 (def string-to-int32' (string)
