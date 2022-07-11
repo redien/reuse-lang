@@ -49,7 +49,7 @@
      (state-bind operation f))
 
 (pub def state-map (f operation)
-     (state-flatmap (pipe f state-return) operation))
+     (state-flatmap (. state-return f) operation))
 
 (pub def state-lift (value)
      (state-return value))

@@ -182,11 +182,11 @@
 (def format-source-file (file)
      ((pipe source-file-content
             (parse-sexps (Pair 0 (dictionary-of (language-identifiers))))
-            (result-bimap (pipe pair-right format-file string-to-slice) stringify-error))
+            (result-bimap (. string-to-slice format-file pair-right) stringify-error))
           file))
 
 (def result-from-pair (pair)
      (result-map (pair-cons (pair-left pair)) (pair-right pair)))
 
 (pub def format-source-files (files)
-     (result-concat (list-map (pipe pair-dup (pair-bimap source-file-path format-source-file) result-from-pair) files)))
+     (result-concat (list-map (. result-from-pair (pair-bimap source-file-path format-source-file) pair-dup) files)))

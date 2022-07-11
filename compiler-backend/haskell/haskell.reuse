@@ -73,14 +73,15 @@
             _
                 (SourceString (data-compile-error))))
 
-(def translate-constructor (translator name)
-     (pipe
+(def translate-constructor (translator name constructor)
+     ((pipe
          (list-map translator)
          (source-string-join (data-space))
          (fn (parameters)
              (list (translate-constructor-identifier name) (source-space) parameters))
          join'
-         wrap-in-brackets'))
+         wrap-in-brackets')
+        constructor))
 
 (def translate-pattern (pattern)
      (match pattern
@@ -104,8 +105,8 @@
                     (line n (list (translate-pattern pattern) (SourceString (data-arrow))))
                     (line (+ n 1) (list (translate-expression (+ n 1) expression)))))))
 
-(def translate-match-expression (translate-expression n expression)
-     (pipe
+(def translate-match-expression (translate-expression n expression rules)
+     ((pipe
          (list-map (translate-rule translate-expression n))
          (source-string-join (string-empty))
          (fn (rules)
@@ -116,7 +117,8 @@
                  (source-space)
                  (SourceString (data-of))
                  rules))
-         (source-string-join (string-empty))))
+         (source-string-join (string-empty)))
+        rules))
 
 (def translate-function-application' (translate-expression expressions)
      (match expressions
@@ -250,10 +252,11 @@
             (ComplexConstructor identifier types _)
                 (translate-complex-constructor-definition identifier types parameters)))
 
-(def translate-constructor-definitions (n parameters)
-     (pipe
+(def translate-constructor-definitions (n parameters constructors)
+     ((pipe
          (list-map (translate-constructor-definition parameters))
-         (source-string-join (string-concat (newline) (string-concat (indent n) (data-vertical-bar))))))
+         (source-string-join (string-concat (newline) (string-concat (indent n) (data-vertical-bar)))))
+        constructors))
 
 (def append-universal-parameter (parameter s)
      (match parameter

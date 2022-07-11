@@ -163,7 +163,7 @@
                 (result-return (Pair pattern expression))))))
 
 (pub def over-match-pair-expressions (over-subexpressions f pairs)
-     (result-concat (list-map (over-match-pair-expression (pipe f (result-flatmap (over-subexpressions f)))) pairs)))
+     (result-concat (list-map (over-match-pair-expression (. (result-flatmap (over-subexpressions f)) f)) pairs)))
 
 (pub def over-subexpressions (f expression)
      (result-bind (f expression)  (fn (expression)
@@ -178,10 +178,10 @@
                 (result-bind   (over-match-pair-expressions over-subexpressions f pairs)  (fn (pairs)
                 (result-return (Match expression pairs range))))))))
             (Constructor identifier expressions range)
-                (result-bind   (result-concat (list-map (pipe f (result-flatmap (over-subexpressions f))) expressions)) (fn (expressions)
+                (result-bind   (result-concat (list-map (. (result-flatmap (over-subexpressions f)) f) expressions)) (fn (expressions)
                 (result-return (Constructor identifier expressions range))))
             (FunctionApplication expressions range)
-                (result-bind   (result-concat (list-map (pipe f (result-flatmap (over-subexpressions f))) expressions)) (fn (expressions)
+                (result-bind   (result-concat (list-map (. (result-flatmap (over-subexpressions f)) f) expressions)) (fn (expressions)
                 (result-return (FunctionApplication expressions range))))
             _
                 (result-return expression)))))

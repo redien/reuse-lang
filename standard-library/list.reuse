@@ -167,7 +167,7 @@
                  list))
 
 (pub def list-exclude (f list)
-     (list-filter (pipe f not) list))
+     (list-filter (. not f) list))
 
 (pub def list-any? (f list)
      (match (list-find-first f list)

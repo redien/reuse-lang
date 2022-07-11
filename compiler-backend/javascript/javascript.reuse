@@ -48,11 +48,13 @@
 (def wrap-in-angle-brackets (s)
      (join' (list (SourceString (data-open-array)) s (SourceString (data-close-array)))))
 
-(def translate-constructor (translator identifier)
-     (pipe (list-map translator)
-           (list-cons (translate-constructor-identifier identifier))
-           (source-string-join (string-concat (data-comma) (string-of-char 32)))
-           wrap-in-angle-brackets))
+(def translate-constructor (translator identifier constructor)
+     ((pipe
+         (list-map translator)
+         (list-cons (translate-constructor-identifier identifier))
+         (source-string-join (string-concat (data-comma) (string-of-char 32)))
+         wrap-in-angle-brackets)
+        constructor))
 
 (def translate-pattern (pattern)
      (match pattern

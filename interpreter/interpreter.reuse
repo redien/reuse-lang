@@ -7,8 +7,6 @@
 (def map (f xs) (result-map f xs))
 
 (def identifier-main () 2000)
-(def identifier-Empty () 2001)
-(def identifier-Cons () 2002)
 
 (def eval-error ()
      (Error (data-error-generic)))
@@ -38,10 +36,10 @@
 
 (def render-stack-trace (stack-trace)
      (string-join (string-of-char 10)
-                  (list-map (pipe (string-concat (data-space))
-                                  (string-concat (data-space))
-                                  (string-concat (data-space))
-                                  (string-concat (data-space)))
+                  (list-map (. (string-concat (data-space))
+                               (string-concat (data-space))
+                               (string-concat (data-space))
+                               (string-concat (data-space)))
                             stack-trace)))
 
 (def add-stack-trace (expression values stack-trace)
@@ -67,11 +65,7 @@
                                           (string-of-char 10)
                                           (data-space) (data-space) (data-space) (data-space)
                                           (string-join (data-space)
-                                                       (list-map (pipe pair-left
-                                                                       pattern-to-sexp
-                                                                       list-from
-                                                                       stringify-sexps)
-                                                                 cases))
+                                                       (list-map (. stringify-sexp pattern-to-sexp pair-left) cases))
                                           (string-of-char 10)
                                           (data-error-stack-trace)
                                           (string-of-char 10)
@@ -203,29 +197,6 @@
                 (bind (eval-expression scope stack-trace expression) (fn (expression)
                 (pattern-match eval-expression scope stack-trace expression cases)))))
 
-(def eval-pipe' (functions scope stack-trace parameters)
-     (match functions
-            Empty
-                (match (list-first parameters)
-                       None          (eval-error)
-                       (Some value)  (return value))
-            (Cons function rest)
-                (bind (apply-function eval-expression scope stack-trace None (Cons function parameters)) (fn (value)
-                (eval-pipe' rest scope stack-trace (list value))))))
-
-(def eval-pipe (scope stack-trace functions)
-     (return (ValueIntrinsic (eval-pipe' functions))))
-
-(def eval-list' (values)
-     (match values
-            Empty
-                (ValueConstructor (identifier-Empty) (data-Empty) Empty)
-            (Cons value rest)
-                (ValueConstructor (identifier-Cons) (data-Cons) (list value (eval-list' rest)))))
-
-(def eval-list (scope stack-trace values)
-     (return (eval-list' values)))
-
 (def eval (scope values)
      (match (scope-get (identifier-main) scope)
             (Some (ValueFunction arguments expression))
@@ -249,9 +220,7 @@
                       (Pair (identifier-slice-get)        (ValueIntrinsic eval-slice-get))
                       (Pair (identifier-slice-concat)     (ValueIntrinsic eval-slice-concat))
                       (Pair (identifier-slice-foldl)      (ValueIntrinsic (eval-slice-foldl (apply-function eval-expression))))
-                      (Pair (identifier-slice-subslice)   (ValueIntrinsic eval-slice-subslice))
-                      (Pair (identifier-pipe)             (ValueIntrinsic eval-pipe))
-                      (Pair (identifier-list)             (ValueIntrinsic eval-list)))
+                      (Pair (identifier-slice-subslice)   (ValueIntrinsic eval-slice-subslice)))
                 scope))
 
 (def definitions-to-scope (definitions)
@@ -265,7 +234,4 @@
                 False))
 
 (def internal-symbols ()
-     (list-concat (intrinsic-identifiers) (list
-        (Pair (identifier-main) (data-main))
-        (Pair (identifier-Empty) (data-Empty))
-        (Pair (identifier-Cons) (data-Cons)))))
+     (list-concat (intrinsic-identifiers) (list (Pair (identifier-main) (data-main)))))

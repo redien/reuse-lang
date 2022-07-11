@@ -61,16 +61,18 @@
             _
                 (SourceString (data-compile-error))))
 
-(def translate-constructor (translator identifier)
-     (pipe (list-map translator)
-           (source-string-join (string-concat (data-comma) (string-of-char 32)))
-           wrap-in-brackets'
-           (fn (parameters)
-               (list (translate-constructor-identifier identifier)
-                     (SourceString (data-space))
-                     parameters))
-           join'
-           wrap-in-brackets'))
+(def translate-constructor (translator identifier constructor)
+     ((pipe
+         (list-map translator)
+         (source-string-join (string-concat (data-comma) (string-of-char 32)))
+         wrap-in-brackets'
+         (fn (parameters)
+             (list (translate-constructor-identifier identifier)
+                   (SourceString (data-space))
+                   parameters))
+         join'
+         wrap-in-brackets')
+        constructor))
 
 (def translate-pattern (pattern)
      (match pattern
@@ -92,17 +94,19 @@
                                   (SourceString (data-arrow))))
                     (line (+ n 1) (list (translate-expression (+ n 1) expression)))))))
 
-(def translate-match-expression (translate-expression n expression)
-     (pipe (list-map (translate-rule translate-expression n))
-           (source-string-join (string-empty))
-           (fn (rules)
-               (list (SourceString (data-match))
-                     (source-space)
-                     (translate-expression n expression)
-                     (source-space)
-                     (SourceString (data-with))
-                     rules))
-           (source-string-join (string-empty))))
+(def translate-match-expression (translate-expression n expression rules)
+     ((pipe
+         (list-map (translate-rule translate-expression n))
+         (source-string-join (string-empty))
+         (fn (rules)
+             (list (SourceString (data-match))
+                   (source-space)
+                   (translate-expression n expression)
+                   (source-space)
+                   (SourceString (data-with))
+                   rules))
+         (source-string-join (string-empty)))
+        rules))
 
 (def translate-function-application' (translate-expression expressions)
      (match expressions
