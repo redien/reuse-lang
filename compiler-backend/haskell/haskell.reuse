@@ -13,67 +13,74 @@
 
 (def operator-translation-map ()
      (dictionary-of (list
-        (Pair (data-+) (SourceString (data-int32-plus)))
-        (Pair (data--) (SourceString (data-int32-minus)))
-        (Pair (data-*) (SourceString (data-int32-multiply)))
-        (Pair (data-/) (SourceString (data-int32-divide)))
-        (Pair (data-%) (SourceString (data-int32-modulus)))
-        (Pair (data-&) (SourceString (data-int32-and))))))
+         (Pair (data-+) (SourceString (data-int32-plus)))
+         (Pair (data--) (SourceString (data-int32-minus)))
+         (Pair (data-*) (SourceString (data-int32-multiply)))
+         (Pair (data-/) (SourceString (data-int32-divide)))
+         (Pair (data-%) (SourceString (data-int32-modulus)))
+         (Pair (data-&) (SourceString (data-int32-and))))))
 
 (def translate-identifier (identifier)
      (match (token-is-operator? (identifier-token identifier))
-            True   (match (dictionary-get (identifier-name identifier) (operator-translation-map))
-                          (Some translation)  translation
-                          None                (escape-identifier identifier))
-            False  (escape-identifier identifier)))
+            True
+                (match (dictionary-get (identifier-name identifier) (operator-translation-map))
+                       (Some translation)
+                           translation
+                       None
+                           (escape-identifier identifier))
+            False
+                (escape-identifier identifier)))
 
 (def prefix-type-variable (identifier)
      (SourceStringIdentifier identifier IdentifierTransformationLowercase))
 
 (def prefix-type (identifier)
      (match (identifier-is? identifier (identifier-slice))
-            True   (SourceString (data-slice-type))
+            True
+                (SourceString (data-slice-type))
             False
-     (match (identifier-is? identifier (identifier-int32))
-            True   (SourceString (data-Int32))
-            False  (SourceStringIdentifier identifier IdentifierTransformationCapitalize))))
+                (match (identifier-is? identifier (identifier-int32))
+                       True
+                           (SourceString (data-Int32))
+                       False
+                           (SourceStringIdentifier identifier IdentifierTransformationCapitalize))))
 
 (def translate-less-than (translate-expression expressions)
      (match expressions
             (Cons a (Cons b (Cons then-case (Cons else-case Empty))))
-                (join' (list (SourceString (data-if))
-                             (source-space)
-                             (SourceString (data-open-bracket))
-                             (translate-expression a)
-                             (SourceString (data-::))
-                             (SourceString (data-Int32))
-                             (SourceString (data-close-bracket))
-                             (SourceString (data-less-than))
-                             (SourceString (data-open-bracket))
-                             (translate-expression b)
-                             (SourceString (data-::))
-                             (SourceString (data-Int32))
-                             (SourceString (data-close-bracket))
-                             (source-space)
-                             (SourceString (data-then))
-                             (source-space)
-                             (translate-expression then-case)
-                             (source-space)
-                             (SourceString (data-else))
-                             (source-space)
-                             (translate-expression else-case)))
+                (join' (list
+                    (SourceString (data-if))
+                    (source-space)
+                    (SourceString (data-open-bracket))
+                    (translate-expression a)
+                    (SourceString (data-::))
+                    (SourceString (data-Int32))
+                    (SourceString (data-close-bracket))
+                    (SourceString (data-less-than))
+                    (SourceString (data-open-bracket))
+                    (translate-expression b)
+                    (SourceString (data-::))
+                    (SourceString (data-Int32))
+                    (SourceString (data-close-bracket))
+                    (source-space)
+                    (SourceString (data-then))
+                    (source-space)
+                    (translate-expression then-case)
+                    (source-space)
+                    (SourceString (data-else))
+                    (source-space)
+                    (translate-expression else-case)))
             _
                 (SourceString (data-compile-error))))
 
 (def translate-constructor (translator name)
-     (pipe (list-map translator)
-           (source-string-join (data-space))
-           (fn (parameters)
-               (list (translate-constructor-identifier name)
-                     (source-space)
-                     parameters))
-           join'
-           wrap-in-brackets'))
+     (pipe
+         (list-map translator)
+         (source-string-join (data-space))
+         (fn (parameters)
+             (list (translate-constructor-identifier name) (source-space) parameters))
+         join'
+         wrap-in-brackets'))
 
 (def translate-pattern (pattern)
      (match pattern
@@ -81,8 +88,10 @@
                 (escape-identifier identifier)
             (IntegerPattern integer _)
                 (match (< integer 0)
-                       True   (SourceString (wrap-in-brackets (string-from-int32 integer)))
-                       False  (SourceString (string-from-int32 integer)))
+                       True
+                           (SourceString (wrap-in-brackets (string-from-int32 integer)))
+                       False
+                           (SourceString (string-from-int32 integer)))
             (ConstructorPattern identifier Empty _)
                 (translate-constructor-identifier identifier)
             (ConstructorPattern identifier patterns _)
@@ -91,49 +100,56 @@
 (def translate-rule (translate-expression n rule)
      (match rule
             (Pair pattern expression)
-                 (join-lines (list
-                        (line n (list (translate-pattern pattern) (SourceString (data-arrow))))
-                        (line (+ n 1) (list (translate-expression (+ n 1) expression)))))))
+                (join-lines (list
+                    (line n (list (translate-pattern pattern) (SourceString (data-arrow))))
+                    (line (+ n 1) (list (translate-expression (+ n 1) expression)))))))
 
 (def translate-match-expression (translate-expression n expression)
-     (pipe (list-map (translate-rule translate-expression n))
-           (source-string-join (string-empty))
-           (fn (rules)
-               (list (SourceString (data-case))
-                     (source-space)
-                     (translate-expression n expression)
-                     (source-space)
-                     (SourceString (data-of))
-                     rules))
-           (source-string-join (string-empty))))
+     (pipe
+         (list-map (translate-rule translate-expression n))
+         (source-string-join (string-empty))
+         (fn (rules)
+             (list
+                 (SourceString (data-case))
+                 (source-space)
+                 (translate-expression n expression)
+                 (source-space)
+                 (SourceString (data-of))
+                 rules))
+         (source-string-join (string-empty))))
 
 (def translate-function-application' (translate-expression expressions)
      (match expressions
             (Cons no-args-function Empty)
-                    (translate-expression no-args-function)
+                (translate-expression no-args-function)
             _
-                    (source-string-join (data-space) (list-map translate-expression expressions))))
+                (source-string-join (data-space) (list-map translate-expression expressions))))
 
 (def translate-function-application (translate-expression expressions)
      (match expressions
             (Cons (Variable identifier) rest)
-                    (match (= (identifier-token identifier) (identifier-int32-less-than))
-                           True  (translate-less-than translate-expression rest)
-                           False (translate-function-application' translate-expression expressions))
+                (match (= (identifier-token identifier) (identifier-int32-less-than))
+                       True
+                           (translate-less-than translate-expression rest)
+                       False
+                           (translate-function-application' translate-expression expressions))
             _
-                    (translate-function-application' translate-expression expressions)))
+                (translate-function-application' translate-expression expressions)))
 
 (def translate-argument-list (arguments)
      (source-string-join (data-space) (list-map escape-identifier arguments)))
 
 (def translate-lambda (translate-expression arguments expression)
      (match (list-is-empty? arguments)
-            True   (translate-expression expression)
-            False  (join' (list (SourceString (data-backslash))
-                                (source-space)
-                                (translate-argument-list arguments)
-                                (SourceString (data-arrow))
-                                (translate-expression expression)))))
+            True
+                (translate-expression expression)
+            False
+                (join' (list
+                    (SourceString (data-backslash))
+                    (source-space)
+                    (translate-argument-list arguments)
+                    (SourceString (data-arrow))
+                    (translate-expression expression)))))
 
 (def translate-expression (n expression)
      (match expression
@@ -147,8 +163,10 @@
                 (wrap-in-brackets' (translate-function-application (translate-expression n) expressions))
             (IntegerConstant integer _)
                 (match (< integer 0)
-                       True   (SourceString (wrap-in-brackets (string-from-int32 integer)))
-                       False  (SourceString (string-from-int32 integer)))
+                       True
+                           (SourceString (wrap-in-brackets (string-from-int32 integer)))
+                       False
+                           (SourceString (string-from-int32 integer)))
             (Variable identifier)
                 (translate-identifier identifier)
             (Match expression rules _)
@@ -156,34 +174,45 @@
 
 (def translate-function-definition (name arguments expression)
      (match (list-is-empty? arguments)
-            True  (line 0 (list name
-                                (source-space)
-                                (SourceString (data-equals))
-                                (source-space)
-                                (translate-expression 0 expression)))
-            False (join-lines (list
-                    (line 0 (list name
-                                  (source-space)
-                                  (translate-argument-list arguments)
-                                  (SourceString (data-equals))))
-                    (line 1 (list (translate-expression 1 expression)))))))
+            True
+                ((line 0) (list
+                    name
+                    (source-space)
+                    (SourceString (data-equals))
+                    (source-space)
+                    (translate-expression 0 expression)))
+            False
+                (join-lines (list
+                    ((line 0) (list
+                        name
+                        (source-space)
+                        (translate-argument-list arguments)
+                        (SourceString (data-equals))))
+                    ((line 1) (list (translate-expression 1 expression)))))))
+
+(def type-parameter-equals? (identifier parameter)
+     (identifier-equal? identifier (type-parameter-identifier parameter)))
 
 (def translate-simple-type (identifier parameters)
-     (match (list-any? (. (identifier-equal? identifier) type-parameter-identifier) parameters)
-            False  (prefix-type identifier)
-            True   (prefix-type-variable identifier)))
+     (match (list-any? (type-parameter-equals? identifier) parameters)
+            False
+                (prefix-type identifier)
+            True
+                (prefix-type-variable identifier)))
 
 (def translate-complex-types (translate-types name types)
-     ((pipe (translate-types (data-space))
-            (source-string-concat (source-string-concat (prefix-type name) (source-space)))
-            wrap-in-brackets')
+     ((pipe
+         (translate-types (data-space))
+         (source-string-concat (source-string-concat (prefix-type name) (source-space)))
+         wrap-in-brackets')
         types))
 
 (def translate-function-type (translate-types return-type argument-types)
-     ((pipe (fn (argument-types)
-                (list-concat argument-types (list return-type)))
-            (translate-types (data-arrow))
-            wrap-in-brackets')
+     ((pipe
+         (fn (argument-types)
+             (list-concat argument-types (list return-type)))
+         (translate-types (data-arrow))
+         wrap-in-brackets')
         argument-types))
 
 (def translate-type (translate-types parameters type)
@@ -196,8 +225,9 @@
                 (translate-function-type translate-types return-type argument-types)))
 
 (def translate-types (parameters separator types)
-     ((pipe (list-map (translate-type (translate-types parameters) parameters))
-            (source-string-join separator))
+     ((pipe
+         (list-map (translate-type (translate-types parameters) parameters))
+         (source-string-join separator))
         types))
 
 (def translate-type-parameter (parameter)
@@ -208,9 +238,10 @@
                 (SourceString (identifier-name identifier))))
 
 (def translate-complex-constructor-definition (name types parameters)
-     (join' (list (translate-constructor-identifier name)
-                  (source-space)
-                  (translate-types parameters (data-space) types))))
+     (join' (list
+         (translate-constructor-identifier name)
+         (source-space)
+         (translate-types parameters (data-space) types))))
 
 (def translate-constructor-definition (parameters constructor)
      (match constructor
@@ -220,46 +251,42 @@
                 (translate-complex-constructor-definition identifier types parameters)))
 
 (def translate-constructor-definitions (n parameters)
-     (pipe (list-map (translate-constructor-definition parameters))
-           (source-string-join (string-concat (newline) (string-concat (indent n) (data-vertical-bar))))))
+     (pipe
+         (list-map (translate-constructor-definition parameters))
+         (source-string-join (string-concat (newline) (string-concat (indent n) (data-vertical-bar))))))
 
-(def translate-universal-parameters (parameters)
-     (list-foldl (fn (parameter s)
-                     (match parameter
-                            (UniversalParameter identifier)
-                                (join' (list s
-                                             (source-space)
-                                             (prefix-type-variable identifier)))
-                            (ExistentialParameter _)
-                                s))
-                 (source-string-empty)
-                 parameters))
+(def append-universal-parameter (parameter s)
+     (match parameter
+            (UniversalParameter identifier)
+                (join' (list s (source-space) (prefix-type-variable identifier)))
+            (ExistentialParameter _)
+                s))
 
-(def translate-existential-parameters (parameters)
-     (list-foldl (fn (parameter s)
-                     (match parameter
-                            (UniversalParameter _)
-                                s
-                            (ExistentialParameter identifier)
-                                (join' (list s
-                                             (SourceString (data-forall))
-                                             (source-space)
-                                             (prefix-type-variable identifier)
-                                             (SourceString (data-dot))
-                                             (source-space)))))
-                 (source-string-empty)
-                 parameters))
+(def append-existential-parameter (parameter s)
+     (match parameter
+            (UniversalParameter _)
+                s
+            (ExistentialParameter identifier)
+                (join' (list
+                    s
+                    (SourceString (data-forall))
+                    (source-space)
+                    (prefix-type-variable identifier)
+                    (SourceString (data-dot))
+                    (source-space)))))
 
 (def translate-type-definition (name parameters constructors)
      (join-lines (list
-            (line 0 (list (SourceString (data-data))
-                          (source-space)
-                          (prefix-type name)
-                          (translate-universal-parameters parameters)
-                          (SourceString (data-equals))
-                          (translate-existential-parameters parameters)))
-            (line 1 (list (SourceString (string-repeat (data-space) 3))
-                          (translate-constructor-definitions 1 parameters constructors))))))
+         ((line 0) (list
+             (SourceString (data-data))
+             (source-space)
+             (prefix-type name)
+             (list-foldl append-universal-parameter (source-string-empty) parameters)
+             (SourceString (data-equals))
+             (list-foldl append-existential-parameter (source-string-empty) parameters)))
+         ((line 1) (list
+             (SourceString (string-repeat (data-space) 3))
+             (translate-constructor-definitions 1 parameters constructors))))))
 
 (def translate-definition (definition)
      (match definition
@@ -271,11 +298,12 @@
                 (SourceString (string-from-slice data))))
 
 (def translate-module-declaration (module-name)
-     (join' (list (SourceString (data-module))
-                  (source-space)
-                  (SourceString module-name)
-                  (source-space)
-                  (SourceString (data-where)))))
+     (join' (list
+         (SourceString (data-module))
+         (source-space)
+         (SourceString module-name)
+         (source-space)
+         (SourceString (data-where)))))
 
 (def definition-to-public-identifier (definition)
      (match definition
@@ -290,17 +318,19 @@
      (list-flatmap (. list-from-maybe definition-to-public-identifier) definitions))
 
 (def generate-source (module-name definitions)
-     ((pipe (list-map translate-definition)
-            (list-cons (translate-module-declaration module-name))
-            (list-cons (SourceString (data-language-exts)))
-            (source-string-join (string-of-char 10))
-            (pair-cons (public-identifiers-with-transformations definitions)))
-         definitions))
+     ((pipe
+         (list-map translate-definition)
+         (list-cons (translate-module-declaration module-name))
+         (list-cons (SourceString (data-language-exts)))
+         (source-string-join (string-of-char 10))
+         (pair-cons (public-identifiers-with-transformations definitions)))
+       definitions))
 
 (pub def compiler-backend-haskell ()
-     (Backend (data-haskell-language)
-              (list (data-preamble-filename))
-              (list (data-pervasives-filename))
-              generate-source
-              (reserved-identifiers)
-              (. local-transforms validate-reserved-identifiers)))
+     (Backend
+         (data-haskell-language)
+         (list (data-preamble-filename))
+         (list (data-pervasives-filename))
+         generate-source
+         (reserved-identifiers)
+         (. local-transforms validate-reserved-identifiers)))
