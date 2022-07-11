@@ -21,7 +21,7 @@ state-map
 
 
 state-flatmap
-> (string-from-list (state-final-value Empty (state-flatmap (pipe list-from state-lift) (state-lift 65))))
+> (string-from-list (state-final-value Empty (state-flatmap (. state-lift list-from) (state-lift 65))))
 = A
 
 
