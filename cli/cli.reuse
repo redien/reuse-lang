@@ -27,9 +27,6 @@
      (CliError string (fn () cli-program))
      (CliExit int32))
 
-(def let-bind (x f)
-     (f x))
-
 (def time-bind (f)
      (CliTime f))
 

@@ -4,3 +4,5 @@
 (pub def flip (f) (fn (b a) (f a b)))
 (pub def .2 (f g x y) (f (g x y)))
 (pub def fix (f) (f (fix f)))
+(pub def let-bind (x f)
+     (f x))
