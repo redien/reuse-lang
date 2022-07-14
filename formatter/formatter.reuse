@@ -127,8 +127,8 @@
 
 (def format-type-constructor-split (constructor)
      (match constructor
-            (List (Cons identifier types) _)
-               (wrap-in-brackets (string-join (indent 5) (Cons (stringify-sexp identifier) (list-map format-type types))))
+            (List (Cons identifier (Cons first rest)) _)
+               (wrap-in-brackets (string-join (space) (list (stringify-sexp identifier) (string-join (indent (+ (string-size (stringify-sexp identifier)) 7)) (Cons (format-type first) (list-map format-type rest))))))
             x
                (stringify-sexp x)))
 
@@ -151,7 +151,7 @@
           (Cons constructor Empty)
                (match (>= (string-size (stringify-sexps constructors)) 80)
                       True
-                          (string-concat (space) (format-type-constructor-split constructor))
+                          (string-concat (indent 5) (format-type-constructor-split constructor))
                       False
                           (string-concat (space) (format-type-constructor constructor)))
           _
