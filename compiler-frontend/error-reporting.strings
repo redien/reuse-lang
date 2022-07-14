@@ -1,9 +1,21 @@
-reserved-identifier-error    |Symbols prefixed with ✨ are reserved:
-not-defined-error            |The following identifier was not defined: 
-already-defined-error        |The following identifier was already defined: 
-malformed-function-definition|Malformed function definition found:
-no-location-information      |(No location information available)
-Line:                        |Line: 
-Column:                      |Column: 
-File:                        |File: 
-Range:                       |Range: 
+internal-error                        |Encountered an error here but it was unexpected. This might be a compiler bug:
+reserved-identifier-error             |Symbols prefixed with ✨ are reserved:
+not-defined-error                     |The following identifier was not defined: 
+already-defined-error                 |The following identifier was already defined: 
+malformed-expression                  |I expected an expression here but it doesn't contain anything:
+malformed-function-definition         |Malformed function definition found:
+malformed-definition                  |Only type- or function definitions can be in the top level of a file. You need to wrap expressions in a function.
+malformed-type-definition             |I think you wanted to write a type definition, but it doesn't have the right shape. It should look like this:
+malformed-type-definition-ex          |(type name-of-type NameOfConstructor ...)
+malformed-pattern                     |I expected a pattern here but this doesn't look correct.
+malformed-match-expression            |This match expression is not correct, make sure you have put parentheses correctly so that all your match rules come in pairs:
+malformed-symbol                      |Expected an identifier here:
+malformed-constructor                 |Expected a constructor here:
+malformed-type                        |Expected a type here:
+too-few-closing-brackets              |There are too few closing parentheses.
+too-many-closing-brackets             |There are too many closing parentheses.
+no-location-information               |(No location information available)
+Line:                                 |Line: 
+Column:                               |Column: 
+File:                                 |File: 
+Range:                                |Range: 

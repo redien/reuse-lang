@@ -6,14 +6,23 @@
      (Pair (ModulePath (path-filename-without-extension path) open?) path))
 
 (def standard-library-files (backend data-path)
-     (Cons (path-join (list data-path (data-standard-library-filename)))
-           (list-map (fn (filename) (path-join (list data-path filename))) (compiler-backend-pervasives-files backend))))
+     (Cons
+         (path-join (list data-path (data-standard-library-filename)))
+         (list-map
+             (fn (filename)
+                 (path-join (list data-path filename)))
+             (compiler-backend-pervasives-files backend))))
 
 (pub def standard-library-module (backend data-path)
-     (list-map (module-name-and-path True) (standard-library-files backend data-path)))
+     (list-map
+         (module-name-and-path True)
+         (standard-library-files backend data-path)))
 
 (pub def parser-module (backend data-path)
      (module-name-and-path True (path-join (list data-path (data-parser-filename)))))
 
 (pub def preamble-files (backend data-path)
-     (list-map (fn (filename) (Pair ModuleSelf (string-concat data-path filename))) (compiler-backend-preamble-files backend)))
+     (list-map
+         (fn (filename)
+             (Pair ModuleSelf (string-concat data-path filename)))
+         (compiler-backend-preamble-files backend)))

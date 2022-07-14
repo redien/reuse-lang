@@ -1,8 +1,9 @@
+InternalParserError                 |InternalParserError
+MalformedExpressionError            |MalformedExpressionError
 MalformedDefinitionError            |MalformedDefinitionError
 MalformedTypeDefinitionError        |MalformedTypeDefinitionError
 MalformedFunctionDefinitionError    |MalformedFunctionDefinitionError
-MalformedFunctionNameError          |MalformedFunctionNameError
-MalformedExpressionError            |MalformedExpressionError
+MalformedPatternError               |MalformedPatternError
 MalformedMatchExpressionError       |MalformedMatchExpressionError
 MalformedSymbolError                |MalformedSymbolError
 MalformedConstructorError           |MalformedConstructorError

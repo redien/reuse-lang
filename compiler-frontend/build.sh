@@ -12,7 +12,6 @@ $project_root/bin/reusec --language module\
                          --module $($project_root/dev-env/builddir.sh parser)/parser.reuse\
                          --module $($project_root/dev-env/builddir.sh compiler-backend)/compiler-backend.reuse\
                          $project_root/compiler-frontend/error-reporting.strings\
-                         $project_root/compiler-frontend/error-strings.reuse\
                          $project_root/compiler-frontend/error-reporting.reuse\
                          $project_root/compiler-frontend/path.strings\
                          $project_root/compiler-frontend/path.reuse\

@@ -1,38 +1,67 @@
 
 (def usage (modules)
-    (string-join (string-of-char 10) (list
-          (data-usage1)
-          (string-empty)
-          (data-usage2)
-          (string-empty)
-          (data-usage3)
-          (data-usage4)
-          (data-usage5)
-          (data-usage6)
-          (data-usage7)
-          (string-empty)
-          (string-concat (data-usage8) (string-join (string-of-char 32) (list-map compiler-backend-name modules))))))
+     (string-join
+         (string-of-char 10)
+         (list
+             (data-usage1)
+             (string-empty)
+             (data-usage2)
+             (string-empty)
+             (data-usage3)
+             (data-usage4)
+             (data-usage5)
+             (data-usage6)
+             (data-usage7)
+             (string-empty)
+             (string-concat
+                 (data-usage8)
+                 (string-join (string-of-char 32) (list-map compiler-backend-name modules))))))
 
-(typ cli-program (CliTime (fn (int32) cli-program))
-                 (CliMaxHeapSize (fn (int32) cli-program))
-                 (CliRenderSource (pair (list (pair identifier-transformation identifier)) source-string)
-                                  (list (fn () string))
-                                  (fn (slice) cli-program))
-                 (CliReadFiles (list (pair module-reference string)) (fn ((list source-file)) cli-program))
-                 (CliWriteFiles (list (pair string slice)) (fn () cli-program))
-                 (CliOutput string (fn () cli-program))
-                 (CliError string (fn () cli-program))
-                 (CliExit int32))
+(typ cli-program
+     (CliTime (fn (int32) cli-program))
+     (CliMaxHeapSize (fn (int32) cli-program))
+     (CliRenderSource (pair (list (pair identifier-transformation identifier)) source-string) (list (fn () string)) (fn (slice) cli-program))
+     (CliReadFiles (list (pair module-reference string)) (fn ((list source-file)) cli-program))
+     (CliWriteFiles (list (pair string slice)) (fn () cli-program))
+     (CliOutput string (fn () cli-program))
+     (CliError string (fn () cli-program))
+     (CliExit int32))
+
+(def let-bind (x f)
+     (f x))
+
+(def time-bind (f)
+     (CliTime f))
+
+(def max-heap-size-bind (f)
+     (CliMaxHeapSize f))
+
+(def render-source-bind (source reserved-identifiers f)
+     (CliRenderSource source reserved-identifiers f))
+
+(def read-files-bind (paths f)
+     (CliReadFiles paths f))
+
+(def write-files-bind (files f)
+     (CliWriteFiles files f))
+
+(def error-bind (message f)
+     (CliError message f))
 
 (def flag-is-true? (flag default arguments)
      (match (dictionary-get flag arguments)
-            (Some value)  (string-equal? value (data-true))
-            None          default))
+            (Some value)
+                (string-equal? value (data-true))
+            None
+                default))
 
 (def find-backend (arguments)
-     (maybe-or-else (compiler-backend-ocaml)
-     (maybe-bind (dictionary-get (data-language-flag) arguments)  (fn (language)
-     (list-find-first (. (string-equal? language) compiler-backend-name) (compiler-backends))))))
+     (maybe-or-else
+         (compiler-backend-ocaml)
+         (maybe-bind (dictionary-get (data-language-flag) arguments) (fn (language)
+         (list-find-first
+             (. (string-equal? language) compiler-backend-name)
+             (compiler-backends))))))
 
 (def modules-from-arguments (backend data-path arguments)
      (pipe
@@ -40,111 +69,129 @@
          (list-filter (. (string-equal? (data-module-flag)) pair-left))
          (list-map (. (module-name-and-path False) pair-right))
          (match (flag-is-true? (data-parser-flag) False (dictionary-of arguments))
-                True   (list-cons (parser-module backend data-path))
-                False  id)
+                True
+                    (list-cons (parser-module backend data-path))
+                False
+                    id)
          (match (flag-is-true? (data-stdlib) True (dictionary-of arguments))
-                True   (list-concat (standard-library-module backend data-path))
-                False  id)))
+                True
+                    (list-concat (standard-library-module backend data-path))
+                False
+                    id)))
 
 (def table-to-string (table)
-     (string-join (string-of-char 10) (list-map (string-join (string-of-char 32)) table)))
+     (string-join
+         (string-of-char 10)
+         (list-map (string-join (string-of-char 32)) table)))
 
-(def print-diagnostics (arguments file-entries
-                        max-heap-size
-                        start-parse end-parse
-                        start-transform end-transform
-                        start-generate end-generate
-                        start-read-files end-read-files
-                        start-write-files end-write-files
-                        k)
+(def print-diagnostics (arguments file-entries max-heap-size start-parse end-parse start-transform end-transform start-generate end-generate start-read-files end-read-files start-write-files end-write-files k)
      (match (flag-is-true? (data-diagnostics-flag) False arguments)
             True
-               (CliError (table-to-string (list 
-                    (list (string-from-int32 (list-foldl (fn (file bytes) (+ bytes (source-file-size file))) 0 file-entries)) (data-bytes-read))
-                    (list (string-from-int32 max-heap-size) (data-max-heap-size))
-                    (list (string-from-int32 (- end-parse start-parse)) (data-parse-time))
-                    (list (string-from-int32 (- end-transform start-transform)) (data-transform-time))
-                    (list (string-from-int32 (- end-generate start-generate)) (data-generate-time))
-                    (list (string-from-int32 (- end-read-files start-read-files)) (data-read-files))
-                    (list (string-from-int32 (- end-write-files start-write-files)) (data-write-files))))
-                                 k)
+                (CliError
+                    (table-to-string (list
+                        (list
+                            (string-from-int32 (list-foldl
+                                (fn (file bytes)
+                                    (+ bytes (source-file-size file)))
+                                0
+                                file-entries))
+                            (data-bytes-read))
+                        (list (string-from-int32 max-heap-size) (data-max-heap-size))
+                        (list (string-from-int32 (- end-parse start-parse)) (data-parse-time))
+                        (list
+                            (string-from-int32 (- end-transform start-transform))
+                            (data-transform-time))
+                        (list (string-from-int32 (- end-generate start-generate)) (data-generate-time))
+                        (list
+                            (string-from-int32 (- end-read-files start-read-files))
+                            (data-read-files))
+                        (list
+                            (string-from-int32 (- end-write-files start-write-files))
+                            (data-write-files))))
+                    k)
             False
-               (k)))
+                (k)))
 
 (def format-input-files (input-files)
-     (CliReadFiles (list-map (pair-cons ModuleSelf) input-files) (fn (source-files)
-     (match (format-source-files source-files)
-            (Result files-to-write)
-                  (CliWriteFiles files-to-write (fn ()
-                  (CliExit 0)))
-            (Error error-message)
-                  (CliError error-message (fn ()
-                  (CliExit 1)))))))
+     (CliReadFiles
+         (list-map (pair-cons ModuleSelf) input-files)
+         (fn (source-files)
+             (match (format-source-files source-files)
+                    (Result files-to-write)
+                        (CliWriteFiles files-to-write (fn ()
+                            (CliExit 0)))
+                    (Error error-message)
+                        (error-bind error-message (fn ()
+                        (CliExit 1)))))))
+
+(def compile-input-files (input-files data-path arguments argument-list)
+     (let-bind (find-backend arguments) (fn (backend)
+     (time-bind (fn (start-read-files)
+     (read-files-bind (list-concat (preamble-files backend data-path) (list-concat (modules-from-arguments backend data-path argument-list) (list-map (pair-cons ModuleSelf) input-files))) (fn (file-entries)
+     (time-bind (fn (end-read-files)
+     (match (dictionary-get (data-output-key) arguments)
+            (Some output-path)
+                (let-bind (path-filename-without-extension output-path) (fn (module-name)
+                (time-bind (fn (start-parse)
+                (let-bind (parse-source-files (with-local-transform-keywords (intrinsic-identifiers)) file-entries) (fn (definitions)
+                (time-bind (fn (end-parse)
+                (time-bind (fn (start-transform)
+                (let-bind (compiler-backend-transform-definitions backend definitions) (fn (definitions)
+                (time-bind (fn (end-transform)
+                (time-bind (fn (start-generate)
+                (match (generate backend module-name definitions)
+                       (Result source)
+                           (time-bind (fn (end-generate)
+                           (time-bind (fn (start-write-files)
+                           (render-source-bind source (compiler-backend-reserved-identifiers backend) (fn (source)
+                           (write-files-bind (list (Pair output-path source)) (fn ()
+                           (time-bind (fn (end-write-files)
+                           (CliMaxHeapSize (fn (max-heap-size)
+                               (print-diagnostics
+                                   arguments
+                                   file-entries
+                                   max-heap-size
+                                   start-parse
+                                   end-parse
+                                   start-transform
+                                   end-transform
+                                   start-generate
+                                   end-generate
+                                   start-read-files
+                                   end-read-files
+                                   start-write-files
+                                   end-write-files
+                                   (fn ()
+                                       (CliExit 0)))))))))))))))
+                       (Error error)
+                           (error-bind (error-to-string file-entries error) (fn ()
+                           (CliExit 1))))))))))))))))))))
+            None
+                (error-bind (data-no-output-path) (fn ()
+                (CliExit 1)))))))))))))
 
 (def cli-main (data-path argv)
      (match (parse-arguments argv)
-          (CliArguments Empty Empty)
-               (CliError (usage (compiler-backends)) (fn ()
-               (CliExit 1)))
-          (CliErrorMissingValue key)
-               (CliError key (fn ()
-               (CliExit 1)))
-          (CliArguments argument-list input-files)
-     (match (dictionary-of argument-list)
-            arguments
-     (match (dictionary-has? (data-h) arguments)
-            True
-                  (CliError (usage (compiler-backends)) (fn ()
-                  (CliExit 1)))
-            False
-     (match (list-is-empty? input-files)
-            True
-                  (CliError (data-no-input-files) (fn ()
-                  (CliExit 1)))
-            False
-     (match (dictionary-has? (data-f) arguments)
-            True
-                  (format-input-files input-files)
-            False
-     (match (find-backend arguments)  backend
-     (CliTime (fn (start-read-files)
-     (CliReadFiles (list-concat (preamble-files backend data-path)
-                   (list-concat (modules-from-arguments backend data-path argument-list)
-                                (list-map (pair-cons ModuleSelf) input-files)))
-                          (fn (file-entries)
-     (CliTime (fn (end-read-files)
-          (match (dictionary-get (data-output-key) arguments)
-               (Some output-path)
-                    (match (path-filename-without-extension output-path)
-                           module-name
-                    (CliTime (fn (start-parse)
-                    (match (parse-source-files (with-local-transform-keywords (intrinsic-identifiers)) file-entries)
-                           definitions
-                    (CliTime (fn (end-parse)
-                    (CliTime (fn (start-transform)
-                    (match (compiler-backend-transform-definitions backend definitions)
-                           definitions
-                    (CliTime (fn (end-transform)
-                    (CliTime (fn (start-generate)
-                    (match (generate backend module-name definitions)
-                           (Result source)
-                              (CliTime (fn (end-generate)
-                              (CliTime (fn (start-write-files)
-                              (CliRenderSource source (compiler-backend-reserved-identifiers backend) (fn (source)
-                              (CliWriteFiles (list (Pair output-path source)) (fn ()
-                              (CliTime (fn (end-write-files)
-                              (CliMaxHeapSize (fn (max-heap-size)
-                              (print-diagnostics arguments file-entries
-                                                 max-heap-size
-                                                 start-parse end-parse
-                                                 start-transform end-transform
-                                                 start-generate end-generate
-                                                 start-read-files end-read-files
-                                                 start-write-files end-write-files (fn ()
-                              (CliExit 0)))))))))))))))
-                           (Error error)
-                              (CliError (error-to-string file-entries error) (fn ()
-                              (CliExit 1)))))))))))))))))
-               None
-                    (CliError (data-no-output-path) (fn ()
-                    (CliExit 1)))))))))))))))))
+            (CliArguments Empty Empty)
+                (error-bind (usage (compiler-backends)) (fn ()
+                (CliExit 1)))
+            (CliErrorMissingValue key)
+                (error-bind key (fn ()
+                (CliExit 1)))
+            (CliArguments argument-list input-files)
+                (let-bind (dictionary-of argument-list) (fn (arguments)
+                (match (dictionary-has? (data-h) arguments)
+                       True
+                           (error-bind (usage (compiler-backends)) (fn ()
+                           (CliExit 1)))
+                       False
+                           (match (list-is-empty? input-files)
+                                  True
+                                      (error-bind (data-no-input-files) (fn ()
+                                      (CliExit 1)))
+                                  False
+                                      (match (dictionary-has? (data-f) arguments)
+                                             True
+                                                 (format-input-files input-files)
+                                             False
+                                                 (compile-input-files input-files data-path arguments argument-list))))))))

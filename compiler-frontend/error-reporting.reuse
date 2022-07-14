@@ -1,26 +1,36 @@
 
 (def string-format (list)
-     (string-join (string-of-char 10)
-                  (list-map (string-join (string-empty)) list)))
+     (string-join (string-of-char 10) (list-map (string-join (string-empty)) list)))
+
+(def file-matches-reference (source-reference file)
+     (pipe
+         file
+         source-file-path
+         (string-equal? (source-reference-file-path source-reference))))
 
 (def find-file-matching (files source-reference)
-     (list-find-first (. (string-equal? (source-reference-file-path source-reference)) source-file-path) files))
+     (list-find-first (file-matches-reference source-reference) files))
 
 (def range-information (range)
      (match range
             (Range start end)
-                (string-join (string-of-char 45) (list (string-from-int32 start) (string-from-int32 end)))))
+                (string-join
+                    (string-of-char 45)
+                    (list (string-from-int32 start) (string-from-int32 end)))))
 
 (def count-lines (index lines source)
      (match (string-index-of index (string-of-char 10) source)
-            (Some index)  (count-lines (+ index 1) (+ lines 1) source)
-            None          (Pair lines (+ (- (string-size source) index) 1))))
+            (Some index)
+                (count-lines (+ index 1) (+ lines 1) source)
+            None
+                (Pair lines (+ (- (string-size source) index) 1))))
 
 (def line-information (file range)
      (match range
             (Range start _)
-                (match (string-from-slice (source-file-content file))  content
-                (count-lines 0 1 (string-substring 0 start content)))))
+                (match (string-from-slice (source-file-content file))
+                       content
+                           (count-lines 0 1 (string-substring 0 start content)))))
 
 (def next-newline (content index)
      (match (string-index-of index (string-of-char 10) content)
@@ -32,59 +42,89 @@
 (def source-paragraph (file range)
      (match range
             (Range start end)
-                (match (string-from-slice (source-file-content file))  content
-                (match (next-newline content (- start 100))                       paragraph-start
-                (match (- (next-newline content (+ end 50)) paragraph-start)      paragraph-size
-                (match (string-substring paragraph-start paragraph-size content)  region
-                region))))))
+                (match (string-from-slice (source-file-content file))
+                       content
+                           (match (next-newline content (- start 100))
+                                  paragraph-start
+                                      (match (- (next-newline content (+ end 50)) paragraph-start)
+                                             paragraph-size
+                                                 (string-substring paragraph-start paragraph-size content))))))
 
 (def location-information (files source-reference range)
      (match (find-file-matching files source-reference)
             (Some file)
                 (match (line-information file range)
                        (Pair lines column)
-                            (string-format (list Empty
-                                                 (list (source-paragraph file range))
-                                                 Empty
-                                                 (list (data-Line:) (string-from-int32 lines))
-                                                 (list (data-Column:) (string-from-int32 column))
-                                                 (list (data-Range:) (range-information range))
-                                                 (list (data-File:) (source-file-path file)))))
-            None         (data-no-location-information)))
+                           (string-format (list
+                               Empty
+                               (list (source-paragraph file range))
+                               Empty
+                               (list (data-Line:) (string-from-int32 lines))
+                               (list (data-Column:) (string-from-int32 column))
+                               (list (data-Range:) (range-information range))
+                               (list (data-File:) (source-file-path file)))))
+            None
+                (data-no-location-information)))
 
 (pub def error-to-string (files error)
      (match error
-            (MalformedDefinitionError range)
-                (i18n-malformed-definition-error range)
+            (InternalParserError source-reference range)
+                (string-format (list
+                    (list (data-internal-error))
+                    (list (location-information files source-reference range))))
+            (MalformedExpressionError source-reference range)
+                (string-format (list
+                    (list (data-malformed-expression))
+                    (list (location-information files source-reference range))))
+            (MalformedDefinitionError source-reference range)
+                (string-format (list
+                    (list (data-malformed-definition))
+                    (list (location-information files source-reference range))))
             (MalformedFunctionDefinitionError source-reference range)
                 (string-format (list
                     (list (data-malformed-function-definition))
                     (list (location-information files source-reference range))))
-            (MalformedTypeDefinitionError range)
-                (i18n-malformed-type-definition-error range)
-            (MalformedFunctionNameError range)
-                (i18n-malformed-function-name-error range)
-            (MalformedExpressionError range)
-                (i18n-malformed-expression-error range)
-            (MalformedMatchExpressionError range)
-                (i18n-malformed-match-expression-error range)
-            (MalformedSymbolError range)
-                (i18n-malformed-symbol-error range)
-            (MalformedConstructorError range)
-                (i18n-malformed-constructor-error range)
-            (MalformedTypeError range)
-                (i18n-malformed-type-error range)
+            (MalformedTypeDefinitionError source-reference range)
+                (string-format (list
+                    (list (data-malformed-type-definition))
+                    Empty
+                    (list (data-malformed-type-definition-ex))
+                    (list (location-information files source-reference range))))
+            (MalformedPatternError source-reference range)
+                (string-format (list
+                    (list (data-malformed-pattern))
+                    (list (location-information files source-reference range))))
+            (MalformedMatchExpressionError source-reference range)
+                (string-format (list
+                    (list (data-malformed-match-expression))
+                    (list (location-information files source-reference range))))
+            (MalformedSymbolError source-reference range)
+                (string-format (list
+                    (list (data-malformed-symbol))
+                    (list (location-information files source-reference range))))
+            (MalformedConstructorError source-reference range)
+                (string-format (list
+                    (list (data-malformed-constructor))
+                    (list (location-information files source-reference range))))
+            (MalformedTypeError source-reference range)
+                (string-format (list
+                    (list (data-malformed-type))
+                    (list (location-information files source-reference range))))
             (ErrorNotDefined name source-reference range)
                 (string-format (list
                     (list (string-concat (data-not-defined-error) name))
                     (list (location-information files source-reference range))))
-            (ErrorAlreadyDefined name)
-                (string-concat (data-already-defined-error) name)
+            (ErrorAlreadyDefined name source-reference range)
+                (string-format (list
+                    (list (string-concat (data-already-defined-error) name))
+                    (list (location-information files source-reference range))))
             (ErrorReservedIdentifier name source-reference range)
                 (string-format (list
                     (list (string-concat (data-reserved-identifier-error) name))
                     (list (location-information files source-reference range))))
             MalformedSexpTooFewClosingBrackets
-                (i18n-malformed-sexp-too-few-closing-brackets)
+                (string-format (list
+                    (list (data-too-few-closing-brackets))))
             MalformedSexpTooManyClosingBrackets
-                (i18n-malformed-sexp-too-many-closing-brackets)))
+                (string-format (list
+                    (list (data-too-many-closing-brackets))))))
