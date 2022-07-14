@@ -68,6 +68,19 @@ Complex types should be formatted on one line
 =      C)
 = 
 
+Complex types should be formatted with one type per line of when constructor is 80 characters or longer
+> (typ a (Foo abcdefghijklmnopqrstabcdefghijklmnopq rstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ123))
+= 
+= (typ a (Foo
+=      abcdefghijklmnopqrstabcdefghijklmnopq
+=      rstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ123))
+=
+
+> (typ a (Foo abcdefghijklmnopqrstabcdefghijklmnopq rstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ12))
+= 
+= (typ a (Foo abcdefghijklmnopqrstabcdefghijklmnopq rstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ12))
+=
+
 Type definitions with public modifier
 > (pub typ a A)
 = 
