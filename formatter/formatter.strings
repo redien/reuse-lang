@@ -11,3 +11,4 @@ list                                |list
 pipe                                |pipe
 open-bracket                        |(
 close-bracket                       |)
+bind                                |bind

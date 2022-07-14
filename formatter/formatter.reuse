@@ -54,18 +54,36 @@
 (def format-match-rules (format-expression depth rules)
      (string-join (indent depth) (list-map (format-match-rule format-expression depth) rules)))
 
+(def monadic-function-call? (expressions)
+     (match (Pair (list-first expressions) (list-last expressions))
+            (Pair (Some (Symbol _ name __)) (Some (List (Cons (Symbol -3 ___ ____) _____) ______)))
+                (match (list-last (string-split 45 name))
+                       (Some last-part)
+                           (string-equal? last-part (data-bind))
+                       None
+                           False)
+            _
+                False))
+
+(def format-long-list-expression (format-expression stringified depth expressions)
+     (match (>= (string-size stringified) 78)
+            True
+               (string-join (indent (+ depth 4)) (list-map (format-expression (+ depth 4)) expressions))
+            False
+               stringified))
+
 (def format-list-expression (format-expression depth expressions)
-     (match (string-join (space) (list-map (format-expression depth) expressions))
-            stringified
-               (match (<= (list-size expressions) 2)
-                      False
-                         (match (>= (string-size stringified) 78)
-                                True
-                                   (string-join (indent (+ depth 4)) (list-map (format-expression (+ depth 4)) expressions))
-                                False
-                                   stringified)
-                      True
-                         stringified)))
+     (match (monadic-function-call? expressions)
+            True
+                (string-join (space) (list-map (format-expression (- depth 4)) expressions))
+            False
+                (match (string-join (space) (list-map (format-expression depth) expressions))
+                       stringified
+                          (match (<= (list-size expressions) 2)
+                                 False
+                                    (format-long-list-expression format-expression stringified depth expressions)
+                                 True
+                                    stringified))))
 
 (def format-expression (depth expression)
      (match expression
