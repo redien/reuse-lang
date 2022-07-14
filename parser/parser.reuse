@@ -1,21 +1,28 @@
 
-(def identifier-def ()              -1)
-(def identifier-typ ()              -2)
-(def identifier-fn ()               -3)
-(def identifier-match ()            -4)
-(def identifier-exists ()           -5)
-(def identifier-pub ()              -6)
+(def identifier-def () -1)
+
+(def identifier-typ () -2)
+
+(def identifier-fn () -3)
+
+(def identifier-match () -4)
+
+(def identifier-exists () -5)
+
+(def identifier-pub () -6)
 
 (def with-language-identifiers (other-symbols)
-     (list-concat other-symbols (list
-        (Pair (identifier-def) (data-def))
-        (Pair (identifier-typ) (data-typ))
-        (Pair (identifier-fn) (data-fn))
-        (Pair (identifier-match) (data-match))
-        (Pair (identifier-exists) (data-exists))
-        (Pair (identifier-pub) (data-pub)))))
+     (list-concat
+         other-symbols
+         (list
+             (Pair (identifier-def) (data-def))
+             (Pair (identifier-typ) (data-typ))
+             (Pair (identifier-fn) (data-fn))
+             (Pair (identifier-match) (data-match))
+             (Pair (identifier-exists) (data-exists))
+             (Pair (identifier-pub) (data-pub)))))
 
-(pub typ error  
+(pub typ error
      (InternalParserError source-reference range)
      (MalformedExpressionError source-reference range)
      (MalformedDefinitionError source-reference range)
@@ -39,13 +46,13 @@
                 (parser-return (Identifier token name source-reference range None))))
             (Integer _ range)
                 (parser-bind (parser-get-source-reference) (fn (source-reference)
-                (parser-error  (MalformedSymbolError source-reference range))))
+                (parser-error (MalformedSymbolError source-reference range))))
             (List _ range)
                 (parser-bind (parser-get-source-reference) (fn (source-reference)
-                (parser-error  (MalformedSymbolError source-reference range))))))
+                (parser-error (MalformedSymbolError source-reference range))))))
 
 (def resolve-symbol (symbol scope)
-     (parser-bind (symbol-to-identifier symbol)            (fn (identifier)
+     (parser-bind (symbol-to-identifier symbol) (fn (identifier)
      (match (parser-scope-resolve identifier scope)
             (Identifier _ name source-reference range None)
                 (parser-error (ErrorNotDefined name source-reference range))
@@ -53,108 +60,110 @@
                 (parser-return identifier)))))
 
 (def sexp-to-complex-type (sexp-to-type scope symbol parameters range)
-     (parser-bind   (resolve-symbol symbol scope)                                 (fn (identifier)
-     (parser-bind   (parser-sequence (list-map (sexp-to-type scope) parameters))  (fn (sub-types)
+     (parser-bind (resolve-symbol symbol scope) (fn (identifier)
+     (parser-bind (parser-sequence (list-map (sexp-to-type scope) parameters)) (fn (sub-types)
      (parser-return (ComplexType identifier sub-types range)))))))
 
 (def sexp-to-function-type (sexp-to-type parameters range)
      (match parameters
             (Cons (List arg-types _) (Cons return-type Empty))
-                (parser-bind   (parser-sequence (list-map sexp-to-type arg-types))   (fn (arg-types)
-                (parser-bind   (sexp-to-type return-type)                            (fn (return-type)
+                (parser-bind (parser-sequence (list-map sexp-to-type arg-types)) (fn (arg-types)
+                (parser-bind (sexp-to-type return-type) (fn (return-type)
                 (parser-return (FunctionType arg-types return-type range))))))
             _
-                (parser-bind   (parser-get-source-reference) (fn (source-reference)
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
                 (parser-error (MalformedTypeError source-reference range))))))
 
 (def sexp-to-type (scope type)
      (match type
             (List (Cons symbol parameters) range)
-                (parser-bind   (symbol-to-identifier symbol)  (fn (identifier)
+                (parser-bind (symbol-to-identifier symbol) (fn (identifier)
                 (match (= (identifier-token identifier) (identifier-fn))
-                        True   (sexp-to-function-type (sexp-to-type scope) parameters range)
-                        False  (sexp-to-complex-type sexp-to-type scope symbol parameters range))))
+                       True
+                           (sexp-to-function-type (sexp-to-type scope) parameters range)
+                       False
+                           (sexp-to-complex-type sexp-to-type scope symbol parameters range))))
             (Integer _ range)
-                (parser-bind   (parser-get-source-reference) (fn (source-reference)
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
                 (parser-error (MalformedTypeError source-reference range))))
             (List _ range)
-                (parser-bind   (parser-get-source-reference) (fn (source-reference)
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
                 (parser-error (MalformedTypeError source-reference range))))
             symbol
-                (parser-bind   (resolve-symbol symbol scope)  (fn (identifier)
+                (parser-bind (resolve-symbol symbol scope) (fn (identifier)
                 (parser-return (SimpleType identifier))))))
 
 (def sexp-to-constructor-definition (scope constructor)
      (match constructor
             (List (Cons name types) range)
-                (parser-bind   (symbol-to-identifier name)                             (fn (name)
-                (parser-bind   (parser-bind-symbol! name)                              (fn (name)
-                (parser-bind   (parser-sequence (list-map (sexp-to-type scope) types)) (fn (types)
+                (parser-bind (symbol-to-identifier name) (fn (name)
+                (parser-bind (parser-bind-symbol! name) (fn (name)
+                (parser-bind (parser-sequence (list-map (sexp-to-type scope) types)) (fn (types)
                 (parser-return (ComplexConstructor name types range))))))))
             (Integer _ range)
-                (parser-bind   (parser-get-source-reference) (fn (source-reference)
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
                 (parser-error (MalformedConstructorError source-reference range))))
             (List _ range)
-                (parser-bind   (parser-get-source-reference) (fn (source-reference)
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
                 (parser-error (MalformedConstructorError source-reference range))))
             symbol
-                (parser-bind   (symbol-to-identifier symbol)                   (fn (name)
-                (parser-bind   (parser-bind-symbol! name)                      (fn (name)
+                (parser-bind (symbol-to-identifier symbol) (fn (name)
+                (parser-bind (parser-bind-symbol! name) (fn (name)
                 (parser-return (SimpleConstructor name))))))))
 
 (def sexp-to-type-parameter (sexp)
      (match sexp
             (List (Cons _ (Cons name Empty)) ___)
-                (parser-bind   (symbol-to-identifier name) (fn (name)
-                (parser-bind   (parser-bind-symbol! name)  (fn (name)
+                (parser-bind (symbol-to-identifier name) (fn (name)
+                (parser-bind (parser-bind-symbol! name) (fn (name)
                 (parser-return (ExistentialParameter name))))))
             (Integer _ range)
-                (parser-bind   (parser-get-source-reference) (fn (source-reference)
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
                 (parser-error (MalformedDefinitionError source-reference range))))
             (List _ range)
-                (parser-bind   (parser-get-source-reference) (fn (source-reference)
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
                 (parser-error (MalformedDefinitionError source-reference range))))
             symbol
-                (parser-bind   (symbol-to-identifier symbol) (fn (name)
-                (parser-bind   (parser-bind-symbol! name)  (fn (name)
+                (parser-bind (symbol-to-identifier symbol) (fn (name)
+                (parser-bind (parser-bind-symbol! name) (fn (name)
                 (parser-return (UniversalParameter name))))))))
 
 (def sexp-to-lambda (sexp-to-expression scope rest range)
      (match rest
             (Cons (List arguments _) (Cons expression Empty))
-                (parser-bind   (parser-sequence (list-map symbol-to-identifier arguments))  (fn (arguments)
-                (parser-bind   (parser-bind-symbols! arguments)                      (fn (arguments)
-                (match         (parser-scope-new scope)                              scope
-                (match         (parser-scope-set-all arguments scope)                scope
-                (parser-bind   (sexp-to-expression scope expression)                 (fn (expression)
-                (parser-return (Lambda arguments expression range))))))))))
+                (parser-bind (parser-sequence (list-map symbol-to-identifier arguments)) (fn (arguments)
+                (parser-bind (parser-bind-symbols! arguments) (fn (arguments)
+                (let-bind (parser-scope-new scope) (fn (scope)
+                (let-bind (parser-scope-set-all arguments scope) (fn (scope)
+                (parser-bind (sexp-to-expression scope expression) (fn (expression)
+                (parser-return (Lambda arguments expression range))))))))))))
             _
-                (parser-bind   (parser-get-source-reference) (fn (source-reference)
-                (parser-error  (MalformedFunctionDefinitionError source-reference range))))))
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
+                (parser-error (MalformedFunctionDefinitionError source-reference range))))))
 
 (def sexp-to-function-application (sexp-to-expression range expressions)
      (parser-bind (parser-sequence (list-map sexp-to-expression expressions)) (fn (expressions)
      (parser-return (FunctionApplication expressions range)))))
 
 (def to-constructor-or-capture (scope symbol)
-     (parser-bind (symbol-to-identifier symbol)                                 (fn (identifier)
-     (parser-bind (parser-token-is-constructor? (identifier-token identifier))  (fn (constructor?)
+     (parser-bind (symbol-to-identifier symbol) (fn (identifier)
+     (parser-bind (parser-token-is-constructor? (identifier-token identifier)) (fn (constructor?)
      (match constructor?
             True
-                (parser-bind (resolve-symbol symbol scope)                      (fn (identifier)
+                (parser-bind (resolve-symbol symbol scope) (fn (identifier)
                 (parser-return (ConstructorPattern identifier Empty (identifier-range identifier)))))
             False
-                (parser-bind   (parser-bind-symbol! identifier)                 (fn (identifier)
+                (parser-bind (parser-bind-symbol! identifier) (fn (identifier)
                 (parser-return (Capture identifier))))))))))
 
 (def sexp-to-pattern (scope sexp)
      (match sexp
             (List (Cons name rest) range)
-                (parser-bind   (parser-sequence (list-map (sexp-to-pattern scope) rest)) (fn (patterns)
-                (parser-bind   (resolve-symbol name scope)                               (fn (identifier)
+                (parser-bind (parser-sequence (list-map (sexp-to-pattern scope) rest)) (fn (patterns)
+                (parser-bind (resolve-symbol name scope) (fn (identifier)
                 (parser-return (ConstructorPattern identifier patterns range))))))
             (List Empty range)
-                (parser-bind  (parser-get-source-reference) (fn (source-reference)
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
                 (parser-error (MalformedPatternError source-reference range))))
             (Integer integer range)
                 (parser-return (IntegerPattern integer range))
@@ -164,20 +173,20 @@
 (def sexp-to-match-pair (sexp-to-expression scope range pair)
      (match pair
             (Cons pattern (Cons expression Empty))
-                (parser-bind   (sexp-to-pattern scope pattern)              (fn (pattern)
-                (match         (captured-identifiers-from-pattern pattern)  captures
-                (match         (parser-scope-new scope)                     scope
-                (match         (parser-scope-set-all captures scope)        scope
-                (parser-bind   (sexp-to-expression scope expression)        (fn (expression)
-                (parser-return (Pair pattern expression)))))))))
+                (parser-bind (sexp-to-pattern scope pattern) (fn (pattern)
+                (let-bind (captured-identifiers-from-pattern pattern) (fn (captures)
+                (let-bind (parser-scope-new scope) (fn (scope)
+                (let-bind (parser-scope-set-all captures scope) (fn (scope)
+                (parser-bind (sexp-to-expression scope expression) (fn (expression)
+                (parser-return (Pair pattern expression))))))))))))
             _
-                (parser-bind  (parser-get-source-reference) (fn (source-reference)
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
                 (parser-error (MalformedMatchExpressionError source-reference range))))))
 
 (def sexp-to-match-pairs (sexp-to-expression scope range xs)
      (match (list-partition 2 xs)
             Empty
-                (parser-bind  (parser-get-source-reference) (fn (source-reference)
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
                 (parser-error (MalformedMatchExpressionError source-reference range))))
             pairs
                 (parser-sequence (list-map (sexp-to-match-pair sexp-to-expression scope range) pairs))))
@@ -185,34 +194,43 @@
 (def sexp-to-match (sexp-to-expression scope range rest)
      (match rest
             (Cons expression rest)
-                (parser-bind   (sexp-to-expression scope expression)                      (fn (expression)
-                (parser-bind   (sexp-to-match-pairs sexp-to-expression scope range rest)  (fn (pairs)
+                (parser-bind (sexp-to-expression scope expression) (fn (expression)
+                (parser-bind (sexp-to-match-pairs sexp-to-expression scope range rest) (fn (pairs)
                 (parser-return (Match expression pairs range))))))
             _
-                (parser-bind  (parser-get-source-reference) (fn (source-reference)
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
                 (parser-error (InternalParserError source-reference range))))))
 
 (def sexp-to-constructor (sexp-to-expression range symbol rest scope)
-     (parser-bind   (symbol-to-identifier symbol)                        (fn (identifier)
-     (parser-bind   (resolve-symbol symbol scope)                        (fn (identifier)
-     (parser-bind   (parser-sequence (list-map sexp-to-expression rest)) (fn (expressions)
+     (parser-bind (symbol-to-identifier symbol) (fn (identifier)
+     (parser-bind (resolve-symbol symbol scope) (fn (identifier)
+     (parser-bind (parser-sequence (list-map sexp-to-expression rest)) (fn (expressions)
      (parser-return (Constructor identifier expressions range)))))))))
 
 (def sexp-to-list-expression (sexp-to-expression scope expressions range)
      (match expressions
             (Cons (Symbol token name symbol-range) rest)
-                  (match (= token (identifier-fn))
-                         True   (sexp-to-lambda sexp-to-expression scope rest range)
-                         False
-                  (match (= token (identifier-match))
-                         True   (sexp-to-match sexp-to-expression scope range rest)
-                         False
-                  (parser-bind (parser-token-is-constructor? token) (fn (constructor?)
-                  (match constructor?
-                         True   (sexp-to-constructor (sexp-to-expression scope) range (Symbol token name symbol-range) rest scope)
-                         False  (sexp-to-function-application (sexp-to-expression scope) range expressions))))))
+                (match (= token (identifier-fn))
+                       True
+                           (sexp-to-lambda sexp-to-expression scope rest range)
+                       False
+                           (match (= token (identifier-match))
+                                  True
+                                      (sexp-to-match sexp-to-expression scope range rest)
+                                  False
+                                      (parser-bind (parser-token-is-constructor? token) (fn (constructor?)
+                                      (match constructor?
+                                             True
+                                                 (sexp-to-constructor
+                                                     (sexp-to-expression scope)
+                                                     range
+                                                     (Symbol token name symbol-range)
+                                                     rest
+                                                     scope)
+                                             False
+                                                 (sexp-to-function-application (sexp-to-expression scope) range expressions))))))
             _
-                  (sexp-to-function-application (sexp-to-expression scope) range expressions)))
+                (sexp-to-function-application (sexp-to-expression scope) range expressions)))
 
 (def sexp-to-expression (scope sexp)
      (match sexp
@@ -221,82 +239,84 @@
             (List expressions range)
                 (match expressions
                        Empty
-                            (parser-bind  (parser-get-source-reference) (fn (source-reference)
-                            (parser-error (MalformedExpressionError source-reference range))))
+                           (parser-bind (parser-get-source-reference) (fn (source-reference)
+                           (parser-error (MalformedExpressionError source-reference range))))
                        _
-                            (sexp-to-list-expression sexp-to-expression scope expressions range))
+                           (sexp-to-list-expression sexp-to-expression scope expressions range))
             symbol
-                (parser-bind (resolve-symbol symbol scope)         (fn (identifier)
+                (parser-bind (resolve-symbol symbol scope) (fn (identifier)
                 (parser-bind (parser-token-is-constructor? (identifier-token identifier)) (fn (constructor?)
                 (parser-return (match constructor?
-                                      True   (Constructor identifier Empty (identifier-range identifier))
-                                      False  (Variable identifier)))))))))
+                       True
+                           (Constructor identifier Empty (identifier-range identifier))
+                       False
+                           (Variable identifier)))))))))
 
 (def sexp-to-type-definition (scope type-name public? rest range)
      (match type-name
             (List (Cons name parameters) _)
-                (parser-bind   (symbol-to-identifier name)                                               (fn (name)
-                (parser-bind   (parser-bind-symbol! name)                                                (fn (name)
-                (parser-bind   (parser-sequence (list-map sexp-to-type-parameter parameters))            (fn (parameters)
-                (match         (list-map type-parameter-identifier parameters)                           parameter-identifiers
-                (match         (parser-scope-new scope)                                                  scope
-                (match         (parser-scope-set-all (Cons name parameter-identifiers) scope)            scope
-                (parser-bind   (parser-sequence (list-map (sexp-to-constructor-definition scope) rest))  (fn (constructors)
-                (parser-return (TypeDefinition name public? parameters constructors range)))))))))))))
+                (parser-bind (symbol-to-identifier name) (fn (name)
+                (parser-bind (parser-bind-symbol! name) (fn (name)
+                (parser-bind (parser-sequence (list-map sexp-to-type-parameter parameters)) (fn (parameters)
+                (let-bind (list-map type-parameter-identifier parameters) (fn (parameter-identifiers)
+                (let-bind (parser-scope-new scope) (fn (scope)
+                (let-bind (parser-scope-set-all (Cons name parameter-identifiers) scope) (fn (scope)
+                (parser-bind (parser-sequence (list-map (sexp-to-constructor-definition scope) rest)) (fn (constructors)
+                (parser-return (TypeDefinition name public? parameters constructors range))))))))))))))))
             (Integer _ range)
-                (parser-bind   (parser-get-source-reference) (fn (source-reference)
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
                 (parser-error (MalformedTypeError source-reference range))))
             (List _ range)
-                (parser-bind   (parser-get-source-reference) (fn (source-reference)
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
                 (parser-error (MalformedTypeError source-reference range))))
             symbol
-                (parser-bind   (symbol-to-identifier symbol)                                             (fn (name)
-                (parser-bind   (parser-bind-symbol! name)                                                (fn (name)
-                (match         (parser-scope-new scope)                                                  scope
-                (match         (parser-scope-set name scope)                                             scope
-                (parser-bind   (parser-sequence (list-map (sexp-to-constructor-definition scope) rest))  (fn (constructors)
-                (parser-return (TypeDefinition name public? Empty constructors range))))))))))))
+                (parser-bind (symbol-to-identifier symbol) (fn (name)
+                (parser-bind (parser-bind-symbol! name) (fn (name)
+                (let-bind (parser-scope-new scope) (fn (scope)
+                (let-bind (parser-scope-set name scope) (fn (scope)
+                (parser-bind (parser-sequence (list-map (sexp-to-constructor-definition scope) rest)) (fn (constructors)
+                (parser-return (TypeDefinition name public? Empty constructors range))))))))))))))
 
 (def sexp-to-function-definition (scope name-symbol public? rest range)
      (match rest
             (Cons (List arguments _) (Cons expression Empty))
-                  (parser-bind   (symbol-to-identifier name-symbol)                           (fn (name)
-                  (parser-bind   (parser-bind-symbol! name)                                   (fn (name)
-                  (parser-bind   (parser-sequence (list-map symbol-to-identifier arguments))  (fn (arguments)
-                  (parser-bind   (parser-bind-symbols! arguments)                             (fn (arguments)
-                  (match         (parser-scope-new scope)                                     scope
-                  (match         (parser-scope-set-all (Cons name arguments) scope)           scope
-                  (parser-bind   (sexp-to-expression scope expression)                        (fn (expression)
-                  (parser-return (FunctionDefinition name public? arguments expression range))))))))))))))
+                (parser-bind (symbol-to-identifier name-symbol) (fn (name)
+                (parser-bind (parser-bind-symbol! name) (fn (name)
+                (parser-bind (parser-sequence (list-map symbol-to-identifier arguments)) (fn (arguments)
+                (parser-bind (parser-bind-symbols! arguments) (fn (arguments)
+                (let-bind (parser-scope-new scope) (fn (scope)
+                (let-bind (parser-scope-set-all (Cons name arguments) scope) (fn (scope)
+                (parser-bind (sexp-to-expression scope expression) (fn (expression)
+                (parser-return (FunctionDefinition name public? arguments expression range))))))))))))))))
             _
-                  (parser-bind   (parser-get-source-reference) (fn (source-reference)
-                  (parser-error  (MalformedFunctionDefinitionError source-reference range))))))
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
+                (parser-error (MalformedFunctionDefinitionError source-reference range))))))
 
 (def sexp-to-definition' (scope name public? rest range kind)
      (match (= kind (identifier-typ))
             True
                 (sexp-to-type-definition scope name public? rest range)
             False
-     (match (= kind (identifier-def))
-            True
-                 (sexp-to-function-definition scope name public? rest range)
-            False
-                 (parser-bind (parser-get-source-reference) (fn (source-reference)
-                 (parser-error (MalformedDefinitionError source-reference range)))))))
+                (match (= kind (identifier-def))
+                       True
+                           (sexp-to-function-definition scope name public? rest range)
+                       False
+                           (parser-bind (parser-get-source-reference) (fn (source-reference)
+                           (parser-error (MalformedDefinitionError source-reference range)))))))
 
 (def specific-malformed-definition-error (kind range)
      (match (= kind (identifier-typ))
             True
-                (parser-bind  (parser-get-source-reference) (fn (source-reference)
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
                 (parser-error (MalformedTypeDefinitionError source-reference range))))
             False
-     (match (= kind (identifier-def))
-            True   
-                (parser-bind  (parser-get-source-reference) (fn (source-reference)
-                (parser-error (MalformedFunctionDefinitionError source-reference range))))
-            False
-                (parser-bind (parser-get-source-reference) (fn (source-reference)
-                (parser-error (MalformedDefinitionError source-reference range)))))))
+                (match (= kind (identifier-def))
+                       True
+                           (parser-bind (parser-get-source-reference) (fn (source-reference)
+                           (parser-error (MalformedFunctionDefinitionError source-reference range))))
+                       False
+                           (parser-bind (parser-get-source-reference) (fn (source-reference)
+                           (parser-error (MalformedDefinitionError source-reference range)))))))
 
 (def sexp-to-definition (scope expression)
      (match expression
@@ -309,16 +329,16 @@
             (List (Cons (Symbol kind _ __) (Cons name rest)) range)
                 (sexp-to-definition' scope name False rest range kind)
             (List (Cons (List _ range) Empty) __)
-                (parser-bind   (parser-get-source-reference) (fn (source-reference)
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
                 (parser-error (MalformedDefinitionError source-reference range))))
             (List _ range)
-                (parser-bind   (parser-get-source-reference) (fn (source-reference)
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
                 (parser-error (MalformedDefinitionError source-reference range))))
             (Integer _ range)
-                (parser-bind   (parser-get-source-reference) (fn (source-reference)
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
                 (parser-error (MalformedDefinitionError source-reference range))))
             (Symbol _ __ range)
-                (parser-bind   (parser-get-source-reference) (fn (source-reference)
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
                 (parser-error (MalformedDefinitionError source-reference range))))))
 
 (def parse-definition! (expression)
@@ -328,8 +348,10 @@
 
 (def sexp-error-to-ast-error (error)
      (match error
-            ParseErrorTooFewClosingBrackets   MalformedSexpTooFewClosingBrackets
-            ParseErrorTooManyClosingBrackets  MalformedSexpTooManyClosingBrackets))
+            ParseErrorTooFewClosingBrackets
+                MalformedSexpTooFewClosingBrackets
+            ParseErrorTooManyClosingBrackets
+                MalformedSexpTooManyClosingBrackets))
 
 (def parse-definitions! (module file-path iterator)
      (parser-bind (parser-set-source-reference! (SourceReference file-path module)) (fn (_)
@@ -343,8 +365,10 @@
 
 (def transform-strings (path content)
      (match (string-gen content)
-            (Result string)  (string-to-slice string)
-            (Error error)    (slice-empty)))
+            (Result string)
+                (string-to-slice string)
+            (Error error)
+                (slice-empty)))
 
 (def parse-reuse-file (file)
      (match file
@@ -363,9 +387,12 @@
 
 (def parse-source-file (file)
      (match (source-file-type file)
-            SourceFileTypeStrings         (parse-strings-file file)
-            SourceFileTypeReuse           (parse-reuse-file file)
-            SourceFileTypeTargetLanguage  (parse-target-file file)))
+            SourceFileTypeStrings
+                (parse-strings-file file)
+            SourceFileTypeReuse
+                (parse-reuse-file file)
+            SourceFileTypeTargetLanguage
+                (parse-target-file file)))
 
 (def parse-module (files)
      (parser-bind (parser-new-module!) (fn (_)
@@ -381,9 +408,6 @@
          (parser-run (with-language-identifiers symbols))
          (result-map list-flatten)))
 
-
-
-
 (def identifier-to-symbol (identifier)
      (match identifier
             (Identifier token name _ range __)
@@ -394,10 +418,12 @@
             (SimpleType identifier)
                 (identifier-to-symbol identifier)
             (FunctionType arg-types return-type range)
-                (List (list (Symbol (identifier-fn) (data-fn) range)
-                            (List (types-to-sexp arg-types) range)
-                            (type-to-sexp types-to-sexp return-type))
-                      range)
+                (List
+                    (list
+                        (Symbol (identifier-fn) (data-fn) range)
+                        (List (types-to-sexp arg-types) range)
+                        (type-to-sexp types-to-sexp return-type))
+                    range)
             (ComplexType identifier types range)
                 (List (Cons (identifier-to-symbol identifier) (types-to-sexp types)) range)))
 
@@ -417,18 +443,22 @@
 (def type-parameter-to-sexp (parameter)
      (match parameter
             (ExistentialParameter identifier)
-                (List (list (Symbol (identifier-exists) (data-exists) (identifier-range identifier)) (identifier-to-symbol identifier)) (identifier-range identifier))
+                (List
+                    (list
+                        (Symbol (identifier-exists) (data-exists) (identifier-range identifier))
+                        (identifier-to-symbol identifier))
+                    (identifier-range identifier))
             (UniversalParameter identifier)
                 (identifier-to-symbol identifier)))
 
 (def type-name-to-sexp (token range name parameters)
      (match parameters
             Empty
-                (Symbol token name range) 
+                (Symbol token name range)
             _
-                (List (Cons (Symbol token name range)
-                            (list-map type-parameter-to-sexp parameters))
-                      range)))
+                (List
+                    (Cons (Symbol token name range) (list-map type-parameter-to-sexp parameters))
+                    range)))
 
 (def function-arguments-to-sexp (arguments range)
      (List (list-map identifier-to-symbol arguments) range))
@@ -438,7 +468,9 @@
             (ConstructorPattern identifier Empty _)
                 (identifier-to-symbol identifier)
             (ConstructorPattern identifier patterns range)
-                (List (Cons (identifier-to-symbol identifier) (list-map pattern-to-sexp patterns)) range)
+                (List
+                    (Cons (identifier-to-symbol identifier) (list-map pattern-to-sexp patterns))
+                    range)
             (IntegerPattern value range)
                 (Integer value range)
             (Capture identifier)
@@ -447,7 +479,7 @@
 (def match-pair-to-sexp (expression-to-sexp pair)
      (match pair
             (Pair pattern expression)
-               (list (pattern-to-sexp pattern) (expression-to-sexp expression))))
+                (list (pattern-to-sexp pattern) (expression-to-sexp expression))))
 
 (pub def expression-to-sexp (expression)
      (match expression
@@ -456,46 +488,68 @@
             (Variable (Identifier token string _ range __))
                 (Symbol token string range)
             (Lambda arguments expression range)
-                (List (list (Symbol (identifier-fn) (data-fn) range)
-                            (function-arguments-to-sexp arguments range)
-                            (expression-to-sexp expression))
-                      range)
+                (List
+                    (list
+                        (Symbol (identifier-fn) (data-fn) range)
+                        (function-arguments-to-sexp arguments range)
+                        (expression-to-sexp expression))
+                    range)
             (Match expression pairs range)
-                (List (Cons (Symbol (identifier-match) (data-match) range)
-                      (Cons (expression-to-sexp expression)
-                            (list-flatmap (match-pair-to-sexp expression-to-sexp) pairs))) range)
+                (List
+                    (Cons
+                        (Symbol (identifier-match) (data-match) range)
+                        (Cons
+                            (expression-to-sexp expression)
+                            (list-flatmap (match-pair-to-sexp expression-to-sexp) pairs)))
+                    range)
             (Constructor identifier expressions range)
                 (match expressions
                        Empty
-                            (identifier-to-symbol identifier)
+                           (identifier-to-symbol identifier)
                        _
-                            (List (Cons (identifier-to-symbol identifier) (list-map expression-to-sexp expressions)) range))
+                           (List
+                               (Cons
+                                   (identifier-to-symbol identifier)
+                                   (list-map expression-to-sexp expressions))
+                               range))
             (FunctionApplication expressions range)
                 (List (list-map expression-to-sexp expressions) range)))
 
 (def type-definition-to-sexp (token name parameters constructors range)
-     (list-concat (list (Symbol (identifier-typ) (data-typ) range)
-                        (type-name-to-sexp token range name parameters))
-                  (constructors-to-sexp constructors)))
+     (list-concat
+         (list
+             (Symbol (identifier-typ) (data-typ) range)
+             (type-name-to-sexp token range name parameters))
+         (constructors-to-sexp constructors)))
 
 (def function-definition-to-sexp (name arguments expression range)
-     (list (Symbol (identifier-def) (data-def) range)
-           (identifier-to-symbol name)
-           (function-arguments-to-sexp arguments range)
-           (expression-to-sexp expression)))
+     (list
+         (Symbol (identifier-def) (data-def) range)
+         (identifier-to-symbol name)
+         (function-arguments-to-sexp arguments range)
+         (expression-to-sexp expression)))
 
 (def definition-to-sexp' (public? range sexp)
-     (List (match public?
-                  True   (Cons (Symbol (identifier-pub) (data-pub) range) sexp)
-                  False  sexp)
-           range))
+     (List
+         (match public?
+                True
+                    (Cons (Symbol (identifier-pub) (data-pub) range) sexp)
+                False
+                    sexp)
+         range))
 
 (pub def definition-to-sexp (definition)
      (match definition
             (TypeDefinition (Identifier token name _ __ ___) public? parameters constructors range)
-                (definition-to-sexp' public? range (type-definition-to-sexp token name parameters constructors range))
+                (definition-to-sexp'
+                    public?
+                    range
+                    (type-definition-to-sexp token name parameters constructors range))
             (FunctionDefinition name public? arguments expression range)
-                (definition-to-sexp' public? range (function-definition-to-sexp name arguments expression range))
+                (definition-to-sexp'
+                    public?
+                    range
+                    (function-definition-to-sexp name arguments expression range))
             (TargetDefinition _ data)
                 (Symbol 0 (string-from-slice data) (Range 0 0))))
 

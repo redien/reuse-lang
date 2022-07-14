@@ -1,40 +1,42 @@
 
-(pub typ module-reference       (ModulePath           string boolean)
-                                ModuleSelf)
-(pub typ source-reference       (SourceReference      string module-reference))
-(pub typ identifier             (Identifier           int32 string source-reference range (maybe int32)))
-(pub typ ast-type               (SimpleType           identifier)
-                                (ComplexType          identifier (list ast-type) range)
-                                (FunctionType         (list ast-type) ast-type range))
-(pub typ type-parameter         (UniversalParameter   identifier)
-                                (ExistentialParameter identifier))
-(pub typ constructor            (SimpleConstructor    identifier)
-                                (ComplexConstructor   identifier (list ast-type) range))
-(pub typ pattern                (Capture              identifier)
-                                (IntegerPattern       int32 range)
-                                (ConstructorPattern   identifier (list pattern) range))
-(pub typ expression             (IntegerConstant      int32 range)
-                                (Variable             identifier)
-                                (Lambda               (list identifier)
-                                                      expression
-                                                      range)
-                                (Match                expression
-                                                      (list (pair pattern expression))
-                                                      range)
-                                (Constructor          identifier (list expression) range)
-                                (FunctionApplication  (list expression) range))
-(pub typ definition             (TypeDefinition       identifier
-                                                      boolean
-                                                      (list type-parameter)
-                                                      (list constructor)
-                                                      range)
-                                (FunctionDefinition   identifier
-                                                      boolean
-                                                      (list identifier)
-                                                      expression
-                                                      range)
-                                (TargetDefinition     source-reference
-                                                      slice))
+(pub typ module-reference
+     (ModulePath string boolean)
+     ModuleSelf)
+
+(pub typ source-reference (SourceReference string module-reference))
+
+(pub typ identifier (Identifier int32 string source-reference range (maybe int32)))
+
+(pub typ ast-type
+     (SimpleType identifier)
+     (ComplexType identifier (list ast-type) range)
+     (FunctionType (list ast-type) ast-type range))
+
+(pub typ type-parameter
+     (UniversalParameter identifier)
+     (ExistentialParameter identifier))
+
+(pub typ constructor
+     (SimpleConstructor identifier)
+     (ComplexConstructor identifier (list ast-type) range))
+
+(pub typ pattern
+     (Capture identifier)
+     (IntegerPattern int32 range)
+     (ConstructorPattern identifier (list pattern) range))
+
+(pub typ expression
+     (IntegerConstant int32 range)
+     (Variable identifier)
+     (Lambda (list identifier) expression range)
+     (Match expression (list (pair pattern expression)) range)
+     (Constructor identifier (list expression) range)
+     (FunctionApplication (list expression) range))
+
+(pub typ definition
+     (TypeDefinition identifier boolean (list type-parameter) (list constructor) range)
+     (FunctionDefinition identifier boolean (list identifier) expression range)
+     (TargetDefinition source-reference slice))
 
 (pub def source-reference-file-path (source-reference)
      (match source-reference
@@ -48,11 +50,13 @@
 
 (pub def identifier-token (identifier)
      (match identifier
-            (Identifier token _ __ ___ ____)  token))
+            (Identifier token _ __ ___ ____)
+                token))
 
 (pub def identifier-name (identifier)
      (match identifier
-            (Identifier _ name __ ___ ____)  name))
+            (Identifier _ name __ ___ ____)
+                name))
 
 (pub def identifier-with-name (name identifier)
      (match identifier
@@ -61,27 +65,33 @@
 
 (pub def identifier-source-reference (identifier)
      (match identifier
-            (Identifier _ __ source-reference ___ ____)  source-reference))
+            (Identifier _ __ source-reference ___ ____)
+                source-reference))
 
 (pub def identifier-module (identifier)
      (source-reference-module (identifier-source-reference identifier)))
 
 (pub def identifier-range (identifier)
      (match identifier
-            (Identifier _ __ ___ range ____)  range))
+            (Identifier _ __ ___ range ____)
+                range))
 
 (def identifier-id' (identifier)
      (match identifier
-            (Identifier _ __ ___ ____ id)  id))
+            (Identifier _ __ ___ ____ id)
+                id))
 
 (pub def identifier-is? (identifier id)
      (match (identifier-id' identifier)
-            (Some a)  (= a id)
-            None      False))
+            (Some a)
+                (= a id)
+            None
+                False))
 
 (def identifier-with-id (id identifier)
      (match identifier
-            (Identifier _1 _2 _3 _4 _)  (Identifier _1 _2 _3 _4 id)))
+            (Identifier _1 _2 _3 _4 _)
+                (Identifier _1 _2 _3 _4 id)))
 
 (pub def identifier-equal? (a b)
      (= (identifier-token a) (identifier-token b)))
@@ -91,46 +101,59 @@
             (ModulePath a' _)
                 (match b
                        (ModulePath b' _)
-                            (string-equal? a' b')
+                           (string-equal? a' b')
                        ModuleSelf
-                            False)
+                           False)
             ModuleSelf
                 (match b
                        (ModulePath _ __)
-                            False
+                           False
                        ModuleSelf
-                            True)))
+                           True)))
 
 (pub def definition-source-reference (definition)
      (match definition
-            (TypeDefinition identifier _ __ ___ ____)              (identifier-source-reference identifier)
-            (FunctionDefinition identifier ___ ____ _____ ______)  (identifier-source-reference identifier)
-            (TargetDefinition source-reference _)           source-reference))
+            (TypeDefinition identifier _ __ ___ ____)
+                (identifier-source-reference identifier)
+            (FunctionDefinition identifier ___ ____ _____ ______)
+                (identifier-source-reference identifier)
+            (TargetDefinition source-reference _)
+                source-reference))
 
 (pub def definition-module (definition)
      (source-reference-module (definition-source-reference definition)))
 
 (def definition-public? (definition)
      (match definition
-            (TypeDefinition _ public? __ ___ ____)          public?
-            (FunctionDefinition _ public? __ ___ ____)      public?
-            (TargetDefinition _ __)                         False))
+            (TypeDefinition _ public? __ ___ ____)
+                public?
+            (FunctionDefinition _ public? __ ___ ____)
+                public?
+            (TargetDefinition _ __)
+                False))
 
 (def definition-identifier (definition)
      (match definition
-            (TypeDefinition identifier _ __ ___ ____)       (Some identifier)
-            (FunctionDefinition identifier _ __ ___ ____)   (Some identifier)
-            (TargetDefinition _ __)                         None))
+            (TypeDefinition identifier _ __ ___ ____)
+                (Some identifier)
+            (FunctionDefinition identifier _ __ ___ ____)
+                (Some identifier)
+            (TargetDefinition _ __)
+                None))
 
 (def constructor-identifier (constructor)
      (match constructor
-            (ComplexConstructor identifier _ __)  identifier
-            (SimpleConstructor identifier)        identifier))
+            (ComplexConstructor identifier _ __)
+                identifier
+            (SimpleConstructor identifier)
+                identifier))
 
 (pub def type-parameter-identifier (parameter)
      (match parameter
-            (UniversalParameter identifier)    identifier
-            (ExistentialParameter identifier)  identifier))
+            (UniversalParameter identifier)
+                identifier
+            (ExistentialParameter identifier)
+                identifier))
 
 (pub def captured-identifiers-from-pattern (pattern)
      (match pattern
@@ -160,29 +183,31 @@
 (pub def over-match-pair-expression (f pair)
      (match pair
             (Pair pattern expression)
-                (result-bind   (f expression) (fn (expression)
+                (result-bind (f expression) (fn (expression)
                 (result-return (Pair pattern expression))))))
 
 (pub def over-match-pair-expressions (over-subexpressions f pairs)
-     (result-concat (list-map (over-match-pair-expression (. (result-flatmap (over-subexpressions f)) f)) pairs)))
+     (result-concat (list-map
+         (over-match-pair-expression (. (result-flatmap (over-subexpressions f)) f))
+         pairs)))
 
 (pub def over-subexpressions (f expression)
-     (result-bind (f expression)  (fn (expression)
+     (result-bind (f expression) (fn (expression)
      (match expression
             (Lambda arguments expression range)
-                (result-bind   (f expression)                                             (fn (expression)
-                (result-bind   (over-subexpressions f expression)                         (fn (expression)
+                (result-bind (f expression) (fn (expression)
+                (result-bind (over-subexpressions f expression) (fn (expression)
                 (result-return (Lambda arguments expression range))))))
             (Match expression pairs range)
-                (result-bind   (f expression)                                             (fn (expression)
-                (result-bind   (over-subexpressions f expression)                         (fn (expression)
-                (result-bind   (over-match-pair-expressions over-subexpressions f pairs)  (fn (pairs)
+                (result-bind (f expression) (fn (expression)
+                (result-bind (over-subexpressions f expression) (fn (expression)
+                (result-bind (over-match-pair-expressions over-subexpressions f pairs) (fn (pairs)
                 (result-return (Match expression pairs range))))))))
             (Constructor identifier expressions range)
-                (result-bind   (result-concat (list-map (. (result-flatmap (over-subexpressions f)) f) expressions)) (fn (expressions)
+                (result-bind (result-concat (list-map (. (result-flatmap (over-subexpressions f)) f) expressions)) (fn (expressions)
                 (result-return (Constructor identifier expressions range))))
             (FunctionApplication expressions range)
-                (result-bind   (result-concat (list-map (. (result-flatmap (over-subexpressions f)) f) expressions)) (fn (expressions)
+                (result-bind (result-concat (list-map (. (result-flatmap (over-subexpressions f)) f) expressions)) (fn (expressions)
                 (result-return (FunctionApplication expressions range))))
             _
                 (result-return expression)))))
@@ -190,7 +215,7 @@
 (pub def over-definition-expressions (f definition)
      (match definition
             (FunctionDefinition identifier public? arguments expression range)
-                (result-bind   (f expression)  (fn (expression)
+                (result-bind (f expression) (fn (expression)
                 (result-return (FunctionDefinition identifier public? arguments expression range))))
             _
                 (result-return definition)))
@@ -212,25 +237,25 @@
 (pub def over-identifiers (f expression)
      (match expression
             (Variable name)
-                (result-bind   (f name)                                (fn (name)
+                (result-bind (f name) (fn (name)
                 (result-return (Variable name))))
             (Lambda arguments expression range)
-                (result-bind   (over-identifiers f expression)         (fn (expression)
-                (result-bind   (result-concat (list-map f arguments))  (fn (arguments)
+                (result-bind (over-identifiers f expression) (fn (expression)
+                (result-bind (result-concat (list-map f arguments)) (fn (arguments)
                 (result-return (Lambda arguments expression range))))))
             (Constructor name Empty range)
-                (result-bind   (f name)                                (fn (name)
+                (result-bind (f name) (fn (name)
                 (result-return (Constructor name Empty range))))
             (Constructor name expressions range)
-                (result-bind   (result-concat (list-map (over-identifiers f) expressions))  (fn (expressions)
-                (result-bind   (f name)                                                     (fn (name)
+                (result-bind (result-concat (list-map (over-identifiers f) expressions)) (fn (expressions)
+                (result-bind (f name) (fn (name)
                 (result-return (Constructor name expressions range))))))
             (FunctionApplication expressions range)
-                (result-bind   (result-concat (list-map (over-identifiers f) expressions))  (fn (expressions)
+                (result-bind (result-concat (list-map (over-identifiers f) expressions)) (fn (expressions)
                 (result-return (FunctionApplication expressions range))))
             (Match expression rules range)
-                (result-bind   (result-concat (list-map (over-match-pair-expression (over-identifiers f)) rules)) (fn (rules)
-                (result-bind   (over-identifiers f expression)                              (fn (expression)
+                (result-bind (result-concat (list-map (over-match-pair-expression (over-identifiers f)) rules)) (fn (rules)
+                (result-bind (over-identifiers f expression) (fn (expression)
                 (result-return (Match expression rules range))))))
             _
                 (result-return expression)))
@@ -240,31 +265,47 @@
             (FunctionApplication (Cons (Variable f) rest) _)
                 (identifier-equal? name f)
             (Match _ rules __)
-                (list-any? (fn (pair)
-                               (match pair
-                                      (Pair pattern expression)
-                                            (and (not (list-any? (identifier-equal? name) (captured-identifiers-from-pattern pattern)))
-                                                 (expression-calls-function-in-tail-position? name expression))))
-                           rules)
+                (list-any?
+                    (fn (pair)
+                        (match pair
+                               (Pair pattern expression)
+                                   (and
+                                       (not (list-any?
+                                           (identifier-equal? name)
+                                           (captured-identifiers-from-pattern pattern)))
+                                       (expression-calls-function-in-tail-position? name expression))))
+                    rules)
             _
                 False))
+
+(def any-captures-match? (name pattern)
+     (list-any?
+         (identifier-equal? name)
+         (captured-identifiers-from-pattern pattern)))
 
 (def over-tail-recursive-match-rule (name f over-tail-recursive-call rule)
      (match rule
             (Pair pattern expression)
-                  (match (list-any? (identifier-equal? name) (captured-identifiers-from-pattern pattern))
-                         True   (Pair pattern expression)
-                         False  (Pair pattern (over-tail-recursive-call name f expression)))))
+                (match (any-captures-match? name pattern)
+                       True
+                           (Pair pattern expression)
+                       False
+                           (Pair pattern (over-tail-recursive-call name f expression)))))
 
 (pub def over-tail-recursive-call (name f expression)
      (match expression
             (FunctionApplication (Cons (Variable applied-name) rest) range)
                 (match (identifier-equal? name applied-name)
-                       True   (f rest range)
-                       False  expression)
+                       True
+                           (f rest range)
+                       False
+                           expression)
             (Match expression rules range)
-                (Match expression
-                       (list-map (over-tail-recursive-match-rule name f over-tail-recursive-call) rules)
-                       range)
+                (Match
+                    expression
+                    (list-map
+                        (over-tail-recursive-match-rule name f over-tail-recursive-call)
+                        rules)
+                    range)
             _
                 expression))

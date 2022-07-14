@@ -2,19 +2,67 @@
 (def stringify-requirement (requirement)
      (match requirement
             (Comment comment)
-               (string-join (string-empty) (list (data-comment) comment))
+                (string-join (string-empty) (list (data-comment) comment))
             (ExpectSuccess context expression expected)
-               (match (string-is-empty? context)
-                      True
-                         (string-join (string-empty) (list (data-success) (data-expected) (data-equal) expected (data-comma) (data-expression) (data-equal) expression))
-                      False
-                         (string-join (string-empty) (list (data-success) (data-expected) (data-equal) expected (data-comma) (data-expression) (data-equal) expression (data-comma) (data-context) (data-equal) context)))
+                (match (string-is-empty? context)
+                       True
+                           (string-join
+                               (string-empty)
+                               (list
+                                   (data-success)
+                                   (data-expected)
+                                   (data-equal)
+                                   expected
+                                   (data-comma)
+                                   (data-expression)
+                                   (data-equal)
+                                   expression))
+                       False
+                           (string-join
+                               (string-empty)
+                               (list
+                                   (data-success)
+                                   (data-expected)
+                                   (data-equal)
+                                   expected
+                                   (data-comma)
+                                   (data-expression)
+                                   (data-equal)
+                                   expression
+                                   (data-comma)
+                                   (data-context)
+                                   (data-equal)
+                                   context)))
             (ExpectFailure context expression expected)
-               (match (string-is-empty? context)
-                      True
-                        (string-join (string-empty) (list (data-failure) (data-expected) (data-equal) expected (data-comma) (data-expression) (data-equal) expression))
-                      False
-                        (string-join (string-empty) (list (data-failure) (data-expected) (data-equal) expected (data-comma) (data-expression) (data-equal) expression (data-comma) (data-context) (data-equal) context)))))
+                (match (string-is-empty? context)
+                       True
+                           (string-join
+                               (string-empty)
+                               (list
+                                   (data-failure)
+                                   (data-expected)
+                                   (data-equal)
+                                   expected
+                                   (data-comma)
+                                   (data-expression)
+                                   (data-equal)
+                                   expression))
+                       False
+                           (string-join
+                               (string-empty)
+                               (list
+                                   (data-failure)
+                                   (data-expected)
+                                   (data-equal)
+                                   expected
+                                   (data-comma)
+                                   (data-expression)
+                                   (data-equal)
+                                   expression
+                                   (data-comma)
+                                   (data-context)
+                                   (data-equal)
+                                   context)))))
 
 (def stringify-parameters (requirements)
      (string-join (data-pipe) (list-map stringify-requirement requirements)))

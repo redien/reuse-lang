@@ -1,5 +1,6 @@
 
 (typ symbol-table-entry (SymbolTableEntry int32 string))
+
 (typ symbol-table (SymbolTable int32 (array symbol-table-entry)))
 
 (def symbol-table-empty ()

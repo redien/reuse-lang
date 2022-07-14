@@ -1,53 +1,65 @@
 
 (pub typ (dictionary value) (Dictionary (array (list (pair string value)))))
 
-(pub def dictionary-empty () (Dictionary (array-empty)))
+(pub def dictionary-empty ()
+     (Dictionary (array-empty)))
 
 (def dictionary-bucket-from-key (key)
-     (string-foldl (fn (c h) (+ (* h 33) c)) 5381 key))
+     (string-foldl (fn (c h)
+         (+ (* h 33) c)) 5381 key))
 
 (pub def dictionary-set (key new-value dictionary)
      (match dictionary
             (Dictionary array)
-     (match (dictionary-bucket-from-key key)
-            bucket-id
-     (match (array-get bucket-id array)
-            (Some bucket)
-                (match (list-filter (fn (entry) (not (string-equal? (pair-left entry) key))) bucket)
-                       new-bucket
-                           (Dictionary (array-set bucket-id (Cons (Pair key new-value) new-bucket) array)))
-            None
-                (Dictionary (array-set bucket-id (list (Pair key new-value)) array))))))
+                (match (dictionary-bucket-from-key key)
+                       bucket-id
+                           (match (array-get bucket-id array)
+                                  (Some bucket)
+                                      (match (list-filter
+                                          (fn (entry)
+                                              (not (string-equal? (pair-left entry) key)))
+                                          bucket)
+                                             new-bucket
+                                                 (Dictionary (array-set bucket-id (Cons (Pair key new-value) new-bucket) array)))
+                                  None
+                                      (Dictionary (array-set bucket-id (list (Pair key new-value)) array))))))
 
 (pub def dictionary-get (key dictionary)
      (match dictionary
             (Dictionary array)
-     (match (dictionary-bucket-from-key key)
-            bucket-id
-     (match (array-get bucket-id array)
-            (Some bucket)
-                (maybe-map pair-right (list-find-first (fn (entry) (string-equal? (pair-left entry) key)) bucket))
-            None
-                None))))
+                (match (dictionary-bucket-from-key key)
+                       bucket-id
+                           (match (array-get bucket-id array)
+                                  (Some bucket)
+                                      (maybe-map
+                                          pair-right
+                                          (list-find-first
+                                              (fn (entry)
+                                                  (string-equal? (pair-left entry) key))
+                                              bucket))
+                                  None
+                                      None))))
 
 (pub def dictionary-remove (key dictionary)
      (match dictionary
             (Dictionary array)
-     (match (dictionary-bucket-from-key key)
-            bucket-id
-     (match (array-get bucket-id array)
-            (Some bucket)
-                (match (list-filter (fn (entry) (not (string-equal? (pair-left entry) key))) bucket)
-                       new-bucket
-                           (Dictionary (array-set bucket-id new-bucket array)))
-            None
-                dictionary))))
+                (match (dictionary-bucket-from-key key)
+                       bucket-id
+                           (match (array-get bucket-id array)
+                                  (Some bucket)
+                                      (match (list-filter
+                                          (fn (entry)
+                                              (not (string-equal? (pair-left entry) key)))
+                                          bucket)
+                                             new-bucket
+                                                 (Dictionary (array-set bucket-id new-bucket array)))
+                                  None
+                                      dictionary))))
 
 (pub def dictionary-entries (dictionary)
      (match dictionary
             (Dictionary array)
-               (list-flatten (list-map pair-right (array-entries array)))))
-
+                (list-flatten (list-map pair-right (array-entries array)))))
 
 (pub def dictionary-of (entries)
      (list-foldl (pair-map dictionary-set) (dictionary-empty) entries))
@@ -57,16 +69,20 @@
 
 (pub def dictionary-get-or (key default dictionary)
      (match (dictionary-get key dictionary)
-            (Some value)  value
-            None          default))
+            (Some value)
+                value
+            None
+                default))
 
 (pub def dictionary-size (dictionary)
      (list-size (dictionary-entries dictionary)))
 
 (pub def dictionary-has? (key dictionary)
      (match (dictionary-get key dictionary)
-            (Some _)  True
-            None      False))
+            (Some _)
+                True
+            None
+                False))
 
 (pub def dictionary-values (dictionary)
      (list-map pair-right (dictionary-entries dictionary)))

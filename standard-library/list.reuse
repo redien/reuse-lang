@@ -1,4 +1,7 @@
-(pub typ (list a) (Cons a (list a)) Empty)
+
+(pub typ (list a)
+     (Cons a (list a))
+     Empty)
 
 (pub def list-empty ()
      Empty)
@@ -11,8 +14,10 @@
 
 (def list-from-range' (from to rest)
      (match (> to from)
-            True   (list-from-range' from (- to 1) (Cons (- to 1) rest))
-            False  rest))
+            True
+                (list-from-range' from (- to 1) (Cons (- to 1) rest))
+            False
+                rest))
 
 (pub def list-from-range (from to)
      (list-from-range' from to Empty))
@@ -32,10 +37,13 @@
                 Empty))
 
 (pub def list-last (list)
-    (match list
-           Empty           None
-           (Cons x Empty)  (Some x)
-           (Cons _ rest)   (list-last rest)))
+     (match list
+            Empty
+                None
+            (Cons x Empty)
+                (Some x)
+            (Cons _ rest)
+                (list-last rest)))
 
 (pub def list-is-empty? (list)
      (match list
@@ -56,26 +64,42 @@
 
 (pub def list-foldrk (f initial list continue)
      (match list
-            Empty       (continue initial)
-            (Cons x xs) (list-foldrk f initial xs (fn (value) (f x value continue)))))
+            Empty
+                (continue initial)
+            (Cons x xs)
+                (list-foldrk
+                    f
+                    initial
+                    xs
+                    (fn (value)
+                        (f x value continue)))))
 
 (pub def list-foldlk (f initial list continue)
      (match list
-            Empty       (continue initial)
-            (Cons x xs) (f x initial (fn (new-value)
-                                         (list-foldlk f new-value xs continue)))))
+            Empty
+                (continue initial)
+            (Cons x xs)
+                (f
+                    x
+                    initial
+                    (fn (new-value)
+                        (list-foldlk f new-value xs continue)))))
 
 (pub def list-foldr (f initial list)
-     (list-foldrk (fn (x value continue)
-                      (continue (f x value)))
-                  initial
-                  list
-                  (fn (x) x)))
+     (list-foldrk
+         (fn (x value continue)
+             (continue (f x value)))
+         initial
+         list
+         (fn (x)
+             x)))
 
 (pub def list-foldl (f initial list)
      (match list
-            Empty       initial
-            (Cons x xs) (list-foldl f (f x initial) xs)))
+            Empty
+                initial
+            (Cons x xs)
+                (list-foldl f (f x initial) xs)))
 
 (pub def list-concat (a b)
      (list-foldr list-cons b a))
@@ -84,28 +108,36 @@
      (list-foldl list-cons Empty list))
 
 (pub def list-map (f list)
-     (list-foldr (fn (head tail) (list-cons (f head) tail)) Empty list))
+     (list-foldr (fn (head tail)
+         (list-cons (f head) tail)) Empty list))
 
 (pub def list-flatmap (f list)
-     (list-foldr (fn (head tail) (list-concat (f head) tail)) Empty list))
+     (list-foldr (fn (head tail)
+         (list-concat (f head) tail)) Empty list))
 
 (pub def list-flatten (list)
      (list-foldr list-concat Empty list))
 
 (def list-split-at' (n a b)
      (match (> n 0)
-            True   (match b
-                          (Cons x xs)  (list-split-at' (- n 1) (Cons x a) xs)
-                          Empty        (Pair (list-reverse a) b))
-            False  (Pair (list-reverse a) b)))
+            True
+                (match b
+                       (Cons x xs)
+                           (list-split-at' (- n 1) (Cons x a) xs)
+                       Empty
+                           (Pair (list-reverse a) b))
+            False
+                (Pair (list-reverse a) b)))
 
 (pub def list-split-at (n xs)
      (list-split-at' n Empty xs))
 
 (def list-partition' (n xs partitions)
      (match (list-split-at n xs)
-            (Pair Empty _)       partitions
-            (Pair partition xs)  (list-partition' n xs (Cons partition partitions))))
+            (Pair Empty _)
+                partitions
+            (Pair partition xs)
+                (list-partition' n xs (Cons partition partitions))))
 
 (pub def list-partition (n xs)
      (list-reverse (list-partition' n xs Empty)))
@@ -113,22 +145,22 @@
 (def list-partition-by' (x xs)
      (match xs
             (Cons partition rest)
-               (Cons (Cons x partition) rest)
+                (Cons (Cons x partition) rest)
             Empty
-               xs))
+                xs))
 
 (pub def list-partition-by (f xs)
      (match xs
             Empty
-               Empty
+                Empty
             (Cons x Empty)
-               (list (list x))
+                (list (list x))
             (Cons x (Cons x' rest))
-               (match (f x x')
-                      True
-                         (list-partition-by' x (list-partition-by f (Cons x' rest)))
-                      False
-                         (Cons (list x) (list-partition-by f (Cons x' rest))))))
+                (match (f x x')
+                       True
+                           (list-partition-by' x (list-partition-by f (Cons x' rest)))
+                       False
+                           (Cons (list x) (list-partition-by f (Cons x' rest))))))
 
 (pub def list-skip (count list)
      (pair-right (list-split-at count list)))
@@ -138,59 +170,84 @@
 
 (def list-zip' (xs ys collected)
      (match xs
-            Empty        collected
-            (Cons x xs)  (match ys
-                                Empty        collected
-                                (Cons y ys)  (list-zip' xs ys (Cons (Pair x y) collected)))))
+            Empty
+                collected
+            (Cons x xs)
+                (match ys
+                       Empty
+                           collected
+                       (Cons y ys)
+                           (list-zip' xs ys (Cons (Pair x y) collected)))))
 
 (pub def list-zip (xs ys)
      (list-reverse (list-zip' xs ys Empty)))
 
 (pub def list-pairs (xs)
      (match xs
-            (Cons a (Cons b rest))  (Cons (Pair a b) (list-pairs rest))
-            _                       Empty))
+            (Cons a (Cons b rest))
+                (Cons (Pair a b) (list-pairs rest))
+            _
+                Empty))
 
 (pub def list-find-first (predicate list)
      (match list
-            Empty        None
-            (Cons x xs)  (match (predicate x)
-                                True   (Some x)
-                                False  (list-find-first predicate xs))))
+            Empty
+                None
+            (Cons x xs)
+                (match (predicate x)
+                       True
+                           (Some x)
+                       False
+                           (list-find-first predicate xs))))
 
 (pub def list-filter (f list)
-     (list-foldr (fn (head tail)
-                     (match (f head)
-                            True  (Cons head tail)
-                            False tail))
-                 Empty
-                 list))
+     (list-foldr
+         (fn (head tail)
+             (match (f head)
+                    True
+                        (Cons head tail)
+                    False
+                        tail))
+         Empty
+         list))
 
 (pub def list-exclude (f list)
      (list-filter (. not f) list))
 
 (pub def list-any? (f list)
      (match (list-find-first f list)
-            (Some _)  True
-            _         False))
+            (Some _)
+                True
+            _
+                False))
 
 (pub def list-every? (f list)
-     (match (list-find-first (fn (x) (not (f x))) list)
-            (Some _)  False
-            _         True))
+     (match (list-find-first (fn (x)
+         (not (f x))) list)
+            (Some _)
+                False
+            _
+                True))
 
 (pub def list-from-maybe (maybe)
      (match maybe
-            (Some x)  (list x)
-            None      Empty))
+            (Some x)
+                (list x)
+            None
+                Empty))
 
 (def list-collect-from-indexed-iterator' (predicate iterator initial)
      (match (indexed-iterator-next iterator)
-            (Pair None _)         (Pair iterator initial)
-            (Pair (Some x) next)  (match (predicate x)
-                                         True   (list-collect-from-indexed-iterator' predicate next (Cons x initial))
-                                         False  (Pair iterator initial))))
+            (Pair None _)
+                (Pair iterator initial)
+            (Pair (Some x) next)
+                (match (predicate x)
+                       True
+                           (list-collect-from-indexed-iterator' predicate next (Cons x initial))
+                       False
+                           (Pair iterator initial))))
 
 (pub def list-collect-from-indexed-iterator (predicate iterator)
      (match (list-collect-from-indexed-iterator' predicate iterator Empty)
-            (Pair iterator result) (Pair iterator (list-reverse result))))
+            (Pair iterator result)
+                (Pair iterator (list-reverse result))))

@@ -10,21 +10,29 @@
 (def parser-context-add-constructors (definition array)
      (match definition
             (TypeDefinition _ __ ___ constructors ____)
-                (list-foldl (fn (constructor array)
-                                (array-set (identifier-token (constructor-identifier constructor)) definition array))
-                            array
-                            constructors)
+                (list-foldl
+                    (fn (constructor array)
+                        (array-set
+                            (identifier-token (constructor-identifier constructor))
+                            definition
+                            array))
+                    array
+                    constructors)
             _
                 array))
 
 (def prefix-module-symbol (module identifier)
      (match module
             (ModulePath name open?)
-               (match open?
-                      True   identifier
-                      False  (identifier-with-name (string-join (data-:) (list name (identifier-name identifier))) identifier))
+                (match open?
+                       True
+                           identifier
+                       False
+                           (identifier-with-name
+                               (string-join (data-:) (list name (identifier-name identifier)))
+                               identifier))
             ModuleSelf
-               identifier))
+                identifier))
 
 (def prefix-module-symbols (module syms)
      (list-map (prefix-module-symbol module) syms))
@@ -32,28 +40,41 @@
 (def parser-context-add-definition (definition context)
      (match context
             (ParserContext source-reference symbols module-scope global-scope symbol-table constructors)
-                (match (identifiers-from-definition definition)        definition-symbols
-                (match (source-reference-module source-reference)  module
-                (ParserContext source-reference
-                               symbols
-                               (parser-scope-set-all definition-symbols module-scope)
-                               (match (definition-public? definition)
-                                      True   (parser-scope-set-all (prefix-module-symbols module definition-symbols) global-scope)
-                                      False  global-scope)
-                               symbol-table
-                               (parser-context-add-constructors definition constructors))))))
+                (let-bind (identifiers-from-definition definition) (fn (definition-symbols)
+                (let-bind (source-reference-module source-reference) (fn (module)
+                (ParserContext
+                    source-reference
+                    symbols
+                    (parser-scope-set-all definition-symbols module-scope)
+                    (match (definition-public? definition)
+                           True
+                               (parser-scope-set-all
+                                   (prefix-module-symbols module definition-symbols)
+                                   global-scope)
+                           False
+                               global-scope)
+                    symbol-table
+                    (parser-context-add-constructors definition constructors))))))))
 
 (def parser-context-token-is-constructor? (token context)
      (match context
             (ParserContext _ __ ___ ____ _____ constructors)
                 (match (array-get token constructors)
-                       (Some _)  True
-                       None      False)))
+                       (Some _)
+                           True
+                       None
+                           False)))
 
 (def parser-context-new-module (context)
      (match context
             (ParserContext source-reference symbols _ global-scope symbol-table constructors)
-                (ParserContext source-reference symbols (parser-scope-new global-scope) global-scope symbol-table constructors)))
+                (ParserContext
+                    source-reference
+                    symbols
+                    (parser-scope-new global-scope)
+                    global-scope
+                    symbol-table
+                    constructors)))
 
 (def parser-context-module-scope (context)
      (match context
@@ -63,12 +84,13 @@
 (def parser-context-bind-symbol (identifier context)
      (match context
             (ParserContext source-reference symbols module-scope global-scope symbol-table constructors)
-                (ParserContext source-reference
-                               symbols
-                               module-scope
-                               global-scope
-                               (symbol-table-bind (identifier-name identifier) symbol-table)
-                               constructors)))
+                (ParserContext
+                    source-reference
+                    symbols
+                    module-scope
+                    global-scope
+                    (symbol-table-bind (identifier-name identifier) symbol-table)
+                    constructors)))
 
 (def parser-context-symbols (context)
      (match context
@@ -78,7 +100,13 @@
 (def parser-context-with-symbols (symbols context)
      (match context
             (ParserContext source-reference _ module-scope global-scope symbol-table constructors)
-                (ParserContext source-reference symbols module-scope global-scope symbol-table constructors)))
+                (ParserContext
+                    source-reference
+                    symbols
+                    module-scope
+                    global-scope
+                    symbol-table
+                    constructors)))
 
 (def parser-context-symbol-id (context)
      (match context
@@ -93,23 +121,39 @@
 (def parser-context-with-source-reference (source-reference context)
      (match context
             (ParserContext _ symbols module-scope global-scope symbol-table constructors)
-                (ParserContext source-reference symbols module-scope global-scope symbol-table constructors)))
+                (ParserContext
+                    source-reference
+                    symbols
+                    module-scope
+                    global-scope
+                    symbol-table
+                    constructors)))
 
 (def default-scope (symbols)
-     (parser-scope-set-list (list-map (. (fn (x) (Pair x x)) pair-left) symbols) (parser-scope-empty)))
+     (parser-scope-set-list
+         (list-map (. (fn (x)
+             (Pair x x)) pair-left) symbols)
+         (parser-scope-empty)))
 
 (def max-symbol-id (symbols)
-     (list-foldl (fn (x xs) (max xs (pair-left x))) 0 symbols))
+     (list-foldl (fn (x xs)
+         (max xs (pair-left x))) 0 symbols))
 
 (def parser-run (symbols parser)
-     (match (state-run (ParserContext (SourceReference (string-empty) ModuleSelf)
-                                      (Pair (+ (max-symbol-id symbols) 1) (dictionary-of (list-map (fn (x) (Pair (pair-right x) x)) symbols)))
-                                      (default-scope symbols)
-                                      (default-scope symbols)
-                                      (symbol-table-bind-list (list-map pair-right symbols) (symbol-table-empty))
-                                      (array-empty))
-                       parser)
-            (Pair _ result)  result))
+     (match (state-run
+         (ParserContext
+             (SourceReference (string-empty) ModuleSelf)
+             (Pair
+                 (+ (max-symbol-id symbols) 1)
+                 (dictionary-of (list-map (fn (x)
+                     (Pair (pair-right x) x)) symbols)))
+             (default-scope symbols)
+             (default-scope symbols)
+             (symbol-table-bind-list (list-map pair-right symbols) (symbol-table-empty))
+             (array-empty))
+         parser)
+            (Pair _ result)
+                result))
 
 (def parser-return (value)
      (state-return (result-return value)))
@@ -119,9 +163,10 @@
 
 (def parser-bind (parser f)
      (state-bind parser (fn (result)
-     (result-prod state-return
-     (result-bind result (fn (value)
-     (result-return (f value))))))))
+     (result-prod
+         state-return
+         (result-bind result (fn (value)
+         (result-return (f value))))))))
 
 (def parser-token-is-constructor? (token)
      (state-bind (state-get) (fn (context)
@@ -160,12 +205,13 @@
      (parser-return source-reference))))
 
 (def parser-sequence (list)
-     (list-foldr (fn (a b)
-                     (parser-bind a (fn (a')
-                     (parser-bind b (fn (b')
-                     (parser-return (Cons a' b')))))))
-                 (parser-return Empty)
-                 list))
+     (list-foldr
+         (fn (a b)
+             (parser-bind a (fn (a')
+             (parser-bind b (fn (b')
+             (parser-return (Cons a' b')))))))
+         (parser-return Empty)
+         list))
 
 (def parser-bind-symbols! (syms)
      (parser-sequence (list-map parser-bind-symbol! syms)))

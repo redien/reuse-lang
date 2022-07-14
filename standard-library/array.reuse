@@ -1,34 +1,65 @@
 
-(typ array-color ArrayRed ArrayBlack)
-(pub typ (array value) ArrayEmpty
-                   (ArrayTree array-color (array value) (pair int32 value) (array value)))
+(typ array-color
+     ArrayRed
+     ArrayBlack)
 
-(pub def array-empty () ArrayEmpty)
+(pub typ (array value)
+     ArrayEmpty
+     (ArrayTree array-color (array value) (pair int32 value) (array value)))
+
+(pub def array-empty ()
+     ArrayEmpty)
 
 (def array-make-black' (array)
      (match array
-            ArrayEmpty           ArrayEmpty
-            (ArrayTree _ a y b)  (ArrayTree ArrayBlack a y b)))
+            ArrayEmpty
+                ArrayEmpty
+            (ArrayTree _ a y b)
+                (ArrayTree ArrayBlack a y b)))
 
 (def array-balance' (array)
      (match array
-            (ArrayTree ArrayBlack (ArrayTree ArrayRed (ArrayTree ArrayRed a x b) y c) z d)  (ArrayTree ArrayRed (ArrayTree ArrayBlack a x b) y (ArrayTree ArrayBlack c z d))
-            (ArrayTree ArrayBlack (ArrayTree ArrayRed a x (ArrayTree ArrayRed b y c)) z d)  (ArrayTree ArrayRed (ArrayTree ArrayBlack a x b) y (ArrayTree ArrayBlack c z d))
-            (ArrayTree ArrayBlack a x (ArrayTree ArrayRed (ArrayTree ArrayRed b y c) z d))  (ArrayTree ArrayRed (ArrayTree ArrayBlack a x b) y (ArrayTree ArrayBlack c z d))
-            (ArrayTree ArrayBlack a x (ArrayTree ArrayRed b y (ArrayTree ArrayRed c z d)))  (ArrayTree ArrayRed (ArrayTree ArrayBlack a x b) y (ArrayTree ArrayBlack c z d))
-            rest                                                                            rest))
+            (ArrayTree ArrayBlack (ArrayTree ArrayRed (ArrayTree ArrayRed a x b) y c) z d)
+                (ArrayTree
+                    ArrayRed
+                    (ArrayTree ArrayBlack a x b)
+                    y
+                    (ArrayTree ArrayBlack c z d))
+            (ArrayTree ArrayBlack (ArrayTree ArrayRed a x (ArrayTree ArrayRed b y c)) z d)
+                (ArrayTree
+                    ArrayRed
+                    (ArrayTree ArrayBlack a x b)
+                    y
+                    (ArrayTree ArrayBlack c z d))
+            (ArrayTree ArrayBlack a x (ArrayTree ArrayRed (ArrayTree ArrayRed b y c) z d))
+                (ArrayTree
+                    ArrayRed
+                    (ArrayTree ArrayBlack a x b)
+                    y
+                    (ArrayTree ArrayBlack c z d))
+            (ArrayTree ArrayBlack a x (ArrayTree ArrayRed b y (ArrayTree ArrayRed c z d)))
+                (ArrayTree
+                    ArrayRed
+                    (ArrayTree ArrayBlack a x b)
+                    y
+                    (ArrayTree ArrayBlack c z d))
+            rest
+                rest))
 
 (def array-set' (x value array)
      (match array
             ArrayEmpty
-               (ArrayTree ArrayRed ArrayEmpty (Pair x value) ArrayEmpty)
+                (ArrayTree ArrayRed ArrayEmpty (Pair x value) ArrayEmpty)
             (ArrayTree color a y b)
-               (match (< x (pair-left y))
-                      True   (array-balance' (ArrayTree color (array-set' x value a) y b))
-                      False
-               (match (> x (pair-left y))
-                      True   (array-balance' (ArrayTree color a y (array-set' x value b)))
-                      False  (ArrayTree color a (Pair x value) b)))))
+                (match (< x (pair-left y))
+                       True
+                           (array-balance' (ArrayTree color (array-set' x value a) y b))
+                       False
+                           (match (> x (pair-left y))
+                                  True
+                                      (array-balance' (ArrayTree color a y (array-set' x value b)))
+                                  False
+                                      (ArrayTree color a (Pair x value) b)))))
 
 (pub def array-set (x value array)
      (array-make-black' (array-set' x value array)))
@@ -36,57 +67,63 @@
 (pub def array-get (x array)
      (match array
             ArrayEmpty
-               None
+                None
             (ArrayTree _ a (Pair y value) b)
-               (match (< x y)
-                      True   (array-get x a)
-                      False
-               (match (> x y)
-                      True   (array-get x b)
-                      False  (Some value)))))
+                (match (< x y)
+                       True
+                           (array-get x a)
+                       False
+                           (match (> x y)
+                                  True
+                                      (array-get x b)
+                                  False
+                                      (Some value)))))
 
 (def array-min (array default)
      (match array
             ArrayEmpty
-               default
+                default
             (ArrayTree _ ArrayEmpty y __)
-               y
+                y
             (ArrayTree _ a __ ___)
-               (array-min a default)))
+                (array-min a default)))
 
 (def array-remove-min (array)
      (match array
             ArrayEmpty
-               ArrayEmpty
+                ArrayEmpty
             (ArrayTree _ ArrayEmpty y b)
-               b
+                b
             (ArrayTree color a y b)
-               (array-balance' (ArrayTree color (array-remove-min a) y b))))
+                (array-balance' (ArrayTree color (array-remove-min a) y b))))
 
 (def array-remove-root (array)
      (match array
             ArrayEmpty
-               ArrayEmpty
+                ArrayEmpty
             (ArrayTree _ ArrayEmpty y ArrayEmpty)
-               ArrayEmpty
+                ArrayEmpty
             (ArrayTree _ a y ArrayEmpty)
-               a
+                a
             (ArrayTree _ ArrayEmpty y b)
-               b
+                b
             (ArrayTree color a y b)
-               (array-balance' (ArrayTree color a (array-min b y) (array-remove-min b)))))
+                (array-balance' (ArrayTree color a (array-min b y) (array-remove-min b)))))
 
 (def array-remove' (x array)
      (match array
             ArrayEmpty
-               ArrayEmpty
+                ArrayEmpty
             (ArrayTree color a y b)
-               (match (< x (pair-left y))
-                      True   (array-balance' (ArrayTree color (array-remove' x a) y b))
-                      False
-               (match (> x (pair-left y))
-                      True   (array-balance' (ArrayTree color a y (array-remove' x b)))
-                      False  (array-remove-root array)))))
+                (match (< x (pair-left y))
+                       True
+                           (array-balance' (ArrayTree color (array-remove' x a) y b))
+                       False
+                           (match (> x (pair-left y))
+                                  True
+                                      (array-balance' (ArrayTree color a y (array-remove' x b)))
+                                  False
+                                      (array-remove-root array)))))
 
 (pub def array-remove (x array)
      (array-make-black' (array-remove' x array)))
@@ -94,30 +131,38 @@
 (pub def array-entries (array)
      (match array
             ArrayEmpty
-               Empty
+                Empty
             (ArrayTree _ a entry b)
-               (list-flatten (list (array-entries a) (list entry) (array-entries b)))))
+                (list-flatten (list (array-entries a) (list entry) (array-entries b)))))
 
 (def array-from-list' (entries index array)
      (match entries
             (Cons x xs)
-               (array-from-list' xs (+ index 1) (array-set index x array))
+                (array-from-list' xs (+ index 1) (array-set index x array))
             Empty
-               array))
+                array))
 
 (pub def array-from-list (entries)
      (array-from-list' entries 0 ArrayEmpty))
 
 (pub def array-of (entries)
-     (list-foldl (fn (entry array) (match entry (Pair key value) (array-set key value array))) ArrayEmpty entries))
+     (list-foldl
+         (fn (entry array)
+             (match entry
+                    (Pair key value)
+                        (array-set key value array)))
+         ArrayEmpty
+         entries))
 
 (pub def array-singleton (index value)
      (ArrayTree ArrayBlack ArrayEmpty (Pair index value) ArrayEmpty))
 
 (pub def array-get-or (index default array)
      (match (array-get index array)
-            (Some value)  value
-            None          default))
+            (Some value)
+                value
+            None
+                default))
 
 (pub def array-size (array)
      (list-size (array-entries array)))

@@ -1,6 +1,5 @@
 
-(pub typ (indexed-iterator (exists iterable) element)
-     (IndexedIterator (iterable-class iterable element) iterable int32))
+(pub typ (indexed-iterator (exists iterable) element) (IndexedIterator (iterable-class iterable element) iterable int32))
 
 (pub def indexed-iterator-from-iterable (i iterable)
      (IndexedIterator i iterable 0))
@@ -14,4 +13,5 @@
 
 (pub def indexed-iterator-index (iterator)
      (match iterator
-            (IndexedIterator _ __ index)  index))
+            (IndexedIterator _ __ index)
+                index))

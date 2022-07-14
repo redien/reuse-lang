@@ -7,12 +7,13 @@
 (def scope-add (variables scope)
      (match scope
             (Scope scope)
-                (Scope (list-foldl (fn (variable scope)
-                                       (match variable
-                                              (Pair name value)
-                                                  (array-set name value scope)))
-                                   scope
-                                   variables))))
+                (Scope (list-foldl
+                    (fn (variable scope)
+                        (match variable
+                               (Pair name value)
+                                   (array-set name value scope)))
+                    scope
+                    variables))))
 
 (def scope-get (name scope)
      (match scope
@@ -22,11 +23,15 @@
 (def scope-add-definitions (definitions scope)
      (match scope
             (Scope scope)
-                (Scope (list-foldl (fn (definition scope)
-                                       (match definition
-                                              (FunctionDefinition identifier _ arguments expression __)
-                                                  (array-set (identifier-token identifier) (ValueFunction arguments expression) scope)
-                                              _
-                                                  scope))
-                                   scope
-                                   definitions))))
+                (Scope (list-foldl
+                    (fn (definition scope)
+                        (match definition
+                               (FunctionDefinition identifier _ arguments expression __)
+                                   (array-set
+                                       (identifier-token identifier)
+                                       (ValueFunction arguments expression)
+                                       scope)
+                               _
+                                   scope))
+                    scope
+                    definitions))))

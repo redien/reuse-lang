@@ -1536,7 +1536,7 @@ let rec parse_symbol index10 slice6 symbols2 next5 end2 =
                             (end2 index10))));;
 
 let rec parse_list index11 slice7 parse_sexps2 symbols3 error7 next6 = 
-    (parse_sexps2 index11 slice7 symbols3 Empty error7 (fun next_index3 symbols4 expressions -> (next6 next_index3 symbols4 (List (expressions, (Range ((Int32.sub index11 (1l)), next_index3)))))));;
+    ((parse_sexps2 index11 slice7 symbols3 Empty error7) (fun next_index3 symbols4 expressions -> (next6 next_index3 symbols4 (List (expressions, (Range ((Int32.sub index11 (1l)), next_index3)))))));;
 
 let rec parse_expression depth index12 slice8 parse_sexps3 symbols5 error8 next7 end3 = 
     (match (x2 index12 (slice_size slice8)) with
@@ -1564,10 +1564,10 @@ let rec parse_expression depth index12 slice8 parse_sexps3 symbols5 error8 next7
                             (parse_symbol index12 slice8 symbols5 next7 end3))));;
 
 let rec parse_sexps4 depth2 index13 slice9 symbols6 expressions2 error9 end4 = 
-    (parse_expression depth2 index13 slice9 parse_sexps4 symbols6 error9 (fun index14 symbols7 expression2 -> (parse_sexps4 depth2 index14 slice9 symbols7 (Cons (expression2, expressions2)) error9 end4)) (fun index15 -> (end4 index15 symbols6 (list_reverse expressions2))));;
+    ((parse_expression depth2 index13 slice9 parse_sexps4 symbols6 error9) (fun index14 symbols7 expression2 -> ((parse_sexps4 depth2 index14 slice9) symbols7 (Cons (expression2, expressions2)) error9 end4)) (fun index15 -> (end4 index15 symbols6 (list_reverse expressions2))));;
 
 let rec parse_sexps symbols8 slice10 = 
-    (parse_sexps4 (0l) (0l) slice10 symbols8 Empty (fun error10 -> (Error (error10))) (fun x190 symbols9 expressions3 -> (Result ((Pair (symbols9, expressions3))))));;
+    ((parse_sexps4 (0l) (0l) slice10 symbols8 Empty) (fun error10 -> (Error (error10))) (fun x190 symbols9 expressions3 -> (Result ((Pair (symbols9, expressions3))))));;
 
 let rec wrap_in_brackets string33 = 
     (string_concat (string_of_char (40l)) (string_concat string33 (string_of_char (41l))));;
@@ -1599,17 +1599,17 @@ let rec parts_are_empty parts8 =
 let rec transform_line line2 = 
     (match (string_split (124l) line2) with
          | (Cons (name5, parts9)) -> 
-            (string_concat (string_from_list (Cons ((40l), (Cons ((100l), (Cons ((101l), (Cons ((102l), (Cons ((32l), (Cons ((100l), (Cons ((97l), (Cons ((116l), (Cons ((97l), (Cons ((45l), Empty))))))))))))))))))))) (string_concat (string_trim name5) (string_concat (string_from_list (Cons ((32l), (Cons ((40l), (Cons ((41l), (Cons ((32l), (Cons ((40l), (Cons ((115l), (Cons ((116l), (Cons ((114l), (Cons ((105l), (Cons ((110l), (Cons ((103l), (Cons ((45l), (Cons ((102l), (Cons ((114l), (Cons ((111l), (Cons ((109l), (Cons ((45l), (Cons ((108l), (Cons ((105l), (Cons ((115l), (Cons ((116l), (Cons ((32l), Empty))))))))))))))))))))))))))))))))))))))))))))) (match (parts_are_empty parts9) with
+            (string_concat (string_from_list (Cons ((40l), (Cons ((100l), (Cons ((101l), (Cons ((102l), (Cons ((32l), (Cons ((100l), (Cons ((97l), (Cons ((116l), (Cons ((97l), (Cons ((45l), Empty))))))))))))))))))))) (string_concat (string_trim name5) (string_concat (string_from_list (Cons ((32l), (Cons ((40l), (Cons ((41l), (Cons ((32l), (Cons ((40l), (Cons ((115l), (Cons ((116l), (Cons ((114l), (Cons ((105l), (Cons ((110l), (Cons ((103l), Empty))))))))))))))))))))))) (string_concat (string_from_list (Cons ((45l), (Cons ((102l), (Cons ((114l), (Cons ((111l), (Cons ((109l), (Cons ((45l), (Cons ((108l), (Cons ((105l), (Cons ((115l), (Cons ((116l), (Cons ((32l), Empty))))))))))))))))))))))) (match (parts_are_empty parts9) with
                  | True -> 
                     (string_from_list (Cons ((69l), (Cons ((109l), (Cons ((112l), (Cons ((116l), (Cons ((121l), (Cons ((41l), (Cons ((41l), Empty)))))))))))))))
                  | False -> 
-                    (string_concat (string_from_list (Cons ((40l), (Cons ((108l), (Cons ((105l), (Cons ((115l), (Cons ((116l), (Cons ((32l), Empty))))))))))))) (string_concat (string_join (string_of_char (32l)) (list_map string_from_int32 (string_to_list (string_join (string_of_char (124l)) parts9)))) (string_from_list (Cons ((41l), (Cons ((41l), (Cons ((41l), Empty)))))))))))))
+                    (string_concat (string_from_list (Cons ((40l), (Cons ((108l), (Cons ((105l), (Cons ((115l), (Cons ((116l), (Cons ((32l), Empty))))))))))))) (string_concat (string_join (string_of_char (32l)) (list_map string_from_int32 (string_to_list (string_join (string_of_char (124l)) parts9)))) (string_from_list (Cons ((41l), (Cons ((41l), (Cons ((41l), Empty))))))))))))))
          | Empty -> 
             (string_empty ()));;
 
 let rec string_gen stdin_iterator = 
-    (match (string_collect_from_slice (fun x196 -> True) (0l) stdin_iterator) with
-         | (Pair (x197, stdin)) -> 
+    (match (string_collect_from_slice (const True) (0l) stdin_iterator) with
+         | (Pair (x196, stdin)) -> 
             (Result ((string_join (string_of_char (10l)) (list_map transform_line (string_split (10l) stdin))))));;
 
 type module_reference  = 
@@ -1655,32 +1655,32 @@ type definition  =
 
 let rec source_reference_file_path source_reference2 = 
     (match source_reference2 with
-         | (SourceReference (file_path, x198)) -> 
+         | (SourceReference (file_path, x197)) -> 
             file_path);;
 
 let rec source_reference_module source_reference3 = 
     (match source_reference3 with
-         | (SourceReference (x199, module2)) -> 
+         | (SourceReference (x198, module2)) -> 
             module2);;
 
 let rec identifier_token identifier2 = 
     (match identifier2 with
-         | (Identifier (token3, x200, x201, x202, x203)) -> 
+         | (Identifier (token3, x199, x200, x201, x202)) -> 
             token3);;
 
 let rec identifier_name identifier3 = 
     (match identifier3 with
-         | (Identifier (x204, name6, x205, x206, x207)) -> 
+         | (Identifier (x203, name6, x204, x205, x206)) -> 
             name6);;
 
 let rec identifier_with_name name7 identifier4 = 
     (match identifier4 with
-         | (Identifier (x208, x209, x210, x211, x212)) -> 
-            (Identifier (x208, name7, x210, x211, x212)));;
+         | (Identifier (x207, x208, x209, x210, x211)) -> 
+            (Identifier (x207, name7, x209, x210, x211)));;
 
 let rec identifier_source_reference identifier5 = 
     (match identifier5 with
-         | (Identifier (x213, x214, source_reference4, x215, x216)) -> 
+         | (Identifier (x212, x213, source_reference4, x214, x215)) -> 
             source_reference4);;
 
 let rec identifier_module identifier6 = 
@@ -1688,12 +1688,12 @@ let rec identifier_module identifier6 =
 
 let rec identifier_range identifier7 = 
     (match identifier7 with
-         | (Identifier (x217, x218, x219, range2, x220)) -> 
+         | (Identifier (x216, x217, x218, range2, x219)) -> 
             range2);;
 
 let rec identifier_id identifier8 = 
     (match identifier8 with
-         | (Identifier (x221, x222, x223, x224, id2)) -> 
+         | (Identifier (x220, x221, x222, x223, id2)) -> 
             id2);;
 
 let rec identifier_is identifier9 id3 = 
@@ -1705,34 +1705,34 @@ let rec identifier_is identifier9 id3 =
 
 let rec identifier_with_id id4 identifier10 = 
     (match identifier10 with
-         | (Identifier (x225, x226, x227, x228, x229)) -> 
-            (Identifier (x225, x226, x227, x228, id4)));;
+         | (Identifier (x224, x225, x226, x227, x228)) -> 
+            (Identifier (x224, x225, x226, x227, id4)));;
 
 let rec identifier_equal a65 b60 = 
     (x4 (identifier_token a65) (identifier_token b60));;
 
 let rec module_equal a66 b61 = 
     (match a66 with
-         | (ModulePath (a67, x230)) -> 
+         | (ModulePath (a67, x229)) -> 
             (match b61 with
-                 | (ModulePath (b62, x231)) -> 
+                 | (ModulePath (b62, x230)) -> 
                     (string_equal a67 b62)
                  | ModuleSelf -> 
                     False)
          | ModuleSelf -> 
             (match b61 with
-                 | (ModulePath (x232, x233)) -> 
+                 | (ModulePath (x231, x232)) -> 
                     False
                  | ModuleSelf -> 
                     True));;
 
 let rec definition_source_reference definition2 = 
     (match definition2 with
-         | (TypeDefinition (identifier11, x234, x235, x236, x237)) -> 
+         | (TypeDefinition (identifier11, x233, x234, x235, x236)) -> 
             (identifier_source_reference identifier11)
-         | (FunctionDefinition (identifier12, x238, x239, x240, x241)) -> 
+         | (FunctionDefinition (identifier12, x237, x238, x239, x240)) -> 
             (identifier_source_reference identifier12)
-         | (TargetDefinition (source_reference5, x242)) -> 
+         | (TargetDefinition (source_reference5, x241)) -> 
             source_reference5);;
 
 let rec definition_module definition3 = 
@@ -1740,25 +1740,25 @@ let rec definition_module definition3 =
 
 let rec definition_public definition4 = 
     (match definition4 with
-         | (TypeDefinition (x243, public, x244, x245, x246)) -> 
+         | (TypeDefinition (x242, public, x243, x244, x245)) -> 
             public
-         | (FunctionDefinition (x247, public2, x248, x249, x250)) -> 
+         | (FunctionDefinition (x246, public2, x247, x248, x249)) -> 
             public2
-         | (TargetDefinition (x251, x252)) -> 
+         | (TargetDefinition (x250, x251)) -> 
             False);;
 
 let rec definition_identifier definition5 = 
     (match definition5 with
-         | (TypeDefinition (identifier13, x253, x254, x255, x256)) -> 
+         | (TypeDefinition (identifier13, x252, x253, x254, x255)) -> 
             (Some (identifier13))
-         | (FunctionDefinition (identifier14, x257, x258, x259, x260)) -> 
+         | (FunctionDefinition (identifier14, x256, x257, x258, x259)) -> 
             (Some (identifier14))
-         | (TargetDefinition (x261, x262)) -> 
+         | (TargetDefinition (x260, x261)) -> 
             None);;
 
 let rec constructor_identifier constructor2 = 
     (match constructor2 with
-         | (ComplexConstructor (identifier15, x263, x264)) -> 
+         | (ComplexConstructor (identifier15, x262, x263)) -> 
             identifier15
          | (SimpleConstructor (identifier16)) -> 
             identifier16);;
@@ -1774,18 +1774,18 @@ let rec captured_identifiers_from_pattern pattern2 =
     (match pattern2 with
          | (Capture (identifier19)) -> 
             (Cons (identifier19, Empty))
-         | (ConstructorPattern (x265, patterns, x266)) -> 
+         | (ConstructorPattern (x264, patterns, x265)) -> 
             (list_flatmap captured_identifiers_from_pattern patterns)
-         | x267 -> 
+         | x266 -> 
             Empty);;
 
 let rec identifiers_from_definition definition6 = 
     (match definition6 with
-         | (TypeDefinition (name8, x268, x269, constructors, x270)) -> 
+         | (TypeDefinition (name8, x267, x268, constructors, x269)) -> 
             (Cons (name8, (list_map constructor_identifier constructors)))
-         | (FunctionDefinition (name9, x271, arguments, x272, x273)) -> 
+         | (FunctionDefinition (name9, x270, arguments, x271, x272)) -> 
             (Cons (name9, Empty))
-         | (TargetDefinition (x274, x275)) -> 
+         | (TargetDefinition (x273, x274)) -> 
             Empty);;
 
 let rec public_identifiers definitions = 
@@ -1809,28 +1809,28 @@ let rec over_subexpressions f45 expression7 =
             (result_bind (result_concat (list_map (fun x51 -> ((result_flatmap (over_subexpressions f45)) (f45 x51))) expressions6)) (fun expressions7 -> (result_return (Constructor (identifier20, expressions7, range5)))))
          | (FunctionApplication (expressions8, range6)) -> 
             (result_bind (result_concat (list_map (fun x51 -> ((result_flatmap (over_subexpressions f45)) (f45 x51))) expressions8)) (fun expressions9 -> (result_return (FunctionApplication (expressions9, range6)))))
-         | x276 -> 
+         | x275 -> 
             (result_return expression8))));;
 
 let rec over_definition_expressions f46 definition7 = 
     (match definition7 with
          | (FunctionDefinition (identifier21, public3, arguments3, expression15, range7)) -> 
             (result_bind (f46 expression15) (fun expression16 -> (result_return (FunctionDefinition (identifier21, public3, arguments3, expression16, range7)))))
-         | x277 -> 
+         | x276 -> 
             (result_return definition7));;
 
 let rec over_function_application f47 expression17 = 
     (match expression17 with
          | (FunctionApplication (expressions10, range8)) -> 
             (f47 expressions10 range8)
-         | x278 -> 
+         | x277 -> 
             (result_return expression17));;
 
 let rec over_match_expression f48 expression18 = 
     (match expression18 with
          | (Match (expression19, pairs4, range9)) -> 
             (f48 expression19 pairs4 range9)
-         | x279 -> 
+         | x278 -> 
             (result_return expression18));;
 
 let rec over_identifiers f49 expression20 = 
@@ -1847,40 +1847,43 @@ let rec over_identifiers f49 expression20 =
             (result_bind (result_concat (list_map (over_identifiers f49) expressions13)) (fun expressions14 -> (result_return (FunctionApplication (expressions14, range13)))))
          | (Match (expression23, rules, range14)) -> 
             (result_bind (result_concat (list_map (over_match_pair_expression (over_identifiers f49)) rules)) (fun rules2 -> (result_bind (over_identifiers f49 expression23) (fun expression24 -> (result_return (Match (expression24, rules2, range14)))))))
-         | x280 -> 
+         | x279 -> 
             (result_return expression20));;
 
 let rec expression_calls_function_in_tail_position name16 expression25 = 
     (match expression25 with
-         | (FunctionApplication ((Cons ((Variable (f50)), rest15)), x281)) -> 
+         | (FunctionApplication ((Cons ((Variable (f50)), rest15)), x280)) -> 
             (identifier_equal name16 f50)
-         | (Match (x282, rules3, x283)) -> 
+         | (Match (x281, rules3, x282)) -> 
             (list_any (fun pair10 -> (match pair10 with
                  | (Pair (pattern4, expression26)) -> 
                     (and2 (not (list_any (identifier_equal name16) (captured_identifiers_from_pattern pattern4))) (expression_calls_function_in_tail_position name16 expression26)))) rules3)
-         | x284 -> 
+         | x283 -> 
             False);;
 
-let rec over_tail_recursive_match_rule name17 f51 over_tail_recursive_call2 rule = 
-    (match rule with
-         | (Pair (pattern5, expression27)) -> 
-            (match (list_any (identifier_equal name17) (captured_identifiers_from_pattern pattern5)) with
-                 | True -> 
-                    (Pair (pattern5, expression27))
-                 | False -> 
-                    (Pair (pattern5, (over_tail_recursive_call2 name17 f51 expression27)))));;
+let rec any_captures_match name17 pattern5 = 
+    (list_any (identifier_equal name17) (captured_identifiers_from_pattern pattern5));;
 
-let rec over_tail_recursive_call name18 f52 expression28 = 
+let rec over_tail_recursive_match_rule name18 f51 over_tail_recursive_call2 rule = 
+    (match rule with
+         | (Pair (pattern6, expression27)) -> 
+            (match (any_captures_match name18 pattern6) with
+                 | True -> 
+                    (Pair (pattern6, expression27))
+                 | False -> 
+                    (Pair (pattern6, (over_tail_recursive_call2 name18 f51 expression27)))));;
+
+let rec over_tail_recursive_call name19 f52 expression28 = 
     (match expression28 with
          | (FunctionApplication ((Cons ((Variable (applied_name)), rest16)), range15)) -> 
-            (match (identifier_equal name18 applied_name) with
+            (match (identifier_equal name19 applied_name) with
                  | True -> 
                     (f52 rest16 range15)
                  | False -> 
                     expression28)
          | (Match (expression29, rules4, range16)) -> 
-            (Match (expression29, (list_map (over_tail_recursive_match_rule name18 f52 over_tail_recursive_call) rules4), range16))
-         | x285 -> 
+            (Match (expression29, (list_map (over_tail_recursive_match_rule name19 f52 over_tail_recursive_call) rules4), range16))
+         | x284 -> 
             expression28);;
 
 let rec data_strings_file_ending () = 
@@ -1902,22 +1905,22 @@ let rec source_file_of module3 path iterator9 =
 
 let rec source_file_module file = 
     (match file with
-         | (SourceFile (module4, x286, x287)) -> 
+         | (SourceFile (module4, x285, x286)) -> 
             module4);;
 
 let rec source_file_path file2 = 
     (match file2 with
-         | (SourceFile (x288, path2, x289)) -> 
+         | (SourceFile (x287, path2, x288)) -> 
             path2);;
 
 let rec source_file_content file3 = 
     (match file3 with
-         | (SourceFile (x290, x291, content)) -> 
+         | (SourceFile (x289, x290, content)) -> 
             content);;
 
 let rec source_file_size file4 = 
     (match file4 with
-         | (SourceFile (x292, x293, content2)) -> 
+         | (SourceFile (x291, x292, content2)) -> 
             (slice_size content2));;
 
 let rec source_file_in_same_module a68 b63 = 
@@ -1926,12 +1929,18 @@ let rec source_file_in_same_module a68 b63 =
 let rec last_n_chars n7 path3 = 
     (string_substring (Int32.sub (string_size path3) n7) n7 path3);;
 
-let rec source_file_type2 file5 = 
-    (match (string_equal (last_n_chars (6l) (source_file_path file5)) (data_reuse_file_ending ())) with
+let rec is_reuse_source file5 = 
+    (string_equal (last_n_chars (6l) (source_file_path file5)) (data_reuse_file_ending ()));;
+
+let rec is_strings_source file6 = 
+    (string_equal (last_n_chars (8l) (source_file_path file6)) (data_strings_file_ending ()));;
+
+let rec source_file_type2 file7 = 
+    (match (is_reuse_source file7) with
          | True -> 
             SourceFileTypeReuse
          | False -> 
-            (match (string_equal (last_n_chars (8l) (source_file_path file5)) (data_strings_file_ending ())) with
+            (match (is_strings_source file7) with
                  | True -> 
                     SourceFileTypeStrings
                  | False -> 
@@ -1985,7 +1994,7 @@ let rec symbol_table_empty () =
 
 let rec symbol_table_id3 table = 
     (match table with
-         | (SymbolTable (id6, x294)) -> 
+         | (SymbolTable (id6, x293)) -> 
             id6);;
 
 let rec symbol_table_bind string34 table2 = 
@@ -2004,19 +2013,19 @@ type ('Tdefinition8) parser_context  =
 
 let rec parser_context_add_constructors definition9 array22 = 
     (match definition9 with
-         | (TypeDefinition (x295, x296, x297, constructors2, x298)) -> 
+         | (TypeDefinition (x294, x295, x296, constructors2, x297)) -> 
             (list_foldl (fun constructor3 array23 -> (array_set (identifier_token (constructor_identifier constructor3)) definition9 array23)) array22 constructors2)
-         | x299 -> 
+         | x298 -> 
             array22);;
 
 let rec prefix_module_symbol module5 identifier24 = 
     (match module5 with
-         | (ModulePath (name19, open2)) -> 
+         | (ModulePath (name20, open2)) -> 
             (match open2 with
                  | True -> 
                     identifier24
                  | False -> 
-                    (identifier_with_name (string_join (data_ ()) (Cons (name19, (Cons ((identifier_name identifier24), Empty))))) identifier24))
+                    (identifier_with_name (string_join (data_ ()) (Cons (name20, (Cons ((identifier_name identifier24), Empty))))) identifier24))
          | ModuleSelf -> 
             identifier24);;
 
@@ -2026,33 +2035,29 @@ let rec prefix_module_symbols module6 syms2 =
 let rec parser_context_add_definition definition10 context = 
     (match context with
          | (ParserContext (source_reference6, symbols15, module_scope, global_scope, symbol_table2, constructors3)) -> 
-            (match (identifiers_from_definition definition10) with
-                 | definition_symbols -> 
-                    (match (source_reference_module source_reference6) with
-                         | module7 -> 
-                            (ParserContext (source_reference6, symbols15, (parser_scope_set_all definition_symbols module_scope), (match (definition_public definition10) with
-                                 | True -> 
-                                    (parser_scope_set_all (prefix_module_symbols module7 definition_symbols) global_scope)
-                                 | False -> 
-                                    global_scope), symbol_table2, (parser_context_add_constructors definition10 constructors3))))));;
+            (let_bind (identifiers_from_definition definition10) (fun definition_symbols -> (let_bind (source_reference_module source_reference6) (fun module7 -> (ParserContext (source_reference6, symbols15, (parser_scope_set_all definition_symbols module_scope), (match (definition_public definition10) with
+                 | True -> 
+                    (parser_scope_set_all (prefix_module_symbols module7 definition_symbols) global_scope)
+                 | False -> 
+                    global_scope), symbol_table2, (parser_context_add_constructors definition10 constructors3))))))));;
 
 let rec parser_context_token_is_constructor token4 context2 = 
     (match context2 with
-         | (ParserContext (x300, x301, x302, x303, x304, constructors4)) -> 
+         | (ParserContext (x299, x300, x301, x302, x303, constructors4)) -> 
             (match (array_get token4 constructors4) with
-                 | (Some (x305)) -> 
+                 | (Some (x304)) -> 
                     True
                  | None -> 
                     False));;
 
 let rec parser_context_new_module context3 = 
     (match context3 with
-         | (ParserContext (source_reference7, symbols16, x306, global_scope2, symbol_table3, constructors5)) -> 
+         | (ParserContext (source_reference7, symbols16, x305, global_scope2, symbol_table3, constructors5)) -> 
             (ParserContext (source_reference7, symbols16, (parser_scope_new global_scope2), global_scope2, symbol_table3, constructors5)));;
 
 let rec parser_context_module_scope context4 = 
     (match context4 with
-         | (ParserContext (x307, x308, module_scope2, x309, x310, x311)) -> 
+         | (ParserContext (x306, x307, module_scope2, x308, x309, x310)) -> 
             module_scope2);;
 
 let rec parser_context_bind_symbol identifier25 context5 = 
@@ -2062,38 +2067,38 @@ let rec parser_context_bind_symbol identifier25 context5 =
 
 let rec parser_context_symbols context6 = 
     (match context6 with
-         | (ParserContext (x312, symbols18, x313, x314, x315, x316)) -> 
+         | (ParserContext (x311, symbols18, x312, x313, x314, x315)) -> 
             symbols18);;
 
 let rec parser_context_with_symbols symbols19 context7 = 
     (match context7 with
-         | (ParserContext (source_reference9, x317, module_scope4, global_scope4, symbol_table5, constructors7)) -> 
+         | (ParserContext (source_reference9, x316, module_scope4, global_scope4, symbol_table5, constructors7)) -> 
             (ParserContext (source_reference9, symbols19, module_scope4, global_scope4, symbol_table5, constructors7)));;
 
 let rec parser_context_symbol_id context8 = 
     (match context8 with
-         | (ParserContext (x318, x319, x320, x321, symbol_table6, x322)) -> 
+         | (ParserContext (x317, x318, x319, x320, symbol_table6, x321)) -> 
             (symbol_table_id3 symbol_table6));;
 
 let rec parser_context_source_reference context9 = 
     (match context9 with
-         | (ParserContext (source_reference10, x323, x324, x325, x326, x327)) -> 
+         | (ParserContext (source_reference10, x322, x323, x324, x325, x326)) -> 
             source_reference10);;
 
 let rec parser_context_with_source_reference source_reference11 context10 = 
     (match context10 with
-         | (ParserContext (x328, symbols20, module_scope5, global_scope5, symbol_table7, constructors8)) -> 
+         | (ParserContext (x327, symbols20, module_scope5, global_scope5, symbol_table7, constructors8)) -> 
             (ParserContext (source_reference11, symbols20, module_scope5, global_scope5, symbol_table7, constructors8)));;
 
 let rec default_scope symbols21 = 
-    (parser_scope_set_list (list_map (fun x51 -> ((fun x329 -> (Pair (x329, x329))) (pair_left x51))) symbols21) (parser_scope_empty ()));;
+    (parser_scope_set_list (list_map (fun x51 -> ((fun x328 -> (Pair (x328, x328))) (pair_left x51))) symbols21) (parser_scope_empty ()));;
 
 let rec max_symbol_id symbols22 = 
-    (list_foldl (fun x330 xs28 -> (max xs28 (pair_left x330))) (0l) symbols22);;
+    (list_foldl (fun x329 xs28 -> (max xs28 (pair_left x329))) (0l) symbols22);;
 
 let rec parser_run symbols23 parser2 = 
-    (match (state_run (ParserContext ((SourceReference ((string_empty ()), ModuleSelf)), (Pair ((Int32.add (max_symbol_id symbols23) (1l)), (dictionary_of (list_map (fun x331 -> (Pair ((pair_right x331), x331))) symbols23)))), (default_scope symbols23), (default_scope symbols23), (symbol_table_bind_list (list_map pair_right symbols23) (symbol_table_empty ())), (array_empty ()))) parser2) with
-         | (Pair (x332, result13)) -> 
+    (match (state_run (ParserContext ((SourceReference ((string_empty ()), ModuleSelf)), (Pair ((Int32.add (max_symbol_id symbols23) (1l)), (dictionary_of (list_map (fun x330 -> (Pair ((pair_right x330), x330))) symbols23)))), (default_scope symbols23), (default_scope symbols23), (symbol_table_bind_list (list_map pair_right symbols23) (symbol_table_empty ())), (array_empty ()))) parser2) with
+         | (Pair (x331, result13)) -> 
             result13);;
 
 let rec parser_return value22 = 
@@ -2109,13 +2114,13 @@ let rec parser_token_is_constructor token5 =
     (state_bind (state_get ()) (fun context11 -> (parser_return (parser_context_token_is_constructor token5 context11))));;
 
 let rec parser_add_definition definition11 = 
-    (state_bind (state_modify (parser_context_add_definition definition11)) (fun x333 -> (parser_return definition11)));;
+    (state_bind (state_modify (parser_context_add_definition definition11)) (fun x332 -> (parser_return definition11)));;
 
 let rec parser_get_symbols () = 
     (state_bind (state_get ()) (fun state8 -> (parser_return (parser_context_symbols state8))));;
 
 let rec parser_set_symbols symbols24 = 
-    (state_bind (state_modify (parser_context_with_symbols symbols24)) (fun x334 -> (parser_return symbols24)));;
+    (state_bind (state_modify (parser_context_with_symbols symbols24)) (fun x333 -> (parser_return symbols24)));;
 
 let rec parser_get_module_scope () = 
     (state_bind (state_get ()) (fun state9 -> (parser_return (parser_context_module_scope state9))));;
@@ -2130,7 +2135,7 @@ let rec parser_get_source_reference () =
     (state_bind (state_get ()) (fun state12 -> (parser_return (parser_context_source_reference state12))));;
 
 let rec parser_set_source_reference source_reference12 = 
-    (state_bind (state_modify (parser_context_with_source_reference source_reference12)) (fun x335 -> (parser_return source_reference12)));;
+    (state_bind (state_modify (parser_context_with_source_reference source_reference12)) (fun x334 -> (parser_return source_reference12)));;
 
 let rec parser_sequence list28 = 
     (list_foldr (fun a69 b64 -> (parser_bind a69 (fun a70 -> (parser_bind b64 (fun b65 -> (parser_return (Cons (a70, b65)))))))) (parser_return Empty) list28);;
@@ -2196,17 +2201,17 @@ type error  =
 
 let rec symbol_to_identifier symbol = 
     (match symbol with
-         | (Symbol (token6, name20, range17)) -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference13 -> (parser_return (Identifier (token6, name20, source_reference13, range17, None)))))
-         | (Integer (x336, range18)) -> 
+         | (Symbol (token6, name21, range17)) -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference13 -> (parser_return (Identifier (token6, name21, source_reference13, range17, None)))))
+         | (Integer (x335, range18)) -> 
             (parser_bind (parser_get_source_reference ()) (fun source_reference14 -> (parser_error (MalformedSymbolError (source_reference14, range18)))))
-         | (List (x337, range19)) -> 
+         | (List (x336, range19)) -> 
             (parser_bind (parser_get_source_reference ()) (fun source_reference15 -> (parser_error (MalformedSymbolError (source_reference15, range19))))));;
 
 let rec resolve_symbol symbol2 scope6 = 
     (parser_bind (symbol_to_identifier symbol2) (fun identifier27 -> (match (parser_scope_resolve identifier27 scope6) with
-         | (Identifier (x338, name21, source_reference16, range20, None)) -> 
-            (parser_error (ErrorNotDefined (name21, source_reference16, range20)))
+         | (Identifier (x337, name22, source_reference16, range20, None)) -> 
+            (parser_error (ErrorNotDefined (name22, source_reference16, range20)))
          | identifier28 -> 
             (parser_return identifier28))));;
 
@@ -2215,9 +2220,9 @@ let rec sexp_to_complex_type sexp_to_type scope7 symbol3 parameters range21 =
 
 let rec sexp_to_function_type sexp_to_type2 parameters2 range22 = 
     (match parameters2 with
-         | (Cons ((List (arg_types, x339)), (Cons (return_type, Empty)))) -> 
+         | (Cons ((List (arg_types, x338)), (Cons (return_type, Empty)))) -> 
             (parser_bind (parser_sequence (list_map sexp_to_type2 arg_types)) (fun arg_types2 -> (parser_bind (sexp_to_type2 return_type) (fun return_type2 -> (parser_return (FunctionType (arg_types2, return_type2, range22)))))))
-         | x340 -> 
+         | x339 -> 
             (parser_bind (parser_get_source_reference ()) (fun source_reference17 -> (parser_error (MalformedTypeError (source_reference17, range22))))));;
 
 let rec sexp_to_type3 scope8 type2 = 
@@ -2228,44 +2233,40 @@ let rec sexp_to_type3 scope8 type2 =
                     (sexp_to_function_type (sexp_to_type3 scope8) parameters3 range23)
                  | False -> 
                     (sexp_to_complex_type sexp_to_type3 scope8 symbol4 parameters3 range23))))
-         | (Integer (x341, range24)) -> 
+         | (Integer (x340, range24)) -> 
             (parser_bind (parser_get_source_reference ()) (fun source_reference18 -> (parser_error (MalformedTypeError (source_reference18, range24)))))
-         | (List (x342, range25)) -> 
+         | (List (x341, range25)) -> 
             (parser_bind (parser_get_source_reference ()) (fun source_reference19 -> (parser_error (MalformedTypeError (source_reference19, range25)))))
          | symbol5 -> 
             (parser_bind (resolve_symbol symbol5 scope8) (fun identifier31 -> (parser_return (SimpleType (identifier31))))));;
 
 let rec sexp_to_constructor_definition scope9 constructor4 = 
     (match constructor4 with
-         | (List ((Cons (name22, types)), range26)) -> 
-            (parser_bind (symbol_to_identifier name22) (fun name23 -> (parser_bind (parser_bind_symbol name23) (fun name24 -> (parser_bind (parser_sequence (list_map (sexp_to_type3 scope9) types)) (fun types2 -> (parser_return (ComplexConstructor (name24, types2, range26)))))))))
-         | (Integer (x343, range27)) -> 
+         | (List ((Cons (name23, types)), range26)) -> 
+            (parser_bind (symbol_to_identifier name23) (fun name24 -> (parser_bind (parser_bind_symbol name24) (fun name25 -> (parser_bind (parser_sequence (list_map (sexp_to_type3 scope9) types)) (fun types2 -> (parser_return (ComplexConstructor (name25, types2, range26)))))))))
+         | (Integer (x342, range27)) -> 
             (parser_bind (parser_get_source_reference ()) (fun source_reference20 -> (parser_error (MalformedConstructorError (source_reference20, range27)))))
-         | (List (x344, range28)) -> 
+         | (List (x343, range28)) -> 
             (parser_bind (parser_get_source_reference ()) (fun source_reference21 -> (parser_error (MalformedConstructorError (source_reference21, range28)))))
          | symbol6 -> 
-            (parser_bind (symbol_to_identifier symbol6) (fun name25 -> (parser_bind (parser_bind_symbol name25) (fun name26 -> (parser_return (SimpleConstructor (name26))))))));;
+            (parser_bind (symbol_to_identifier symbol6) (fun name26 -> (parser_bind (parser_bind_symbol name26) (fun name27 -> (parser_return (SimpleConstructor (name27))))))));;
 
 let rec sexp_to_type_parameter sexp2 = 
     (match sexp2 with
-         | (List ((Cons (x345, (Cons (name27, Empty)))), x346)) -> 
-            (parser_bind (symbol_to_identifier name27) (fun name28 -> (parser_bind (parser_bind_symbol name28) (fun name29 -> (parser_return (ExistentialParameter (name29)))))))
-         | (Integer (x347, range29)) -> 
+         | (List ((Cons (x344, (Cons (name28, Empty)))), x345)) -> 
+            (parser_bind (symbol_to_identifier name28) (fun name29 -> (parser_bind (parser_bind_symbol name29) (fun name30 -> (parser_return (ExistentialParameter (name30)))))))
+         | (Integer (x346, range29)) -> 
             (parser_bind (parser_get_source_reference ()) (fun source_reference22 -> (parser_error (MalformedDefinitionError (source_reference22, range29)))))
-         | (List (x348, range30)) -> 
+         | (List (x347, range30)) -> 
             (parser_bind (parser_get_source_reference ()) (fun source_reference23 -> (parser_error (MalformedDefinitionError (source_reference23, range30)))))
          | symbol7 -> 
-            (parser_bind (symbol_to_identifier symbol7) (fun name30 -> (parser_bind (parser_bind_symbol name30) (fun name31 -> (parser_return (UniversalParameter (name31))))))));;
+            (parser_bind (symbol_to_identifier symbol7) (fun name31 -> (parser_bind (parser_bind_symbol name31) (fun name32 -> (parser_return (UniversalParameter (name32))))))));;
 
 let rec sexp_to_lambda sexp_to_expression scope10 rest17 range31 = 
     (match rest17 with
-         | (Cons ((List (arguments6, x349)), (Cons (expression30, Empty)))) -> 
-            (parser_bind (parser_sequence (list_map symbol_to_identifier arguments6)) (fun arguments7 -> (parser_bind (parser_bind_symbols arguments7) (fun arguments8 -> (match (parser_scope_new scope10) with
-                 | scope11 -> 
-                    (match (parser_scope_set_all arguments8 scope11) with
-                         | scope12 -> 
-                            (parser_bind (sexp_to_expression scope12 expression30) (fun expression31 -> (parser_return (Lambda (arguments8, expression31, range31)))))))))))
-         | x350 -> 
+         | (Cons ((List (arguments6, x348)), (Cons (expression30, Empty)))) -> 
+            (parser_bind (parser_sequence (list_map symbol_to_identifier arguments6)) (fun arguments7 -> (parser_bind (parser_bind_symbols arguments7) (fun arguments8 -> (let_bind (parser_scope_new scope10) (fun scope11 -> (let_bind (parser_scope_set_all arguments8 scope11) (fun scope12 -> (parser_bind (sexp_to_expression scope12 expression30) (fun expression31 -> (parser_return (Lambda (arguments8, expression31, range31)))))))))))))
+         | x349 -> 
             (parser_bind (parser_get_source_reference ()) (fun source_reference24 -> (parser_error (MalformedFunctionDefinitionError (source_reference24, range31))))));;
 
 let rec sexp_to_function_application sexp_to_expression2 range32 expressions15 = 
@@ -2280,8 +2281,8 @@ let rec to_constructor_or_capture scope13 symbol8 =
 
 let rec sexp_to_pattern scope14 sexp3 = 
     (match sexp3 with
-         | (List ((Cons (name32, rest18)), range33)) -> 
-            (parser_bind (parser_sequence (list_map (sexp_to_pattern scope14) rest18)) (fun patterns2 -> (parser_bind (resolve_symbol name32 scope14) (fun identifier35 -> (parser_return (ConstructorPattern (identifier35, patterns2, range33)))))))
+         | (List ((Cons (name33, rest18)), range33)) -> 
+            (parser_bind (parser_sequence (list_map (sexp_to_pattern scope14) rest18)) (fun patterns2 -> (parser_bind (resolve_symbol name33 scope14) (fun identifier35 -> (parser_return (ConstructorPattern (identifier35, patterns2, range33)))))))
          | (List (Empty, range34)) -> 
             (parser_bind (parser_get_source_reference ()) (fun source_reference25 -> (parser_error (MalformedPatternError (source_reference25, range34)))))
          | (Integer (integer6, range35)) -> 
@@ -2291,15 +2292,9 @@ let rec sexp_to_pattern scope14 sexp3 =
 
 let rec sexp_to_match_pair sexp_to_expression3 scope15 range36 pair11 = 
     (match pair11 with
-         | (Cons (pattern6, (Cons (expression32, Empty)))) -> 
-            (parser_bind (sexp_to_pattern scope15 pattern6) (fun pattern7 -> (match (captured_identifiers_from_pattern pattern7) with
-                 | captures -> 
-                    (match (parser_scope_new scope15) with
-                         | scope16 -> 
-                            (match (parser_scope_set_all captures scope16) with
-                                 | scope17 -> 
-                                    (parser_bind (sexp_to_expression3 scope17 expression32) (fun expression33 -> (parser_return (Pair (pattern7, expression33))))))))))
-         | x351 -> 
+         | (Cons (pattern7, (Cons (expression32, Empty)))) -> 
+            (parser_bind (sexp_to_pattern scope15 pattern7) (fun pattern8 -> (let_bind (captured_identifiers_from_pattern pattern8) (fun captures -> (let_bind (parser_scope_new scope15) (fun scope16 -> (let_bind (parser_scope_set_all captures scope16) (fun scope17 -> (parser_bind (sexp_to_expression3 scope17 expression32) (fun expression33 -> (parser_return (Pair (pattern8, expression33)))))))))))))
+         | x350 -> 
             (parser_bind (parser_get_source_reference ()) (fun source_reference26 -> (parser_error (MalformedMatchExpressionError (source_reference26, range36))))));;
 
 let rec sexp_to_match_pairs sexp_to_expression4 scope18 range37 xs29 = 
@@ -2313,7 +2308,7 @@ let rec sexp_to_match sexp_to_expression5 scope19 range38 rest19 =
     (match rest19 with
          | (Cons (expression34, rest20)) -> 
             (parser_bind (sexp_to_expression5 scope19 expression34) (fun expression35 -> (parser_bind (sexp_to_match_pairs sexp_to_expression5 scope19 range38 rest20) (fun pairs6 -> (parser_return (Match (expression35, pairs6, range38)))))))
-         | x352 -> 
+         | x351 -> 
             (parser_bind (parser_get_source_reference ()) (fun source_reference28 -> (parser_error (InternalParserError (source_reference28, range38))))));;
 
 let rec sexp_to_constructor sexp_to_expression6 range39 symbol10 rest21 scope20 = 
@@ -2321,7 +2316,7 @@ let rec sexp_to_constructor sexp_to_expression6 range39 symbol10 rest21 scope20 
 
 let rec sexp_to_list_expression sexp_to_expression7 scope21 expressions18 range40 = 
     (match expressions18 with
-         | (Cons ((Symbol (token7, name33, symbol_range)), rest22)) -> 
+         | (Cons ((Symbol (token7, name34, symbol_range)), rest22)) -> 
             (match (x4 token7 (identifier_fn ())) with
                  | True -> 
                     (sexp_to_lambda sexp_to_expression7 scope21 rest22 range40)
@@ -2332,10 +2327,10 @@ let rec sexp_to_list_expression sexp_to_expression7 scope21 expressions18 range4
                          | False -> 
                             (parser_bind (parser_token_is_constructor token7) (fun constructor6 -> (match constructor6 with
                                  | True -> 
-                                    (sexp_to_constructor (sexp_to_expression7 scope21) range40 (Symbol (token7, name33, symbol_range)) rest22 scope21)
+                                    (sexp_to_constructor (sexp_to_expression7 scope21) range40 (Symbol (token7, name34, symbol_range)) rest22 scope21)
                                  | False -> 
                                     (sexp_to_function_application (sexp_to_expression7 scope21) range40 expressions18))))))
-         | x353 -> 
+         | x352 -> 
             (sexp_to_function_application (sexp_to_expression7 scope21) range40 expressions18));;
 
 let rec sexp_to_expression8 scope22 sexp4 = 
@@ -2346,7 +2341,7 @@ let rec sexp_to_expression8 scope22 sexp4 =
             (match expressions19 with
                  | Empty -> 
                     (parser_bind (parser_get_source_reference ()) (fun source_reference29 -> (parser_error (MalformedExpressionError (source_reference29, range42)))))
-                 | x354 -> 
+                 | x353 -> 
                     (sexp_to_list_expression sexp_to_expression8 scope22 expressions19 range42))
          | symbol11 -> 
             (parser_bind (resolve_symbol symbol11 scope22) (fun identifier38 -> (parser_bind (parser_token_is_constructor (identifier_token identifier38)) (fun constructor7 -> (parser_return (match constructor7 with
@@ -2357,44 +2352,30 @@ let rec sexp_to_expression8 scope22 sexp4 =
 
 let rec sexp_to_type_definition scope23 type_name public4 rest23 range43 = 
     (match type_name with
-         | (List ((Cons (name34, parameters4)), x355)) -> 
-            (parser_bind (symbol_to_identifier name34) (fun name35 -> (parser_bind (parser_bind_symbol name35) (fun name36 -> (parser_bind (parser_sequence (list_map sexp_to_type_parameter parameters4)) (fun parameters5 -> (match (list_map type_parameter_identifier parameters5) with
-                 | parameter_identifiers -> 
-                    (match (parser_scope_new scope23) with
-                         | scope24 -> 
-                            (match (parser_scope_set_all (Cons (name36, parameter_identifiers)) scope24) with
-                                 | scope25 -> 
-                                    (parser_bind (parser_sequence (list_map (sexp_to_constructor_definition scope25) rest23)) (fun constructors9 -> (parser_return (TypeDefinition (name36, public4, parameters5, constructors9, range43))))))))))))))
-         | (Integer (x356, range44)) -> 
+         | (List ((Cons (name35, parameters4)), x354)) -> 
+            (parser_bind (symbol_to_identifier name35) (fun name36 -> (parser_bind (parser_bind_symbol name36) (fun name37 -> (parser_bind (parser_sequence (list_map sexp_to_type_parameter parameters4)) (fun parameters5 -> (let_bind (list_map type_parameter_identifier parameters5) (fun parameter_identifiers -> (let_bind (parser_scope_new scope23) (fun scope24 -> (let_bind (parser_scope_set_all (Cons (name37, parameter_identifiers)) scope24) (fun scope25 -> (parser_bind (parser_sequence (list_map (sexp_to_constructor_definition scope25) rest23)) (fun constructors9 -> (parser_return (TypeDefinition (name37, public4, parameters5, constructors9, range43)))))))))))))))))
+         | (Integer (x355, range44)) -> 
             (parser_bind (parser_get_source_reference ()) (fun source_reference30 -> (parser_error (MalformedTypeError (source_reference30, range44)))))
-         | (List (x357, range45)) -> 
+         | (List (x356, range45)) -> 
             (parser_bind (parser_get_source_reference ()) (fun source_reference31 -> (parser_error (MalformedTypeError (source_reference31, range45)))))
          | symbol12 -> 
-            (parser_bind (symbol_to_identifier symbol12) (fun name37 -> (parser_bind (parser_bind_symbol name37) (fun name38 -> (match (parser_scope_new scope23) with
-                 | scope26 -> 
-                    (match (parser_scope_set2 name38 scope26) with
-                         | scope27 -> 
-                            (parser_bind (parser_sequence (list_map (sexp_to_constructor_definition scope27) rest23)) (fun constructors10 -> (parser_return (TypeDefinition (name38, public4, Empty, constructors10, range43))))))))))));;
+            (parser_bind (symbol_to_identifier symbol12) (fun name38 -> (parser_bind (parser_bind_symbol name38) (fun name39 -> (let_bind (parser_scope_new scope23) (fun scope26 -> (let_bind (parser_scope_set2 name39 scope26) (fun scope27 -> (parser_bind (parser_sequence (list_map (sexp_to_constructor_definition scope27) rest23)) (fun constructors10 -> (parser_return (TypeDefinition (name39, public4, Empty, constructors10, range43))))))))))))));;
 
 let rec sexp_to_function_definition scope28 name_symbol public5 rest24 range46 = 
     (match rest24 with
-         | (Cons ((List (arguments9, x358)), (Cons (expression36, Empty)))) -> 
-            (parser_bind (symbol_to_identifier name_symbol) (fun name39 -> (parser_bind (parser_bind_symbol name39) (fun name40 -> (parser_bind (parser_sequence (list_map symbol_to_identifier arguments9)) (fun arguments10 -> (parser_bind (parser_bind_symbols arguments10) (fun arguments11 -> (match (parser_scope_new scope28) with
-                 | scope29 -> 
-                    (match (parser_scope_set_all (Cons (name40, arguments11)) scope29) with
-                         | scope30 -> 
-                            (parser_bind (sexp_to_expression8 scope30 expression36) (fun expression37 -> (parser_return (FunctionDefinition (name40, public5, arguments11, expression37, range46)))))))))))))))
-         | x359 -> 
+         | (Cons ((List (arguments9, x357)), (Cons (expression36, Empty)))) -> 
+            (parser_bind (symbol_to_identifier name_symbol) (fun name40 -> (parser_bind (parser_bind_symbol name40) (fun name41 -> (parser_bind (parser_sequence (list_map symbol_to_identifier arguments9)) (fun arguments10 -> (parser_bind (parser_bind_symbols arguments10) (fun arguments11 -> (let_bind (parser_scope_new scope28) (fun scope29 -> (let_bind (parser_scope_set_all (Cons (name41, arguments11)) scope29) (fun scope30 -> (parser_bind (sexp_to_expression8 scope30 expression36) (fun expression37 -> (parser_return (FunctionDefinition (name41, public5, arguments11, expression37, range46)))))))))))))))))
+         | x358 -> 
             (parser_bind (parser_get_source_reference ()) (fun source_reference32 -> (parser_error (MalformedFunctionDefinitionError (source_reference32, range46))))));;
 
-let rec sexp_to_definition scope31 name41 public6 rest25 range47 kind = 
+let rec sexp_to_definition scope31 name42 public6 rest25 range47 kind = 
     (match (x4 kind (identifier_typ ())) with
          | True -> 
-            (sexp_to_type_definition scope31 name41 public6 rest25 range47)
+            (sexp_to_type_definition scope31 name42 public6 rest25 range47)
          | False -> 
             (match (x4 kind (identifier_def ())) with
                  | True -> 
-                    (sexp_to_function_definition scope31 name41 public6 rest25 range47)
+                    (sexp_to_function_definition scope31 name42 public6 rest25 range47)
                  | False -> 
                     (parser_bind (parser_get_source_reference ()) (fun source_reference33 -> (parser_error (MalformedDefinitionError (source_reference33, range47)))))));;
 
@@ -2411,21 +2392,21 @@ let rec specific_malformed_definition_error kind2 range48 =
 
 let rec sexp_to_definition2 scope32 expression38 = 
     (match expression38 with
-         | (List ((Cons ((Symbol (kind3, x360, x361)), Empty)), range49)) -> 
+         | (List ((Cons ((Symbol (kind3, x359, x360)), Empty)), range49)) -> 
             (specific_malformed_definition_error kind3 range49)
-         | (List ((Cons ((Symbol (kind4, x362, x363)), (Cons (x364, Empty)))), range50)) -> 
+         | (List ((Cons ((Symbol (kind4, x361, x362)), (Cons (x363, Empty)))), range50)) -> 
             (specific_malformed_definition_error kind4 range50)
-         | (List ((Cons ((Symbol (-6l, x365, x366)), (Cons ((Symbol (kind5, x367, x368)), (Cons (name42, rest26)))))), range51)) -> 
-            (sexp_to_definition scope32 name42 True rest26 range51 kind5)
-         | (List ((Cons ((Symbol (kind6, x369, x370)), (Cons (name43, rest27)))), range52)) -> 
-            (sexp_to_definition scope32 name43 False rest27 range52 kind6)
-         | (List ((Cons ((List (x371, range53)), Empty)), x372)) -> 
+         | (List ((Cons ((Symbol (-6l, x364, x365)), (Cons ((Symbol (kind5, x366, x367)), (Cons (name43, rest26)))))), range51)) -> 
+            (sexp_to_definition scope32 name43 True rest26 range51 kind5)
+         | (List ((Cons ((Symbol (kind6, x368, x369)), (Cons (name44, rest27)))), range52)) -> 
+            (sexp_to_definition scope32 name44 False rest27 range52 kind6)
+         | (List ((Cons ((List (x370, range53)), Empty)), x371)) -> 
             (parser_bind (parser_get_source_reference ()) (fun source_reference37 -> (parser_error (MalformedDefinitionError (source_reference37, range53)))))
-         | (List (x373, range54)) -> 
+         | (List (x372, range54)) -> 
             (parser_bind (parser_get_source_reference ()) (fun source_reference38 -> (parser_error (MalformedDefinitionError (source_reference38, range54)))))
-         | (Integer (x374, range55)) -> 
+         | (Integer (x373, range55)) -> 
             (parser_bind (parser_get_source_reference ()) (fun source_reference39 -> (parser_error (MalformedDefinitionError (source_reference39, range55)))))
-         | (Symbol (x375, x376, range56)) -> 
+         | (Symbol (x374, x375, range56)) -> 
             (parser_bind (parser_get_source_reference ()) (fun source_reference40 -> (parser_error (MalformedDefinitionError (source_reference40, range56))))));;
 
 let rec parse_definition expression39 = 
@@ -2439,9 +2420,9 @@ let rec sexp_error_to_ast_error error12 =
             MalformedSexpTooManyClosingBrackets);;
 
 let rec parse_definitions module8 file_path2 iterator10 = 
-    (parser_bind (parser_set_source_reference (SourceReference (file_path2, module8))) (fun x377 -> (parser_bind (parser_get_symbols ()) (fun symbols25 -> (match (parse_sexps symbols25 iterator10) with
+    (parser_bind (parser_set_source_reference (SourceReference (file_path2, module8))) (fun x376 -> (parser_bind (parser_get_symbols ()) (fun symbols25 -> (match (parse_sexps symbols25 iterator10) with
          | (Result ((Pair (symbols26, expressions20)))) -> 
-            (parser_bind (parser_set_symbols symbols26) (fun x378 -> (parser_sequence (list_map parse_definition expressions20))))
+            (parser_bind (parser_set_symbols symbols26) (fun x377 -> (parser_sequence (list_map parse_definition expressions20))))
          | (Error (error13)) -> 
             (parser_error (sexp_error_to_ast_error error13)))))));;
 
@@ -2452,40 +2433,40 @@ let rec transform_strings path4 content3 =
          | (Error (error14)) -> 
             (slice_empty ()));;
 
-let rec parse_reuse_file file6 = 
-    (match file6 with
+let rec parse_reuse_file file8 = 
+    (match file8 with
          | (SourceFile (module9, path5, content4)) -> 
             (parse_definitions module9 path5 content4));;
 
-let rec parse_strings_file file7 = 
-    (match file7 with
+let rec parse_strings_file file9 = 
+    (match file9 with
          | (SourceFile (module10, path6, content5)) -> 
             (parse_definitions module10 path6 (transform_strings path6 content5)));;
 
-let rec parse_target_file file8 = 
-    (match file8 with
+let rec parse_target_file file10 = 
+    (match file10 with
          | (SourceFile (module11, path7, content6)) -> 
             (parser_return (Cons ((TargetDefinition ((SourceReference (path7, module11)), content6)), Empty))));;
 
-let rec parse_source_file file9 = 
-    (match (source_file_type2 file9) with
+let rec parse_source_file file11 = 
+    (match (source_file_type2 file11) with
          | SourceFileTypeStrings -> 
-            (parse_strings_file file9)
+            (parse_strings_file file11)
          | SourceFileTypeReuse -> 
-            (parse_reuse_file file9)
+            (parse_reuse_file file11)
          | SourceFileTypeTargetLanguage -> 
-            (parse_target_file file9));;
+            (parse_target_file file11));;
 
 let rec parse_module files = 
-    (parser_bind (parser_new_module ()) (fun x379 -> (parser_bind (parser_sequence (list_map parse_source_file files)) (fun definitions2 -> (parser_return (list_flatten definitions2))))));;
+    (parser_bind (parser_new_module ()) (fun x378 -> (parser_bind (parser_sequence (list_map parse_source_file files)) (fun definitions2 -> (parser_return (list_flatten definitions2))))));;
 
 let rec parse_source_files symbols27 files2 = 
     ((result_map list_flatten) ((parser_run (with_language_identifiers symbols27)) (parser_sequence ((list_map parse_module) ((list_partition_by source_file_in_same_module) files2)))));;
 
 let rec identifier_to_symbol identifier39 = 
     (match identifier39 with
-         | (Identifier (token8, name44, x380, range57, x381)) -> 
-            (Symbol (token8, name44, range57)));;
+         | (Identifier (token8, name45, x379, range57, x380)) -> 
+            (Symbol (token8, name45, range57)));;
 
 let rec type_to_sexp types_to_sexp type3 = 
     (match type3 with
@@ -2516,19 +2497,19 @@ let rec type_parameter_to_sexp parameter2 =
          | (UniversalParameter (identifier45)) -> 
             (identifier_to_symbol identifier45));;
 
-let rec type_name_to_sexp token9 range61 name45 parameters6 = 
+let rec type_name_to_sexp token9 range61 name46 parameters6 = 
     (match parameters6 with
          | Empty -> 
-            (Symbol (token9, name45, range61))
-         | x382 -> 
-            (List ((Cons ((Symbol (token9, name45, range61)), (list_map type_parameter_to_sexp parameters6))), range61)));;
+            (Symbol (token9, name46, range61))
+         | x381 -> 
+            (List ((Cons ((Symbol (token9, name46, range61)), (list_map type_parameter_to_sexp parameters6))), range61)));;
 
 let rec function_arguments_to_sexp arguments12 range62 = 
     (List ((list_map identifier_to_symbol arguments12), range62));;
 
-let rec pattern_to_sexp pattern8 = 
-    (match pattern8 with
-         | (ConstructorPattern (identifier46, Empty, x383)) -> 
+let rec pattern_to_sexp pattern9 = 
+    (match pattern9 with
+         | (ConstructorPattern (identifier46, Empty, x382)) -> 
             (identifier_to_symbol identifier46)
          | (ConstructorPattern (identifier47, patterns3, range63)) -> 
             (List ((Cons ((identifier_to_symbol identifier47), (list_map pattern_to_sexp patterns3))), range63))
@@ -2539,14 +2520,14 @@ let rec pattern_to_sexp pattern8 =
 
 let rec match_pair_to_sexp expression_to_sexp2 pair12 = 
     (match pair12 with
-         | (Pair (pattern9, expression40)) -> 
-            (Cons ((pattern_to_sexp pattern9), (Cons ((expression_to_sexp2 expression40), Empty)))));;
+         | (Pair (pattern10, expression40)) -> 
+            (Cons ((pattern_to_sexp pattern10), (Cons ((expression_to_sexp2 expression40), Empty)))));;
 
 let rec expression_to_sexp expression41 = 
     (match expression41 with
          | (IntegerConstant (integer8, range65)) -> 
             (Integer (integer8, range65))
-         | (Variable ((Identifier (token10, string36, x384, range66, x385)))) -> 
+         | (Variable ((Identifier (token10, string36, x383, range66, x384)))) -> 
             (Symbol (token10, string36, range66))
          | (Lambda (arguments13, expression42, range67)) -> 
             (List ((Cons ((Symbol ((identifier_fn ()), (data_fn ()), range67)), (Cons ((function_arguments_to_sexp arguments13 range67), (Cons ((expression_to_sexp expression42), Empty)))))), range67))
@@ -2556,16 +2537,16 @@ let rec expression_to_sexp expression41 =
             (match expressions21 with
                  | Empty -> 
                     (identifier_to_symbol identifier49)
-                 | x386 -> 
+                 | x385 -> 
                     (List ((Cons ((identifier_to_symbol identifier49), (list_map expression_to_sexp expressions21))), range69)))
          | (FunctionApplication (expressions22, range70)) -> 
             (List ((list_map expression_to_sexp expressions22), range70)));;
 
-let rec type_definition_to_sexp token11 name46 parameters7 constructors12 range71 = 
-    (list_concat (Cons ((Symbol ((identifier_typ ()), (data_typ ()), range71)), (Cons ((type_name_to_sexp token11 range71 name46 parameters7), Empty)))) (constructors_to_sexp constructors12));;
+let rec type_definition_to_sexp token11 name47 parameters7 constructors12 range71 = 
+    (list_concat (Cons ((Symbol ((identifier_typ ()), (data_typ ()), range71)), (Cons ((type_name_to_sexp token11 range71 name47 parameters7), Empty)))) (constructors_to_sexp constructors12));;
 
-let rec function_definition_to_sexp name47 arguments14 expression44 range72 = 
-    (Cons ((Symbol ((identifier_def ()), (data_def ()), range72)), (Cons ((identifier_to_symbol name47), (Cons ((function_arguments_to_sexp arguments14 range72), (Cons ((expression_to_sexp expression44), Empty))))))));;
+let rec function_definition_to_sexp name48 arguments14 expression44 range72 = 
+    (Cons ((Symbol ((identifier_def ()), (data_def ()), range72)), (Cons ((identifier_to_symbol name48), (Cons ((function_arguments_to_sexp arguments14 range72), (Cons ((expression_to_sexp expression44), Empty))))))));;
 
 let rec definition_to_sexp2 public7 range73 sexp5 = 
     (List ((match public7 with
@@ -2576,11 +2557,11 @@ let rec definition_to_sexp2 public7 range73 sexp5 =
 
 let rec definition_to_sexp definition13 = 
     (match definition13 with
-         | (TypeDefinition ((Identifier (token12, name48, x387, x388, x389)), public8, parameters8, constructors13, range74)) -> 
-            (definition_to_sexp2 public8 range74 (type_definition_to_sexp token12 name48 parameters8 constructors13 range74))
-         | (FunctionDefinition (name49, public9, arguments15, expression45, range75)) -> 
-            (definition_to_sexp2 public9 range75 (function_definition_to_sexp name49 arguments15 expression45 range75))
-         | (TargetDefinition (x390, data)) -> 
+         | (TypeDefinition ((Identifier (token12, name49, x386, x387, x388)), public8, parameters8, constructors13, range74)) -> 
+            (definition_to_sexp2 public8 range74 (type_definition_to_sexp token12 name49 parameters8 constructors13 range74))
+         | (FunctionDefinition (name50, public9, arguments15, expression45, range75)) -> 
+            (definition_to_sexp2 public9 range75 (function_definition_to_sexp name50 arguments15 expression45 range75))
+         | (TargetDefinition (x389, data)) -> 
             (Symbol ((0l), (string_from_slice data), (Range ((0l), (0l))))));;
 
 let rec definitions_to_sexps definitions3 = 
@@ -2707,30 +2688,30 @@ let rec add_modifiers public10 rest29 =
          | False -> 
             rest29);;
 
-let rec format_pattern pattern10 = 
-    (match pattern10 with
-         | (List (patterns4, x391)) -> 
+let rec format_pattern pattern11 = 
+    (match pattern11 with
+         | (List (patterns4, x390)) -> 
             (list_with_space (list_map format_pattern patterns4))
-         | x392 -> 
-            (stringify_sexp x392));;
+         | x391 -> 
+            (stringify_sexp x391));;
 
 let rec format_match_rule format_expression depth3 rule2 = 
     (match rule2 with
-         | (Pair (pattern11, expression46)) -> 
-            (string_join (string_empty ()) (Cons ((format_pattern pattern11), (Cons ((indent2 (Int32.add depth3 (4l))), (Cons ((format_expression (Int32.add depth3 (4l)) expression46), Empty))))))));;
+         | (Pair (pattern12, expression46)) -> 
+            (string_join (string_empty ()) (Cons ((format_pattern pattern12), (Cons ((indent2 (Int32.add depth3 (4l))), (Cons ((format_expression (Int32.add depth3 (4l)) expression46), Empty))))))));;
 
 let rec format_match_rules format_expression2 depth4 rules5 = 
     (string_join (indent2 depth4) (list_map (format_match_rule format_expression2 depth4) rules5));;
 
 let rec monadic_function_call expressions23 = 
     (match (Pair ((list_first expressions23), (list_last expressions23))) with
-         | (Pair ((Some ((Symbol (x393, name50, x394)))), (Some ((List ((Cons ((Symbol (-3l, x395, x396)), x397)), x398)))))) -> 
-            (match (list_last (string_split (45l) name50)) with
+         | (Pair ((Some ((Symbol (x392, name51, x393)))), (Some ((List ((Cons ((Symbol (-3l, x394, x395)), x396)), x397)))))) -> 
+            (match (list_last (string_split (45l) name51)) with
                  | (Some (last_part)) -> 
                     (string_equal last_part (data_bind ()))
                  | None -> 
                     False)
-         | x399 -> 
+         | x398 -> 
             False);;
 
 let rec format_long_list_expression format_expression3 stringified depth5 expressions24 = 
@@ -2755,51 +2736,51 @@ let rec format_list_expression format_expression4 depth6 expressions25 =
 
 let rec format_expression5 depth7 expression47 = 
     (match expression47 with
-         | (List ((Cons ((Symbol (-3l, x400, x401)), (Cons (arguments18, (Cons (expression48, Empty)))))), x402)) -> 
+         | (List ((Cons ((Symbol (-3l, x399, x400)), (Cons (arguments18, (Cons (expression48, Empty)))))), x401)) -> 
             (list_without_space (Cons ((data_fn2 ()), (Cons ((space ()), (Cons ((stringify_sexp arguments18), (Cons ((indent2 (Int32.add depth7 (4l))), (Cons ((format_expression5 (Int32.add depth7 (4l)) expression48), Empty)))))))))))
-         | (List ((Cons ((Symbol (-4l, x403, x404)), (Cons (expression49, rules6)))), range76)) -> 
+         | (List ((Cons ((Symbol (-4l, x402, x403)), (Cons (expression49, rules6)))), range76)) -> 
             (list_without_space (Cons ((data_match2 ()), (Cons ((space ()), (Cons ((format_expression5 depth7 expression49), (Cons ((indent2 (Int32.add depth7 (7l))), (Cons ((format_match_rules format_expression5 (Int32.add depth7 (7l)) (list_pairs rules6)), Empty)))))))))))
          | (List (expressions26, range77)) -> 
             (wrap_in_brackets (format_list_expression format_expression5 depth7 expressions26))
-         | x405 -> 
-            (stringify_sexp x405));;
+         | x404 -> 
+            (stringify_sexp x404));;
 
 let rec format_type type4 = 
     (match type4 with
-         | (List ((Cons ((Symbol (-3l, x406, x407)), (Cons ((List (argument_types, x408)), (Cons (return_type4, Empty)))))), x409)) -> 
+         | (List ((Cons ((Symbol (-3l, x405, x406)), (Cons ((List (argument_types, x407)), (Cons (return_type4, Empty)))))), x408)) -> 
             (list_with_space (Cons ((data_fn2 ()), (Cons ((list_with_space (list_map format_type argument_types)), (Cons ((format_type return_type4), Empty)))))))
-         | (List ((Cons (identifier50, parameters9)), x410)) -> 
+         | (List ((Cons (identifier50, parameters9)), x409)) -> 
             (list_with_space (Cons ((stringify_sexp identifier50), (list_map format_type parameters9))))
-         | x411 -> 
-            (stringify_sexp x411));;
+         | x410 -> 
+            (stringify_sexp x410));;
 
 let rec format_type_constructor constructor9 = 
     (match constructor9 with
-         | (List ((Cons (identifier51, types6)), x412)) -> 
+         | (List ((Cons (identifier51, types6)), x411)) -> 
             (list_with_space (Cons ((stringify_sexp identifier51), (list_map format_type types6))))
-         | x413 -> 
-            (stringify_sexp x413));;
+         | x412 -> 
+            (stringify_sexp x412));;
 
 let rec format_type_constructor_split constructor10 = 
     (match constructor10 with
-         | (List ((Cons (identifier52, (Cons (first10, rest30)))), x414)) -> 
+         | (List ((Cons (identifier52, (Cons (first10, rest30)))), x413)) -> 
             (wrap_in_brackets (string_join (space ()) (Cons ((stringify_sexp identifier52), (Cons ((string_join (indent2 (Int32.add (string_size (stringify_sexp identifier52)) (7l))) (Cons ((format_type first10), (list_map format_type rest30)))), Empty))))))
-         | x415 -> 
-            (stringify_sexp x415));;
+         | x414 -> 
+            (stringify_sexp x414));;
 
 let rec format_type_parameter parameter3 = 
     (match parameter3 with
-         | (List ((Cons ((Symbol (-5l, x416, x417)), (Cons (identifier53, Empty)))), x418)) -> 
+         | (List ((Cons ((Symbol (-5l, x415, x416)), (Cons (identifier53, Empty)))), x417)) -> 
             (list_with_space (Cons ((data_exists2 ()), (Cons ((stringify_sexp identifier53), Empty)))))
-         | x419 -> 
+         | x418 -> 
             (stringify_sexp parameter3));;
 
-let rec format_type_definition_name name51 parameters10 = 
+let rec format_type_definition_name name52 parameters10 = 
     (match parameters10 with
          | Empty -> 
-            (stringify_sexp name51)
-         | x420 -> 
-            (list_with_space (Cons ((stringify_sexp name51), (list_map format_type_parameter parameters10)))));;
+            (stringify_sexp name52)
+         | x419 -> 
+            (list_with_space (Cons ((stringify_sexp name52), (list_map format_type_parameter parameters10)))));;
 
 let rec format_type_definition_constructors constructors14 = 
     (match constructors14 with
@@ -2809,34 +2790,34 @@ let rec format_type_definition_constructors constructors14 =
                     (string_concat (indent2 (5l)) (format_type_constructor_split constructor11))
                  | False -> 
                     (string_concat (space ()) (format_type_constructor constructor11)))
-         | x421 -> 
+         | x420 -> 
             (string_concat (indent2 (5l)) (string_join (indent2 (5l)) (list_map format_type_constructor constructors14))));;
 
-let rec format_type_definition public11 name52 parameters11 constructors15 = 
-    (list_without_space (add_modifiers public11 (Cons ((data_typ2 ()), (Cons ((space ()), (Cons ((format_type_definition_name name52 parameters11), (Cons ((format_type_definition_constructors constructors15), Empty))))))))));;
+let rec format_type_definition public11 name53 parameters11 constructors15 = 
+    (list_without_space (add_modifiers public11 (Cons ((data_typ2 ()), (Cons ((space ()), (Cons ((format_type_definition_name name53 parameters11), (Cons ((format_type_definition_constructors constructors15), Empty))))))))));;
 
-let rec format_function_definition public12 name53 arguments19 expression50 = 
-    (list_without_space (add_modifiers public12 (list_flatten (Cons ((Cons ((data_def2 ()), (Cons ((space ()), (Cons ((stringify_sexp name53), (Cons ((space ()), (Cons ((wrap_in_brackets (string_join (space ()) (list_map stringify_sexp arguments19))), Empty)))))))))), (Cons ((match expression50 with
-         | (Integer (x422, x423)) -> 
+let rec format_function_definition public12 name54 arguments19 expression50 = 
+    (list_without_space (add_modifiers public12 (list_flatten (Cons ((Cons ((data_def2 ()), (Cons ((space ()), (Cons ((stringify_sexp name54), (Cons ((space ()), (Cons ((wrap_in_brackets (string_join (space ()) (list_map stringify_sexp arguments19))), Empty)))))))))), (Cons ((match expression50 with
+         | (Integer (x421, x422)) -> 
             (Cons ((space ()), Empty))
-         | x424 -> 
+         | x423 -> 
             (Cons ((indent2 (5l)), Empty))), (Cons ((Cons ((format_expression5 (5l) expression50), Empty)), Empty)))))))));;
 
 let rec format_definition definition14 = 
     (match definition14 with
-         | (List ((Cons ((Symbol (-6l, x425, x426)), (Cons ((Symbol (-2l, x427, x428)), (Cons ((List ((Cons (name54, parameters12)), x429)), constructors16)))))), range78)) -> 
-            (format_type_definition True name54 parameters12 constructors16)
-         | (List ((Cons ((Symbol (-6l, x430, x431)), (Cons ((Symbol (-2l, x432, x433)), (Cons (name55, constructors17)))))), range79)) -> 
-            (format_type_definition True name55 Empty constructors17)
-         | (List ((Cons ((Symbol (-2l, x434, x435)), (Cons ((List ((Cons (name56, parameters13)), x436)), constructors18)))), range80)) -> 
-            (format_type_definition False name56 parameters13 constructors18)
-         | (List ((Cons ((Symbol (-2l, x437, x438)), (Cons (name57, constructors19)))), range81)) -> 
-            (format_type_definition False name57 Empty constructors19)
-         | (List ((Cons ((Symbol (-6l, x439, x440)), (Cons ((Symbol (-1l, x441, x442)), (Cons (name58, (Cons ((List (arguments20, x443)), (Cons (expression51, Empty)))))))))), range82)) -> 
-            (format_function_definition True name58 arguments20 expression51)
-         | (List ((Cons ((Symbol (-1l, x444, x445)), (Cons (name59, (Cons ((List (arguments21, x446)), (Cons (expression52, Empty)))))))), range83)) -> 
-            (format_function_definition False name59 arguments21 expression52)
-         | x447 -> 
+         | (List ((Cons ((Symbol (-6l, x424, x425)), (Cons ((Symbol (-2l, x426, x427)), (Cons ((List ((Cons (name55, parameters12)), x428)), constructors16)))))), range78)) -> 
+            (format_type_definition True name55 parameters12 constructors16)
+         | (List ((Cons ((Symbol (-6l, x429, x430)), (Cons ((Symbol (-2l, x431, x432)), (Cons (name56, constructors17)))))), range79)) -> 
+            (format_type_definition True name56 Empty constructors17)
+         | (List ((Cons ((Symbol (-2l, x433, x434)), (Cons ((List ((Cons (name57, parameters13)), x435)), constructors18)))), range80)) -> 
+            (format_type_definition False name57 parameters13 constructors18)
+         | (List ((Cons ((Symbol (-2l, x436, x437)), (Cons (name58, constructors19)))), range81)) -> 
+            (format_type_definition False name58 Empty constructors19)
+         | (List ((Cons ((Symbol (-6l, x438, x439)), (Cons ((Symbol (-1l, x440, x441)), (Cons (name59, (Cons ((List (arguments20, x442)), (Cons (expression51, Empty)))))))))), range82)) -> 
+            (format_function_definition True name59 arguments20 expression51)
+         | (List ((Cons ((Symbol (-1l, x443, x444)), (Cons (name60, (Cons ((List (arguments21, x445)), (Cons (expression52, Empty)))))))), range83)) -> 
+            (format_function_definition False name60 arguments21 expression52)
+         | x446 -> 
             (string_empty ()));;
 
 let rec format_file definitions4 = 
@@ -2846,8 +2827,8 @@ let rec format_file definitions4 =
          | False -> 
             ((string_concat (newline2 ())) (((flip string_concat) (newline2 ())) ((string_join (string_repeat (newline2 ()) (2l))) ((list_map format_definition) definitions4)))));;
 
-let rec format_source_file file10 = 
-    ((result_bimap (fun x51 -> (string_to_slice (format_file (pair_right x51)))) stringify_error) ((parse_sexps (Pair ((0l), (dictionary_of (language_identifiers ()))))) (source_file_content file10)));;
+let rec format_source_file file12 = 
+    ((result_bimap (fun x51 -> (string_to_slice (format_file (pair_right x51)))) stringify_error) ((parse_sexps (Pair ((0l), (dictionary_of (language_identifiers ()))))) (source_file_content file12)));;
 
 let rec result_from_pair pair13 = 
     (result_map (pair_cons (pair_left pair13)) (pair_right pair13));;
@@ -3242,9 +3223,9 @@ let rec with_local_transform_keywords identifiers =
 
 let rec expression_is_token token14 expression53 = 
     (match expression53 with
-         | (Variable ((Identifier (expression_token, x448, x449, x450, x451)))) -> 
+         | (Variable ((Identifier (expression_token, x447, x448, x449, x450)))) -> 
             (x4 expression_token token14)
-         | x452 -> 
+         | x451 -> 
             False);;
 
 let rec first_expression_is_token token15 expressions27 = 
@@ -3329,32 +3310,32 @@ type ('Tcompilation_result,'Ttransform_error) compiler_backend  =
 
 let rec compiler_backend_name backend = 
     (match backend with
-         | (Backend (name60, x453, x454, x455, x456, x457)) -> 
-            name60);;
+         | (Backend (name61, x452, x453, x454, x455, x456)) -> 
+            name61);;
 
 let rec compiler_backend_preamble_files backend2 = 
     (match backend2 with
-         | (Backend (x458, files4, x459, x460, x461, x462)) -> 
+         | (Backend (x457, files4, x458, x459, x460, x461)) -> 
             files4);;
 
 let rec compiler_backend_pervasives_files backend3 = 
     (match backend3 with
-         | (Backend (x463, x464, files5, x465, x466, x467)) -> 
+         | (Backend (x462, x463, files5, x464, x465, x466)) -> 
             files5);;
 
 let rec compiler_backend_generate_source backend4 module_name definitions15 = 
     (match backend4 with
-         | (Backend (x468, x469, x470, generate2, x471, x472)) -> 
+         | (Backend (x467, x468, x469, generate2, x470, x471)) -> 
             (generate2 module_name definitions15));;
 
 let rec compiler_backend_reserved_identifiers backend5 = 
     (match backend5 with
-         | (Backend (x473, x474, x475, x476, identifiers2, x477)) -> 
+         | (Backend (x472, x473, x474, x475, identifiers2, x476)) -> 
             identifiers2);;
 
 let rec compiler_backend_transform_definitions backend6 definitions16 = 
     (match backend6 with
-         | (Backend (x478, x479, x480, x481, x482, transform)) -> 
+         | (Backend (x477, x478, x479, x480, x481, transform)) -> 
             (transform definitions16));;
 
 let rec data_internal_error () = 
@@ -3423,8 +3404,8 @@ let rec data_range () =
 let rec string_format list29 = 
     (string_join (string_of_char (10l)) (list_map (string_join (string_empty ())) list29));;
 
-let rec file_matches_reference source_reference45 file11 = 
-    ((string_equal (source_reference_file_path source_reference45)) (source_file_path file11));;
+let rec file_matches_reference source_reference45 file13 = 
+    ((string_equal (source_reference_file_path source_reference45)) (source_file_path file13));;
 
 let rec find_file_matching files6 source_reference46 = 
     (list_find_first (file_matches_reference source_reference46) files6);;
@@ -3441,10 +3422,10 @@ let rec count_lines index16 lines2 source =
          | None -> 
             (Pair (lines2, (Int32.add (Int32.sub (string_size source) index16) (1l)))));;
 
-let rec line_information file12 range92 = 
+let rec line_information file14 range92 = 
     (match range92 with
-         | (Range (start3, x483)) -> 
-            (match (string_from_slice (source_file_content file12)) with
+         | (Range (start3, x482)) -> 
+            (match (string_from_slice (source_file_content file14)) with
                  | content7 -> 
                     (count_lines (0l) (1l) (string_substring (0l) start3 content7))));;
 
@@ -3455,10 +3436,10 @@ let rec next_newline content8 index18 =
          | None -> 
             index18);;
 
-let rec source_paragraph file13 range93 = 
+let rec source_paragraph file15 range93 = 
     (match range93 with
          | (Range (start4, end6)) -> 
-            (match (string_from_slice (source_file_content file13)) with
+            (match (string_from_slice (source_file_content file15)) with
                  | content9 -> 
                     (match (next_newline content9 (Int32.sub start4 (100l))) with
                          | paragraph_start -> 
@@ -3468,10 +3449,10 @@ let rec source_paragraph file13 range93 =
 
 let rec location_information files7 source_reference47 range94 = 
     (match (find_file_matching files7 source_reference47) with
-         | (Some (file14)) -> 
-            (match (line_information file14 range94) with
+         | (Some (file16)) -> 
+            (match (line_information file16 range94) with
                  | (Pair (lines3, column)) -> 
-                    (string_format (Cons (Empty, (Cons ((Cons ((source_paragraph file14 range94), Empty)), (Cons (Empty, (Cons ((Cons ((data_line ()), (Cons ((string_from_int32 lines3), Empty)))), (Cons ((Cons ((data_column ()), (Cons ((string_from_int32 column), Empty)))), (Cons ((Cons ((data_range ()), (Cons ((range_information range94), Empty)))), (Cons ((Cons ((data_file ()), (Cons ((source_file_path file14), Empty)))), Empty))))))))))))))))
+                    (string_format (Cons (Empty, (Cons ((Cons ((source_paragraph file16 range94), Empty)), (Cons (Empty, (Cons ((Cons ((data_line ()), (Cons ((string_from_int32 lines3), Empty)))), (Cons ((Cons ((data_column ()), (Cons ((string_from_int32 column), Empty)))), (Cons ((Cons ((data_range ()), (Cons ((range_information range94), Empty)))), (Cons ((Cons ((data_file ()), (Cons ((source_file_path file16), Empty)))), Empty))))))))))))))))
          | None -> 
             (data_no_location_information ()));;
 
@@ -3497,12 +3478,12 @@ let rec error_to_string files8 error16 =
             (string_format (Cons ((Cons ((data_malformed_constructor ()), Empty)), (Cons ((Cons ((location_information files8 source_reference56 range103), Empty)), Empty)))))
          | (MalformedTypeError (source_reference57, range104)) -> 
             (string_format (Cons ((Cons ((data_malformed_type ()), Empty)), (Cons ((Cons ((location_information files8 source_reference57 range104), Empty)), Empty)))))
-         | (ErrorNotDefined (name61, source_reference58, range105)) -> 
-            (string_format (Cons ((Cons ((string_concat (data_not_defined_error ()) name61), Empty)), (Cons ((Cons ((location_information files8 source_reference58 range105), Empty)), Empty)))))
-         | (ErrorAlreadyDefined (name62, source_reference59, range106)) -> 
-            (string_format (Cons ((Cons ((string_concat (data_already_defined_error ()) name62), Empty)), (Cons ((Cons ((location_information files8 source_reference59 range106), Empty)), Empty)))))
-         | (ErrorReservedIdentifier (name63, source_reference60, range107)) -> 
-            (string_format (Cons ((Cons ((string_concat (data_reserved_identifier_error ()) name63), Empty)), (Cons ((Cons ((location_information files8 source_reference60 range107), Empty)), Empty)))))
+         | (ErrorNotDefined (name62, source_reference58, range105)) -> 
+            (string_format (Cons ((Cons ((string_concat (data_not_defined_error ()) name62), Empty)), (Cons ((Cons ((location_information files8 source_reference58 range105), Empty)), Empty)))))
+         | (ErrorAlreadyDefined (name63, source_reference59, range106)) -> 
+            (string_format (Cons ((Cons ((string_concat (data_already_defined_error ()) name63), Empty)), (Cons ((Cons ((location_information files8 source_reference59 range106), Empty)), Empty)))))
+         | (ErrorReservedIdentifier (name64, source_reference60, range107)) -> 
+            (string_format (Cons ((Cons ((string_concat (data_reserved_identifier_error ()) name64), Empty)), (Cons ((Cons ((location_information files8 source_reference60 range107), Empty)), Empty)))))
          | MalformedSexpTooFewClosingBrackets -> 
             (string_format (Cons ((Cons ((data_too_few_closing_brackets ()), Empty)), Empty)))
          | MalformedSexpTooManyClosingBrackets -> 
@@ -3520,15 +3501,15 @@ let rec path_filename path8 =
 
 let rec path_filename_without_extension path9 = 
     (match (list_first (string_split (46l) (path_filename path9))) with
-         | (Some (name64)) -> 
-            name64
+         | (Some (name65)) -> 
+            name65
          | None -> 
             (path_filename path9));;
 
 let rec path_filename_extension path10 = 
     (match (list_last (string_split (46l) (path_filename path10))) with
-         | (Some (name65)) -> 
-            name65
+         | (Some (name66)) -> 
+            name66
          | None -> 
             (string_empty ()));;
 
@@ -3984,31 +3965,31 @@ let rec translate_less_than translate_expression expressions33 =
     (match expressions33 with
          | (Cons (a72, (Cons (b67, (Cons (then_case, (Cons (else_case, Empty)))))))) -> 
             (join (Cons ((SourceString ((data_if2 ()))), (Cons ((source_space ()), (Cons ((SourceString ((data_open_bracket2 ()))), (Cons ((translate_expression a72), (Cons ((SourceString ((data_15 ()))), (Cons ((SourceString ((data_int323 ()))), (Cons ((SourceString ((data_close_bracket2 ()))), (Cons ((SourceString ((data_less_than2 ()))), (Cons ((SourceString ((data_open_bracket2 ()))), (Cons ((translate_expression b67), (Cons ((SourceString ((data_15 ()))), (Cons ((SourceString ((data_int323 ()))), (Cons ((SourceString ((data_close_bracket2 ()))), (Cons ((source_space ()), (Cons ((SourceString ((data_then2 ()))), (Cons ((source_space ()), (Cons ((translate_expression then_case), (Cons ((source_space ()), (Cons ((SourceString ((data_else2 ()))), (Cons ((source_space ()), (Cons ((translate_expression else_case), Empty)))))))))))))))))))))))))))))))))))))))))))
-         | x484 -> 
+         | x483 -> 
             (SourceString ((data_compile_error ()))));;
 
-let rec translate_constructor translator name66 constructor13 = 
-    (wrap_in_brackets2 (join ((fun parameters14 -> (Cons ((translate_constructor_identifier name66), (Cons ((source_space ()), (Cons (parameters14, Empty))))))) ((source_string_join (data_space2 ())) ((list_map translator) constructor13)))));;
+let rec translate_constructor translator name67 constructor13 = 
+    (wrap_in_brackets2 (join ((fun parameters14 -> (Cons ((translate_constructor_identifier name67), (Cons ((source_space ()), (Cons (parameters14, Empty))))))) ((source_string_join (data_space2 ())) ((list_map translator) constructor13)))));;
 
-let rec translate_pattern pattern12 = 
-    (match pattern12 with
+let rec translate_pattern pattern13 = 
+    (match pattern13 with
          | (Capture (identifier62)) -> 
             (escape_identifier identifier62)
-         | (IntegerPattern (integer9, x485)) -> 
+         | (IntegerPattern (integer9, x484)) -> 
             (match (x2 integer9 (0l)) with
                  | True -> 
                     (SourceString ((wrap_in_brackets (string_from_int32 integer9))))
                  | False -> 
                     (SourceString ((string_from_int32 integer9))))
-         | (ConstructorPattern (identifier63, Empty, x486)) -> 
+         | (ConstructorPattern (identifier63, Empty, x485)) -> 
             (translate_constructor_identifier identifier63)
-         | (ConstructorPattern (identifier64, patterns5, x487)) -> 
+         | (ConstructorPattern (identifier64, patterns5, x486)) -> 
             ((translate_constructor translate_pattern identifier64) patterns5));;
 
 let rec translate_rule translate_expression2 n11 rule3 = 
     (match rule3 with
-         | (Pair (pattern13, expression59)) -> 
-            (join_lines (Cons ((line n11 (Cons ((translate_pattern pattern13), (Cons ((SourceString ((data_arrow ()))), Empty))))), (Cons ((line (Int32.add n11 (1l)) (Cons ((translate_expression2 (Int32.add n11 (1l)) expression59), Empty))), Empty))))));;
+         | (Pair (pattern14, expression59)) -> 
+            (join_lines (Cons ((line n11 (Cons ((translate_pattern pattern14), (Cons ((SourceString ((data_arrow ()))), Empty))))), (Cons ((line (Int32.add n11 (1l)) (Cons ((translate_expression2 (Int32.add n11 (1l)) expression59), Empty))), Empty))))));;
 
 let rec translate_match_expression translate_expression3 n12 expression60 rules7 = 
     ((source_string_join (string_empty ())) ((fun rules8 -> (Cons ((SourceString ((data_case ()))), (Cons ((source_space ()), (Cons ((translate_expression3 n12 expression60), (Cons ((source_space ()), (Cons ((SourceString ((data_of2 ()))), (Cons (rules8, Empty))))))))))))) ((source_string_join (string_empty ())) ((list_map (translate_rule translate_expression3 n12)) rules7))));;
@@ -4017,7 +3998,7 @@ let rec translate_function_application translate_expression4 expressions34 =
     (match expressions34 with
          | (Cons (no_args_function, Empty)) -> 
             (translate_expression4 no_args_function)
-         | x488 -> 
+         | x487 -> 
             (source_string_join (data_space2 ()) (list_map translate_expression4 expressions34)));;
 
 let rec translate_function_application2 translate_expression5 expressions35 = 
@@ -4028,7 +4009,7 @@ let rec translate_function_application2 translate_expression5 expressions35 =
                     (translate_less_than translate_expression5 rest32)
                  | False -> 
                     (translate_function_application translate_expression5 expressions35))
-         | x489 -> 
+         | x488 -> 
             (translate_function_application translate_expression5 expressions35));;
 
 let rec translate_argument_list arguments22 = 
@@ -4043,15 +4024,15 @@ let rec translate_lambda translate_expression6 arguments23 expression61 =
 
 let rec translate_expression7 n13 expression62 = 
     (match expression62 with
-         | (Lambda (arguments24, expression63, x490)) -> 
+         | (Lambda (arguments24, expression63, x489)) -> 
             (wrap_in_brackets2 (translate_lambda (translate_expression7 n13) arguments24 expression63))
-         | (Constructor (identifier66, Empty, x491)) -> 
+         | (Constructor (identifier66, Empty, x490)) -> 
             (translate_constructor_identifier identifier66)
-         | (Constructor (identifier67, expressions36, x492)) -> 
+         | (Constructor (identifier67, expressions36, x491)) -> 
             ((translate_constructor (translate_expression7 n13) identifier67) expressions36)
-         | (FunctionApplication (expressions37, x493)) -> 
+         | (FunctionApplication (expressions37, x492)) -> 
             (wrap_in_brackets2 (translate_function_application2 (translate_expression7 n13) expressions37))
-         | (IntegerConstant (integer10, x494)) -> 
+         | (IntegerConstant (integer10, x493)) -> 
             (match (x2 integer10 (0l)) with
                  | True -> 
                     (SourceString ((wrap_in_brackets (string_from_int32 integer10))))
@@ -4059,15 +4040,15 @@ let rec translate_expression7 n13 expression62 =
                     (SourceString ((string_from_int32 integer10))))
          | (Variable (identifier68)) -> 
             (translate_identifier identifier68)
-         | (Match (expression64, rules9, x495)) -> 
+         | (Match (expression64, rules9, x494)) -> 
             (wrap_in_brackets2 (translate_match_expression translate_expression7 (Int32.add n13 (1l)) expression64 rules9)));;
 
-let rec translate_function_definition name67 arguments25 expression65 = 
+let rec translate_function_definition name68 arguments25 expression65 = 
     (match (list_is_empty arguments25) with
          | True -> 
-            ((line (0l)) (Cons (name67, (Cons ((source_space ()), (Cons ((SourceString ((data_equals ()))), (Cons ((source_space ()), (Cons ((translate_expression7 (0l) expression65), Empty)))))))))))
+            ((line (0l)) (Cons (name68, (Cons ((source_space ()), (Cons ((SourceString ((data_equals ()))), (Cons ((source_space ()), (Cons ((translate_expression7 (0l) expression65), Empty)))))))))))
          | False -> 
-            (join_lines (Cons (((line (0l)) (Cons (name67, (Cons ((source_space ()), (Cons ((translate_argument_list arguments25), (Cons ((SourceString ((data_equals ()))), Empty))))))))), (Cons (((line (1l)) (Cons ((translate_expression7 (1l) expression65), Empty))), Empty))))));;
+            (join_lines (Cons (((line (0l)) (Cons (name68, (Cons ((source_space ()), (Cons ((translate_argument_list arguments25), (Cons ((SourceString ((data_equals ()))), Empty))))))))), (Cons (((line (1l)) (Cons ((translate_expression7 (1l) expression65), Empty))), Empty))))));;
 
 let rec type_parameter_equals identifier69 parameter4 = 
     (identifier_equal identifier69 (type_parameter_identifier parameter4));;
@@ -4079,8 +4060,8 @@ let rec translate_simple_type identifier70 parameters15 =
          | True -> 
             (prefix_type_variable identifier70));;
 
-let rec translate_complex_types translate_types name68 types7 = 
-    (wrap_in_brackets2 ((source_string_concat (source_string_concat (prefix_type name68) (source_space ()))) ((translate_types (data_space2 ())) types7)));;
+let rec translate_complex_types translate_types name69 types7 = 
+    (wrap_in_brackets2 ((source_string_concat (source_string_concat (prefix_type name69) (source_space ()))) ((translate_types (data_space2 ())) types7)));;
 
 let rec translate_function_type translate_types2 return_type5 argument_types2 = 
     (wrap_in_brackets2 ((translate_types2 (data_arrow ())) ((fun argument_types3 -> (list_concat argument_types3 (Cons (return_type5, Empty)))) argument_types2)));;
@@ -4089,9 +4070,9 @@ let rec translate_type translate_types3 parameters16 type5 =
     (match type5 with
          | (SimpleType (identifier71)) -> 
             (translate_simple_type identifier71 parameters16)
-         | (ComplexType (identifier72, types8, x496)) -> 
+         | (ComplexType (identifier72, types8, x495)) -> 
             (translate_complex_types translate_types3 identifier72 types8)
-         | (FunctionType (argument_types4, return_type6, x497)) -> 
+         | (FunctionType (argument_types4, return_type6, x496)) -> 
             (translate_function_type translate_types3 return_type6 argument_types4));;
 
 let rec translate_types4 parameters17 separator5 types9 = 
@@ -4104,14 +4085,14 @@ let rec translate_type_parameter parameter5 =
          | (ExistentialParameter (identifier74)) -> 
             (SourceString ((identifier_name identifier74))));;
 
-let rec translate_complex_constructor_definition name69 types10 parameters18 = 
-    (join (Cons ((translate_constructor_identifier name69), (Cons ((source_space ()), (Cons ((translate_types4 parameters18 (data_space2 ()) types10), Empty)))))));;
+let rec translate_complex_constructor_definition name70 types10 parameters18 = 
+    (join (Cons ((translate_constructor_identifier name70), (Cons ((source_space ()), (Cons ((translate_types4 parameters18 (data_space2 ()) types10), Empty)))))));;
 
 let rec translate_constructor_definition parameters19 constructor14 = 
     (match constructor14 with
          | (SimpleConstructor (identifier75)) -> 
             (translate_constructor_identifier identifier75)
-         | (ComplexConstructor (identifier76, types11, x498)) -> 
+         | (ComplexConstructor (identifier76, types11, x497)) -> 
             (translate_complex_constructor_definition identifier76 types11 parameters19));;
 
 let rec translate_constructor_definitions n14 parameters20 constructors20 = 
@@ -4121,26 +4102,26 @@ let rec append_universal_parameter parameter6 s2 =
     (match parameter6 with
          | (UniversalParameter (identifier77)) -> 
             (join (Cons (s2, (Cons ((source_space ()), (Cons ((prefix_type_variable identifier77), Empty)))))))
-         | (ExistentialParameter (x499)) -> 
+         | (ExistentialParameter (x498)) -> 
             s2);;
 
 let rec append_existential_parameter parameter7 s3 = 
     (match parameter7 with
-         | (UniversalParameter (x500)) -> 
+         | (UniversalParameter (x499)) -> 
             s3
          | (ExistentialParameter (identifier78)) -> 
             (join (Cons (s3, (Cons ((SourceString ((data_forall ()))), (Cons ((source_space ()), (Cons ((prefix_type_variable identifier78), (Cons ((SourceString ((data_dot3 ()))), (Cons ((source_space ()), Empty))))))))))))));;
 
-let rec translate_type_definition name70 parameters21 constructors21 = 
-    (join_lines (Cons (((line (0l)) (Cons ((SourceString ((data_data ()))), (Cons ((source_space ()), (Cons ((prefix_type name70), (Cons ((list_foldl append_universal_parameter (source_string_empty ()) parameters21), (Cons ((SourceString ((data_equals ()))), (Cons ((list_foldl append_existential_parameter (source_string_empty ()) parameters21), Empty))))))))))))), (Cons (((line (1l)) (Cons ((SourceString ((string_repeat (data_space2 ()) (3l)))), (Cons ((translate_constructor_definitions (1l) parameters21 constructors21), Empty))))), Empty)))));;
+let rec translate_type_definition name71 parameters21 constructors21 = 
+    (join_lines (Cons (((line (0l)) (Cons ((SourceString ((data_data ()))), (Cons ((source_space ()), (Cons ((prefix_type name71), (Cons ((list_foldl append_universal_parameter (source_string_empty ()) parameters21), (Cons ((SourceString ((data_equals ()))), (Cons ((list_foldl append_existential_parameter (source_string_empty ()) parameters21), Empty))))))))))))), (Cons (((line (1l)) (Cons ((SourceString ((string_repeat (data_space2 ()) (3l)))), (Cons ((translate_constructor_definitions (1l) parameters21 constructors21), Empty))))), Empty)))));;
 
 let rec translate_definition definition18 = 
     (match definition18 with
-         | (FunctionDefinition (name71, x501, arguments26, expression66, x502)) -> 
-            (translate_function_definition (escape_identifier name71) arguments26 expression66)
-         | (TypeDefinition (name72, x503, parameters22, constructors22, x504)) -> 
-            (translate_type_definition name72 parameters22 constructors22)
-         | (TargetDefinition (x505, data2)) -> 
+         | (FunctionDefinition (name72, x500, arguments26, expression66, x501)) -> 
+            (translate_function_definition (escape_identifier name72) arguments26 expression66)
+         | (TypeDefinition (name73, x502, parameters22, constructors22, x503)) -> 
+            (translate_type_definition name73 parameters22 constructors22)
+         | (TargetDefinition (x504, data2)) -> 
             (SourceString ((string_from_slice data2))));;
 
 let rec translate_module_declaration module_name3 = 
@@ -4148,11 +4129,11 @@ let rec translate_module_declaration module_name3 =
 
 let rec definition_to_public_identifier definition19 = 
     (match definition19 with
-         | (FunctionDefinition (name73, True, x506, x507, x508)) -> 
-            (Some ((Pair (IdentifierTransformationLowercase, name73))))
-         | (TypeDefinition (name74, True, x509, x510, x511)) -> 
-            (Some ((Pair (IdentifierTransformationCapitalize, name74))))
-         | x512 -> 
+         | (FunctionDefinition (name74, True, x505, x506, x507)) -> 
+            (Some ((Pair (IdentifierTransformationLowercase, name74))))
+         | (TypeDefinition (name75, True, x508, x509, x510)) -> 
+            (Some ((Pair (IdentifierTransformationCapitalize, name75))))
+         | x511 -> 
             None);;
 
 let rec public_identifiers_with_transformations definitions18 = 
@@ -4620,7 +4601,7 @@ let rec translate_less_than2 translate_expression8 expressions38 =
     (match expressions38 with
          | (Cons (a73, (Cons (b68, (Cons (then_case2, (Cons (else_case2, Empty)))))))) -> 
             (wrap_in_brackets2 (join (Cons ((translate_expression8 a73), (Cons ((SourceString ((data_less_than3 ()))), (Cons ((translate_expression8 b68), (Cons ((SourceString ((data_space3 ()))), (Cons ((SourceString ((data_question_mark ()))), (Cons ((SourceString ((data_space3 ()))), (Cons ((translate_expression8 then_case2), (Cons ((SourceString ((data_space3 ()))), (Cons ((SourceString ((data_colon2 ()))), (Cons ((SourceString ((data_space3 ()))), (Cons ((translate_expression8 else_case2), Empty))))))))))))))))))))))))
-         | x513 -> 
+         | x512 -> 
             (SourceString ((data_compile_error2 ()))));;
 
 let rec wrap_in_angle_brackets s4 = 
@@ -4629,30 +4610,30 @@ let rec wrap_in_angle_brackets s4 =
 let rec translate_constructor2 translator2 identifier82 constructor15 = 
     (wrap_in_angle_brackets ((source_string_join (string_concat (data_comma2 ()) (string_of_char (32l)))) ((list_cons (translate_constructor_identifier2 identifier82)) ((list_map translator2) constructor15))));;
 
-let rec translate_pattern2 pattern14 = 
-    (match pattern14 with
-         | (Capture (x514)) -> 
+let rec translate_pattern2 pattern15 = 
+    (match pattern15 with
+         | (Capture (x513)) -> 
             (SourceString ((data_capture ())))
-         | (IntegerPattern (integer11, x515)) -> 
+         | (IntegerPattern (integer11, x514)) -> 
             (SourceString ((string_from_int32 integer11)))
-         | (ConstructorPattern (identifier83, Empty, x516)) -> 
+         | (ConstructorPattern (identifier83, Empty, x515)) -> 
             (translate_constructor_identifier2 identifier83)
-         | (ConstructorPattern (identifier84, patterns6, x517)) -> 
+         | (ConstructorPattern (identifier84, patterns6, x516)) -> 
             (translate_constructor2 translate_pattern2 identifier84 patterns6));;
 
-let rec translate_captures pattern15 = 
-    (match pattern15 with
+let rec translate_captures pattern16 = 
+    (match pattern16 with
          | (Capture (identifier85)) -> 
             (Cons ((escape_identifier2 identifier85), Empty))
-         | (IntegerPattern (x518, x519)) -> 
+         | (IntegerPattern (x517, x518)) -> 
             (list_empty ())
-         | (ConstructorPattern (x520, patterns7, x521)) -> 
+         | (ConstructorPattern (x519, patterns7, x520)) -> 
             (list_flatmap translate_captures patterns7));;
 
 let rec translate_rule2 n15 translate_expression9 rule4 = 
     (match rule4 with
-         | (Pair (pattern16, expression67)) -> 
-            (join_lines (Cons (((line n15) (Cons ((translate_pattern2 pattern16), (Cons ((SourceString ((data_comma2 ()))), (Cons ((source_space ()), (Cons ((wrap_in_brackets2 (source_string_join (string_concat (data_comma2 ()) (string_of_char (32l))) (translate_captures pattern16))), (Cons ((SourceString ((data_lambda_arrow ()))), Empty))))))))))), (Cons (((line (Int32.add n15 (1l))) (Cons ((translate_expression9 (Int32.add n15 (1l)) expression67), Empty))), Empty))))));;
+         | (Pair (pattern17, expression67)) -> 
+            (join_lines (Cons (((line n15) (Cons ((translate_pattern2 pattern17), (Cons ((SourceString ((data_comma2 ()))), (Cons ((source_space ()), (Cons ((wrap_in_brackets2 (source_string_join (string_concat (data_comma2 ()) (string_of_char (32l))) (translate_captures pattern17))), (Cons ((SourceString ((data_lambda_arrow ()))), Empty))))))))))), (Cons (((line (Int32.add n15 (1l))) (Cons ((translate_expression9 (Int32.add n15 (1l)) expression67), Empty))), Empty))))));;
 
 let rec translate_match_expression2 n16 translate_expression10 translate_rule3 expression68 rules10 = 
     ((source_string_join (string_empty ())) (Cons ((SourceString ((data_match_func ()))), (Cons ((SourceString ((data_open_bracket3 ()))), (Cons ((translate_expression10 n16 expression68), (Cons ((SourceString ((data_comma2 ()))), (Cons ((source_space ()), (Cons ((SourceString ((data_open_array ()))), (Cons ((source_string_join (data_comma2 ()) (list_map (translate_rule3 (Int32.add n16 (1l)) translate_expression10) rules10)), (Cons ((SourceString ((data_close_array ()))), (Cons ((SourceString ((data_close_bracket3 ()))), Empty)))))))))))))))))));;
@@ -4674,7 +4655,7 @@ let rec translate_function_application4 translate_expression12 expressions40 =
                     (translate_less_than2 translate_expression12 rest33)
                  | False -> 
                     (translate_function_application3 translate_expression12 expressions40))
-         | x522 -> 
+         | x521 -> 
             (translate_function_application3 translate_expression12 expressions40));;
 
 let rec translate_argument_list2 arguments27 = 
@@ -4689,19 +4670,19 @@ let rec translate_lambda2 translate_expression13 arguments28 expression69 =
 
 let rec translate_expression14 n17 expression70 = 
     (match expression70 with
-         | (Lambda (arguments29, expression71, x523)) -> 
+         | (Lambda (arguments29, expression71, x522)) -> 
             (wrap_in_brackets2 (translate_lambda2 (translate_expression14 n17) arguments29 expression71))
-         | (Constructor (identifier87, Empty, x524)) -> 
+         | (Constructor (identifier87, Empty, x523)) -> 
             (translate_constructor_identifier2 identifier87)
-         | (Constructor (identifier88, expressions41, x525)) -> 
+         | (Constructor (identifier88, expressions41, x524)) -> 
             ((translate_constructor2 (translate_expression14 n17) identifier88) expressions41)
-         | (FunctionApplication (expressions42, x526)) -> 
+         | (FunctionApplication (expressions42, x525)) -> 
             (translate_function_application4 (translate_expression14 n17) expressions42)
-         | (IntegerConstant (integer12, x527)) -> 
+         | (IntegerConstant (integer12, x526)) -> 
             (SourceString ((string_from_int32 integer12)))
          | (Variable (identifier89)) -> 
             (translate_identifier2 identifier89)
-         | (Match (expression72, rules11, x528)) -> 
+         | (Match (expression72, rules11, x527)) -> 
             (translate_match_expression2 n17 translate_expression14 translate_rule2 expression72 rules11));;
 
 let rec mark_as_return_value source2 = 
@@ -4710,24 +4691,24 @@ let rec mark_as_return_value source2 =
 let rec identifier_in_captures identifier90 rule5 = 
     (list_any (identifier_equal identifier90) (captured_identifiers_from_pattern (pair_left rule5)));;
 
-let rec translate_tail_recursive_match_rule name75 translate_tail_recursive_function n18 translate_expression15 rule6 = 
-    (match (identifier_in_captures name75 rule6) with
+let rec translate_tail_recursive_match_rule name76 translate_tail_recursive_function n18 translate_expression15 rule6 = 
+    (match (identifier_in_captures name76 rule6) with
          | True -> 
             (translate_rule2 n18 translate_expression15 rule6)
          | False -> 
-            (translate_rule2 n18 (translate_tail_recursive_function name75) rule6));;
+            (translate_rule2 n18 (translate_tail_recursive_function name76) rule6));;
 
-let rec translate_tail_recursive_function2 name76 n19 expression73 = 
+let rec translate_tail_recursive_function2 name77 n19 expression73 = 
     (match expression73 with
          | (FunctionApplication ((Cons ((Variable (applied_name2)), arguments30)), range108)) -> 
-            (match (identifier_equal name76 applied_name2) with
+            (match (identifier_equal name77 applied_name2) with
                  | True -> 
                     (mark_as_return_value ((source_string_join (string_empty ())) (Cons ((SourceString ((data_open_bracket3 ()))), (Cons ((SourceString ((data_close_bracket3 ()))), (Cons ((SourceString ((data_lambda_arrow ()))), (Cons ((SourceString ((data_tailcall ()))), (Cons ((source_space ()), (Cons ((join (list_map (fun x51 -> (wrap_in_brackets2 ((translate_expression14 n19) x51))) arguments30)), Empty))))))))))))))
                  | False -> 
                     (translate_expression14 n19 expression73))
          | (Match (expression74, rules12, range109)) -> 
-            (translate_match_expression2 n19 translate_expression14 (translate_tail_recursive_match_rule name76 translate_tail_recursive_function2) expression74 rules12)
-         | x529 -> 
+            (translate_match_expression2 n19 translate_expression14 (translate_tail_recursive_match_rule name77 translate_tail_recursive_function2) expression74 rules12)
+         | x528 -> 
             (translate_expression14 n19 expression73));;
 
 let rec tail_recursive_function identifier91 arguments31 expression75 = 
@@ -4758,7 +4739,7 @@ let rec constructor_identifier2 constructor16 =
     (match constructor16 with
          | (SimpleConstructor (identifier95)) -> 
             identifier95
-         | (ComplexConstructor (identifier96, x530, x531)) -> 
+         | (ComplexConstructor (identifier96, x529, x530)) -> 
             identifier96);;
 
 let rec translate_constructor_definition2 public14 constructor17 = 
@@ -4770,16 +4751,16 @@ let rec translate_constructor_definition2 public14 constructor17 =
                  | False -> 
                     Empty))));;
 
-let rec translate_type_definition2 name77 public15 parameters23 constructors23 = 
+let rec translate_type_definition2 name78 public15 parameters23 constructors23 = 
     (source_string_join (string_of_char (10l)) (list_map (translate_constructor_definition2 public15) constructors23));;
 
 let rec translate_definition2 definition20 = 
     (match definition20 with
-         | (FunctionDefinition (identifier98, public16, arguments35, expression78, x532)) -> 
+         | (FunctionDefinition (identifier98, public16, arguments35, expression78, x531)) -> 
             (translate_function_definition2 identifier98 public16 arguments35 expression78)
-         | (TypeDefinition (name78, public17, parameters24, constructors24, x533)) -> 
-            (translate_type_definition2 name78 public17 parameters24 constructors24)
-         | (TargetDefinition (x534, data3)) -> 
+         | (TypeDefinition (name79, public17, parameters24, constructors24, x532)) -> 
+            (translate_type_definition2 name79 public17 parameters24 constructors24)
+         | (TargetDefinition (x533, data3)) -> 
             (SourceString ((string_from_slice data3))));;
 
 let rec generate_source2 module_name5 definitions20 = 
@@ -5422,27 +5403,27 @@ let rec translate_less_than3 translate_expression16 expressions43 =
     (match expressions43 with
          | (Cons (a74, (Cons (b69, (Cons (then_case3, (Cons (else_case3, Empty)))))))) -> 
             (join (Cons ((SourceString ((data_if5 ()))), (Cons ((SourceString ((data_space5 ()))), (Cons ((translate_expression16 a74), (Cons ((SourceString ((data_less_than5 ()))), (Cons ((translate_expression16 b69), (Cons ((SourceString ((data_space5 ()))), (Cons ((SourceString ((data_then5 ()))), (Cons ((SourceString ((data_space5 ()))), (Cons ((translate_expression16 then_case3), (Cons ((SourceString ((data_space5 ()))), (Cons ((SourceString ((data_else5 ()))), (Cons ((SourceString ((data_space5 ()))), (Cons ((translate_expression16 else_case3), Empty)))))))))))))))))))))))))))
-         | x535 -> 
+         | x534 -> 
             (SourceString ((data_compile_error3 ()))));;
 
 let rec translate_constructor3 translator3 identifier105 constructor18 = 
     (wrap_in_brackets2 (join ((fun parameters25 -> (Cons ((translate_constructor_identifier3 identifier105), (Cons ((SourceString ((data_space5 ()))), (Cons (parameters25, Empty))))))) (wrap_in_brackets2 ((source_string_join (string_concat (data_comma3 ()) (string_of_char (32l)))) ((list_map translator3) constructor18))))));;
 
-let rec translate_pattern3 pattern17 = 
-    (match pattern17 with
+let rec translate_pattern3 pattern18 = 
+    (match pattern18 with
          | (Capture (identifier106)) -> 
             (escape_identifier3 identifier106)
-         | (IntegerPattern (integer13, x536)) -> 
+         | (IntegerPattern (integer13, x535)) -> 
             (join (Cons ((SourceString ((string_from_int32 integer13))), (Cons ((SourceStringChar ((108l))), Empty)))))
-         | (ConstructorPattern (identifier107, Empty, x537)) -> 
+         | (ConstructorPattern (identifier107, Empty, x536)) -> 
             (translate_constructor_identifier3 identifier107)
-         | (ConstructorPattern (identifier108, patterns8, x538)) -> 
+         | (ConstructorPattern (identifier108, patterns8, x537)) -> 
             ((translate_constructor3 translate_pattern3 identifier108) patterns8));;
 
 let rec translate_rule4 translate_expression17 n20 rule7 = 
     (match rule7 with
-         | (Pair (pattern18, expression79)) -> 
-            (join_lines (Cons (((line n20) (Cons ((SourceString ((data_vertical_bar2 ()))), (Cons ((translate_pattern3 pattern18), (Cons ((SourceString ((data_arrow2 ()))), Empty))))))), (Cons (((line (Int32.add n20 (1l))) (Cons ((translate_expression17 (Int32.add n20 (1l)) expression79), Empty))), Empty))))));;
+         | (Pair (pattern19, expression79)) -> 
+            (join_lines (Cons (((line n20) (Cons ((SourceString ((data_vertical_bar2 ()))), (Cons ((translate_pattern3 pattern19), (Cons ((SourceString ((data_arrow2 ()))), Empty))))))), (Cons (((line (Int32.add n20 (1l))) (Cons ((translate_expression17 (Int32.add n20 (1l)) expression79), Empty))), Empty))))));;
 
 let rec translate_match_expression3 translate_expression18 n21 expression80 rules13 = 
     ((source_string_join (string_empty ())) ((fun rules14 -> (Cons ((SourceString ((data_match7 ()))), (Cons ((source_space ()), (Cons ((translate_expression18 n21 expression80), (Cons ((source_space ()), (Cons ((SourceString ((data_with6 ()))), (Cons (rules14, Empty))))))))))))) ((source_string_join (string_empty ())) ((list_map (translate_rule4 translate_expression18 n21)) rules13))));;
@@ -5451,7 +5432,7 @@ let rec translate_function_application5 translate_expression19 expressions44 =
     (match expressions44 with
          | (Cons (no_args_function2, Empty)) -> 
             (join (Cons ((translate_expression19 no_args_function2), (Cons ((SourceString ((data_space5 ()))), (Cons ((SourceString ((wrap_in_brackets (string_empty ())))), Empty)))))))
-         | x539 -> 
+         | x538 -> 
             (source_string_join (data_space5 ()) (list_map translate_expression19 expressions44)));;
 
 let rec translate_function_application6 translate_expression20 expressions45 = 
@@ -5462,7 +5443,7 @@ let rec translate_function_application6 translate_expression20 expressions45 =
                     (translate_less_than3 translate_expression20 rest34)
                  | False -> 
                     (translate_function_application5 translate_expression20 expressions45))
-         | x540 -> 
+         | x539 -> 
             (translate_function_application5 translate_expression20 expressions45));;
 
 let rec translate_argument_list3 arguments36 = 
@@ -5477,19 +5458,19 @@ let rec translate_lambda3 translate_expression21 arguments37 expression81 =
 
 let rec translate_expression22 n22 expression82 = 
     (match expression82 with
-         | (Lambda (arguments38, expression83, x541)) -> 
+         | (Lambda (arguments38, expression83, x540)) -> 
             (wrap_in_brackets2 (translate_lambda3 (translate_expression22 n22) arguments38 expression83))
-         | (Constructor (identifier110, Empty, x542)) -> 
+         | (Constructor (identifier110, Empty, x541)) -> 
             (translate_constructor_identifier3 identifier110)
-         | (Constructor (identifier111, expressions46, x543)) -> 
+         | (Constructor (identifier111, expressions46, x542)) -> 
             ((translate_constructor3 (translate_expression22 n22) identifier111) expressions46)
-         | (FunctionApplication (expressions47, x544)) -> 
+         | (FunctionApplication (expressions47, x543)) -> 
             (wrap_in_brackets2 (translate_function_application6 (translate_expression22 n22) expressions47))
-         | (IntegerConstant (integer14, x545)) -> 
+         | (IntegerConstant (integer14, x544)) -> 
             (wrap_in_brackets2 (SourceString ((string_concat (string_from_int32 integer14) (string_of_char (108l))))))
          | (Variable (identifier112)) -> 
             (translate_identifier3 identifier112)
-         | (Match (expression84, rules15, x546)) -> 
+         | (Match (expression84, rules15, x545)) -> 
             (wrap_in_brackets2 (translate_match_expression3 translate_expression22 (Int32.add n22 (1l)) expression84 rules15)));;
 
 let rec translate_function_definition3 identifier113 arguments39 expression85 = 
@@ -5502,8 +5483,8 @@ let rec translate_simple_type2 identifier114 parameters26 =
          | True -> 
             (translate_type_variable identifier114));;
 
-let rec translate_complex_types2 translate_types5 name79 types12 = 
-    (join ((fun types13 -> (Cons (types13, (Cons ((SourceString ((data_space5 ()))), (Cons ((translate_type_identifier name79), Empty))))))) (wrap_in_brackets2 ((translate_types5 (data_comma3 ())) types12))));;
+let rec translate_complex_types2 translate_types5 name80 types12 = 
+    (join ((fun types13 -> (Cons (types13, (Cons ((SourceString ((data_space5 ()))), (Cons ((translate_type_identifier name80), Empty))))))) (wrap_in_brackets2 ((translate_types5 (data_comma3 ())) types12))));;
 
 let rec translate_function_type2 translate_types6 return_type7 argument_types5 = 
     (match (list_is_empty argument_types5) with
@@ -5516,22 +5497,22 @@ let rec translate_type2 translate_types7 parameters27 type6 =
     (match type6 with
          | (SimpleType (identifier115)) -> 
             (translate_simple_type2 identifier115 parameters27)
-         | (ComplexType (identifier116, types14, x547)) -> 
+         | (ComplexType (identifier116, types14, x546)) -> 
             (translate_complex_types2 translate_types7 identifier116 types14)
-         | (FunctionType (argument_types6, return_type8, x548)) -> 
+         | (FunctionType (argument_types6, return_type8, x547)) -> 
             (translate_function_type2 translate_types7 return_type8 argument_types6));;
 
 let rec translate_types8 parameters28 separator6 types15 = 
     ((source_string_join separator6) ((list_map (translate_type2 (translate_types8 parameters28) parameters28)) types15));;
 
-let rec translate_complex_constructor_definition2 name80 type7 types16 parameters29 = 
-    (join (Cons ((translate_constructor_identifier3 name80), (Cons ((SourceString ((data_colon3 ()))), (Cons ((translate_types8 parameters29 (data_star2 ()) types16), (Cons ((SourceString ((data_arrow2 ()))), (Cons (type7, Empty)))))))))));;
+let rec translate_complex_constructor_definition2 name81 type7 types16 parameters29 = 
+    (join (Cons ((translate_constructor_identifier3 name81), (Cons ((SourceString ((data_colon3 ()))), (Cons ((translate_types8 parameters29 (data_star2 ()) types16), (Cons ((SourceString ((data_arrow2 ()))), (Cons (type7, Empty)))))))))));;
 
 let rec translate_constructor_definition3 type8 parameters30 constructor19 = 
     (match constructor19 with
          | (SimpleConstructor (identifier117)) -> 
             (translate_constructor_identifier3 identifier117)
-         | (ComplexConstructor (identifier118, types17, x549)) -> 
+         | (ComplexConstructor (identifier118, types17, x548)) -> 
             (translate_complex_constructor_definition2 identifier118 type8 types17 parameters30));;
 
 let rec translate_constructor_definitions2 type9 parameters31 constructors25 = 
@@ -5541,36 +5522,36 @@ let rec translate_type_parameter_for_definition parameter8 =
     (match parameter8 with
          | (UniversalParameter (identifier119)) -> 
             (translate_type_variable identifier119)
-         | (ExistentialParameter (x550)) -> 
+         | (ExistentialParameter (x549)) -> 
             SourceStringEmpty);;
 
 let rec translate_type_parameters parameters32 = 
     ((source_string_join (data_comma3 ())) ((list_filter (fun parameter9 -> (match parameter9 with
          | SourceStringEmpty -> 
             False
-         | x551 -> 
+         | x550 -> 
             True))) ((list_map translate_type_parameter_for_definition) parameters32)));;
 
-let rec translate_type_name name81 parameters33 parameter_string = 
+let rec translate_type_name name82 parameters33 parameter_string = 
     (match (list_is_empty parameters33) with
          | True -> 
-            (lowercase_identifier name81)
+            (lowercase_identifier name82)
          | False -> 
-            (join (Cons ((wrap_in_brackets2 parameter_string), (Cons ((source_space ()), (Cons ((lowercase_identifier name81), Empty))))))));;
+            (join (Cons ((wrap_in_brackets2 parameter_string), (Cons ((source_space ()), (Cons ((lowercase_identifier name82), Empty))))))));;
 
-let rec translate_type_name2 name82 parameters34 = 
-    (translate_type_name name82 parameters34 (translate_type_parameters parameters34));;
+let rec translate_type_name2 name83 parameters34 = 
+    (translate_type_name name83 parameters34 (translate_type_parameters parameters34));;
 
-let rec translate_type_definition3 name83 parameters35 constructors26 = 
-    (join_lines (Cons (((line (0l)) (Cons ((SourceString ((data_type5 ()))), (Cons ((source_space ()), (Cons ((translate_type_name2 name83 parameters35), (Cons ((source_space ()), (Cons ((SourceString ((data_equals3 ()))), Empty))))))))))), (Cons (((line (1l)) (Cons ((SourceString ((data_vertical_bar2 ()))), (Cons ((translate_constructor_definitions2 (translate_type_name2 name83 parameters35) parameters35 constructors26), (Cons ((SourceString ((data_definition_end ()))), Empty))))))), Empty)))));;
+let rec translate_type_definition3 name84 parameters35 constructors26 = 
+    (join_lines (Cons (((line (0l)) (Cons ((SourceString ((data_type5 ()))), (Cons ((source_space ()), (Cons ((translate_type_name2 name84 parameters35), (Cons ((source_space ()), (Cons ((SourceString ((data_equals3 ()))), Empty))))))))))), (Cons (((line (1l)) (Cons ((SourceString ((data_vertical_bar2 ()))), (Cons ((translate_constructor_definitions2 (translate_type_name2 name84 parameters35) parameters35 constructors26), (Cons ((SourceString ((data_definition_end ()))), Empty))))))), Empty)))));;
 
 let rec translate_definition3 definition21 = 
     (match definition21 with
-         | (FunctionDefinition (identifier120, x552, arguments40, expression86, x553)) -> 
+         | (FunctionDefinition (identifier120, x551, arguments40, expression86, x552)) -> 
             (translate_function_definition3 identifier120 arguments40 expression86)
-         | (TypeDefinition (name84, x554, parameters36, constructors27, x555)) -> 
-            (translate_type_definition3 name84 parameters36 constructors27)
-         | (TargetDefinition (x556, data4)) -> 
+         | (TypeDefinition (name85, x553, parameters36, constructors27, x554)) -> 
+            (translate_type_definition3 name85 parameters36 constructors27)
+         | (TargetDefinition (x555, data4)) -> 
             (SourceString ((string_from_slice data4))));;
 
 let rec generate_source4 module_name7 definitions22 = 
@@ -5721,7 +5702,7 @@ let rec table_to_string table4 =
 let rec print_diagnostics arguments44 file_entries max_heap_size start_parse end_parse start_transform end_transform start_generate end_generate start_read_files end_read_files start_write_files end_write_files k = 
     (match (flag_is_true (data_diagnostics_flag ()) False arguments44) with
          | True -> 
-            (CliError ((table_to_string (Cons ((Cons ((string_from_int32 (list_foldl (fun file15 bytes -> (Int32.add bytes (source_file_size file15))) (0l) file_entries)), (Cons ((data_bytes_read ()), Empty)))), (Cons ((Cons ((string_from_int32 max_heap_size), (Cons ((data_max_heap_size ()), Empty)))), (Cons ((Cons ((string_from_int32 (Int32.sub end_parse start_parse)), (Cons ((data_parse_time ()), Empty)))), (Cons ((Cons ((string_from_int32 (Int32.sub end_transform start_transform)), (Cons ((data_transform_time ()), Empty)))), (Cons ((Cons ((string_from_int32 (Int32.sub end_generate start_generate)), (Cons ((data_generate_time ()), Empty)))), (Cons ((Cons ((string_from_int32 (Int32.sub end_read_files start_read_files)), (Cons ((data_read_files ()), Empty)))), (Cons ((Cons ((string_from_int32 (Int32.sub end_write_files start_write_files)), (Cons ((data_write_files ()), Empty)))), Empty))))))))))))))), k))
+            (CliError ((table_to_string (Cons ((Cons ((string_from_int32 (list_foldl (fun file17 bytes -> (Int32.add bytes (source_file_size file17))) (0l) file_entries)), (Cons ((data_bytes_read ()), Empty)))), (Cons ((Cons ((string_from_int32 max_heap_size), (Cons ((data_max_heap_size ()), Empty)))), (Cons ((Cons ((string_from_int32 (Int32.sub end_parse start_parse)), (Cons ((data_parse_time ()), Empty)))), (Cons ((Cons ((string_from_int32 (Int32.sub end_transform start_transform)), (Cons ((data_transform_time ()), Empty)))), (Cons ((Cons ((string_from_int32 (Int32.sub end_generate start_generate)), (Cons ((data_generate_time ()), Empty)))), (Cons ((Cons ((string_from_int32 (Int32.sub end_read_files start_read_files)), (Cons ((data_read_files ()), Empty)))), (Cons ((Cons ((string_from_int32 (Int32.sub end_write_files start_write_files)), (Cons ((data_write_files ()), Empty)))), Empty))))))))))))))), k))
          | False -> 
             (k ()));;
 

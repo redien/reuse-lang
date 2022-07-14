@@ -26,13 +26,14 @@
             (ValueConstructor _ name values)
                 (match values
                        Empty
-                            name
+                           name
                        _
-                            (pipe values
-                                  (list-map value-to-string)
-                                  (list-cons name)
-                                  (string-join (data-space))
-                                  wrap-in-brackets))
+                           (pipe
+                               values
+                               (list-map value-to-string)
+                               (list-cons name)
+                               (string-join (data-space))
+                               wrap-in-brackets))
             (ValueClosure arguments expression scope)
                 (value-function-to-string arguments expression)
             (ValueFunction arguments expression)

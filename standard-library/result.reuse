@@ -1,5 +1,7 @@
 
-(pub typ (result v e) (Result v) (Error e))
+(pub typ (result v e)
+     (Result v)
+     (Error e))
 
 (pub def result-lift (result)
      (Result result))
@@ -9,50 +11,68 @@
 
 (pub def result-prod (return result)
      (match result
-            (Result m)     m
-            (Error error)  (return (Error error))))
+            (Result m)
+                m
+            (Error error)
+                (return (Error error))))
 
 (pub def result-bimap (f g result)
      (match result
-            (Result x)     (Result (f x))
-            (Error y)      (Error (g y))))
+            (Result x)
+                (Result (f x))
+            (Error y)
+                (Error (g y))))
 
 (pub def result-either (f g result)
      (match result
-            (Result x)     (f x)
-            (Error x)      (g x)))
+            (Result x)
+                (f x)
+            (Error x)
+                (g x)))
 
 (pub def result-map (f result)
      (result-bimap f id result))
 
 (pub def result-flatmap (f result)
      (match result
-            (Result x)     (f x)
-            (Error error)  (Error error)))
+            (Result x)
+                (f x)
+            (Error error)
+                (Error error)))
 
 (pub def result-or-else (value result)
      (match result
-            (Result x) x
-            (Error x)  value))
+            (Result x)
+                x
+            (Error x)
+                value))
 
 (pub def result-error? (result)
      (match result
-            (Error _)  True
-            _          False))
+            (Error _)
+                True
+            _
+                False))
 
 (pub def result-filter-list (list)
-     (list-foldr (fn (result new-list)
-                     (match result
-                            (Result x)  (Cons x new-list)
-                            _           new-list))
-                 Empty
-                 list))
+     (list-foldr
+         (fn (result new-list)
+             (match result
+                    (Result x)
+                        (Cons x new-list)
+                    _
+                        new-list))
+         Empty
+         list))
 
 (pub def result-concat (list)
      (match (list-filter result-error? list)
-            (Cons (Error error) _)  (Error error)
-            (Cons (Result _) __)    (Result Empty)
-            Empty                   (Result (result-filter-list list))))
+            (Cons (Error error) _)
+                (Error error)
+            (Cons (Result _) __)
+                (Result Empty)
+            Empty
+                (Result (result-filter-list list))))
 
 (pub def result-of-maybe (error maybe)
      (match maybe

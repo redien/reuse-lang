@@ -8,69 +8,82 @@
      (= first-char (maybe-or-else 0 (string-first line))))
 
 (def collect-lines (first-char lines)
-     (string-join (string-of-char 10) (list-map (string-skip 2) (list-filter (line-matches first-char) lines))))
+     (string-join
+         (string-of-char 10)
+         (list-map (string-skip 2) (list-filter (line-matches first-char) lines))))
 
 (def collect-success (lines)
-     (ExpectSuccess (collect-lines 124 lines) (collect-lines 62 lines) (collect-lines 61 lines)))
+     (ExpectSuccess
+         (collect-lines 124 lines)
+         (collect-lines 62 lines)
+         (collect-lines 61 lines)))
 
 (def collect-failure (lines)
-     (ExpectFailure (collect-lines 124 lines) (collect-lines 62 lines) (collect-lines 63 lines)))
+     (ExpectFailure
+         (collect-lines 124 lines)
+         (collect-lines 62 lines)
+         (collect-lines 63 lines)))
 
 (def commit-requirement (result)
      (match result
             (Pair lines requirements)
-               (match (Pair (list-is-empty? lines) (list-any? (line-matches 63) lines))
-                      (Pair False True)
-                         (Pair (list-empty) (Cons (collect-failure (list-reverse lines)) requirements))
-                      (Pair False False)
-                         (Pair (list-empty) (Cons (collect-success (list-reverse lines)) requirements))
-                      (Pair True _)
-                         result)))
+                (match (Pair (list-is-empty? lines) (list-any? (line-matches 63) lines))
+                       (Pair False True)
+                           (Pair (list-empty) (Cons (collect-failure (list-reverse lines)) requirements))
+                       (Pair False False)
+                           (Pair (list-empty) (Cons (collect-success (list-reverse lines)) requirements))
+                       (Pair True _)
+                           result)))
 
 (def append-line (line result)
      (match result
             (Pair lines requirements)
-               (Pair (Cons line lines) requirements)))
+                (Pair (Cons line lines) requirements)))
 
 (def previous-line-is-assertion? (result)
      (match result
             (Pair (Cons line _) __)
-               (or (line-matches 63 line) (line-matches 61 line))
+                (or (line-matches 63 line) (line-matches 61 line))
             _
-               False))
+                False))
 
 (def commit-comment (line result)
      (match (previous-line-is-assertion? result)
             True
-               (match (commit-requirement result)
-                      (Pair lines requirements)
-                         (Pair lines (Cons (Comment line) requirements)))
+                (match (commit-requirement result)
+                       (Pair lines requirements)
+                           (Pair lines (Cons (Comment line) requirements)))
             False
-               (match result
-                      (Pair lines requirements)
-                         (Pair lines (Cons (Comment line) requirements)))))
+                (match result
+                       (Pair lines requirements)
+                           (Pair lines (Cons (Comment line) requirements)))))
 
 (def append-non-assertion (line result)
      (match (previous-line-is-assertion? result)
             True
-               (append-line line (commit-requirement result))
+                (append-line line (commit-requirement result))
             False
-               (append-line line result)))
+                (append-line line result)))
 
 (def reduce-spec (line result)
      (match (string-first line)
             (Some 61)
-               (append-line line result)
+                (append-line line result)
             (Some 63)
-               (append-line line result)
+                (append-line line result)
             (Some 62)
-               (append-non-assertion line result)
+                (append-non-assertion line result)
             (Some 124)
-               (append-non-assertion line result)
+                (append-non-assertion line result)
             _
-               (match (string-is-empty? line)
-                      True   result
-                      False  (commit-comment line result))))
+                (match (string-is-empty? line)
+                       True
+                           result
+                       False
+                           (commit-comment line result))))
 
 (pub def parse-spec (file)
-     (list-reverse (pair-right (commit-requirement (list-foldl reduce-spec (Pair (list-empty) (list-empty)) (string-split 10 (string-from-slice file)))))))
+     (list-reverse (pair-right (commit-requirement (list-foldl
+         reduce-spec
+         (Pair (list-empty) (list-empty))
+         (string-split 10 (string-from-slice file)))))))

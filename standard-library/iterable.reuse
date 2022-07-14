@@ -1,7 +1,7 @@
 
-(pub typ (iterable-class collection element)
-     (IterableClass (fn (collection) (pair (maybe element) collection))))
+(pub typ (iterable-class collection element) (IterableClass (fn (collection) (pair (maybe element) collection))))
 
 (pub def iterable-next (class collection)
      (match class
-            (IterableClass next)  (next collection)))
+            (IterableClass next)
+                (next collection)))

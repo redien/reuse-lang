@@ -3,47 +3,50 @@
 
 (pub def state-run (state operation)
      (match operation
-            (Operation f)  (f state)))
+            (Operation f)
+                (f state)))
 
 (pub def state-final-value (initial-state operation)
      (match (state-run initial-state operation)
-            (Pair _ value)  value))
+            (Pair _ value)
+                value))
 
 (pub def state-return (value)
      (Operation (fn (state)
-                    (Pair state value))))
+         (Pair state value))))
 
 (pub def state-bind (operation f)
      (Operation (fn (state)
-                    (match (state-run state operation)
-                           (Pair new-state new-value)  (state-run new-state (f new-value))))))
+         (match (state-run state operation)
+                (Pair new-state new-value)
+                    (state-run new-state (f new-value))))))
 
 (pub def state-get ()
      (Operation (fn (state)
-                    (Pair state state))))
+         (Pair state state))))
 
 (pub def state-set (state)
      (Operation (fn (_)
-                    (Pair state state))))
+         (Pair state state))))
 
 (pub def state-modify (f)
      (state-bind (state-get) (fn (state)
-                 (state-set (f state)))))
+     (state-set (f state)))))
 
 (pub def state-let (value f)
      (state-bind (state-return value) f))
 
 (pub def state-foldr (f initial-value operations)
-     (list-foldr (fn (operation chain)
-                     (state-bind operation (fn (x)
-                     (state-bind chain     (fn (xs)
-                     (state-return (f x xs)))))))
-                 (state-return initial-value)
-                 operations))
+     (list-foldr
+         (fn (operation chain)
+             (state-bind operation (fn (x)
+             (state-bind chain (fn (xs)
+             (state-return (f x xs)))))))
+         (state-return initial-value)
+         operations))
 
 (pub def state-foreach (f xs)
      (state-foldr list-cons Empty (list-map f xs)))
-
 
 (pub def state-flatmap (f operation)
      (state-bind operation f))

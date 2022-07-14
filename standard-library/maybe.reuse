@@ -8,7 +8,7 @@
             (Some x)
                 (Some (f x))
             None
-                None)) 
+                None))
 
 (pub def maybe-flatmap (f maybe)
      (match maybe
@@ -27,8 +27,10 @@
      (match maybe
             (Some x)
                 (match (f x)
-                       True  maybe
-                       False None)
+                       True
+                           maybe
+                       False
+                           None)
             None
                 None))
 

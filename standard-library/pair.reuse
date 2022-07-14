@@ -9,28 +9,35 @@
 
 (pub def pair-left (pair)
      (match pair
-            (Pair x _)  x))
+            (Pair x _)
+                x))
 
 (pub def pair-right (pair)
      (match pair
-            (Pair _ x)  x))
+            (Pair _ x)
+                x))
 
 (pub def pair-map (f pair)
      (match pair
-            (Pair x y)  (f x y)))
+            (Pair x y)
+                (f x y)))
 
 (pub def pair-bimap (f g pair)
      (match pair
-            (Pair x y)  (Pair (f x) (g y))))
+            (Pair x y)
+                (Pair (f x) (g y))))
 
 (pub def pair-map-left (f pair)
      (match pair
-            (Pair x y)  (Pair (f x) y)))
+            (Pair x y)
+                (Pair (f x) y)))
 
 (pub def pair-map-right (f pair)
      (match pair
-            (Pair x y)  (Pair x (f y))))
+            (Pair x y)
+                (Pair x (f y))))
 
 (pub def pair-swap (pair)
      (match pair
-            (Pair x y) (Pair y x)))
+            (Pair x y)
+                (Pair y x)))

@@ -2,9 +2,7 @@
 (def stringify-parameter (parameter)
      (match parameter
             (Pair key value)
-               (string-concat key
-               (string-concat (data-equal)
-                              value))))
+                (string-concat key (string-concat (data-equal) value))))
 
 (def stringify-parameters (parameters)
      (string-join (data-comma) (list-map stringify-parameter parameters)))
@@ -12,8 +10,8 @@
 (def reuse-main (stdin)
      (match (parse-arguments (string-split 32 (string-from-slice stdin)))
             (CliErrorMissingValue _)
-               (data-error)
+                (data-error)
             (CliArguments parameters files)
-               (string-join (data-comma) (list
-                    (stringify-parameters parameters)
-                    (string-join (data-comma) files)))))
+                (string-join
+                    (data-comma)
+                    (list (stringify-parameters parameters) (string-join (data-comma) files)))))

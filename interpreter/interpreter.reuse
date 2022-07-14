@@ -1,10 +1,21 @@
 
-(def return (x) (Result x))
-(def bind (xs f) (result-bind xs f))
-(def let (x f) (f x))
-(def flatmap (f xs) (result-flatmap f xs))
-(def sequence (xs) (result-concat xs))
-(def map (f xs) (result-map f xs))
+(def return (x)
+     (Result x))
+
+(def bind (xs f)
+     (result-bind xs f))
+
+(def let (x f)
+     (f x))
+
+(def flatmap (f xs)
+     (result-flatmap f xs))
+
+(def sequence (xs)
+     (result-concat xs))
+
+(def map (f xs)
+     (result-map f xs))
 
 (def identifier-main () 2000)
 
@@ -16,8 +27,9 @@
             (Pair (ValueInteger a) (IntegerPattern b _2))
                 (= a b)
             (Pair (ValueConstructor token name values) (ConstructorPattern pattern-symbol patterns _2))
-                (and (= token (identifier-token pattern-symbol))
-                     (list-every? (pair-map pattern-matches-value) (list-zip values patterns)))
+                (and
+                    (= token (identifier-token pattern-symbol))
+                    (list-every? (pair-map pattern-matches-value) (list-zip values patterns)))
             (Pair _1 (Capture _2))
                 True
             _
@@ -35,41 +47,68 @@
                 Empty))
 
 (def render-stack-trace (stack-trace)
-     (string-join (string-of-char 10)
-                  (list-map (. (string-concat (data-space))
-                               (string-concat (data-space))
-                               (string-concat (data-space))
-                               (string-concat (data-space)))
-                            stack-trace)))
+     (string-join
+         (string-of-char 10)
+         (list-map
+             (.
+                 (string-concat (data-space))
+                 (string-concat (data-space))
+                 (string-concat (data-space))
+                 (string-concat (data-space)))
+             stack-trace)))
 
 (def add-stack-trace (expression values stack-trace)
-     (maybe-or-else stack-trace
-     (maybe-map (fn (expression)
-                    (Cons (string-concat (string-append 32 (stringify-sexps (list-from (expression-to-sexp expression))))
-                                         (string-join (data-space) (list-map value-to-string values)))
-                          stack-trace))
-                expression)))
+     (maybe-or-else
+         stack-trace
+         (maybe-map
+             (fn (expression)
+                 (Cons
+                     (string-concat
+                         (string-append
+                             32
+                             (stringify-sexps (list-from (expression-to-sexp expression))))
+                         (string-join (data-space) (list-map value-to-string values)))
+                     stack-trace))
+             expression)))
+
+(def first-case-matching (value cases)
+     (list-find-first
+         (fn (case)
+             (pattern-matches-value value (pair-left case)))
+         cases))
 
 (def pattern-match (eval-expression scope stack-trace value cases)
-     (match (list-find-first (fn (case) (pattern-matches-value value (pair-left case))) cases)
+     (match (first-case-matching value cases)
             (Some (Pair pattern branch))
-                (eval-expression (scope-add (case-capture (Pair value pattern)) scope) stack-trace branch)
+                (eval-expression
+                    (scope-add (case-capture (Pair value pattern)) scope)
+                    stack-trace
+                    branch)
             None
-                (Error (string-join (string-empty)
-                                    (list (data-error-unmatched-case)
-                                          (string-of-char 10)
-                                          (data-space) (data-space) (data-space) (data-space)
-                                          (value-to-string value)
-                                          (string-of-char 10)
-                                          (data-error-unmatched-case2)
-                                          (string-of-char 10)
-                                          (data-space) (data-space) (data-space) (data-space)
-                                          (string-join (data-space)
-                                                       (list-map (. stringify-sexp pattern-to-sexp pair-left) cases))
-                                          (string-of-char 10)
-                                          (data-error-stack-trace)
-                                          (string-of-char 10)
-                                          (render-stack-trace stack-trace))))))
+                (Error (string-join
+                    (string-empty)
+                    (list
+                        (data-error-unmatched-case)
+                        (string-of-char 10)
+                        (data-space)
+                        (data-space)
+                        (data-space)
+                        (data-space)
+                        (value-to-string value)
+                        (string-of-char 10)
+                        (data-error-unmatched-case2)
+                        (string-of-char 10)
+                        (data-space)
+                        (data-space)
+                        (data-space)
+                        (data-space)
+                        (string-join
+                            (data-space)
+                            (list-map (. stringify-sexp pattern-to-sexp pair-left) cases))
+                        (string-of-char 10)
+                        (data-error-stack-trace)
+                        (string-of-char 10)
+                        (render-stack-trace stack-trace))))))
 
 (def eval-int32-operator (operator scope stack-trace arguments)
      (match arguments
@@ -82,8 +121,10 @@
      (match arguments
             (Cons (ValueInteger a) (Cons (ValueInteger b) (Cons first (Cons second Empty))))
                 (match (< a b)
-                       True   (return first)
-                       False  (return second))
+                       True
+                           (return first)
+                       False
+                           (return second))
             _
                 (Error (data-error-int32-op))))
 
@@ -121,11 +162,12 @@
 (def eval-slice-foldl (apply-function scope stack-trace arguments)
      (match arguments
             (Cons f (Cons ys (Cons (ValueSlice slice) Empty)))
-                (slice-foldl (fn (y ys)
-                                 (bind ys (fn (ys-value)
-                                 (apply-function scope stack-trace None (list f (ValueInteger y) ys-value)))))
-                             (return ys)
-                             slice)
+                (slice-foldl
+                    (fn (y ys)
+                        (bind ys (fn (ys-value)
+                        (apply-function scope stack-trace None (list f (ValueInteger y) ys-value)))))
+                    (return ys)
+                    slice)
             _
                 (Error (data-error-slice-op))))
 
@@ -139,34 +181,38 @@
 (def eval-function-application (eval-expression stack-trace arguments values scope expression)
      (match (< (list-size values) (list-size arguments))
             True
-                (return (ValueClosure (list-skip (list-size values) arguments)
-                                      expression
-                                      (scope-add (list-zip (list-map identifier-token arguments) values) scope)))
+                (return (ValueClosure
+                    (list-skip (list-size values) arguments)
+                    expression
+                    (scope-add (list-zip (list-map identifier-token arguments) values) scope)))
             False
-                (eval-expression (scope-add (list-zip (list-map identifier-token arguments) values) scope)
-                                 stack-trace
-                                 expression)))
+                (eval-expression
+                    (scope-add (list-zip (list-map identifier-token arguments) values) scope)
+                    stack-trace
+                    expression)))
 
 (def apply-function (eval-expression scope stack-trace expression values)
-    (match values
-           (Cons (ValueClosure arguments body closed-scope) parameters)
-               (eval-function-application eval-expression
-                                          (add-stack-trace expression parameters stack-trace)
-                                          arguments
-                                          parameters
-                                          closed-scope
-                                          body)
-           (Cons (ValueFunction arguments body) parameters)
-               (eval-function-application eval-expression
-                                          (add-stack-trace expression parameters stack-trace)
-                                          arguments
-                                          parameters
-                                          scope
-                                          body)
-           (Cons (ValueIntrinsic evaluator) parameters)
-               (evaluator scope stack-trace (list-rest values))
-           _
-               (eval-error)))
+     (match values
+            (Cons (ValueClosure arguments body closed-scope) parameters)
+                (eval-function-application
+                    eval-expression
+                    (add-stack-trace expression parameters stack-trace)
+                    arguments
+                    parameters
+                    closed-scope
+                    body)
+            (Cons (ValueFunction arguments body) parameters)
+                (eval-function-application
+                    eval-expression
+                    (add-stack-trace expression parameters stack-trace)
+                    arguments
+                    parameters
+                    scope
+                    body)
+            (Cons (ValueIntrinsic evaluator) parameters)
+                (evaluator scope stack-trace (list-rest values))
+            _
+                (eval-error)))
 
 (def eval-expression (scope stack-trace expression)
      (match expression
@@ -175,24 +221,30 @@
             (Variable identifier)
                 (match (scope-get (identifier-token identifier) scope)
                        (Some value)
-                            (return value)
+                           (return value)
                        None
-                            (Error (string-join (string-empty)
-                                                (list (data-error-no-symbol)
-                                                      (data-space)
-                                                      (identifier-name identifier)
-                                                      (string-of-char 10)
-                                                      (data-error-stack-trace)
-                                                      (string-of-char 10)
-                                                      (render-stack-trace stack-trace)))))
+                           (Error (string-join
+                               (string-empty)
+                               (list
+                                   (data-error-no-symbol)
+                                   (data-space)
+                                   (identifier-name identifier)
+                                   (string-of-char 10)
+                                   (data-error-stack-trace)
+                                   (string-of-char 10)
+                                   (render-stack-trace stack-trace)))))
             (Constructor identifier arguments _)
                 (bind (sequence (list-map (eval-expression scope stack-trace) arguments)) (fn (values)
-                (return (ValueConstructor (identifier-token identifier) (identifier-name identifier) values))))
+                (return (ValueConstructor
+                    (identifier-token identifier)
+                    (identifier-name identifier)
+                    values))))
             (Lambda arguments expression _)
                 (return (ValueClosure arguments expression scope))
             (FunctionApplication expressions _)
-                (bind (sequence (list-map (eval-expression scope stack-trace) expressions))
-                (apply-function eval-expression scope stack-trace (list-first expressions)))
+                (bind
+                    (sequence (list-map (eval-expression scope stack-trace) expressions))
+                    (apply-function eval-expression scope stack-trace (list-first expressions)))
             (Match expression cases _)
                 (bind (eval-expression scope stack-trace expression) (fn (expression)
                 (pattern-match eval-expression scope stack-trace expression cases)))))
@@ -200,28 +252,33 @@
 (def eval (scope values)
      (match (scope-get (identifier-main) scope)
             (Some (ValueFunction arguments expression))
-                (eval-expression (scope-add (list-zip (list-map identifier-token arguments) values) scope)
-                                 Empty
-                                 expression)
+                (eval-expression
+                    (scope-add (list-zip (list-map identifier-token arguments) values) scope)
+                    Empty
+                    expression)
             _
                 (eval-error)))
 
 (def add-intrinsics (scope)
-     (scope-add (list (Pair (identifier-+)                (ValueIntrinsic (eval-int32-operator +)))
-                      (Pair (identifier--)                (ValueIntrinsic (eval-int32-operator -)))
-                      (Pair (identifier-*)                (ValueIntrinsic (eval-int32-operator *)))
-                      (Pair (identifier-/)                (ValueIntrinsic (eval-int32-operator /)))
-                      (Pair (identifier-%)                (ValueIntrinsic (eval-int32-operator %)))
-                      (Pair (identifier-&)                (ValueIntrinsic (eval-int32-operator &)))
-                      (Pair (identifier-int32-less-than)  (ValueIntrinsic eval-int32-less-than))
-                      (Pair (identifier-slice-empty)      (ValueIntrinsic eval-slice-empty))
-                      (Pair (identifier-slice-of-u8)      (ValueIntrinsic eval-slice-of-u8))
-                      (Pair (identifier-slice-size)       (ValueIntrinsic eval-slice-size))
-                      (Pair (identifier-slice-get)        (ValueIntrinsic eval-slice-get))
-                      (Pair (identifier-slice-concat)     (ValueIntrinsic eval-slice-concat))
-                      (Pair (identifier-slice-foldl)      (ValueIntrinsic (eval-slice-foldl (apply-function eval-expression))))
-                      (Pair (identifier-slice-subslice)   (ValueIntrinsic eval-slice-subslice)))
-                scope))
+     (scope-add
+         (list
+             (Pair (identifier-+) (ValueIntrinsic (eval-int32-operator +)))
+             (Pair (identifier--) (ValueIntrinsic (eval-int32-operator -)))
+             (Pair (identifier-*) (ValueIntrinsic (eval-int32-operator *)))
+             (Pair (identifier-/) (ValueIntrinsic (eval-int32-operator /)))
+             (Pair (identifier-%) (ValueIntrinsic (eval-int32-operator %)))
+             (Pair (identifier-&) (ValueIntrinsic (eval-int32-operator &)))
+             (Pair (identifier-int32-less-than) (ValueIntrinsic eval-int32-less-than))
+             (Pair (identifier-slice-empty) (ValueIntrinsic eval-slice-empty))
+             (Pair (identifier-slice-of-u8) (ValueIntrinsic eval-slice-of-u8))
+             (Pair (identifier-slice-size) (ValueIntrinsic eval-slice-size))
+             (Pair (identifier-slice-get) (ValueIntrinsic eval-slice-get))
+             (Pair (identifier-slice-concat) (ValueIntrinsic eval-slice-concat))
+             (Pair
+                 (identifier-slice-foldl)
+                 (ValueIntrinsic (eval-slice-foldl (apply-function eval-expression))))
+             (Pair (identifier-slice-subslice) (ValueIntrinsic eval-slice-subslice)))
+         scope))
 
 (def definitions-to-scope (definitions)
      (scope-add-definitions definitions (add-intrinsics (scope-empty))))
@@ -234,4 +291,6 @@
                 False))
 
 (def internal-symbols ()
-     (list-concat (intrinsic-identifiers) (list (Pair (identifier-main) (data-main)))))
+     (list-concat
+         (intrinsic-identifiers)
+         (list (Pair (identifier-main) (data-main)))))

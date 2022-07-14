@@ -1,6 +1,7 @@
 
-(typ parser-scope (ParserScope (array int32) parser-scope)
-                  (ParserScopeRoot (array int32)))
+(typ parser-scope
+     (ParserScope (array int32) parser-scope)
+     (ParserScopeRoot (array int32)))
 
 (def parser-scope-empty ()
      (ParserScopeRoot (array-empty)))
@@ -16,10 +17,12 @@
                 (ParserScopeRoot (array-set identifier-token symbol-table-id symbols))))
 
 (def parser-scope-set (identifier scope)
-     (maybe-or-else scope
-     (maybe-map (fn (symbol-table-id)
-                    (parser-scope-set' (identifier-token identifier) symbol-table-id scope))
-          (identifier-id' identifier))))
+     (maybe-or-else
+         scope
+         (maybe-map
+             (fn (symbol-table-id)
+                 (parser-scope-set' (identifier-token identifier) symbol-table-id scope))
+             (identifier-id' identifier))))
 
 (def parser-scope-set-all (syms scope)
      (list-foldl parser-scope-set scope syms))
@@ -28,10 +31,14 @@
      (match scope
             (ParserScope symbols parent)
                 (match (array-get (identifier-token identifier) symbols)
-                       None    (parser-scope-resolve identifier parent)
-                       id      (identifier-with-id id identifier))
+                       None
+                           (parser-scope-resolve identifier parent)
+                       id
+                           (identifier-with-id id identifier))
             (ParserScopeRoot symbols)
-                (identifier-with-id (array-get (identifier-token identifier) symbols) identifier)))
+                (identifier-with-id
+                    (array-get (identifier-token identifier) symbols)
+                    identifier)))
 
 (def parser-scope-set-list (symbols scope)
      (list-foldl (pair-map parser-scope-set') scope symbols))

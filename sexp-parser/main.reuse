@@ -2,6 +2,6 @@
 (def reuse-main (stdin)
      (match (parse-sexps (Pair 0 (dictionary-empty)) stdin)
             (Result (Pair _ expressions))
-                 (stringify-sexps expressions)
+                (stringify-sexps expressions)
             (Error _)
-                 (string-of-char 45)))
+                (string-of-char 45)))

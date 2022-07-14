@@ -1,11 +1,13 @@
 
-(typ string-node (FTValue int32)
-                 (FTNode2 int32 string-node string-node)
-                 (FTNode3 int32 string-node string-node string-node))
+(typ string-node
+     (FTValue int32)
+     (FTNode2 int32 string-node string-node)
+     (FTNode3 int32 string-node string-node string-node))
 
-(pub typ string FTEmpty
-                (FTSingle string-node)
-                (FTDeep (list string-node) string (list string-node)))
+(pub typ string
+     FTEmpty
+     (FTSingle string-node)
+     (FTDeep (list string-node) string (list string-node)))
 
 (pub def string-empty ()
      FTEmpty)
@@ -15,15 +17,22 @@
 
 (def string-node-size' (node)
      (match node
-            (FTValue _)              1
-            (FTNode2 size _ __)      size
-            (FTNode3 size _ __ ___)  size))
+            (FTValue _)
+                1
+            (FTNode2 size _ __)
+                size
+            (FTNode3 size _ __ ___)
+                size))
 
 (def string-node2' (a b)
      (FTNode2 (+ (string-node-size' a) (string-node-size' b)) a b))
 
 (def string-node3' (a b c)
-     (FTNode3 (+ (string-node-size' a) (+ (string-node-size' b) (string-node-size' c))) a b c))
+     (FTNode3
+         (+ (string-node-size' a) (+ (string-node-size' b) (string-node-size' c)))
+         a
+         b
+         c))
 
 (def string-prepend-node' (a tree)
      (match tree
@@ -34,11 +43,9 @@
             (FTDeep first middle last)
                 (match first
                        (Cons b (Cons c (Cons d (Cons e Empty))))
-                            (FTDeep (list a b)
-                                    (string-prepend-node' (string-node3' c d e) middle)
-                                    last)
+                           (FTDeep (list a b) (string-prepend-node' (string-node3' c d e) middle) last)
                        _
-                            (FTDeep (Cons a first) middle last))))
+                           (FTDeep (Cons a first) middle last))))
 
 (pub def string-prepend (char string)
      (string-prepend-node' (FTValue char) string))
@@ -52,39 +59,47 @@
             (FTDeep first middle last)
                 (match last
                        (Cons b (Cons c (Cons d (Cons e Empty))))
-                            (FTDeep first
-                                    (string-append-node' (string-node3' e d c) middle)
-                                    (list a b))
+                           (FTDeep first (string-append-node' (string-node3' e d c) middle) (list a b))
                        _
-                            (FTDeep first middle (Cons a last)))))
+                           (FTDeep first middle (Cons a last)))))
 
 (pub def string-append (char string)
      (string-append-node' (FTValue char) string))
 
 (def string-first-node' (node)
      (match node
-            (FTValue x)            x
-            (FTNode2 _ x __)       (string-first-node' x)
-            (FTNode3 _ x __ ___)   (string-first-node' x)))
+            (FTValue x)
+                x
+            (FTNode2 _ x __)
+                (string-first-node' x)
+            (FTNode3 _ x __ ___)
+                (string-first-node' x)))
 
 (pub def string-first (string)
      (match string
-            FTEmpty           None
-            (FTSingle node)   (Some (string-first-node' node))
+            FTEmpty
+                None
+            (FTSingle node)
+                (Some (string-first-node' node))
             (FTDeep first middle last)
                 (maybe-map string-first-node' (list-first first))))
 
 (def string-rest-node' (node)
      (match node
-            (FTValue _)             None
+            (FTValue _)
+                None
             (FTNode2 _ a b)
                 (match (string-rest-node' a)
-                       (Some node)  (Some (string-node2' node b))
-                       None         (Some b))
+                       (Some node)
+                           (Some (string-node2' node b))
+                       None
+                           (Some b))
             (FTNode3 _ a b c)
                 (match (string-rest-node' a)
-                       (Some node)  (Some (string-node3' node b c))
-                       None         (Some (string-node2' b c)))))
+                       (Some node)
+                           (Some (string-node3' node b c))
+                       None
+                           (Some (string-node2' b c)))))
 
 (pub def string-rest (string)
      (match string
@@ -92,23 +107,34 @@
                 string
             (FTSingle node)
                 (match (string-rest-node' node)
-                       (Some node)  (FTSingle node)
-                       None         FTEmpty)
+                       (Some node)
+                           (FTSingle node)
+                       None
+                           FTEmpty)
             (FTDeep (Cons node rest) middle last)
                 (match (string-rest-node' node)
-                       (Some node)  (FTDeep (Cons node rest) middle last)
+                       (Some node)
+                           (FTDeep (Cons node rest) middle last)
                        None
-                (match rest
-                       Empty        (list-foldr string-append-node' middle last)
-                       _            (FTDeep rest middle last)))
+                           (match rest
+                                  Empty
+                                      (list-foldr string-append-node' middle last)
+                                  _
+                                      (FTDeep rest middle last)))
             _
                 string))
 
 (def string-foldr-node' (f node identity)
      (match node
-            (FTValue a)        (f a identity)
-            (FTNode2 _ a b)    (string-foldr-node' f a (string-foldr-node' f b identity))
-            (FTNode3 _ a b c)  (string-foldr-node' f a (string-foldr-node' f b (string-foldr-node' f c identity)))))
+            (FTValue a)
+                (f a identity)
+            (FTNode2 _ a b)
+                (string-foldr-node' f a (string-foldr-node' f b identity))
+            (FTNode3 _ a b c)
+                (string-foldr-node'
+                    f
+                    a
+                    (string-foldr-node' f b (string-foldr-node' f c identity)))))
 
 (pub def string-foldr (f identity tree)
      (match tree
@@ -117,17 +143,22 @@
             (FTSingle x)
                 (string-foldr-node' f x identity)
             (FTDeep first middle last)
-                (list-foldr (string-foldr-node' f)
-                    (string-foldr f
-                        (list-foldl (string-foldr-node' f) identity last)
-                        middle)
+                (list-foldr
+                    (string-foldr-node' f)
+                    (string-foldr f (list-foldl (string-foldr-node' f) identity last) middle)
                     first)))
 
 (def string-foldl-node' (f node identity)
      (match node
-            (FTValue a)        (f a identity)
-            (FTNode2 _ b a)    (string-foldl-node' f a (string-foldl-node' f b identity))
-            (FTNode3 _ c b a)  (string-foldl-node' f a (string-foldl-node' f b (string-foldl-node' f c identity)))))
+            (FTValue a)
+                (f a identity)
+            (FTNode2 _ b a)
+                (string-foldl-node' f a (string-foldl-node' f b identity))
+            (FTNode3 _ c b a)
+                (string-foldl-node'
+                    f
+                    a
+                    (string-foldl-node' f b (string-foldl-node' f c identity)))))
 
 (pub def string-foldl (f identity tree)
      (match tree
@@ -136,10 +167,9 @@
             (FTSingle x)
                 (string-foldl-node' f x identity)
             (FTDeep first middle last)
-                (list-foldr (string-foldl-node' f)
-                    (string-foldl f
-                        (list-foldl (string-foldl-node' f) identity first)
-                        middle)
+                (list-foldr
+                    (string-foldl-node' f)
+                    (string-foldl f (list-foldl (string-foldl-node' f) identity first) middle)
                     last)))
 
 (pub def string-size (string)
@@ -149,9 +179,9 @@
             (FTSingle x)
                 (string-node-size' x)
             (FTDeep first middle last)
-                (+ (list-foldr + 0 (list-map string-node-size' first))
-                (+ (list-foldr + 0 (list-map string-node-size' last))
-                   (string-size middle)))))
+                (+
+                    (list-foldr + 0 (list-map string-node-size' first))
+                    (+ (list-foldr + 0 (list-map string-node-size' last)) (string-size middle)))))
 
 (def string-concat-nodes' (nodes)
      (match nodes
@@ -167,6 +197,7 @@
                 Empty))
 
 (typ (triple a b c) (Triple a b c))
+
 (def string-concat' (a nodes b)
      (match (Triple a nodes b)
             (Triple FTEmpty nodes b)
@@ -177,28 +208,32 @@
                 (string-prepend-node' x (list-foldr string-prepend-node' b nodes))
             (Triple a nodes (FTSingle x))
                 (string-append-node' x (list-foldl string-append-node' a nodes))
-            (Triple (FTDeep first1 middle1 last1)
-                    nodes
-                    (FTDeep first2 middle2 last2))
-                (FTDeep first1
-                        (string-concat' middle1 (string-concat-nodes' (list-concat (list-reverse last1) (list-concat nodes first2))) middle2)
-                        last2)))
+            (Triple (FTDeep first1 middle1 last1) nodes (FTDeep first2 middle2 last2))
+                (FTDeep
+                    first1
+                    (string-concat'
+                        middle1
+                        (string-concat-nodes' (list-concat (list-reverse last1) (list-concat nodes first2)))
+                        middle2)
+                    last2)))
 
 (pub def string-concat (a b)
      (string-concat' a Empty b))
 
-
-
 (pub def string-is-empty? (string)
      (match (string-first string)
-            (Some _)  False
-            None      True))
+            (Some _)
+                False
+            None
+                True))
 
 (pub def string-any? (predicate string)
-     (string-foldl (fn (x b) (or (predicate x) b)) False string))
+     (string-foldl (fn (x b)
+         (or (predicate x) b)) False string))
 
 (pub def string-every? (predicate string)
-     (string-foldl (fn (x b) (and (predicate x) b)) True string))
+     (string-foldl (fn (x b)
+         (and (predicate x) b)) True string))
 
 (pub def string-to-list (string)
      (string-foldr list-cons Empty string))
@@ -208,20 +243,25 @@
 
 (pub def string-skip (count string)
      (match string
-            FTEmpty  FTEmpty
+            FTEmpty
+                FTEmpty
             _
-     (match (> count 0)
-            True   (string-skip (- count 1) (string-rest string))
-            False  string)))
+                (match (> count 0)
+                       True
+                           (string-skip (- count 1) (string-rest string))
+                       False
+                           string)))
 
 (def string-take' (count string taken)
      (match (> count 0)
-            True   (match (string-first string)
-                          (Some char)  (string-take' (- count 1)
-                                                     (string-rest string)
-                                                     (string-append char taken))
-                          None         taken)
-            False  taken))
+            True
+                (match (string-first string)
+                       (Some char)
+                           (string-take' (- count 1) (string-rest string) (string-append char taken))
+                       None
+                           taken)
+            False
+                taken))
 
 (pub def string-take (count string)
      (string-take' count string (string-empty)))
@@ -230,7 +270,10 @@
      (string-foldl string-prepend (string-empty) string))
 
 (pub def string-repeat (string n)
-     (list-foldl (.2 (string-concat string) (flip const)) (string-empty) (list-from-range 0 n)))
+     (list-foldl
+         (.2 (string-concat string) (flip const))
+         (string-empty)
+         (list-from-range 0 n)))
 
 (pub def string-substring (start size string)
      (string-take size (string-skip start string)))
@@ -238,32 +281,45 @@
 (pub def string-join (separator strings)
      (match strings
             (Cons first rest)
-                (list-foldl (fn (string joined)
-                                (string-concat joined (string-concat separator string)))
-                            first
-                            rest)
+                (list-foldl
+                    (fn (string joined)
+                        (string-concat joined (string-concat separator string)))
+                    first
+                    rest)
             Empty
                 (string-empty)))
 
 (pub def string-flatmap (f string)
-     (string-foldl (fn (x xs) (string-concat xs (f x))) (string-empty) string))
+     (string-foldl
+         (fn (x xs)
+             (string-concat xs (f x)))
+         (string-empty)
+         string))
 
 (def string-split' (separator list current parts)
      (match list
-            Empty          (list-reverse (Cons (list-reverse current) parts))
-            (Cons c rest)  (match (= separator c)
-                                  True   (string-split' separator rest Empty (Cons (list-reverse current) parts))
-                                  False  (string-split' separator rest (Cons c current) parts))))
+            Empty
+                (list-reverse (Cons (list-reverse current) parts))
+            (Cons c rest)
+                (match (= separator c)
+                       True
+                           (string-split' separator rest Empty (Cons (list-reverse current) parts))
+                       False
+                           (string-split' separator rest (Cons c current) parts))))
 
 (pub def string-split (separator string)
-     (list-map string-from-list (string-split' separator (string-to-list string) Empty Empty)))
+     (list-map
+         string-from-list
+         (string-split' separator (string-to-list string) Empty Empty)))
 
 (def string-trim-start' (list)
      (match list
             (Cons x xs)
                 (match (= x 32)
-                       True   (string-trim-start' xs)
-                       False  list)
+                       True
+                           (string-trim-start' xs)
+                       False
+                           list)
             Empty
                 list))
 
@@ -278,53 +334,72 @@
 
 (pub def string-equal? (a b)
      (match (string-first a)
-            (Some xa) (match (string-first b)
-            (Some xb) (and (= xa xb) (string-equal? (string-rest a) (string-rest b)))
-            None      (string-is-empty? a))
-            None      (string-is-empty? b)))
+            (Some xa)
+                (match (string-first b)
+                       (Some xb)
+                           (and (= xa xb) (string-equal? (string-rest a) (string-rest b)))
+                       None
+                           (string-is-empty? a))
+            None
+                (string-is-empty? b)))
 
 (pub def string-index-of (index substring string)
      (match (>= index (string-size string))
-            True   None
+            True
+                None
             False
-     (match (string-equal? substring (string-substring index (string-size substring) string))
-            True   (Some index)
-            False  (string-index-of (+ index 1) substring string))))
-
+                (match (string-equal?
+                    substring
+                    (string-substring index (string-size substring) string))
+                       True
+                           (Some index)
+                       False
+                           (string-index-of (+ index 1) substring string))))
 
 (pub def string-point-is-digit (point)
      (match (> point 47)
-            False  False
+            False
+                False
             True
-     (match (< point 58)
-            True   True
-            False  False)))
+                (match (< point 58)
+                       True
+                           True
+                       False
+                           False)))
 
 (def string-to-int32''' (string-to-int32'' string accumulator x)
-     (string-to-int32'' string (Some (+ (* 10 accumulator) (- x 48))))) 
+     (string-to-int32'' string (Some (+ (* 10 accumulator) (- x 48)))))
 
 (def string-to-int32'' (string accumulator)
      (match string
             Empty
                 accumulator
             (Cons x rest)
-                (maybe-flatmap (fn (accumulator)
-                    (pipe
-                        (Some x)
-                        (maybe-filter string-point-is-digit)
-                        (maybe-flatmap (string-to-int32''' string-to-int32'' rest accumulator))))
+                (maybe-flatmap
+                    (fn (accumulator)
+                        (pipe
+                            (Some x)
+                            (maybe-filter string-point-is-digit)
+                            (maybe-flatmap (string-to-int32''' string-to-int32'' rest accumulator))))
                     accumulator)))
 
 (def string-to-int32' (string)
      (match string
             (Cons 45 string)
                 (match (list-is-empty? string)
-                       True   None
-                       False  (maybe-map (fn (x) (* -1 x)) (string-to-int32' string)))
+                       True
+                           None
+                       False
+                           (maybe-map
+                               (fn (x)
+                                   (* -1 x))
+                               (string-to-int32' string)))
             (Cons x rest)
                 (match (string-point-is-digit x)
-                       True   (string-to-int32'' string (Some 0))
-                       False  None)
+                       True
+                           (string-to-int32'' string (Some 0))
+                       False
+                           None)
             Empty
                 None))
 
@@ -342,10 +417,10 @@
      (match (< integer 0)
             True
                 (match (= integer -2147483648)
-                    True
-                        (list 45 50 49 52 55 52 56 51 54 52 56)
-                    False
-                        (Cons 45 (string-from-int32' (* integer -1))))
+                       True
+                           (list 45 50 49 52 55 52 56 51 54 52 56)
+                       False
+                           (Cons 45 (string-from-int32' (* integer -1))))
             False
                 (string-from-int32'' integer Empty)))
 
@@ -354,60 +429,100 @@
 
 (def string-collect-from-slice' (predicate index slice initial)
      (match (< index (slice-size slice))
-            False  (Pair index initial)
-            True   (match (predicate (slice-get slice index))
-                          True   (string-collect-from-slice' predicate (+ index 1) slice (string-append (slice-get slice index) initial))
-                          False  (Pair index initial))))
+            False
+                (Pair index initial)
+            True
+                (match (predicate (slice-get slice index))
+                       True
+                           (string-collect-from-slice'
+                               predicate
+                               (+ index 1)
+                               slice
+                               (string-append (slice-get slice index) initial))
+                       False
+                           (Pair index initial))))
 
 (pub def string-collect-from-slice (predicate index slice)
      (string-collect-from-slice' predicate index slice (string-empty)))
 
 (pub def string-to-slice (string)
-     (string-foldl (fn (c slice) (slice-concat slice (slice-of-u8 c 1))) (slice-empty) string))
+     (string-foldl
+         (fn (c slice)
+             (slice-concat slice (slice-of-u8 c 1)))
+         (slice-empty)
+         string))
 
 (pub def string-from-slice (slice)
      (slice-foldl string-append (string-empty) slice))
 
 (def string-collect-from-indexed-iterator' (predicate iterator initial)
      (match (indexed-iterator-next iterator)
-            (Pair None _)         (Pair iterator initial)
-            (Pair (Some x) next)  (match (predicate x)
-                                         True   (string-collect-from-indexed-iterator' predicate next (string-append x initial))
-                                         False  (Pair iterator initial))))
+            (Pair None _)
+                (Pair iterator initial)
+            (Pair (Some x) next)
+                (match (predicate x)
+                       True
+                           (string-collect-from-indexed-iterator'
+                               predicate
+                               next
+                               (string-append x initial))
+                       False
+                           (Pair iterator initial))))
 
 (pub def string-collect-from-indexed-iterator (predicate iterator)
      (string-collect-from-indexed-iterator' predicate iterator (string-empty)))
 
 (pub def string-from-indexed-iterator (iterator)
-     (pair-right (string-collect-from-indexed-iterator (fn (_) True) iterator)))
+     (pair-right (string-collect-from-indexed-iterator (fn (_)
+         True) iterator)))
 
 (pub def string-iterable ()
-     (IterableClass
-        (fn (string)
-            (Pair (string-first string) (string-rest string)))))
+     (IterableClass (fn (string)
+         (Pair (string-first string) (string-rest string)))))
 
 (pub def string-from-boolean (boolean)
      (match boolean
-            True  (string-from-list (list 84 114 117 101))
-            False (string-from-list (list 70 97 108 115 101))))
+            True
+                (string-from-list (list 84 114 117 101))
+            False
+                (string-from-list (list 70 97 108 115 101))))
 
 (def valid-string-from-unicode-code-point (point)
      (match (> point 65535)
-            True   (string-from-list (list (+ 240 (/ (& point 1835008) 262144)) (+ 128 (/ (& point 258048) 4096)) (+ 128 (/ (& point 4032) 64)) (+ 128 (& point 63))))
-            False  (match (> point 2047)
-                          True   (string-from-list (list (+ 224 (/ (& point 61440) 4096)) (+ 128 (/ (& point 4032) 64)) (+ 128 (& point 63))))
-                          False  (match (> point 127)
-                                         True   (string-from-list (list (+ 192 (/ (& point 1984) 64)) (+ 128 (& point 63))))
-                                         False  (string-of-char point)))))
+            True
+                (string-from-list (list
+                    (+ 240 (/ (& point 1835008) 262144))
+                    (+ 128 (/ (& point 258048) 4096))
+                    (+ 128 (/ (& point 4032) 64))
+                    (+ 128 (& point 63))))
+            False
+                (match (> point 2047)
+                       True
+                           (string-from-list (list
+                               (+ 224 (/ (& point 61440) 4096))
+                               (+ 128 (/ (& point 4032) 64))
+                               (+ 128 (& point 63))))
+                       False
+                           (match (> point 127)
+                                  True
+                                      (string-from-list (list (+ 192 (/ (& point 1984) 64)) (+ 128 (& point 63))))
+                                  False
+                                      (string-of-char point)))))
 
 (def invalid-code-point ()
      (string-from-list (list 255 253)))
 
 (pub def string-from-unicode-code-point (point)
      (match (> point 1114111)
-            True   (invalid-code-point)
-            False  (match (> point 55295)
-                          True   (match (< point 57344)
-                                        True   (invalid-code-point)
-                                        False  (valid-string-from-unicode-code-point point))
-                          False  (valid-string-from-unicode-code-point point))))
+            True
+                (invalid-code-point)
+            False
+                (match (> point 55295)
+                       True
+                           (match (< point 57344)
+                                  True
+                                      (invalid-code-point)
+                                  False
+                                      (valid-string-from-unicode-code-point point))
+                       False
+                           (valid-string-from-unicode-code-point point))))

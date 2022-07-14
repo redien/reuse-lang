@@ -1,6 +1,7 @@
 
-(pub typ cli-arguments (CliArguments (list (pair string string)) (list string))
-                       (CliErrorMissingValue string))
+(pub typ cli-arguments
+     (CliArguments (list (pair string string)) (list string))
+     (CliErrorMissingValue string))
 
 (def is-key? (argument)
      (string-equal? (data-double-dash) (string-take 2 argument)))
@@ -13,29 +14,31 @@
             (Cons first (Cons second rest))
                 (match (is-key? first)
                        True
-                            (parse-arguments' (list-rest (list-rest arguments))
-                                              (Cons (Pair (string-skip 2 first) second) kv-args)
-                                              inputs)
+                           (parse-arguments'
+                               (list-rest (list-rest arguments))
+                               (Cons (Pair (string-skip 2 first) second) kv-args)
+                               inputs)
                        False
-                            (match (is-flag? first)
-                                   True
-                                        (parse-arguments' (list-rest arguments)
-                                                          (Cons (Pair (string-skip 1 first) (data-true)) kv-args)
-                                                          inputs)
-                                   False
-                                        (parse-arguments' (list-rest arguments)
-                                                          kv-args
-                                                          (Cons first inputs))))
+                           (match (is-flag? first)
+                                  True
+                                      (parse-arguments'
+                                          (list-rest arguments)
+                                          (Cons (Pair (string-skip 1 first) (data-true)) kv-args)
+                                          inputs)
+                                  False
+                                      (parse-arguments' (list-rest arguments) kv-args (Cons first inputs))))
             (Cons first Empty)
                 (match (is-key? first)
                        True
-                            (CliErrorMissingValue first)
+                           (CliErrorMissingValue first)
                        False
-                            (match (is-flag? first)
-                                   True
-                                        (CliArguments (list-reverse (Cons (Pair (string-skip 1 first) (data-true)) kv-args)) (list-reverse inputs))
-                                   False
-                                        (CliArguments (list-reverse kv-args) (list-reverse (Cons first inputs)))))
+                           (match (is-flag? first)
+                                  True
+                                      (CliArguments
+                                          (list-reverse (Cons (Pair (string-skip 1 first) (data-true)) kv-args))
+                                          (list-reverse inputs))
+                                  False
+                                      (CliArguments (list-reverse kv-args) (list-reverse (Cons first inputs)))))
             Empty
                 (CliArguments (list-reverse kv-args) (list-reverse inputs))))
 
