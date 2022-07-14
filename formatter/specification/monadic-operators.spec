@@ -25,3 +25,11 @@ Function calls ending in 'bind' without a separator where the second argument is
 =          (ebind mb (fn (b)
 =              a)))))
 = 
+
+Function calls to 'bind' where the second argument is a lambda should not format the other arguments
+> (def foo () (bind (fn (x) x) (fn (a) a)))
+= 
+= (def foo ()
+=      (bind (fn (x) x) (fn (a)
+=      a)))
+= 

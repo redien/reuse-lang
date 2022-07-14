@@ -75,7 +75,9 @@
 (def format-list-expression (format-expression depth expressions)
      (match (monadic-function-call? expressions)
             True
-                (string-join (space) (list-map (format-expression (- depth 4)) expressions))
+                (string-join (space) (list-flatten (list
+                    (list-map stringify-sexp (list-reverse (list-skip 1 (list-reverse expressions))))
+                    (list (maybe-or-else (string-empty) (maybe-map (format-expression (- depth 4)) (list-last expressions)))))))
             False
                 (match (string-join (space) (list-map (format-expression depth) expressions))
                        stringified

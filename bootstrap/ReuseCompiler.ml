@@ -2739,7 +2739,7 @@ let rec format_long_list_expression format_expression3 stringified depth5 expres
 let rec format_list_expression format_expression4 depth6 expressions25 = 
     (match (monadic_function_call expressions25) with
          | True -> 
-            (string_join (space ()) (list_map (format_expression4 (Int32.sub depth6 (4l))) expressions25))
+            (string_join (space ()) (list_flatten (Cons ((list_map stringify_sexp (list_reverse (list_skip (1l) (list_reverse expressions25)))), (Cons ((Cons ((maybe_or_else (string_empty ()) (maybe_map (format_expression4 (Int32.sub depth6 (4l))) (list_last expressions25))), Empty)), Empty))))))
          | False -> 
             (match (string_join (space ()) (list_map (format_expression4 depth6) expressions25)) with
                  | stringified2 -> 
