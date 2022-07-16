@@ -122,7 +122,7 @@
 (pub def string-trim-start (string) (string-from-list (string-trim-start' (string-to-list string))))
 (pub def string-trim-end (string) (string-reverse (string-trim-start (string-reverse string))))
 (pub def string-trim (string) (string-trim-start (string-trim-end string)))
-(pub def string-equal? (a b) (match (string-first a) (Some xa) (match (string-first b) (Some xb) (and (= xa xb) (string-equal? (string-rest a) (string-rest b))) None (string-is-empty? a)) None (string-is-empty? b)))
+(pub def string-equal? (a b) (match (string-first a) (Some xa) (match (string-first b) (Some xb) (match (= xa xb) True (string-equal? (string-rest a) (string-rest b)) False False) None (string-is-empty? a)) None (string-is-empty? b)))
 (pub def string-index-of (index substring string) (match (>= index (string-size string)) True None False (match (string-equal? substring (string-substring index (string-size substring) string)) True (Some index) False (string-index-of (+ index 1) substring string))))
 (pub def string-point-is-digit (point) (match (> point 47) False False True (match (< point 58) True True False False)))
 (def string-to-int32''' (string-to-int32'' string accumulator x) (string-to-int32'' string (Some (+ (* 10 accumulator) (- x 48)))))

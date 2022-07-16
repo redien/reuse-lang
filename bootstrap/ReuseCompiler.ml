@@ -738,7 +738,11 @@ let rec string_equal a42 b38 =
          | (Some (xa)) -> 
             (match (string_first b38) with
                  | (Some (xb)) -> 
-                    (and2 (x4 xa xb) (string_equal (string_rest a42) (string_rest b38)))
+                    (match (x4 xa xb) with
+                         | True -> 
+                            (string_equal (string_rest a42) (string_rest b38))
+                         | False -> 
+                            False)
                  | None -> 
                     (string_is_empty a42))
          | None -> 

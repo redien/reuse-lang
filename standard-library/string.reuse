@@ -337,7 +337,11 @@
             (Some xa)
                 (match (string-first b)
                        (Some xb)
-                           (and (= xa xb) (string-equal? (string-rest a) (string-rest b)))
+                            (match (= xa xb)
+                                   True
+                                        (string-equal? (string-rest a) (string-rest b))
+                                   False
+                                        False)
                        None
                            (string-is-empty? a))
             None
