@@ -1,2 +1,3 @@
 node_modules
 *.vsix
+src/formatter.js
