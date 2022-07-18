@@ -1,6 +1,0 @@
-
-(typ type  (UniversalType string)
-           (ExistentialType string)
-           (ConstType string (list type))
-           (FnType (list type) type)
-           ErrorType)
