@@ -8,6 +8,7 @@
 
 (def language-identifiers ()
      (list
+         (Pair (string-empty) (Pair -100 (string-empty)))
          (Pair (data-def) (Pair -1 (data-def)))
          (Pair (data-typ) (Pair -2 (data-typ)))
          (Pair (data-fn) (Pair -3 (data-fn)))
@@ -60,6 +61,13 @@
      (string-join
          (indent depth)
          (list-map (format-match-rule format-expression depth) rules)))
+
+(def rule-pairs (rules)
+     (match (% (list-size rules) 2)
+            0
+                (list-pairs rules)
+            _
+                (list-pairs (list-reverse (Cons (Symbol -100 (string-empty) (Range 0 0)) (list-reverse rules))))))
 
 (def monadic-function-call? (expressions)
      (match (Pair (list-first expressions) (list-last expressions))
@@ -117,7 +125,7 @@
                     (space)
                     (format-expression depth expression)
                     (indent (+ depth 7))
-                    (format-match-rules format-expression (+ depth 7) (list-pairs rules))))
+                    (format-match-rules format-expression (+ depth 7) (rule-pairs rules))))
             (List expressions range)
                 (wrap-in-brackets (format-list-expression format-expression depth expressions))
             x

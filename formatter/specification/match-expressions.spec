@@ -38,3 +38,22 @@ Nested match expressions should have proper indentation
 =                        a
 =                            1)))
 = 
+
+Incomplete match expressions should be preserved
+> (def f (x) (match x a))
+= 
+= (def f (x)
+=      (match x
+=             a
+=                 ))
+= 
+
+> (def f (x) (match x a b c))
+= 
+= (def f (x)
+=      (match x
+=             a
+=                 b
+=             c
+=                 ))
+= 
