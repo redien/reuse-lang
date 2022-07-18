@@ -4,24 +4,39 @@
     "description": "Reuse language support",
     "version": "0.0.1",
     "publisher": "jesosk",
-    "repository": { "url": "https://github.com/redien/reuse-lang" },
+    "repository": {
+        "url": "https://github.com/redien/reuse-lang"
+    },
     "engines": {
-        "vscode": "^1.23.0"
+        "vscode": "^1.32.0"
     },
     "categories": [
         "Programming Languages"
     ],
+    "activationEvents": [
+        "onLanguage:reuse"
+    ],
+    "main": "./src/extension.js",
     "contributes": {
-        "languages": [{
-            "id": "reuse",
-            "aliases": ["Reuse", "reuse"],
-            "extensions": [".reuse"],
-            "configuration": "./language-configuration.json"
-        }],
-        "grammars": [{
-            "language": "reuse",
-            "scopeName": "source.reuse",
-            "path": "./syntaxes/reuse.tmLanguage.json"
-        }]
+        "languages": [
+            {
+                "id": "reuse",
+                "aliases": [
+                    "Reuse",
+                    "reuse"
+                ],
+                "extensions": [
+                    ".reuse"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "reuse",
+                "scopeName": "source.reuse",
+                "path": "./syntaxes/reuse.tmLanguage.json"
+            }
+        ]
     }
 }

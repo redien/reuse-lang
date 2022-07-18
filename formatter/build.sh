@@ -12,3 +12,9 @@ $project_root/bin/reusec --language module\
                          --module $($project_root/dev-env/builddir.sh parser)/parser.reuse\
                          $project_root/formatter/formatter.strings\
                          $project_root/formatter/formatter.reuse
+
+$project_root/bin/reusec --language javascript\
+                         --output $build_dir/formatter.js\
+                         --module $($project_root/dev-env/builddir.sh parser)/parser.reuse\
+                         $project_root/formatter/formatter.strings\
+                         $project_root/formatter/formatter.reuse
