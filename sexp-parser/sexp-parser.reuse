@@ -32,77 +32,87 @@
      ParseErrorTooFewClosingBrackets
      ParseErrorTooManyClosingBrackets)
 
-(def intern-string (index next-index name symbol-state next)
+(typ (parser-result symbol value)
+     (ParserResult int32 (pair int32 (dictionary symbol)) value)
+     (ParserError parse-error)
+     (ParserEnd int32))
+
+(def intern-string (index next-index name symbol-state)
      (match symbol-state
             (Pair token symbols)
                 (match (dictionary-get name symbols)
                        (Some (Pair token name))
-                           (next next-index symbol-state (Symbol token name (Range index next-index)))
+                           (ParserResult next-index symbol-state (Symbol token name (Range index next-index)))
                        None
-                           (next
+                           (ParserResult
                                next-index
                                (Pair (+ token 1) (dictionary-set name (Pair token name) symbols))
                                (Symbol token name (Range index next-index))))))
 
-(def parse-symbol (index slice symbols next end)
+(def parse-symbol (index slice symbols)
      (match (string-collect-from-slice atom-character? index slice)
             (Pair next-index name)
                 (match (string-to-int32 name)
                        (Some integer)
-                           (next next-index symbols (Integer integer (Range index next-index)))
+                           (ParserResult next-index symbols (Integer integer (Range index next-index)))
                        None
                            (match (string-is-empty? name)
                                   False
-                                      (intern-string index next-index name symbols next)
+                                      (intern-string index next-index name symbols)
                                   True
-                                      (end index)))))
+                                      (ParserEnd index)))))
 
-(def parse-list (index slice parse-sexps symbols error next)
-     ((parse-sexps index slice symbols Empty error) (fn (next-index symbols expressions)
-         (next next-index symbols (List expressions (Range (- index 1) next-index))))))
+(def parse-list (index slice parse-sexps symbols)
+     (match (parse-sexps index slice symbols Empty)
+            (ParserResult next-index symbols expressions)
+                (ParserResult next-index symbols (List expressions (Range (- index 1) next-index)))
+            (ParserError error)
+                (ParserError error)
+            (ParserEnd index)
+                (ParserEnd index)))
 
-(def parse-expression (depth index slice parse-sexps' symbols error next end)
+(def parse-expression (depth index slice parse-sexps' symbols)
      (match (< index (slice-size slice))
             False
                 (match depth
                        0
-                           (end index)
+                           (ParserEnd index)
                        _
-                           (error ParseErrorTooFewClosingBrackets))
+                           (ParserError ParseErrorTooFewClosingBrackets))
             True
                 (match (slice-get slice index)
                        40
-                           (parse-list (+ index 1) slice (parse-sexps' (+ depth 1)) symbols error next)
+                           (parse-list (+ index 1) slice (parse-sexps' (+ depth 1)) symbols)
                        41
                            (match depth
                                   0
-                                      (error ParseErrorTooManyClosingBrackets)
+                                      (ParserError ParseErrorTooManyClosingBrackets)
                                   _
-                                      (end (+ index 1)))
+                                      (ParserEnd (+ index 1)))
                        x
                            (match (whitespace? x)
                                   True
-                                      (parse-expression depth (+ index 1) slice parse-sexps' symbols error next end)
+                                      (parse-expression depth (+ index 1) slice parse-sexps' symbols)
                                   False
-                                      (parse-symbol index slice symbols next end)))))
+                                      (parse-symbol index slice symbols)))))
 
-(def parse-sexps' (depth index slice symbols expressions error end)
-     ((parse-expression depth index slice parse-sexps' symbols error)
-         (fn (index symbols expression)
-             ((parse-sexps' depth index slice)
-                 symbols
-                 (Cons expression expressions)
-                 error
-                 end))
-         (fn (index)
-             (end index symbols (list-reverse expressions)))))
+(def parse-sexps' (depth index slice symbols expressions)
+     (match (parse-expression depth index slice parse-sexps' symbols)
+            (ParserResult index symbols expression)
+                (parse-sexps' depth index slice symbols (Cons expression expressions))
+            (ParserError error)
+                (ParserError error)
+            (ParserEnd index)
+                (ParserResult index symbols (list-reverse expressions))))
 
 (pub def parse-sexps (symbols slice)
-     ((parse-sexps' 0 0 slice symbols Empty)
-         (fn (error)
-             (Error error))
-         (fn (_ symbols expressions)
-             (Result (Pair symbols expressions)))))
+     (match (parse-sexps' 0 0 slice symbols Empty)
+            (ParserResult _ symbols expressions)
+                (Result (Pair symbols expressions))
+            (ParserError error)
+                (Error error)
+            (ParserEnd _)
+                (Error ParseErrorTooFewClosingBrackets)))
 
 (pub def wrap-in-brackets (string)
      (string-concat (string-of-char 40) (string-concat string (string-of-char 41))))
