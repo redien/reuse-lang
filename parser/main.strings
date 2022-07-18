@@ -13,3 +13,4 @@ ErrorAlreadyDefined                 |ErrorAlreadyDefined
 ErrorReservedIdentifier             |ErrorReservedIdentifier
 MalformedSexpTooFewClosingBrackets  |MalformedSexpTooFewClosingBrackets
 MalformedSexpTooManyClosingBrackets |MalformedSexpTooManyClosingBrackets
+test-file-path                      |test.reuse

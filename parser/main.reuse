@@ -36,6 +36,6 @@
      (pipe
          stdin
          (fn (stdin)
-             (list (SourceFile ModuleSelf (string-empty) stdin)))
+             (list (SourceFile ModuleSelf (data-test-file-path) stdin)))
          (parse-source-files (list-empty))
          (result-either (. stringify-sexps definitions-to-sexps) stringify-error)))
