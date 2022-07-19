@@ -2852,7 +2852,7 @@ let rec format_definition definition14 =
          | (List ((Cons ((Symbol (-1l, x445, x446)), (Cons (name60, (Cons ((List (arguments21, x447)), (Cons (expression52, Empty)))))))), range83)) -> 
             (format_function_definition False name60 arguments21 expression52)
          | x448 -> 
-            (string_empty ()));;
+            (stringify_sexp definition14));;
 
 let rec format_file definitions4 = 
     (match (list_is_empty definitions4) with

@@ -231,7 +231,7 @@
             (List (Cons (Symbol -1 _ __) (Cons name (Cons (List arguments ___) (Cons expression Empty)))) range)
                 (format-function-definition False name arguments expression)
             _
-                (string-empty)))
+                (stringify-sexp definition)))
 
 (def format-file (definitions)
      (match (list-is-empty? definitions)

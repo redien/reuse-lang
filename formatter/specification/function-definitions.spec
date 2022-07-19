@@ -18,3 +18,9 @@ Function definitions which just define a constant should stay on one line
 = 
 = (def foo () 1)
 = 
+
+Partial function definitions should be retained
+> (def foo () )
+= 
+= (def foo ())
+= 
