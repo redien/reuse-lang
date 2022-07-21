@@ -1,0 +1,12 @@
+
+(def identifier-def () -1)
+
+(def identifier-typ () -2)
+
+(def identifier-fn () -3)
+
+(def identifier-match () -4)
+
+(def identifier-exists () -5)
+
+(def identifier-pub () -6)

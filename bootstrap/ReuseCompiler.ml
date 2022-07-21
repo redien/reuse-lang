@@ -2206,6 +2206,110 @@ let rec identifier_exists () =
 let rec identifier_pub () = 
     (-6l);;
 
+let rec identifier_to_symbol identifier27 = 
+    (match identifier27 with
+         | (Identifier (token6, name21, x336, range17, x337)) -> 
+            (Symbol (token6, name21, range17)));;
+
+let rec type_to_sexp types_to_sexp type2 = 
+    (match type2 with
+         | (SimpleType (identifier28)) -> 
+            (identifier_to_symbol identifier28)
+         | (FunctionType (arg_types, return_type, range18)) -> 
+            (List ((Cons ((Symbol ((identifier_fn ()), (data_fn ()), range18)), (Cons ((List ((types_to_sexp arg_types), range18)), (Cons ((type_to_sexp types_to_sexp return_type), Empty)))))), range18))
+         | (ComplexType (identifier29, types, range19)) -> 
+            (List ((Cons ((identifier_to_symbol identifier29), (types_to_sexp types))), range19)));;
+
+let rec types_to_sexp2 types2 = 
+    (list_map (type_to_sexp types_to_sexp2) types2);;
+
+let rec constructor_to_sexp constructor4 = 
+    (match constructor4 with
+         | (SimpleConstructor (identifier30)) -> 
+            (identifier_to_symbol identifier30)
+         | (ComplexConstructor (identifier31, types3, range20)) -> 
+            (List ((Cons ((identifier_to_symbol identifier31), (types_to_sexp2 types3))), range20)));;
+
+let rec constructors_to_sexp constructors9 = 
+    (list_map constructor_to_sexp constructors9);;
+
+let rec type_parameter_to_sexp parameter2 = 
+    (match parameter2 with
+         | (ExistentialParameter (identifier32)) -> 
+            (List ((Cons ((Symbol ((identifier_exists ()), (data_exists ()), (identifier_range identifier32))), (Cons ((identifier_to_symbol identifier32), Empty)))), (identifier_range identifier32)))
+         | (UniversalParameter (identifier33)) -> 
+            (identifier_to_symbol identifier33));;
+
+let rec type_name_to_sexp token7 range21 name22 parameters = 
+    (match parameters with
+         | Empty -> 
+            (Symbol (token7, name22, range21))
+         | x338 -> 
+            (List ((Cons ((Symbol (token7, name22, range21)), (list_map type_parameter_to_sexp parameters))), range21)));;
+
+let rec function_arguments_to_sexp arguments6 range22 = 
+    (List ((list_map identifier_to_symbol arguments6), range22));;
+
+let rec pattern_to_sexp pattern7 = 
+    (match pattern7 with
+         | (ConstructorPattern (identifier34, Empty, x339)) -> 
+            (identifier_to_symbol identifier34)
+         | (ConstructorPattern (identifier35, patterns2, range23)) -> 
+            (List ((Cons ((identifier_to_symbol identifier35), (list_map pattern_to_sexp patterns2))), range23))
+         | (IntegerPattern (value25, range24)) -> 
+            (Integer (value25, range24))
+         | (Capture (identifier36)) -> 
+            (identifier_to_symbol identifier36));;
+
+let rec match_pair_to_sexp expression_to_sexp2 pair11 = 
+    (match pair11 with
+         | (Pair (pattern8, expression30)) -> 
+            (Cons ((pattern_to_sexp pattern8), (Cons ((expression_to_sexp2 expression30), Empty)))));;
+
+let rec expression_to_sexp expression31 = 
+    (match expression31 with
+         | (IntegerConstant (integer6, range25)) -> 
+            (Integer (integer6, range25))
+         | (Variable ((Identifier (token8, string35, x340, range26, x341)))) -> 
+            (Symbol (token8, string35, range26))
+         | (Lambda (arguments7, expression32, range27)) -> 
+            (List ((Cons ((Symbol ((identifier_fn ()), (data_fn ()), range27)), (Cons ((function_arguments_to_sexp arguments7 range27), (Cons ((expression_to_sexp expression32), Empty)))))), range27))
+         | (Match (expression33, pairs5, range28)) -> 
+            (List ((Cons ((Symbol ((identifier_match ()), (data_match ()), range28)), (Cons ((expression_to_sexp expression33), (list_flatmap (match_pair_to_sexp expression_to_sexp) pairs5))))), range28))
+         | (Constructor (identifier37, expressions15, range29)) -> 
+            (match expressions15 with
+                 | Empty -> 
+                    (identifier_to_symbol identifier37)
+                 | x342 -> 
+                    (List ((Cons ((identifier_to_symbol identifier37), (list_map expression_to_sexp expressions15))), range29)))
+         | (FunctionApplication (expressions16, range30)) -> 
+            (List ((list_map expression_to_sexp expressions16), range30)));;
+
+let rec type_definition_to_sexp token9 name23 parameters2 constructors10 range31 = 
+    (list_concat (Cons ((Symbol ((identifier_typ ()), (data_typ ()), range31)), (Cons ((type_name_to_sexp token9 range31 name23 parameters2), Empty)))) (constructors_to_sexp constructors10));;
+
+let rec function_definition_to_sexp name24 arguments8 expression34 range32 = 
+    (Cons ((Symbol ((identifier_def ()), (data_def ()), range32)), (Cons ((identifier_to_symbol name24), (Cons ((function_arguments_to_sexp arguments8 range32), (Cons ((expression_to_sexp expression34), Empty))))))));;
+
+let rec definition_to_sexp2 public4 range33 sexp2 = 
+    (List ((match public4 with
+         | True -> 
+            (Cons ((Symbol ((identifier_pub ()), (data_pub ()), range33)), sexp2))
+         | False -> 
+            sexp2), range33));;
+
+let rec definition_to_sexp definition12 = 
+    (match definition12 with
+         | (TypeDefinition ((Identifier (token10, name25, x343, x344, x345)), public5, parameters3, constructors11, range34)) -> 
+            (definition_to_sexp2 public5 range34 (type_definition_to_sexp token10 name25 parameters3 constructors11 range34))
+         | (FunctionDefinition (name26, public6, arguments9, expression35, range35)) -> 
+            (definition_to_sexp2 public6 range35 (function_definition_to_sexp name26 arguments9 expression35 range35))
+         | (TargetDefinition (x346, data)) -> 
+            (Symbol ((0l), (string_from_slice data), (Range ((0l), (0l))))));;
+
+let rec definitions_to_sexps definitions2 = 
+    (list_map definition_to_sexp definitions2);;
+
 let rec with_language_identifiers other_symbols = 
     (list_concat other_symbols (Cons ((Pair ((identifier_def ()), (data_def ()))), (Cons ((Pair ((identifier_typ ()), (data_typ ()))), (Cons ((Pair ((identifier_fn ()), (data_fn ()))), (Cons ((Pair ((identifier_match ()), (data_match ()))), (Cons ((Pair ((identifier_exists ()), (data_exists ()))), (Cons ((Pair ((identifier_pub ()), (data_pub ()))), Empty)))))))))))));;
 
@@ -2228,216 +2332,216 @@ type error  =
 
 let rec symbol_to_identifier symbol2 = 
     (match symbol2 with
-         | (Symbol (token6, name21, range17)) -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference13 -> (parser_return (Identifier (token6, name21, source_reference13, range17, None)))))
-         | (Integer (x336, range18)) -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference14 -> (parser_error (MalformedSymbolError (source_reference14, range18)))))
-         | (List (x337, range19)) -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference15 -> (parser_error (MalformedSymbolError (source_reference15, range19))))));;
+         | (Symbol (token11, name27, range36)) -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference13 -> (parser_return (Identifier (token11, name27, source_reference13, range36, None)))))
+         | (Integer (x347, range37)) -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference14 -> (parser_error (MalformedSymbolError (source_reference14, range37)))))
+         | (List (x348, range38)) -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference15 -> (parser_error (MalformedSymbolError (source_reference15, range38))))));;
 
 let rec resolve_symbol symbol3 scope6 = 
-    (parser_bind (symbol_to_identifier symbol3) (fun identifier27 -> (match (parser_scope_resolve identifier27 scope6) with
-         | (Identifier (x338, name22, source_reference16, range20, None)) -> 
-            (parser_error (ErrorNotDefined (name22, source_reference16, range20)))
-         | identifier28 -> 
-            (parser_return identifier28))));;
+    (parser_bind (symbol_to_identifier symbol3) (fun identifier38 -> (match (parser_scope_resolve identifier38 scope6) with
+         | (Identifier (x349, name28, source_reference16, range39, None)) -> 
+            (parser_error (ErrorNotDefined (name28, source_reference16, range39)))
+         | identifier39 -> 
+            (parser_return identifier39))));;
 
-let rec sexp_to_complex_type sexp_to_type scope7 symbol4 parameters range21 = 
-    (parser_bind (resolve_symbol symbol4 scope7) (fun identifier29 -> (parser_bind (parser_sequence (list_map (sexp_to_type scope7) parameters)) (fun sub_types -> (parser_return (ComplexType (identifier29, sub_types, range21)))))));;
+let rec sexp_to_complex_type sexp_to_type scope7 symbol4 parameters4 range40 = 
+    (parser_bind (resolve_symbol symbol4 scope7) (fun identifier40 -> (parser_bind (parser_sequence (list_map (sexp_to_type scope7) parameters4)) (fun sub_types -> (parser_return (ComplexType (identifier40, sub_types, range40)))))));;
 
-let rec sexp_to_function_type sexp_to_type2 parameters2 range22 = 
-    (match parameters2 with
-         | (Cons ((List (arg_types, x339)), (Cons (return_type, Empty)))) -> 
-            (parser_bind (parser_sequence (list_map sexp_to_type2 arg_types)) (fun arg_types2 -> (parser_bind (sexp_to_type2 return_type) (fun return_type2 -> (parser_return (FunctionType (arg_types2, return_type2, range22)))))))
-         | x340 -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference17 -> (parser_error (MalformedTypeError (source_reference17, range22))))));;
+let rec sexp_to_function_type sexp_to_type2 parameters5 range41 = 
+    (match parameters5 with
+         | (Cons ((List (arg_types2, x350)), (Cons (return_type2, Empty)))) -> 
+            (parser_bind (parser_sequence (list_map sexp_to_type2 arg_types2)) (fun arg_types3 -> (parser_bind (sexp_to_type2 return_type2) (fun return_type3 -> (parser_return (FunctionType (arg_types3, return_type3, range41)))))))
+         | x351 -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference17 -> (parser_error (MalformedTypeError (source_reference17, range41))))));;
 
-let rec sexp_to_type3 scope8 type2 = 
-    (match type2 with
-         | (List ((Cons (symbol5, parameters3)), range23)) -> 
-            (parser_bind (symbol_to_identifier symbol5) (fun identifier30 -> (match (x4 (identifier_token identifier30) (identifier_fn ())) with
+let rec sexp_to_type3 scope8 type3 = 
+    (match type3 with
+         | (List ((Cons (symbol5, parameters6)), range42)) -> 
+            (parser_bind (symbol_to_identifier symbol5) (fun identifier41 -> (match (x4 (identifier_token identifier41) (identifier_fn ())) with
                  | True -> 
-                    (sexp_to_function_type (sexp_to_type3 scope8) parameters3 range23)
+                    (sexp_to_function_type (sexp_to_type3 scope8) parameters6 range42)
                  | False -> 
-                    (sexp_to_complex_type sexp_to_type3 scope8 symbol5 parameters3 range23))))
-         | (Integer (x341, range24)) -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference18 -> (parser_error (MalformedTypeError (source_reference18, range24)))))
-         | (List (x342, range25)) -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference19 -> (parser_error (MalformedTypeError (source_reference19, range25)))))
+                    (sexp_to_complex_type sexp_to_type3 scope8 symbol5 parameters6 range42))))
+         | (Integer (x352, range43)) -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference18 -> (parser_error (MalformedTypeError (source_reference18, range43)))))
+         | (List (x353, range44)) -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference19 -> (parser_error (MalformedTypeError (source_reference19, range44)))))
          | symbol6 -> 
-            (parser_bind (resolve_symbol symbol6 scope8) (fun identifier31 -> (parser_return (SimpleType (identifier31))))));;
+            (parser_bind (resolve_symbol symbol6 scope8) (fun identifier42 -> (parser_return (SimpleType (identifier42))))));;
 
-let rec sexp_to_constructor_definition scope9 constructor4 = 
-    (match constructor4 with
-         | (List ((Cons (name23, types)), range26)) -> 
-            (parser_bind (symbol_to_identifier name23) (fun name24 -> (parser_bind (parser_bind_symbol name24) (fun name25 -> (parser_bind (parser_sequence (list_map (sexp_to_type3 scope9) types)) (fun types2 -> (parser_return (ComplexConstructor (name25, types2, range26)))))))))
-         | (Integer (x343, range27)) -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference20 -> (parser_error (MalformedConstructorError (source_reference20, range27)))))
-         | (List (x344, range28)) -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference21 -> (parser_error (MalformedConstructorError (source_reference21, range28)))))
+let rec sexp_to_constructor_definition scope9 constructor5 = 
+    (match constructor5 with
+         | (List ((Cons (name29, types4)), range45)) -> 
+            (parser_bind (symbol_to_identifier name29) (fun name30 -> (parser_bind (parser_bind_symbol name30) (fun name31 -> (parser_bind (parser_sequence (list_map (sexp_to_type3 scope9) types4)) (fun types5 -> (parser_return (ComplexConstructor (name31, types5, range45)))))))))
+         | (Integer (x354, range46)) -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference20 -> (parser_error (MalformedConstructorError (source_reference20, range46)))))
+         | (List (x355, range47)) -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference21 -> (parser_error (MalformedConstructorError (source_reference21, range47)))))
          | symbol7 -> 
-            (parser_bind (symbol_to_identifier symbol7) (fun name26 -> (parser_bind (parser_bind_symbol name26) (fun name27 -> (parser_return (SimpleConstructor (name27))))))));;
+            (parser_bind (symbol_to_identifier symbol7) (fun name32 -> (parser_bind (parser_bind_symbol name32) (fun name33 -> (parser_return (SimpleConstructor (name33))))))));;
 
-let rec sexp_to_type_parameter sexp2 = 
-    (match sexp2 with
-         | (List ((Cons (x345, (Cons (name28, Empty)))), x346)) -> 
-            (parser_bind (symbol_to_identifier name28) (fun name29 -> (parser_bind (parser_bind_symbol name29) (fun name30 -> (parser_return (ExistentialParameter (name30)))))))
-         | (Integer (x347, range29)) -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference22 -> (parser_error (MalformedDefinitionError (source_reference22, range29)))))
-         | (List (x348, range30)) -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference23 -> (parser_error (MalformedDefinitionError (source_reference23, range30)))))
+let rec sexp_to_type_parameter sexp3 = 
+    (match sexp3 with
+         | (List ((Cons (x356, (Cons (name34, Empty)))), x357)) -> 
+            (parser_bind (symbol_to_identifier name34) (fun name35 -> (parser_bind (parser_bind_symbol name35) (fun name36 -> (parser_return (ExistentialParameter (name36)))))))
+         | (Integer (x358, range48)) -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference22 -> (parser_error (MalformedDefinitionError (source_reference22, range48)))))
+         | (List (x359, range49)) -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference23 -> (parser_error (MalformedDefinitionError (source_reference23, range49)))))
          | symbol8 -> 
-            (parser_bind (symbol_to_identifier symbol8) (fun name31 -> (parser_bind (parser_bind_symbol name31) (fun name32 -> (parser_return (UniversalParameter (name32))))))));;
+            (parser_bind (symbol_to_identifier symbol8) (fun name37 -> (parser_bind (parser_bind_symbol name37) (fun name38 -> (parser_return (UniversalParameter (name38))))))));;
 
-let rec sexp_to_lambda sexp_to_expression scope10 rest17 range31 = 
+let rec sexp_to_lambda sexp_to_expression scope10 rest17 range50 = 
     (match rest17 with
-         | (Cons ((List (arguments6, x349)), (Cons (expression30, Empty)))) -> 
-            (parser_bind (parser_sequence (list_map symbol_to_identifier arguments6)) (fun arguments7 -> (parser_bind (parser_bind_symbols arguments7) (fun arguments8 -> (let_bind (parser_scope_new scope10) (fun scope11 -> (let_bind (parser_scope_set_all arguments8 scope11) (fun scope12 -> (parser_bind (sexp_to_expression scope12 expression30) (fun expression31 -> (parser_return (Lambda (arguments8, expression31, range31)))))))))))))
-         | x350 -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference24 -> (parser_error (MalformedFunctionDefinitionError (source_reference24, range31))))));;
+         | (Cons ((List (arguments10, x360)), (Cons (expression36, Empty)))) -> 
+            (parser_bind (parser_sequence (list_map symbol_to_identifier arguments10)) (fun arguments11 -> (parser_bind (parser_bind_symbols arguments11) (fun arguments12 -> (let_bind (parser_scope_new scope10) (fun scope11 -> (let_bind (parser_scope_set_all arguments12 scope11) (fun scope12 -> (parser_bind (sexp_to_expression scope12 expression36) (fun expression37 -> (parser_return (Lambda (arguments12, expression37, range50)))))))))))))
+         | x361 -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference24 -> (parser_error (MalformedFunctionDefinitionError (source_reference24, range50))))));;
 
-let rec sexp_to_function_application sexp_to_expression2 range32 expressions15 = 
-    (parser_bind (parser_sequence (list_map sexp_to_expression2 expressions15)) (fun expressions16 -> (parser_return (FunctionApplication (expressions16, range32)))));;
+let rec sexp_to_function_application sexp_to_expression2 range51 expressions17 = 
+    (parser_bind (parser_sequence (list_map sexp_to_expression2 expressions17)) (fun expressions18 -> (parser_return (FunctionApplication (expressions18, range51)))));;
 
 let rec to_constructor_or_capture scope13 symbol9 = 
-    (parser_bind (symbol_to_identifier symbol9) (fun identifier32 -> (parser_bind (parser_token_is_constructor (identifier_token identifier32)) (fun constructor5 -> (match constructor5 with
+    (parser_bind (symbol_to_identifier symbol9) (fun identifier43 -> (parser_bind (parser_token_is_constructor (identifier_token identifier43)) (fun constructor6 -> (match constructor6 with
          | True -> 
-            (parser_bind (resolve_symbol symbol9 scope13) (fun identifier33 -> (parser_return (ConstructorPattern (identifier33, Empty, (identifier_range identifier33))))))
+            (parser_bind (resolve_symbol symbol9 scope13) (fun identifier44 -> (parser_return (ConstructorPattern (identifier44, Empty, (identifier_range identifier44))))))
          | False -> 
-            (parser_bind (parser_bind_symbol identifier32) (fun identifier34 -> (parser_return (Capture (identifier34))))))))));;
+            (parser_bind (parser_bind_symbol identifier43) (fun identifier45 -> (parser_return (Capture (identifier45))))))))));;
 
-let rec sexp_to_pattern scope14 sexp3 = 
-    (match sexp3 with
-         | (List ((Cons (name33, rest18)), range33)) -> 
-            (parser_bind (parser_sequence (list_map (sexp_to_pattern scope14) rest18)) (fun patterns2 -> (parser_bind (resolve_symbol name33 scope14) (fun identifier35 -> (parser_return (ConstructorPattern (identifier35, patterns2, range33)))))))
-         | (List (Empty, range34)) -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference25 -> (parser_error (MalformedPatternError (source_reference25, range34)))))
-         | (Integer (integer6, range35)) -> 
-            (parser_return (IntegerPattern (integer6, range35)))
+let rec sexp_to_pattern scope14 sexp4 = 
+    (match sexp4 with
+         | (List ((Cons (name39, rest18)), range52)) -> 
+            (parser_bind (parser_sequence (list_map (sexp_to_pattern scope14) rest18)) (fun patterns3 -> (parser_bind (resolve_symbol name39 scope14) (fun identifier46 -> (parser_return (ConstructorPattern (identifier46, patterns3, range52)))))))
+         | (List (Empty, range53)) -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference25 -> (parser_error (MalformedPatternError (source_reference25, range53)))))
+         | (Integer (integer7, range54)) -> 
+            (parser_return (IntegerPattern (integer7, range54)))
          | symbol10 -> 
             (to_constructor_or_capture scope14 symbol10));;
 
-let rec sexp_to_match_pair sexp_to_expression3 scope15 range36 pair11 = 
-    (match pair11 with
-         | (Cons (pattern7, (Cons (expression32, Empty)))) -> 
-            (parser_bind (sexp_to_pattern scope15 pattern7) (fun pattern8 -> (let_bind (captured_identifiers_from_pattern pattern8) (fun captures -> (let_bind (parser_scope_new scope15) (fun scope16 -> (let_bind (parser_scope_set_all captures scope16) (fun scope17 -> (parser_bind (sexp_to_expression3 scope17 expression32) (fun expression33 -> (parser_return (Pair (pattern8, expression33)))))))))))))
-         | x351 -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference26 -> (parser_error (MalformedMatchExpressionError (source_reference26, range36))))));;
+let rec sexp_to_match_pair sexp_to_expression3 scope15 range55 pair12 = 
+    (match pair12 with
+         | (Cons (pattern9, (Cons (expression38, Empty)))) -> 
+            (parser_bind (sexp_to_pattern scope15 pattern9) (fun pattern10 -> (let_bind (captured_identifiers_from_pattern pattern10) (fun captures -> (let_bind (parser_scope_new scope15) (fun scope16 -> (let_bind (parser_scope_set_all captures scope16) (fun scope17 -> (parser_bind (sexp_to_expression3 scope17 expression38) (fun expression39 -> (parser_return (Pair (pattern10, expression39)))))))))))))
+         | x362 -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference26 -> (parser_error (MalformedMatchExpressionError (source_reference26, range55))))));;
 
-let rec sexp_to_match_pairs sexp_to_expression4 scope18 range37 xs29 = 
+let rec sexp_to_match_pairs sexp_to_expression4 scope18 range56 xs29 = 
     (match (list_partition (2l) xs29) with
          | Empty -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference27 -> (parser_error (MalformedMatchExpressionError (source_reference27, range37)))))
-         | pairs5 -> 
-            (parser_sequence (list_map (sexp_to_match_pair sexp_to_expression4 scope18 range37) pairs5)));;
+            (parser_bind (parser_get_source_reference ()) (fun source_reference27 -> (parser_error (MalformedMatchExpressionError (source_reference27, range56)))))
+         | pairs6 -> 
+            (parser_sequence (list_map (sexp_to_match_pair sexp_to_expression4 scope18 range56) pairs6)));;
 
-let rec sexp_to_match sexp_to_expression5 scope19 range38 rest19 = 
+let rec sexp_to_match sexp_to_expression5 scope19 range57 rest19 = 
     (match rest19 with
-         | (Cons (expression34, rest20)) -> 
-            (parser_bind (sexp_to_expression5 scope19 expression34) (fun expression35 -> (parser_bind (sexp_to_match_pairs sexp_to_expression5 scope19 range38 rest20) (fun pairs6 -> (parser_return (Match (expression35, pairs6, range38)))))))
-         | x352 -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference28 -> (parser_error (InternalParserError (source_reference28, range38))))));;
+         | (Cons (expression40, rest20)) -> 
+            (parser_bind (sexp_to_expression5 scope19 expression40) (fun expression41 -> (parser_bind (sexp_to_match_pairs sexp_to_expression5 scope19 range57 rest20) (fun pairs7 -> (parser_return (Match (expression41, pairs7, range57)))))))
+         | x363 -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference28 -> (parser_error (InternalParserError (source_reference28, range57))))));;
 
-let rec sexp_to_constructor sexp_to_expression6 range39 symbol11 rest21 scope20 = 
-    (parser_bind (symbol_to_identifier symbol11) (fun identifier36 -> (parser_bind (resolve_symbol symbol11 scope20) (fun identifier37 -> (parser_bind (parser_sequence (list_map sexp_to_expression6 rest21)) (fun expressions17 -> (parser_return (Constructor (identifier37, expressions17, range39)))))))));;
+let rec sexp_to_constructor sexp_to_expression6 range58 symbol11 rest21 scope20 = 
+    (parser_bind (symbol_to_identifier symbol11) (fun identifier47 -> (parser_bind (resolve_symbol symbol11 scope20) (fun identifier48 -> (parser_bind (parser_sequence (list_map sexp_to_expression6 rest21)) (fun expressions19 -> (parser_return (Constructor (identifier48, expressions19, range58)))))))));;
 
-let rec sexp_to_list_expression sexp_to_expression7 scope21 expressions18 range40 = 
-    (match expressions18 with
-         | (Cons ((Symbol (token7, name34, symbol_range)), rest22)) -> 
-            (match (x4 token7 (identifier_fn ())) with
+let rec sexp_to_list_expression sexp_to_expression7 scope21 expressions20 range59 = 
+    (match expressions20 with
+         | (Cons ((Symbol (token12, name40, symbol_range)), rest22)) -> 
+            (match (x4 token12 (identifier_fn ())) with
                  | True -> 
-                    (sexp_to_lambda sexp_to_expression7 scope21 rest22 range40)
+                    (sexp_to_lambda sexp_to_expression7 scope21 rest22 range59)
                  | False -> 
-                    (match (x4 token7 (identifier_match ())) with
+                    (match (x4 token12 (identifier_match ())) with
                          | True -> 
-                            (sexp_to_match sexp_to_expression7 scope21 range40 rest22)
+                            (sexp_to_match sexp_to_expression7 scope21 range59 rest22)
                          | False -> 
-                            (parser_bind (parser_token_is_constructor token7) (fun constructor6 -> (match constructor6 with
+                            (parser_bind (parser_token_is_constructor token12) (fun constructor7 -> (match constructor7 with
                                  | True -> 
-                                    (sexp_to_constructor (sexp_to_expression7 scope21) range40 (Symbol (token7, name34, symbol_range)) rest22 scope21)
+                                    (sexp_to_constructor (sexp_to_expression7 scope21) range59 (Symbol (token12, name40, symbol_range)) rest22 scope21)
                                  | False -> 
-                                    (sexp_to_function_application (sexp_to_expression7 scope21) range40 expressions18))))))
-         | x353 -> 
-            (sexp_to_function_application (sexp_to_expression7 scope21) range40 expressions18));;
+                                    (sexp_to_function_application (sexp_to_expression7 scope21) range59 expressions20))))))
+         | x364 -> 
+            (sexp_to_function_application (sexp_to_expression7 scope21) range59 expressions20));;
 
-let rec sexp_to_expression8 scope22 sexp4 = 
-    (match sexp4 with
-         | (Integer (integer7, range41)) -> 
-            (parser_return (IntegerConstant (integer7, range41)))
-         | (List (expressions19, range42)) -> 
-            (match expressions19 with
+let rec sexp_to_expression8 scope22 sexp5 = 
+    (match sexp5 with
+         | (Integer (integer8, range60)) -> 
+            (parser_return (IntegerConstant (integer8, range60)))
+         | (List (expressions21, range61)) -> 
+            (match expressions21 with
                  | Empty -> 
-                    (parser_bind (parser_get_source_reference ()) (fun source_reference29 -> (parser_error (MalformedExpressionError (source_reference29, range42)))))
-                 | x354 -> 
-                    (sexp_to_list_expression sexp_to_expression8 scope22 expressions19 range42))
+                    (parser_bind (parser_get_source_reference ()) (fun source_reference29 -> (parser_error (MalformedExpressionError (source_reference29, range61)))))
+                 | x365 -> 
+                    (sexp_to_list_expression sexp_to_expression8 scope22 expressions21 range61))
          | symbol12 -> 
-            (parser_bind (resolve_symbol symbol12 scope22) (fun identifier38 -> (parser_bind (parser_token_is_constructor (identifier_token identifier38)) (fun constructor7 -> (parser_return (match constructor7 with
+            (parser_bind (resolve_symbol symbol12 scope22) (fun identifier49 -> (parser_bind (parser_token_is_constructor (identifier_token identifier49)) (fun constructor8 -> (parser_return (match constructor8 with
                  | True -> 
-                    (Constructor (identifier38, Empty, (identifier_range identifier38)))
+                    (Constructor (identifier49, Empty, (identifier_range identifier49)))
                  | False -> 
-                    (Variable (identifier38)))))))));;
+                    (Variable (identifier49)))))))));;
 
-let rec sexp_to_type_definition scope23 type_name public4 rest23 range43 = 
+let rec sexp_to_type_definition scope23 type_name public7 rest23 range62 = 
     (match type_name with
-         | (List ((Cons (name35, parameters4)), x355)) -> 
-            (parser_bind (symbol_to_identifier name35) (fun name36 -> (parser_bind (parser_bind_symbol name36) (fun name37 -> (parser_bind (parser_sequence (list_map sexp_to_type_parameter parameters4)) (fun parameters5 -> (let_bind (list_map type_parameter_identifier parameters5) (fun parameter_identifiers -> (let_bind (parser_scope_new scope23) (fun scope24 -> (let_bind (parser_scope_set_all (Cons (name37, parameter_identifiers)) scope24) (fun scope25 -> (parser_bind (parser_sequence (list_map (sexp_to_constructor_definition scope25) rest23)) (fun constructors9 -> (parser_return (TypeDefinition (name37, public4, parameters5, constructors9, range43)))))))))))))))))
-         | (Integer (x356, range44)) -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference30 -> (parser_error (MalformedTypeError (source_reference30, range44)))))
-         | (List (x357, range45)) -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference31 -> (parser_error (MalformedTypeError (source_reference31, range45)))))
+         | (List ((Cons (name41, parameters7)), x366)) -> 
+            (parser_bind (symbol_to_identifier name41) (fun name42 -> (parser_bind (parser_bind_symbol name42) (fun name43 -> (parser_bind (parser_sequence (list_map sexp_to_type_parameter parameters7)) (fun parameters8 -> (let_bind (list_map type_parameter_identifier parameters8) (fun parameter_identifiers -> (let_bind (parser_scope_new scope23) (fun scope24 -> (let_bind (parser_scope_set_all (Cons (name43, parameter_identifiers)) scope24) (fun scope25 -> (parser_bind (parser_sequence (list_map (sexp_to_constructor_definition scope25) rest23)) (fun constructors12 -> (parser_return (TypeDefinition (name43, public7, parameters8, constructors12, range62)))))))))))))))))
+         | (Integer (x367, range63)) -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference30 -> (parser_error (MalformedTypeError (source_reference30, range63)))))
+         | (List (x368, range64)) -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference31 -> (parser_error (MalformedTypeError (source_reference31, range64)))))
          | symbol13 -> 
-            (parser_bind (symbol_to_identifier symbol13) (fun name38 -> (parser_bind (parser_bind_symbol name38) (fun name39 -> (let_bind (parser_scope_new scope23) (fun scope26 -> (let_bind (parser_scope_set2 name39 scope26) (fun scope27 -> (parser_bind (parser_sequence (list_map (sexp_to_constructor_definition scope27) rest23)) (fun constructors10 -> (parser_return (TypeDefinition (name39, public4, Empty, constructors10, range43))))))))))))));;
+            (parser_bind (symbol_to_identifier symbol13) (fun name44 -> (parser_bind (parser_bind_symbol name44) (fun name45 -> (let_bind (parser_scope_new scope23) (fun scope26 -> (let_bind (parser_scope_set2 name45 scope26) (fun scope27 -> (parser_bind (parser_sequence (list_map (sexp_to_constructor_definition scope27) rest23)) (fun constructors13 -> (parser_return (TypeDefinition (name45, public7, Empty, constructors13, range62))))))))))))));;
 
-let rec sexp_to_function_definition scope28 name_symbol public5 rest24 range46 = 
+let rec sexp_to_function_definition scope28 name_symbol public8 rest24 range65 = 
     (match rest24 with
-         | (Cons ((List (arguments9, x358)), (Cons (expression36, Empty)))) -> 
-            (parser_bind (symbol_to_identifier name_symbol) (fun name40 -> (parser_bind (parser_bind_symbol name40) (fun name41 -> (parser_bind (parser_sequence (list_map symbol_to_identifier arguments9)) (fun arguments10 -> (parser_bind (parser_bind_symbols arguments10) (fun arguments11 -> (let_bind (parser_scope_new scope28) (fun scope29 -> (let_bind (parser_scope_set_all (Cons (name41, arguments11)) scope29) (fun scope30 -> (parser_bind (sexp_to_expression8 scope30 expression36) (fun expression37 -> (parser_return (FunctionDefinition (name41, public5, arguments11, expression37, range46)))))))))))))))))
-         | x359 -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference32 -> (parser_error (MalformedFunctionDefinitionError (source_reference32, range46))))));;
+         | (Cons ((List (arguments13, x369)), (Cons (expression42, Empty)))) -> 
+            (parser_bind (symbol_to_identifier name_symbol) (fun name46 -> (parser_bind (parser_bind_symbol name46) (fun name47 -> (parser_bind (parser_sequence (list_map symbol_to_identifier arguments13)) (fun arguments14 -> (parser_bind (parser_bind_symbols arguments14) (fun arguments15 -> (let_bind (parser_scope_new scope28) (fun scope29 -> (let_bind (parser_scope_set_all (Cons (name47, arguments15)) scope29) (fun scope30 -> (parser_bind (sexp_to_expression8 scope30 expression42) (fun expression43 -> (parser_return (FunctionDefinition (name47, public8, arguments15, expression43, range65)))))))))))))))))
+         | x370 -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference32 -> (parser_error (MalformedFunctionDefinitionError (source_reference32, range65))))));;
 
-let rec sexp_to_definition scope31 name42 public6 rest25 range47 kind = 
+let rec sexp_to_definition scope31 name48 public9 rest25 range66 kind = 
     (match (x4 kind (identifier_typ ())) with
          | True -> 
-            (sexp_to_type_definition scope31 name42 public6 rest25 range47)
+            (sexp_to_type_definition scope31 name48 public9 rest25 range66)
          | False -> 
             (match (x4 kind (identifier_def ())) with
                  | True -> 
-                    (sexp_to_function_definition scope31 name42 public6 rest25 range47)
+                    (sexp_to_function_definition scope31 name48 public9 rest25 range66)
                  | False -> 
-                    (parser_bind (parser_get_source_reference ()) (fun source_reference33 -> (parser_error (MalformedDefinitionError (source_reference33, range47)))))));;
+                    (parser_bind (parser_get_source_reference ()) (fun source_reference33 -> (parser_error (MalformedDefinitionError (source_reference33, range66)))))));;
 
-let rec specific_malformed_definition_error kind2 range48 = 
+let rec specific_malformed_definition_error kind2 range67 = 
     (match (x4 kind2 (identifier_typ ())) with
          | True -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference34 -> (parser_error (MalformedTypeDefinitionError (source_reference34, range48)))))
+            (parser_bind (parser_get_source_reference ()) (fun source_reference34 -> (parser_error (MalformedTypeDefinitionError (source_reference34, range67)))))
          | False -> 
             (match (x4 kind2 (identifier_def ())) with
                  | True -> 
-                    (parser_bind (parser_get_source_reference ()) (fun source_reference35 -> (parser_error (MalformedFunctionDefinitionError (source_reference35, range48)))))
+                    (parser_bind (parser_get_source_reference ()) (fun source_reference35 -> (parser_error (MalformedFunctionDefinitionError (source_reference35, range67)))))
                  | False -> 
-                    (parser_bind (parser_get_source_reference ()) (fun source_reference36 -> (parser_error (MalformedDefinitionError (source_reference36, range48)))))));;
+                    (parser_bind (parser_get_source_reference ()) (fun source_reference36 -> (parser_error (MalformedDefinitionError (source_reference36, range67)))))));;
 
-let rec sexp_to_definition2 scope32 expression38 = 
-    (match expression38 with
-         | (List ((Cons ((Symbol (kind3, x360, x361)), Empty)), range49)) -> 
-            (specific_malformed_definition_error kind3 range49)
-         | (List ((Cons ((Symbol (kind4, x362, x363)), (Cons (x364, Empty)))), range50)) -> 
-            (specific_malformed_definition_error kind4 range50)
-         | (List ((Cons ((Symbol (-6l, x365, x366)), (Cons ((Symbol (kind5, x367, x368)), (Cons (name43, rest26)))))), range51)) -> 
-            (sexp_to_definition scope32 name43 True rest26 range51 kind5)
-         | (List ((Cons ((Symbol (kind6, x369, x370)), (Cons (name44, rest27)))), range52)) -> 
-            (sexp_to_definition scope32 name44 False rest27 range52 kind6)
-         | (List ((Cons ((List (x371, range53)), Empty)), x372)) -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference37 -> (parser_error (MalformedDefinitionError (source_reference37, range53)))))
-         | (List (x373, range54)) -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference38 -> (parser_error (MalformedDefinitionError (source_reference38, range54)))))
-         | (Integer (x374, range55)) -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference39 -> (parser_error (MalformedDefinitionError (source_reference39, range55)))))
-         | (Symbol (x375, x376, range56)) -> 
-            (parser_bind (parser_get_source_reference ()) (fun source_reference40 -> (parser_error (MalformedDefinitionError (source_reference40, range56))))));;
+let rec sexp_to_definition2 scope32 expression44 = 
+    (match expression44 with
+         | (List ((Cons ((Symbol (kind3, x371, x372)), Empty)), range68)) -> 
+            (specific_malformed_definition_error kind3 range68)
+         | (List ((Cons ((Symbol (kind4, x373, x374)), (Cons (x375, Empty)))), range69)) -> 
+            (specific_malformed_definition_error kind4 range69)
+         | (List ((Cons ((Symbol (-6l, x376, x377)), (Cons ((Symbol (kind5, x378, x379)), (Cons (name49, rest26)))))), range70)) -> 
+            (sexp_to_definition scope32 name49 True rest26 range70 kind5)
+         | (List ((Cons ((Symbol (kind6, x380, x381)), (Cons (name50, rest27)))), range71)) -> 
+            (sexp_to_definition scope32 name50 False rest27 range71 kind6)
+         | (List ((Cons ((List (x382, range72)), Empty)), x383)) -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference37 -> (parser_error (MalformedDefinitionError (source_reference37, range72)))))
+         | (List (x384, range73)) -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference38 -> (parser_error (MalformedDefinitionError (source_reference38, range73)))))
+         | (Integer (x385, range74)) -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference39 -> (parser_error (MalformedDefinitionError (source_reference39, range74)))))
+         | (Symbol (x386, x387, range75)) -> 
+            (parser_bind (parser_get_source_reference ()) (fun source_reference40 -> (parser_error (MalformedDefinitionError (source_reference40, range75))))));;
 
-let rec parse_definition expression39 = 
-    (parser_bind (parser_get_module_scope ()) (fun scope33 -> (parser_bind (sexp_to_definition2 scope33 expression39) (fun definition12 -> (parser_add_definition definition12)))));;
+let rec parse_definition expression45 = 
+    (parser_bind (parser_get_module_scope ()) (fun scope33 -> (parser_bind (sexp_to_definition2 scope33 expression45) (fun definition13 -> (parser_add_definition definition13)))));;
 
 let rec sexp_error_to_ast_error error11 = 
     (match error11 with
@@ -2447,16 +2551,16 @@ let rec sexp_error_to_ast_error error11 =
             MalformedSexpTooManyClosingBrackets);;
 
 let rec parse_definitions module8 file_path2 iterator10 = 
-    (parser_bind (parser_set_source_reference (SourceReference (file_path2, module8))) (fun x377 -> (parser_bind (parser_get_symbols ()) (fun symbols25 -> (match (parse_sexps symbols25 iterator10) with
-         | (Result ((Pair (symbols26, expressions20)))) -> 
-            (parser_bind (parser_set_symbols symbols26) (fun x378 -> (parser_sequence (list_map parse_definition expressions20))))
+    (parser_bind (parser_set_source_reference (SourceReference (file_path2, module8))) (fun x388 -> (parser_bind (parser_get_symbols ()) (fun symbols25 -> (match (parse_sexps symbols25 iterator10) with
+         | (Result ((Pair (symbols26, expressions22)))) -> 
+            (parser_bind (parser_set_symbols symbols26) (fun x389 -> (parser_sequence (list_map parse_definition expressions22))))
          | (Error (error12)) -> 
             (parser_error (sexp_error_to_ast_error error12)))))));;
 
 let rec transform_strings path4 content3 = 
     (match (string_gen content3) with
-         | (Result (string35)) -> 
-            (string_to_slice string35)
+         | (Result (string36)) -> 
+            (string_to_slice string36)
          | (Error (error13)) -> 
             (slice_empty ()));;
 
@@ -2485,114 +2589,10 @@ let rec parse_source_file file11 =
             (parse_target_file file11));;
 
 let rec parse_module files = 
-    (parser_bind (parser_new_module ()) (fun x379 -> (parser_bind (parser_sequence (list_map parse_source_file files)) (fun definitions2 -> (parser_return (list_flatten definitions2))))));;
+    (parser_bind (parser_new_module ()) (fun x390 -> (parser_bind (parser_sequence (list_map parse_source_file files)) (fun definitions3 -> (parser_return (list_flatten definitions3))))));;
 
 let rec parse_source_files symbols27 files2 = 
     ((result_map list_flatten) ((parser_run (with_language_identifiers symbols27)) (parser_sequence ((list_map parse_module) ((list_partition_by source_file_in_same_module) files2)))));;
-
-let rec identifier_to_symbol identifier39 = 
-    (match identifier39 with
-         | (Identifier (token8, name45, x380, range57, x381)) -> 
-            (Symbol (token8, name45, range57)));;
-
-let rec type_to_sexp types_to_sexp type3 = 
-    (match type3 with
-         | (SimpleType (identifier40)) -> 
-            (identifier_to_symbol identifier40)
-         | (FunctionType (arg_types3, return_type3, range58)) -> 
-            (List ((Cons ((Symbol ((identifier_fn ()), (data_fn ()), range58)), (Cons ((List ((types_to_sexp arg_types3), range58)), (Cons ((type_to_sexp types_to_sexp return_type3), Empty)))))), range58))
-         | (ComplexType (identifier41, types3, range59)) -> 
-            (List ((Cons ((identifier_to_symbol identifier41), (types_to_sexp types3))), range59)));;
-
-let rec types_to_sexp2 types4 = 
-    (list_map (type_to_sexp types_to_sexp2) types4);;
-
-let rec constructor_to_sexp constructor8 = 
-    (match constructor8 with
-         | (SimpleConstructor (identifier42)) -> 
-            (identifier_to_symbol identifier42)
-         | (ComplexConstructor (identifier43, types5, range60)) -> 
-            (List ((Cons ((identifier_to_symbol identifier43), (types_to_sexp2 types5))), range60)));;
-
-let rec constructors_to_sexp constructors11 = 
-    (list_map constructor_to_sexp constructors11);;
-
-let rec type_parameter_to_sexp parameter2 = 
-    (match parameter2 with
-         | (ExistentialParameter (identifier44)) -> 
-            (List ((Cons ((Symbol ((identifier_exists ()), (data_exists ()), (identifier_range identifier44))), (Cons ((identifier_to_symbol identifier44), Empty)))), (identifier_range identifier44)))
-         | (UniversalParameter (identifier45)) -> 
-            (identifier_to_symbol identifier45));;
-
-let rec type_name_to_sexp token9 range61 name46 parameters6 = 
-    (match parameters6 with
-         | Empty -> 
-            (Symbol (token9, name46, range61))
-         | x382 -> 
-            (List ((Cons ((Symbol (token9, name46, range61)), (list_map type_parameter_to_sexp parameters6))), range61)));;
-
-let rec function_arguments_to_sexp arguments12 range62 = 
-    (List ((list_map identifier_to_symbol arguments12), range62));;
-
-let rec pattern_to_sexp pattern9 = 
-    (match pattern9 with
-         | (ConstructorPattern (identifier46, Empty, x383)) -> 
-            (identifier_to_symbol identifier46)
-         | (ConstructorPattern (identifier47, patterns3, range63)) -> 
-            (List ((Cons ((identifier_to_symbol identifier47), (list_map pattern_to_sexp patterns3))), range63))
-         | (IntegerPattern (value25, range64)) -> 
-            (Integer (value25, range64))
-         | (Capture (identifier48)) -> 
-            (identifier_to_symbol identifier48));;
-
-let rec match_pair_to_sexp expression_to_sexp2 pair12 = 
-    (match pair12 with
-         | (Pair (pattern10, expression40)) -> 
-            (Cons ((pattern_to_sexp pattern10), (Cons ((expression_to_sexp2 expression40), Empty)))));;
-
-let rec expression_to_sexp expression41 = 
-    (match expression41 with
-         | (IntegerConstant (integer8, range65)) -> 
-            (Integer (integer8, range65))
-         | (Variable ((Identifier (token10, string36, x384, range66, x385)))) -> 
-            (Symbol (token10, string36, range66))
-         | (Lambda (arguments13, expression42, range67)) -> 
-            (List ((Cons ((Symbol ((identifier_fn ()), (data_fn ()), range67)), (Cons ((function_arguments_to_sexp arguments13 range67), (Cons ((expression_to_sexp expression42), Empty)))))), range67))
-         | (Match (expression43, pairs7, range68)) -> 
-            (List ((Cons ((Symbol ((identifier_match ()), (data_match ()), range68)), (Cons ((expression_to_sexp expression43), (list_flatmap (match_pair_to_sexp expression_to_sexp) pairs7))))), range68))
-         | (Constructor (identifier49, expressions21, range69)) -> 
-            (match expressions21 with
-                 | Empty -> 
-                    (identifier_to_symbol identifier49)
-                 | x386 -> 
-                    (List ((Cons ((identifier_to_symbol identifier49), (list_map expression_to_sexp expressions21))), range69)))
-         | (FunctionApplication (expressions22, range70)) -> 
-            (List ((list_map expression_to_sexp expressions22), range70)));;
-
-let rec type_definition_to_sexp token11 name47 parameters7 constructors12 range71 = 
-    (list_concat (Cons ((Symbol ((identifier_typ ()), (data_typ ()), range71)), (Cons ((type_name_to_sexp token11 range71 name47 parameters7), Empty)))) (constructors_to_sexp constructors12));;
-
-let rec function_definition_to_sexp name48 arguments14 expression44 range72 = 
-    (Cons ((Symbol ((identifier_def ()), (data_def ()), range72)), (Cons ((identifier_to_symbol name48), (Cons ((function_arguments_to_sexp arguments14 range72), (Cons ((expression_to_sexp expression44), Empty))))))));;
-
-let rec definition_to_sexp2 public7 range73 sexp5 = 
-    (List ((match public7 with
-         | True -> 
-            (Cons ((Symbol ((identifier_pub ()), (data_pub ()), range73)), sexp5))
-         | False -> 
-            sexp5), range73));;
-
-let rec definition_to_sexp definition13 = 
-    (match definition13 with
-         | (TypeDefinition ((Identifier (token12, name49, x387, x388, x389)), public8, parameters8, constructors13, range74)) -> 
-            (definition_to_sexp2 public8 range74 (type_definition_to_sexp token12 name49 parameters8 constructors13 range74))
-         | (FunctionDefinition (name50, public9, arguments15, expression45, range75)) -> 
-            (definition_to_sexp2 public9 range75 (function_definition_to_sexp name50 arguments15 expression45 range75))
-         | (TargetDefinition (x390, data)) -> 
-            (Symbol ((0l), (string_from_slice data), (Range ((0l), (0l))))));;
-
-let rec definitions_to_sexps definitions3 = 
-    (list_map definition_to_sexp definitions3);;
 
 let rec data_double_dash () = 
     (string_from_list (Cons ((45l), (Cons ((45l), Empty)))));;
