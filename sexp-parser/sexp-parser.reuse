@@ -28,6 +28,22 @@
      (Integer int32 range)
      (List (list sexp) range))
 
+(pub def sexp-range (sexp)
+     (match sexp
+            (Symbol _ __ range)
+                range
+            (Integer _ range)
+                range
+            (List _ range)
+                range))
+
+(pub def sexp-symbol-text (sexp)
+     (match sexp
+            (Symbol _ text __)
+                (Some text)
+            _
+                None))
+
 (pub typ parse-error
      ParseErrorTooFewClosingBrackets
      ParseErrorTooManyClosingBrackets)
@@ -42,7 +58,10 @@
             (Pair token symbols)
                 (match (dictionary-get name symbols)
                        (Some (Pair token name))
-                           (ParserResult next-index symbol-state (Symbol token name (Range index next-index)))
+                           (ParserResult
+                               next-index
+                               symbol-state
+                               (Symbol token name (Range index next-index)))
                        None
                            (ParserResult
                                next-index
@@ -65,7 +84,10 @@
 (def parse-list (index slice parse-sexps symbols)
      (match (parse-sexps index slice symbols Empty)
             (ParserResult next-index symbols expressions)
-                (ParserResult next-index symbols (List expressions (Range (- index 1) next-index)))
+                (ParserResult
+                    next-index
+                    symbols
+                    (List expressions (Range (- index 1) next-index)))
             (ParserError error)
                 (ParserError error)
             (ParserEnd index)
