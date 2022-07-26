@@ -90,6 +90,10 @@
                     Empty
                     (list (data-malformed-type-definition-ex))
                     (list (location-information files source-reference range))))
+            (TypeDefinitionMissingConstructors source-reference range)
+                (string-format (list
+                    (list (data-type-definition-missing-constructors))
+                    (list (location-information files source-reference range))))
             (MalformedPatternError source-reference range)
                 (string-format (list
                     (list (data-malformed-pattern))
@@ -123,8 +127,6 @@
                     (list (string-concat (data-reserved-identifier-error) name))
                     (list (location-information files source-reference range))))
             MalformedSexpTooFewClosingBrackets
-                (string-format (list
-                    (list (data-too-few-closing-brackets))))
+                (string-format (list (list (data-too-few-closing-brackets))))
             MalformedSexpTooManyClosingBrackets
-                (string-format (list
-                    (list (data-too-many-closing-brackets))))))
+                (string-format (list (list (data-too-many-closing-brackets))))))

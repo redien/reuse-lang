@@ -36,11 +36,7 @@ Should return an error given a malformed type definition
 
 | (typ a)
 > 1
-? I think you wanted to write a type definition, but it doesn't have the right shape. It should look like this:
-? 
-? (type name-of-type NameOfConstructor ...)
-? 
-? 
+? This type definition is missing a list of constructors. A type needs at least one constructor.
 
 
 Should return an error given a malformed function definition

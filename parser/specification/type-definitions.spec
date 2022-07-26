@@ -36,3 +36,14 @@ Should parse constructor expressions
 
 > (typ a Constructor) (def _ () Constructor)
 = (typ a Constructor) (def _ () Constructor)
+
+Should parse standard types
+> (typ (maybe a) (Some a) None)
+= (typ (maybe a) (Some a) None)
+
+> (typ (list a) (Cons a (list a)) Empty)
+= (typ (list a) (Cons a (list a)) Empty)
+
+Should return an error when missing constructors
+> (typ a)
+? TypeDefinitionMissingConstructors

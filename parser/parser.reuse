@@ -10,23 +10,6 @@
              (Pair (identifier-exists) (data-exists))
              (Pair (identifier-pub) (data-pub)))))
 
-(pub typ error
-     (InternalParserError source-reference range)
-     (MalformedExpressionError source-reference range)
-     (MalformedDefinitionError source-reference range)
-     (MalformedTypeDefinitionError source-reference range)
-     (MalformedFunctionDefinitionError source-reference range)
-     (MalformedPatternError source-reference range)
-     (MalformedMatchExpressionError source-reference range)
-     (MalformedSymbolError source-reference range)
-     (MalformedConstructorError source-reference range)
-     (MalformedTypeError source-reference range)
-     (ErrorNotDefined string source-reference range)
-     (ErrorAlreadyDefined string source-reference range)
-     (ErrorReservedIdentifier string source-reference range)
-     MalformedSexpTooFewClosingBrackets
-     MalformedSexpTooManyClosingBrackets)
-
 (def symbol-to-identifier (symbol)
      (match symbol
             (Symbol token name range)
@@ -308,6 +291,9 @@
 
 (def sexp-to-definition (scope expression)
      (match expression
+            (List (Cons (Symbol -2 _ __) (Cons _ Empty)) range)
+                (parser-bind (parser-get-source-reference) (fn (source-reference)
+                (parser-error (TypeDefinitionMissingConstructors source-reference range))))
             (List (Cons (Symbol kind _ __) Empty) range)
                 (specific-malformed-definition-error kind range)
             (List (Cons (Symbol kind _ __) (Cons ___ Empty)) range)

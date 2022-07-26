@@ -7,6 +7,7 @@ malformed-function-definition         |Malformed function definition found:
 malformed-definition                  |Only type- or function definitions can be in the top level of a file. You need to wrap expressions in a function.
 malformed-type-definition             |I think you wanted to write a type definition, but it doesn't have the right shape. It should look like this:
 malformed-type-definition-ex          |(type name-of-type NameOfConstructor ...)
+type-definition-missing-constructors  |This type definition is missing a list of constructors. A type needs at least one constructor.
 malformed-pattern                     |I expected a pattern here but this doesn't look correct.
 malformed-match-expression            |This match expression is not correct, make sure you have put parentheses correctly so that all your match rules come in pairs:
 malformed-symbol                      |Expected an identifier here:

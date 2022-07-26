@@ -1,0 +1,37 @@
+
+(pub typ error
+     (InternalParserError source-reference range)
+     (MalformedExpressionError source-reference range)
+     (MalformedDefinitionError source-reference range)
+     (MalformedTypeDefinitionError source-reference range)
+     (TypeDefinitionMissingConstructors source-reference range)
+     (MalformedFunctionDefinitionError source-reference range)
+     (MalformedPatternError source-reference range)
+     (MalformedMatchExpressionError source-reference range)
+     (MalformedSymbolError source-reference range)
+     (MalformedConstructorError source-reference range)
+     (MalformedTypeError source-reference range)
+     (ErrorNotDefined string source-reference range)
+     (ErrorAlreadyDefined string source-reference range)
+     (ErrorReservedIdentifier string source-reference range)
+     MalformedSexpTooFewClosingBrackets
+     MalformedSexpTooManyClosingBrackets)
+
+(def malformed-function-definition (source-reference range)
+     (MalformedFunctionDefinitionError source-reference range))
+
+(def malformed-type-definition (source-reference range)
+     (MalformedTypeDefinitionError source-reference range))
+
+(def malformed-type (source-reference range)
+     (MalformedTypeError source-reference range))
+
+(def malformed-pattern (source-reference range)
+     (MalformedPatternError source-reference range))
+
+(def not-defined (text source-reference range)
+     (match text
+            (Some text)
+                (ErrorNotDefined text source-reference range)
+            None
+                (InternalParserError source-reference range)))

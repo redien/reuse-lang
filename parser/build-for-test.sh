@@ -16,7 +16,11 @@ $project_root/reusec --language ocaml\
 printf "\
 $(cat $build_dir/Test.ml)\n\
 open StdinWrapper;;\n\
-Printf.printf \"%%s\" (reuse_string_to_ml (reuse_main (read_stdin ())))\n" > "$build_dir/Test.ml.2.ml"
+result_bimap\n\
+    (fun output -> Printf.printf \"%%s\" (reuse_string_to_ml output); exit 0)\n\
+    (fun error -> Printf.eprintf \"%%s\" (reuse_string_to_ml error); exit 1)\n\
+    (reuse_main (read_stdin ()))\n\
+\n" > "$build_dir/Test.ml.2.ml"
 
 cp $project_root/compiler-backend/ocaml/StdinWrapper.ml $build_dir
 
