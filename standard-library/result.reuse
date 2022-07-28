@@ -65,6 +65,17 @@
          Empty
          list))
 
+(pub def result-partition (list)
+     (list-foldr
+         (fn (result state)
+             (match result
+                    (Result x)
+                        (Pair (Cons x (pair-left state)) (pair-right state))
+                    (Error e)
+                        (Pair (pair-left state) (Cons e (pair-right state)))))
+         (Pair Empty Empty)
+         list))
+
 (pub def result-concat (list)
      (match (list-filter result-error? list)
             (Cons (Error error) _)

@@ -155,6 +155,7 @@
 (pub def result-or-else (value result) (match result (Result x) x (Error x) value))
 (pub def result-error? (result) (match result (Error _) True _ False))
 (pub def result-filter-list (list) (list-foldr (fn (result new-list) (match result (Result x) (Cons x new-list) _ new-list)) Empty list))
+(pub def result-partition (list) (list-foldr (fn (result state) (match result (Result x) (Pair (Cons x (pair-left state)) (pair-right state)) (Error e) (Pair (pair-left state) (Cons e (pair-right state))))) (Pair Empty Empty) list))
 (pub def result-concat (list) (match (list-filter result-error? list) (Cons (Error error) _) (Error error) (Cons (Result _) __) (Result Empty) Empty (Result (result-filter-list list))))
 (pub def result-of-maybe (error maybe) (match maybe (Some x) (Result x) None (Error error)))
 (pub def result-bind (result f) (result-flatmap f result))
