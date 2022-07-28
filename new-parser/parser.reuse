@@ -23,10 +23,15 @@
              (Pair (identifier-exists) (data-exists))
              (Pair (identifier-pub) (data-pub))))))
 
-(def parser-run (parser)
-     (match (state-run 0 parser)
-            (Pair _ result)
-                result))
+(def parser-run (parsers)
+     (pair-right (list-foldl
+         (fn (parser state)
+             (pair-bimap
+                 id
+                 ((flip list-cons) (pair-right state))
+                 (state-run (pair-left state) parser)))
+         (Pair 0 Empty)
+         parsers)))
 
 (def parser-return (value)
      (state-return (result-return value)))
@@ -287,7 +292,7 @@
      (match (parse-sexps (with-language-identifiers symbols) (source-file-content file))
             (Result (Pair _ sexps))
                 (parser-bind (parse-definitions (source-reference-from file) (scope-new) sexps) (fn (definitions)
-                (parser-return (Pair Empty (list-reverse (pair-right definitions))))))
+                (parser-return (list-reverse (pair-right definitions)))))
             (Error error)
                 (parser-error (sexp-error-to-ast-error error))))
 
@@ -312,19 +317,19 @@
             SourceFileTypeReuse
                 (parse-reuse-file symbols file)
             SourceFileTypeTargetLanguage
-                (parser-return (Pair
-                    Empty
-                    (list (TargetDefinition
-                        (SourceReference (source-file-path file) (source-file-module file))
-                        (source-file-content file)))))))
+                (parser-return (list (TargetDefinition
+                    (SourceReference (source-file-path file) (source-file-module file))
+                    (source-file-content file))))))
 
 (def resolve-files (definitions)
-     definitions)
+     (match (result-partition (parser-run definitions))
+            (Pair definitions Empty)
+                (Result (list-flatten definitions))
+            (Pair _ (Cons error __))
+                (Error error)))
 
 (def resolve-modules (definitions)
-     (result-map
-         (. list-flatten (list-map pair-right))
-         (parser-run (parser-sequence definitions))))
+     definitions)
 
 (pub def parse-source-files (symbols files)
      (resolve-modules (resolve-files (list-map (parse-source-file symbols) files))))
