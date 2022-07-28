@@ -3,7 +3,9 @@ MalformedExpressionError                          |MalformedExpressionError
 MalformedDefinitionError                          |MalformedDefinitionError
 MalformedTypeDefinitionError                      |MalformedTypeDefinitionError
 TypeDefinitionMissingConstructors                 |TypeDefinitionMissingConstructors
+TypeDefinitionMissingName                         |TypeDefinitionMissingName
 MalformedFunctionDefinitionError                  |MalformedFunctionDefinitionError
+FunctionDefinitionMissingName                     |FunctionDefinitionMissingName
 MalformedPatternError                             |MalformedPatternError
 MalformedMatchExpressionError                     |MalformedMatchExpressionError
 MalformedSymbolError                              |MalformedSymbolError

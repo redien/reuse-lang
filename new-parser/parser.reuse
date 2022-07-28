@@ -170,6 +170,10 @@
                                (list-cons
                                    (FunctionDefinition name public? arguments expression range)
                                    definitions))))))))))))
+            Empty
+                (parser-error (FunctionDefinitionMissingName source-reference range))
+            (Cons (List _ __) Empty)
+                (parser-error (FunctionDefinitionMissingName source-reference range))
             _
                 (parser-error (MalformedDefinitionError source-reference range))))
 
@@ -255,8 +259,8 @@
                     constructors
                     range
                     public?)
-            _
-                (parser-error (MalformedDefinitionError source-reference range))))
+            Empty
+                (parser-error (TypeDefinitionMissingName source-reference range))))
 
 (def parse-definitions (source-reference scope sexps)
      (list-foldl

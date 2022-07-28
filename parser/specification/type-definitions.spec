@@ -46,3 +46,10 @@ Should parse standard types
 Should return an error when missing constructors
 > (typ a)
 ? TypeDefinitionMissingConstructors
+
+Should return an error when missing type name
+> (typ)
+? TypeDefinitionMissingName
+
+> (pub typ)
+? TypeDefinitionMissingName

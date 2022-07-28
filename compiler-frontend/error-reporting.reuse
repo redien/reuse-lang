@@ -84,11 +84,19 @@
                 (string-format (list
                     (list (data-malformed-function-definition))
                     (list (location-information files source-reference range))))
+            (FunctionDefinitionMissingName source-reference range)
+                (string-format (list
+                    (list (data-function-definition-missing-name))
+                    (list (location-information files source-reference range))))
             (MalformedTypeDefinitionError source-reference range)
                 (string-format (list
                     (list (data-malformed-type-definition))
                     Empty
                     (list (data-malformed-type-definition-ex))
+                    (list (location-information files source-reference range))))
+            (TypeDefinitionMissingName source-reference range)
+                (string-format (list
+                    (list (data-type-definition-missing-name))
                     (list (location-information files source-reference range))))
             (TypeDefinitionMissingConstructors source-reference range)
                 (string-format (list

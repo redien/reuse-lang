@@ -13,3 +13,16 @@ Should parse function arguments
 Should parse public functions
 > (pub def constant () 1)
 = (pub def constant () 1)
+
+Should return an error given a function without a name
+> (def)
+? FunctionDefinitionMissingName
+
+> (def ())
+? FunctionDefinitionMissingName
+
+> (pub def)
+? FunctionDefinitionMissingName
+
+> (pub def ())
+? FunctionDefinitionMissingName

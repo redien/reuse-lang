@@ -28,11 +28,11 @@ Should return an error given a malformed definition
 Should return an error given a malformed type definition
 | (typ)
 > 1
-? I think you wanted to write a type definition, but it doesn't have the right shape. It should look like this:
-? 
-? (type name-of-type NameOfConstructor ...)
-? 
-? 
+? This type definition is missing its name and a constructor. A type needs a name and at least one constructor.
+
+| (pub typ)
+> 1
+? This type definition is missing its name and a constructor. A type needs a name and at least one constructor.
 
 | (typ a)
 > 1
@@ -42,7 +42,19 @@ Should return an error given a malformed type definition
 Should return an error given a malformed function definition
 | (def)
 > 1
-? Malformed function definition found
+? This function definition is missing its name, an argument list and its body. A function needs a name, an argument list (which can be empty) and a function body in the form of an expression.
+
+| (def ())
+> 1
+? This function definition is missing its name, an argument list and its body. A function needs a name, an argument list (which can be empty) and a function body in the form of an expression.
+
+| (pub def)
+> 1
+? This function definition is missing its name, an argument list and its body. A function needs a name, an argument list (which can be empty) and a function body in the form of an expression.
+
+| (pub def ())
+> 1
+? This function definition is missing its name, an argument list and its body. A function needs a name, an argument list (which can be empty) and a function body in the form of an expression.
 
 | (def name)
 > 1
