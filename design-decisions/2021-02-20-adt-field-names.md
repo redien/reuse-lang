@@ -17,6 +17,14 @@ Optional changes:
 
 - Only generate functions when they're actually referenced.
 - If a user-defined function shadows an accessor then it's not generated.
+- Labels are optional
+
+```
+(typ sexp
+     (Symbol token: int32 text: string range: range)
+     (Integer int32 range: range)
+     (List sexps: (list sexp) range: range))
+```
 
 # Benefits
 
