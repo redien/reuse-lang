@@ -345,8 +345,8 @@
             ParseErrorTooManyClosingBrackets
                 MalformedSexpTooManyClosingBrackets))
 
-(def parse-definitions! (module file-path iterator)
-     (parser-bind (parser-set-source-reference! (SourceReference file-path module)) (fn (_)
+(def parse-definitions! (file-index module file-path iterator)
+     (parser-bind (parser-set-source-reference! (SourceReference file-index file-path module)) (fn (_)
      (parser-bind (parser-get-symbols) (fn (symbols)
      (match (parse-sexps symbols iterator)
             (Result (Pair symbols expressions))
@@ -364,18 +364,18 @@
 
 (def parse-reuse-file (file)
      (match file
-            (SourceFile module path content)
-                (parse-definitions! module path content)))
+            (SourceFile module path content file-index)
+                (parse-definitions! file-index module path content)))
 
 (def parse-strings-file (file)
      (match file
-            (SourceFile module path content)
-                (parse-definitions! module path (transform-strings path content))))
+            (SourceFile module path content file-index)
+                (parse-definitions! file-index module path (transform-strings path content))))
 
 (def parse-target-file (file)
      (match file
-            (SourceFile module path content)
-                (parser-return (list (TargetDefinition (SourceReference path module) content)))))
+            (SourceFile module path content file-index)
+                (parser-return (list (TargetDefinition (SourceReference file-index path module) content)))))
 
 (def parse-source-file (file)
      (match (source-file-type file)

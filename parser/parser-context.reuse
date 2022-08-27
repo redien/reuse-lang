@@ -142,7 +142,7 @@
 (def parser-run (symbols parser)
      (match (state-run
          (ParserContext
-             (SourceReference (string-empty) ModuleSelf)
+             (SourceReference -1 (string-empty) ModuleSelf)
              (Pair
                  (+ (max-symbol-id symbols) 1)
                  (dictionary-of (list-map (fn (x)

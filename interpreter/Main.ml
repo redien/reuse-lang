@@ -30,14 +30,14 @@ let stdlib_paths = List.map (fun name -> data_path ^ name) [
 ] |> ml_string_list_to_reuse;;
 let stdlib_module = ModulePath (ml_string_to_reuse "standard-library", True);;
 
-let read_file m path =
+let read_file m path i =
     let channel = open_in (reuse_string_to_ml path) in
     let length = in_channel_length channel in
     let buffer = Bytes.create length in
     really_input channel buffer 0 length ;
     close_in channel;
-    SourceFile (m, path, buffer);;
-let read_files m files = list_map (read_file m) files;;
+    SourceFile (m, path, buffer, i);;
+let read_files m files = list_mapi (read_file m) files;;
 let read_modules modules = if (list_size modules) > 0l then read_files stdlib_module stdlib_paths else Empty;;
 
 let current = ref (EventArguments argv);;

@@ -14,7 +14,7 @@ function activate(context) {
         provideDocumentFormattingEdits: document => {
             const text = document.getText();
             const buffer = Buffer.from(text);
-            const sourceFile = formatter.source_file_of(formatter.ModuleSelf, formatter.string_empty(), buffer)
+            const sourceFile = formatter.source_file_of(formatter.ModuleSelf, formatter.string_empty(), buffer, -1)
             const result = formatter.format_source_files(formatter.list_from(sourceFile));
             return match(result, [
                 [Result, [Cons, [Pair, $, $], Empty]], (x, formattedFile) =>

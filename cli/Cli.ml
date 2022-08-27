@@ -4,14 +4,14 @@ open ReuseCompiler;;
 let data_path = ml_string_to_reuse ((Filename.dirname Sys.executable_name) ^ Filename.dir_sep ^ "data" ^ Filename.dir_sep);;
 
 let argv = ml_list_to_reuse (List.map ml_string_to_reuse (List.tl (Array.to_list Sys.argv)));;
-let read_file m path =
+let read_file m path i =
     let channel = open_in (reuse_string_to_ml path) in
     let length = in_channel_length channel in
     let buffer = Bytes.create length in
     really_input channel buffer 0 length ;
     close_in channel;
-    SourceFile (m, path, buffer);;
-let read_files files = list_map (pair_map read_file) files;;
+    SourceFile (m, path, buffer, i);;
+let read_files files = list_mapi (pair_map read_file) files;;
 
 let write_file path content =
     let channel = open_out (reuse_string_to_ml path) in
