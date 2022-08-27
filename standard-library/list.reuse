@@ -182,6 +182,9 @@
 (pub def list-zip (xs ys)
      (list-reverse (list-zip' xs ys Empty)))
 
+(pub def list-mapi (f list)
+     (list-map (pair-map f) (list-zip list (list-from-range 0 (list-size list)))))
+
 (pub def list-pairs (xs)
      (match xs
             (Cons a (Cons b rest))

@@ -373,6 +373,9 @@ let rec list_zip2 xs12 ys collected =
 let rec list_zip xs14 ys3 = 
     (list_reverse (list_zip2 xs14 ys3 Empty));;
 
+let rec list_mapi f21 list18 = 
+    (list_map (pair_map f21) (list_zip list18 (list_from_range (0l) (list_size list18))));;
+
 let rec list_pairs xs15 = 
     (match xs15 with
          | (Cons (a20, (Cons (b16, rest7)))) -> 
@@ -380,8 +383,8 @@ let rec list_pairs xs15 =
          | x49 -> 
             Empty);;
 
-let rec list_find_first predicate list18 = 
-    (match list18 with
+let rec list_find_first predicate list19 = 
+    (match list19 with
          | Empty -> 
             None
          | (Cons (x50, xs16)) -> 
@@ -391,25 +394,25 @@ let rec list_find_first predicate list18 =
                  | False -> 
                     (list_find_first predicate xs16)));;
 
-let rec list_filter f21 list19 = 
-    (list_foldr (fun head3 tail3 -> (match (f21 head3) with
+let rec list_filter f22 list20 = 
+    (list_foldr (fun head3 tail3 -> (match (f22 head3) with
          | True -> 
             (Cons (head3, tail3))
          | False -> 
-            tail3)) Empty list19);;
+            tail3)) Empty list20);;
 
-let rec list_exclude f22 list20 = 
-    (list_filter (fun x51 -> (not (f22 x51))) list20);;
+let rec list_exclude f23 list21 = 
+    (list_filter (fun x51 -> (not (f23 x51))) list21);;
 
-let rec list_any f23 list21 = 
-    (match (list_find_first f23 list21) with
+let rec list_any f24 list22 = 
+    (match (list_find_first f24 list22) with
          | (Some (x52)) -> 
             True
          | x53 -> 
             False);;
 
-let rec list_every f24 list22 = 
-    (match (list_find_first (fun x54 -> (not (f24 x54))) list22) with
+let rec list_every f25 list23 = 
+    (match (list_find_first (fun x54 -> (not (f25 x54))) list23) with
          | (Some (x55)) -> 
             False
          | x56 -> 
@@ -559,41 +562,41 @@ let rec string_rest string5 =
          | x82 -> 
             string5);;
 
-let rec string_foldr_node f25 node11 identity = 
+let rec string_foldr_node f26 node11 identity = 
     (match node11 with
          | (FTValue (a27)) -> 
-            (f25 a27 identity)
+            (f26 a27 identity)
          | (FTNode2 (x83, a28, b23)) -> 
-            (string_foldr_node f25 a28 (string_foldr_node f25 b23 identity))
+            (string_foldr_node f26 a28 (string_foldr_node f26 b23 identity))
          | (FTNode3 (x84, a29, b24, c5)) -> 
-            (string_foldr_node f25 a29 (string_foldr_node f25 b24 (string_foldr_node f25 c5 identity))));;
+            (string_foldr_node f26 a29 (string_foldr_node f26 b24 (string_foldr_node f26 c5 identity))));;
 
-let rec string_foldr f26 identity2 tree3 = 
+let rec string_foldr f27 identity2 tree3 = 
     (match tree3 with
          | FTEmpty -> 
             identity2
          | (FTSingle (x85)) -> 
-            (string_foldr_node f26 x85 identity2)
+            (string_foldr_node f27 x85 identity2)
          | (FTDeep (first4, middle5, last5)) -> 
-            (list_foldr (string_foldr_node f26) (string_foldr f26 (list_foldl (string_foldr_node f26) identity2 last5) middle5) first4));;
+            (list_foldr (string_foldr_node f27) (string_foldr f27 (list_foldl (string_foldr_node f27) identity2 last5) middle5) first4));;
 
-let rec string_foldl_node f27 node12 identity3 = 
+let rec string_foldl_node f28 node12 identity3 = 
     (match node12 with
          | (FTValue (a30)) -> 
-            (f27 a30 identity3)
+            (f28 a30 identity3)
          | (FTNode2 (x86, b25, a31)) -> 
-            (string_foldl_node f27 a31 (string_foldl_node f27 b25 identity3))
+            (string_foldl_node f28 a31 (string_foldl_node f28 b25 identity3))
          | (FTNode3 (x87, c6, b26, a32)) -> 
-            (string_foldl_node f27 a32 (string_foldl_node f27 b26 (string_foldl_node f27 c6 identity3))));;
+            (string_foldl_node f28 a32 (string_foldl_node f28 b26 (string_foldl_node f28 c6 identity3))));;
 
-let rec string_foldl f28 identity4 tree4 = 
+let rec string_foldl f29 identity4 tree4 = 
     (match tree4 with
          | FTEmpty -> 
             identity4
          | (FTSingle (x88)) -> 
-            (string_foldl_node f28 x88 identity4)
+            (string_foldl_node f29 x88 identity4)
          | (FTDeep (first5, middle6, last6)) -> 
-            (list_foldr (string_foldl_node f28) (string_foldl f28 (list_foldl (string_foldl_node f28) identity4 first5) middle6) last6));;
+            (list_foldr (string_foldl_node f29) (string_foldl f29 (list_foldl (string_foldl_node f29) identity4 first5) middle6) last6));;
 
 let rec string_size string6 = 
     (match string6 with
@@ -652,8 +655,8 @@ let rec string_every predicate5 string9 =
 let rec string_to_list string10 = 
     (string_foldr list_cons Empty string10);;
 
-let rec string_from_list list23 = 
-    (list_foldl string_append (string_empty ()) list23);;
+let rec string_from_list list24 = 
+    (list_foldl string_append (string_empty ()) list24);;
 
 let rec string_skip count3 string11 = 
     (match string11 with
@@ -696,11 +699,11 @@ let rec string_join separator strings =
          | Empty -> 
             (string_empty ()));;
 
-let rec string_flatmap f29 string18 = 
-    (string_foldl (fun x97 xs17 -> (string_concat xs17 (f29 x97))) (string_empty ()) string18);;
+let rec string_flatmap f30 string18 = 
+    (string_foldl (fun x97 xs17 -> (string_concat xs17 (f30 x97))) (string_empty ()) string18);;
 
-let rec string_split2 separator2 list24 current parts = 
-    (match list24 with
+let rec string_split2 separator2 list25 current parts = 
+    (match list25 with
          | Empty -> 
             (list_reverse (Cons ((list_reverse current), parts)))
          | (Cons (c11, rest11)) -> 
@@ -713,16 +716,16 @@ let rec string_split2 separator2 list24 current parts =
 let rec string_split separator3 string19 = 
     (list_map string_from_list (string_split2 separator3 (string_to_list string19) Empty Empty));;
 
-let rec string_trim_start2 list25 = 
-    (match list25 with
+let rec string_trim_start2 list26 = 
+    (match list26 with
          | (Cons (x98, xs18)) -> 
             (match (x4 x98 (32l)) with
                  | True -> 
                     (string_trim_start2 xs18)
                  | False -> 
-                    list25)
+                    list26)
          | Empty -> 
-            list25);;
+            list26);;
 
 let rec string_trim_start string20 = 
     (string_from_list (string_trim_start2 (string_to_list string20)));;
@@ -918,27 +921,27 @@ let rec result_prod return result4 =
          | (Error (error3)) -> 
             (return (Error (error3))));;
 
-let rec result_bimap f30 g3 result5 = 
+let rec result_bimap f31 g3 result5 = 
     (match result5 with
          | (Result (x106)) -> 
-            (Result ((f30 x106)))
+            (Result ((f31 x106)))
          | (Error (y8)) -> 
             (Error ((g3 y8))));;
 
-let rec result_either f31 g4 result6 = 
+let rec result_either f32 g4 result6 = 
     (match result6 with
          | (Result (x107)) -> 
-            (f31 x107)
+            (f32 x107)
          | (Error (x108)) -> 
             (g4 x108));;
 
-let rec result_map f32 result7 = 
-    (result_bimap f32 id result7);;
+let rec result_map f33 result7 = 
+    (result_bimap f33 id result7);;
 
-let rec result_flatmap f33 result8 = 
+let rec result_flatmap f34 result8 = 
     (match result8 with
          | (Result (x109)) -> 
-            (f33 x109)
+            (f34 x109)
          | (Error (error4)) -> 
             (Error (error4)));;
 
@@ -956,28 +959,28 @@ let rec result_error2 result10 =
          | x113 -> 
             False);;
 
-let rec result_filter_list list26 = 
+let rec result_filter_list list27 = 
     (list_foldr (fun result11 new_list -> (match result11 with
          | (Result (x114)) -> 
             (Cons (x114, new_list))
          | x115 -> 
-            new_list)) Empty list26);;
+            new_list)) Empty list27);;
 
-let rec result_partition list27 = 
+let rec result_partition list28 = 
     (list_foldr (fun result12 state2 -> (match result12 with
          | (Result (x116)) -> 
             (Pair ((Cons (x116, (pair_left state2))), (pair_right state2)))
          | (Error (e4)) -> 
-            (Pair ((pair_left state2), (Cons (e4, (pair_right state2))))))) (Pair (Empty, Empty)) list27);;
+            (Pair ((pair_left state2), (Cons (e4, (pair_right state2))))))) (Pair (Empty, Empty)) list28);;
 
-let rec result_concat list28 = 
-    (match (list_filter result_error2 list28) with
+let rec result_concat list29 = 
+    (match (list_filter result_error2 list29) with
          | (Cons ((Error (error5)), x117)) -> 
             (Error (error5))
          | (Cons ((Result (x118)), x119)) -> 
             (Result (Empty))
          | Empty -> 
-            (Result ((result_filter_list list28))));;
+            (Result ((result_filter_list list29))));;
 
 let rec result_of_maybe error6 maybe9 = 
     (match maybe9 with
@@ -986,8 +989,8 @@ let rec result_of_maybe error6 maybe9 =
          | None -> 
             (Error (error6)));;
 
-let rec result_bind result13 f34 = 
-    (result_flatmap f34 result13);;
+let rec result_bind result13 f35 = 
+    (result_flatmap f35 result13);;
 
 let rec result_return value7 = 
     (result_lift value7);;
@@ -997,8 +1000,8 @@ type ('Ts,'Tv2) state  =
 
 let rec state_run state3 operation = 
     (match operation with
-         | (Operation (f35)) -> 
-            (f35 state3));;
+         | (Operation (f36)) -> 
+            (f36 state3));;
 
 let rec state_final_value initial_state operation2 = 
     (match (state_run initial_state operation2) with
@@ -1008,10 +1011,10 @@ let rec state_final_value initial_state operation2 =
 let rec state_return value9 = 
     (Operation ((fun state4 -> (Pair (state4, value9)))));;
 
-let rec state_bind operation3 f36 = 
+let rec state_bind operation3 f37 = 
     (Operation ((fun state5 -> (match (state_run state5 operation3) with
          | (Pair (new_state, new_value2)) -> 
-            (state_run new_state (f36 new_value2))))));;
+            (state_run new_state (f37 new_value2))))));;
 
 let rec state_get () = 
     (Operation ((fun state6 -> (Pair (state6, state6)))));;
@@ -1019,23 +1022,23 @@ let rec state_get () =
 let rec state_set state7 = 
     (Operation ((fun x122 -> (Pair (state7, state7)))));;
 
-let rec state_modify f37 = 
-    (state_bind (state_get ()) (fun state8 -> (state_set (f37 state8))));;
+let rec state_modify f38 = 
+    (state_bind (state_get ()) (fun state8 -> (state_set (f38 state8))));;
 
-let rec state_let value10 f38 = 
-    (state_bind (state_return value10) f38);;
+let rec state_let value10 f39 = 
+    (state_bind (state_return value10) f39);;
 
-let rec state_foldr f39 initial_value operations = 
-    (list_foldr (fun operation4 chain -> (state_bind operation4 (fun x123 -> (state_bind chain (fun xs19 -> (state_return (f39 x123 xs19))))))) (state_return initial_value) operations);;
+let rec state_foldr f40 initial_value operations = 
+    (list_foldr (fun operation4 chain -> (state_bind operation4 (fun x123 -> (state_bind chain (fun xs19 -> (state_return (f40 x123 xs19))))))) (state_return initial_value) operations);;
 
-let rec state_foreach f40 xs20 = 
-    (state_foldr list_cons Empty (list_map f40 xs20));;
+let rec state_foreach f41 xs20 = 
+    (state_foldr list_cons Empty (list_map f41 xs20));;
 
-let rec state_flatmap f41 operation5 = 
-    (state_bind operation5 f41);;
+let rec state_flatmap f42 operation5 = 
+    (state_bind operation5 f42);;
 
-let rec state_map f42 operation6 = 
-    (state_flatmap (fun x51 -> (state_return (f42 x51))) operation6);;
+let rec state_map f43 operation6 = 
+    (state_flatmap (fun x51 -> (state_return (f43 x51))) operation6);;
 
 let rec state_lift value11 = 
     (state_return value11);;
@@ -1841,69 +1844,69 @@ let rec identifiers_from_definition definition6 =
 let rec public_identifiers definitions = 
     ((list_flatmap list_from_maybe) ((list_map definition_identifier) ((list_filter definition_public) definitions)));;
 
-let rec over_match_pair_expression f43 pair9 = 
+let rec over_match_pair_expression f44 pair9 = 
     (match pair9 with
          | (Pair (pattern3, expression5)) -> 
-            (result_bind (f43 expression5) (fun expression6 -> (result_return (Pair (pattern3, expression6))))));;
+            (result_bind (f44 expression5) (fun expression6 -> (result_return (Pair (pattern3, expression6))))));;
 
-let rec over_match_pair_expressions over_subexpressions2 f44 pairs = 
-    (result_concat (list_map (over_match_pair_expression (fun x51 -> ((result_flatmap (over_subexpressions2 f44)) (f44 x51)))) pairs));;
+let rec over_match_pair_expressions over_subexpressions2 f45 pairs = 
+    (result_concat (list_map (over_match_pair_expression (fun x51 -> ((result_flatmap (over_subexpressions2 f45)) (f45 x51)))) pairs));;
 
-let rec over_subexpressions f45 expression7 = 
-    (result_bind (f45 expression7) (fun expression8 -> (match expression8 with
+let rec over_subexpressions f46 expression7 = 
+    (result_bind (f46 expression7) (fun expression8 -> (match expression8 with
          | (Lambda (arguments2, expression9, range6)) -> 
-            (result_bind (f45 expression9) (fun expression10 -> (result_bind (over_subexpressions f45 expression10) (fun expression11 -> (result_return (Lambda (arguments2, expression11, range6)))))))
+            (result_bind (f46 expression9) (fun expression10 -> (result_bind (over_subexpressions f46 expression10) (fun expression11 -> (result_return (Lambda (arguments2, expression11, range6)))))))
          | (Match (expression12, pairs2, range7)) -> 
-            (result_bind (f45 expression12) (fun expression13 -> (result_bind (over_subexpressions f45 expression13) (fun expression14 -> (result_bind (over_match_pair_expressions over_subexpressions f45 pairs2) (fun pairs3 -> (result_return (Match (expression14, pairs3, range7)))))))))
+            (result_bind (f46 expression12) (fun expression13 -> (result_bind (over_subexpressions f46 expression13) (fun expression14 -> (result_bind (over_match_pair_expressions over_subexpressions f46 pairs2) (fun pairs3 -> (result_return (Match (expression14, pairs3, range7)))))))))
          | (Constructor (identifier20, expressions6, range8)) -> 
-            (result_bind (result_concat (list_map (fun x51 -> ((result_flatmap (over_subexpressions f45)) (f45 x51))) expressions6)) (fun expressions7 -> (result_return (Constructor (identifier20, expressions7, range8)))))
+            (result_bind (result_concat (list_map (fun x51 -> ((result_flatmap (over_subexpressions f46)) (f46 x51))) expressions6)) (fun expressions7 -> (result_return (Constructor (identifier20, expressions7, range8)))))
          | (FunctionApplication (expressions8, range9)) -> 
-            (result_bind (result_concat (list_map (fun x51 -> ((result_flatmap (over_subexpressions f45)) (f45 x51))) expressions8)) (fun expressions9 -> (result_return (FunctionApplication (expressions9, range9)))))
+            (result_bind (result_concat (list_map (fun x51 -> ((result_flatmap (over_subexpressions f46)) (f46 x51))) expressions8)) (fun expressions9 -> (result_return (FunctionApplication (expressions9, range9)))))
          | x284 -> 
             (result_return expression8))));;
 
-let rec over_definition_expressions f46 definition7 = 
+let rec over_definition_expressions f47 definition7 = 
     (match definition7 with
          | (FunctionDefinition (identifier21, public3, arguments3, expression15, range10)) -> 
-            (result_bind (f46 expression15) (fun expression16 -> (result_return (FunctionDefinition (identifier21, public3, arguments3, expression16, range10)))))
+            (result_bind (f47 expression15) (fun expression16 -> (result_return (FunctionDefinition (identifier21, public3, arguments3, expression16, range10)))))
          | x285 -> 
             (result_return definition7));;
 
-let rec over_function_application f47 expression17 = 
+let rec over_function_application f48 expression17 = 
     (match expression17 with
          | (FunctionApplication (expressions10, range11)) -> 
-            (f47 expressions10 range11)
+            (f48 expressions10 range11)
          | x286 -> 
             (result_return expression17));;
 
-let rec over_match_expression f48 expression18 = 
+let rec over_match_expression f49 expression18 = 
     (match expression18 with
          | (Match (expression19, pairs4, range12)) -> 
-            (f48 expression19 pairs4 range12)
+            (f49 expression19 pairs4 range12)
          | x287 -> 
             (result_return expression18));;
 
-let rec over_identifiers f49 expression20 = 
+let rec over_identifiers f50 expression20 = 
     (match expression20 with
          | (Variable (name10)) -> 
-            (result_bind (f49 name10) (fun name11 -> (result_return (Variable (name11)))))
+            (result_bind (f50 name10) (fun name11 -> (result_return (Variable (name11)))))
          | (Lambda (arguments4, expression21, range13)) -> 
-            (result_bind (over_identifiers f49 expression21) (fun expression22 -> (result_bind (result_concat (list_map f49 arguments4)) (fun arguments5 -> (result_return (Lambda (arguments5, expression22, range13)))))))
+            (result_bind (over_identifiers f50 expression21) (fun expression22 -> (result_bind (result_concat (list_map f50 arguments4)) (fun arguments5 -> (result_return (Lambda (arguments5, expression22, range13)))))))
          | (Constructor (name12, Empty, range14)) -> 
-            (result_bind (f49 name12) (fun name13 -> (result_return (Constructor (name13, Empty, range14)))))
+            (result_bind (f50 name12) (fun name13 -> (result_return (Constructor (name13, Empty, range14)))))
          | (Constructor (name14, expressions11, range15)) -> 
-            (result_bind (result_concat (list_map (over_identifiers f49) expressions11)) (fun expressions12 -> (result_bind (f49 name14) (fun name15 -> (result_return (Constructor (name15, expressions12, range15)))))))
+            (result_bind (result_concat (list_map (over_identifiers f50) expressions11)) (fun expressions12 -> (result_bind (f50 name14) (fun name15 -> (result_return (Constructor (name15, expressions12, range15)))))))
          | (FunctionApplication (expressions13, range16)) -> 
-            (result_bind (result_concat (list_map (over_identifiers f49) expressions13)) (fun expressions14 -> (result_return (FunctionApplication (expressions14, range16)))))
+            (result_bind (result_concat (list_map (over_identifiers f50) expressions13)) (fun expressions14 -> (result_return (FunctionApplication (expressions14, range16)))))
          | (Match (expression23, rules, range17)) -> 
-            (result_bind (result_concat (list_map (over_match_pair_expression (over_identifiers f49)) rules)) (fun rules2 -> (result_bind (over_identifiers f49 expression23) (fun expression24 -> (result_return (Match (expression24, rules2, range17)))))))
+            (result_bind (result_concat (list_map (over_match_pair_expression (over_identifiers f50)) rules)) (fun rules2 -> (result_bind (over_identifiers f50 expression23) (fun expression24 -> (result_return (Match (expression24, rules2, range17)))))))
          | x288 -> 
             (result_return expression20));;
 
 let rec expression_calls_function_in_tail_position name16 expression25 = 
     (match expression25 with
-         | (FunctionApplication ((Cons ((Variable (f50)), rest15)), x289)) -> 
-            (identifier_equal name16 f50)
+         | (FunctionApplication ((Cons ((Variable (f51)), rest15)), x289)) -> 
+            (identifier_equal name16 f51)
          | (Match (x290, rules3, x291)) -> 
             (list_any (fun pair10 -> (match pair10 with
                  | (Pair (pattern4, expression26)) -> 
@@ -1914,25 +1917,25 @@ let rec expression_calls_function_in_tail_position name16 expression25 =
 let rec any_captures_match name17 pattern5 = 
     (list_any (identifier_equal name17) (captured_identifiers_from_pattern pattern5));;
 
-let rec over_tail_recursive_match_rule name18 f51 over_tail_recursive_call2 rule = 
+let rec over_tail_recursive_match_rule name18 f52 over_tail_recursive_call2 rule = 
     (match rule with
          | (Pair (pattern6, expression27)) -> 
             (match (any_captures_match name18 pattern6) with
                  | True -> 
                     (Pair (pattern6, expression27))
                  | False -> 
-                    (Pair (pattern6, (over_tail_recursive_call2 name18 f51 expression27)))));;
+                    (Pair (pattern6, (over_tail_recursive_call2 name18 f52 expression27)))));;
 
-let rec over_tail_recursive_call name19 f52 expression28 = 
+let rec over_tail_recursive_call name19 f53 expression28 = 
     (match expression28 with
          | (FunctionApplication ((Cons ((Variable (applied_name)), rest16)), range18)) -> 
             (match (identifier_equal name19 applied_name) with
                  | True -> 
-                    (f52 rest16 range18)
+                    (f53 rest16 range18)
                  | False -> 
                     expression28)
          | (Match (expression29, rules4, range19)) -> 
-            (Match (expression29, (list_map (over_tail_recursive_match_rule name19 f52 over_tail_recursive_call) rules4), range19))
+            (Match (expression29, (list_map (over_tail_recursive_match_rule name19 f53 over_tail_recursive_call) rules4), range19))
          | x293 -> 
             expression28);;
 
@@ -2157,8 +2160,8 @@ let rec parser_return value23 =
 let rec parser_error error10 = 
     (state_return (result_error error10));;
 
-let rec parser_bind parser3 f53 = 
-    (state_bind parser3 (fun result15 -> (result_prod state_return (result_bind result15 (fun value24 -> (result_return (f53 value24)))))));;
+let rec parser_bind parser3 f54 = 
+    (state_bind parser3 (fun result15 -> (result_prod state_return (result_bind result15 (fun value24 -> (result_return (f54 value24)))))));;
 
 let rec parser_token_is_constructor token5 = 
     (state_bind (state_get ()) (fun context11 -> (parser_return (parser_context_token_is_constructor token5 context11))));;
@@ -2187,8 +2190,8 @@ let rec parser_get_source_reference () =
 let rec parser_set_source_reference source_reference12 = 
     (state_bind (state_modify (parser_context_with_source_reference source_reference12)) (fun x343 -> (parser_return source_reference12)));;
 
-let rec parser_sequence list29 = 
-    (list_foldr (fun a69 b64 -> (parser_bind a69 (fun a70 -> (parser_bind b64 (fun b65 -> (parser_return (Cons (a70, b65)))))))) (parser_return Empty) list29);;
+let rec parser_sequence list30 = 
+    (list_foldr (fun a69 b64 -> (parser_bind a69 (fun a70 -> (parser_bind b64 (fun b65 -> (parser_return (Cons (a70, b65)))))))) (parser_return Empty) list30);;
 
 let rec parser_bind_symbols syms3 = 
     (parser_sequence (list_map parser_bind_symbol syms3));;
@@ -3503,8 +3506,8 @@ let rec data_file () =
 let rec data_range () = 
     (string_from_list (Cons ((82l), (Cons ((97l), (Cons ((110l), (Cons ((103l), (Cons ((101l), (Cons ((58l), (Cons ((32l), Empty)))))))))))))));;
 
-let rec string_format list30 = 
-    (string_join (string_of_char (10l)) (list_map (string_join (string_empty ())) list30));;
+let rec string_format list31 = 
+    (string_join (string_of_char (10l)) (list_map (string_join (string_empty ())) list31));;
 
 let rec file_matches_reference source_reference57 file13 = 
     ((string_equal (source_reference_file_path source_reference57)) (source_file_path file13));;
@@ -5765,23 +5768,23 @@ type cli_program  =
      | CliError : string * ( unit  -> cli_program) -> cli_program
      | CliExit : int32 -> cli_program;;
 
-let rec time_bind f54 = 
-    (CliTime (f54));;
+let rec time_bind f55 = 
+    (CliTime (f55));;
 
-let rec max_heap_size_bind f55 = 
-    (CliMaxHeapSize (f55));;
+let rec max_heap_size_bind f56 = 
+    (CliMaxHeapSize (f56));;
 
-let rec render_source_bind source3 reserved_identifiers4 f56 = 
-    (CliRenderSource (source3, reserved_identifiers4, f56));;
+let rec render_source_bind source3 reserved_identifiers4 f57 = 
+    (CliRenderSource (source3, reserved_identifiers4, f57));;
 
-let rec read_files_bind paths2 f57 = 
-    (CliReadFiles (paths2, f57));;
+let rec read_files_bind paths2 f58 = 
+    (CliReadFiles (paths2, f58));;
 
-let rec write_files_bind files9 f58 = 
-    (CliWriteFiles (files9, f58));;
+let rec write_files_bind files9 f59 = 
+    (CliWriteFiles (files9, f59));;
 
-let rec error_bind message f59 = 
-    (CliError (message, f59));;
+let rec error_bind message f60 = 
+    (CliError (message, f60));;
 
 let rec flag_is_true flag default4 arguments41 = 
     (match (dictionary_get flag arguments41) with

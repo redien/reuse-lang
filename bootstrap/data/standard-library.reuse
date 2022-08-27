@@ -70,6 +70,7 @@
 (pub def list-take (count list) (pair-left (list-split-at count list)))
 (def list-zip' (xs ys collected) (match xs Empty collected (Cons x xs) (match ys Empty collected (Cons y ys) (list-zip' xs ys (Cons (Pair x y) collected)))))
 (pub def list-zip (xs ys) (list-reverse (list-zip' xs ys Empty)))
+(pub def list-mapi (f list) (list-map (pair-map f) (list-zip list (list-from-range 0 (list-size list)))))
 (pub def list-pairs (xs) (match xs (Cons a (Cons b rest)) (Cons (Pair a b) (list-pairs rest)) _ Empty))
 (pub def list-find-first (predicate list) (match list Empty None (Cons x xs) (match (predicate x) True (Some x) False (list-find-first predicate xs))))
 (pub def list-filter (f list) (list-foldr (fn (head tail) (match (f head) True (Cons head tail) False tail)) Empty list))
