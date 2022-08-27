@@ -10,7 +10,7 @@ let read_file m path i =
     let buffer = Bytes.create length in
     really_input channel buffer 0 length ;
     close_in channel;
-    SourceFile (m, path, buffer, i);;
+    SourceFile (SourceReference (i, path, m), buffer);;
 let read_files files = list_mapi (pair_map read_file) files;;
 
 let write_file path content =

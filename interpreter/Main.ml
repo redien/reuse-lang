@@ -36,7 +36,7 @@ let read_file m path i =
     let buffer = Bytes.create length in
     really_input channel buffer 0 length ;
     close_in channel;
-    SourceFile (m, path, buffer, i);;
+    SourceFile (SourceReference (i, path, m), buffer);;
 let read_files m files = list_mapi (read_file m) files;;
 let read_modules modules = if (list_size modules) > 0l then read_files stdlib_module stdlib_paths else Empty;;
 

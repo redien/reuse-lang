@@ -42,6 +42,6 @@
      (pipe
          stdin
          (fn (stdin)
-             (list (SourceFile ModuleSelf (data-test-file-path) stdin -1)))
+             (list (SourceFile (SourceReference -1 (data-test-file-path) ModuleSelf) stdin)))
          (parse-source-files (list-empty))
          (result-bimap (. stringify-sexps definitions-to-sexps) stringify-error)))

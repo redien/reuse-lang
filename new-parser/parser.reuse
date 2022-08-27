@@ -308,10 +308,12 @@
 
 (def parse-strings-file (symbols file)
      (match file
-            (SourceFile module path content index)
+            (SourceFile reference content)
                 (parse-reuse-file
                     symbols
-                    (SourceFile module path (transform-strings path content) index))))
+                    (SourceFile
+                        reference
+                        (transform-strings (source-reference-file-path reference) content)))))
 
 (def parse-source-file (symbols file)
      (match (source-file-type file)

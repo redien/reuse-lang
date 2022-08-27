@@ -1,38 +1,77 @@
 
-(pub typ source-file (SourceFile module-reference string slice int32))
+(pub typ module-reference
+     (ModulePath string boolean)
+     ModuleSelf)
+
+(pub typ source-reference (SourceReference int32 string module-reference))
+
+(pub typ source-file (SourceFile source-reference slice))
 
 (pub typ source-file-type
      SourceFileTypeReuse
      SourceFileTypeStrings
      SourceFileTypeTargetLanguage)
 
+(pub def module-equal? (a b)
+     (match a
+            (ModulePath a' _)
+                (match b
+                       (ModulePath b' _)
+                           (string-equal? a' b')
+                       ModuleSelf
+                           False)
+            ModuleSelf
+                (match b
+                       (ModulePath _ __)
+                           False
+                       ModuleSelf
+                           True)))
+
+(def source-reference-file-index (source-reference)
+     (match source-reference
+            (SourceReference file-index _ __)
+                file-index))
+
+(pub def source-reference-file-path (source-reference)
+     (match source-reference
+            (SourceReference _ file-path __)
+                file-path))
+
+(pub def source-reference-module (source-reference)
+     (match source-reference
+            (SourceReference _ __ module)
+                module))
+
+(pub def source-reference-equal? (a b)
+     (= (source-reference-file-index a) (source-reference-file-index b)))
+
 (pub def source-file-of (module path iterator index)
-     (SourceFile module path iterator index))
+     (SourceFile (SourceReference index path module) iterator))
 
 (pub def source-file-module (file)
      (match file
-            (SourceFile module _ __ ___)
-                module))
+            (SourceFile reference _)
+                (source-reference-module reference)))
 
 (pub def source-file-path (file)
      (match file
-            (SourceFile _ path __ ___)
-                path))
+            (SourceFile reference _)
+                (source-reference-file-path reference)))
 
 (pub def source-file-content (file)
      (match file
-            (SourceFile _ __ content ___)
+            (SourceFile _ content)
                 content))
 
 (pub def source-file-size (file)
      (match file
-            (SourceFile _ __ content ___)
+            (SourceFile _ content)
                 (slice-size content)))
 
 (pub def source-file-index (file)
      (match file
-            (SourceFile _ __ ___ index)
-                index))
+            (SourceFile reference _)
+                (source-reference-file-index reference)))
 
 (pub def source-file-in-same-module? (a b)
      (module-equal? (source-file-module a) (source-file-module b)))

@@ -1,10 +1,4 @@
 
-(pub typ module-reference
-     (ModulePath string boolean)
-     ModuleSelf)
-
-(pub typ source-reference (SourceReference int32 string module-reference))
-
 (pub typ identifier (Identifier int32 string source-reference range (maybe int32)))
 
 (pub typ ast-type
@@ -37,24 +31,6 @@
      (TypeDefinition identifier boolean (list type-parameter) (list constructor) range)
      (FunctionDefinition identifier boolean (list identifier) expression range)
      (TargetDefinition source-reference slice))
-
-(def source-reference-file-index (source-reference)
-     (match source-reference
-            (SourceReference file-index _ __)
-                file-index))
-
-(pub def source-reference-file-path (source-reference)
-     (match source-reference
-            (SourceReference _ file-path __)
-                file-path))
-
-(pub def source-reference-module (source-reference)
-     (match source-reference
-            (SourceReference _ __ module)
-                module))
-
-(pub def source-reference-equal? (a b)
-     (= (source-reference-file-index a) (source-reference-file-index b)))
 
 (pub def identifier-token (identifier)
      (match identifier
@@ -103,21 +79,6 @@
 
 (pub def identifier-equal? (a b)
      (= (identifier-token a) (identifier-token b)))
-
-(pub def module-equal? (a b)
-     (match a
-            (ModulePath a' _)
-                (match b
-                       (ModulePath b' _)
-                           (string-equal? a' b')
-                       ModuleSelf
-                           False)
-            ModuleSelf
-                (match b
-                       (ModulePath _ __)
-                           False
-                       ModuleSelf
-                           True)))
 
 (pub def definition-source-reference (definition)
      (match definition
