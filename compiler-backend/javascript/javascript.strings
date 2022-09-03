@@ -37,6 +37,7 @@ throw               |throw
 typeof              |typeof
 void                |void
 await               |await
+module              |module
 end-statement       |;
 equals              |=
 empty-object        |{}

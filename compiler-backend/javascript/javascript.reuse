@@ -7,7 +7,7 @@
          (list data-const data-continue data-catch data-debugger data-delete)
          (list data-export data-extends data-enum data-finally data-instanceof)
          (list data-null data-return data-super data-switch data-this data-throw)
-         (list data-typeof data-void data-await))))
+         (list data-typeof data-void data-await data-module))))
 
 (def escape-identifier (identifier)
      (SourceStringIdentifier identifier IdentifierTransformationNone))
