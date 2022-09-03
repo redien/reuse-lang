@@ -60,6 +60,7 @@ function testSpecFile(filePath) {
                 console.log("...");
                 failing++;
             }
+            total++;
         } else if (testCase.type === 'failure') {
             if (result.status === 0) {
                 console.log("not ok " + total + " - expected program to return a non-zero status code");
@@ -73,7 +74,7 @@ function testSpecFile(filePath) {
                 console.log("ok " + total + " - Error contains '" + testCase.expected + "'");
                 passing++;
             } else {
-                console.log("not ok " + total + " - expected '" + stderr + "' to contain '" + testCase.expected + "'");
+                console.log("not ok " + total + " - expected error to contain '" + testCase.expected + "'");
                 console.log("---");
                 console.log("  expression: '" + testCase.expression + "'");
                 console.log("  program:    '" + testCase.context + "'");
@@ -82,11 +83,10 @@ function testSpecFile(filePath) {
                 console.log("...");
                 failing++;
             }
+            total++;
         } else {
             console.log('# ' + testCase.comment);
         }
-
-        total++;
     });
 }
 
