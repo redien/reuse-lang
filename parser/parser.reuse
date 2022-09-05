@@ -207,7 +207,7 @@
                 (match context
                        (Pair scope definitions)
                            (parser-bind (sequence (new-identifier! source-reference malformed-function-definition VariableIdentifier) arguments) (fn (arguments)
-                           (parser-bind (new-identifier! source-reference malformed-function-definition FunctionIdentifier name) (fn (name)
+                           (parser-bind (new-identifier! source-reference malformed-function-definition (match public? True PublicFunctionIdentifier False PrivateFunctionIdentifier) name) (fn (name)
                            (parser-bind (parse-expression source-reference (scope-with (Cons name arguments) scope) expression) (fn (expression)
                            (parser-return (Pair
                                (scope-with (list name) scope)
@@ -239,13 +239,13 @@
             (Integer _ range)
                 (parser-error (malformed-type source-reference range))))
 
-(def parse-constructor (source-reference scope constructor)
+(def parse-constructor (source-reference public? scope constructor)
      (match constructor
             (Symbol _ name range)
-                (parser-bind (new-identifier! source-reference malformed-type-definition ConstructorIdentifier constructor) (fn (id)
+                (parser-bind (new-identifier! source-reference malformed-type-definition (match public? True PublicConstructorIdentifier False PrivateConstructorIdentifier) constructor) (fn (id)
                 (parser-return (SimpleConstructor id))))
             (List (Cons name types) range)
-                (parser-bind (new-identifier! source-reference malformed-type-definition ConstructorIdentifier name) (fn (id)
+                (parser-bind (new-identifier! source-reference malformed-type-definition (match public? True PublicConstructorIdentifier False PrivateConstructorIdentifier) name) (fn (id)
                 (parser-bind (sequence (parse-type source-reference scope) types) (fn (types)
                 (parser-return (ComplexConstructor id types range))))))
             (Integer _ range)
@@ -272,8 +272,8 @@
             (Pair scope definitions)
                 (parser-bind (sequence (parse-type-parameter source-reference scope) parameters) (fn (parameters)
                 (let-bind (list-map type-parameter-identifier parameters) (fn (parameter-names)
-                (parser-bind (new-identifier! source-reference malformed-type-definition TypeIdentifier name) (fn (name)
-                (parser-bind (sequence (parse-constructor source-reference (scope-with (Cons name parameter-names) scope)) constructors) (fn (constructors)
+                (parser-bind (new-identifier! source-reference malformed-type-definition (match public? True PublicTypeIdentifier False PrivateTypeIdentifier) name) (fn (name)
+                (parser-bind (sequence (parse-constructor source-reference public? (scope-with (Cons name parameter-names) scope)) constructors) (fn (constructors)
                 (let-bind (list-map constructor-identifier constructors) (fn (constructor-names)
                 (parser-return (Pair
                     (scope-with (Cons name constructor-names) scope)
@@ -360,16 +360,27 @@
                     (scope-empty)
                     (list (TargetDefinition (source-file-reference file) (source-file-content file)))))))
 
+(def identifier-is-accessible? (identifier source-reference)
+     (or
+         (module-equal?
+             (identifier-module identifier)
+             (source-reference-module source-reference))
+         (identifier-public? identifier)))
+
 (def resolve-variable (scope identifier)
      (match identifier
             (Identifier None text source-reference range)
                 (match (dictionary-get text scope)
                        (Some identifier)
-                           (result-return (Identifier
-                               (Some (Resolved identifier))
-                               (identifier-name identifier)
-                               source-reference
-                               range))
+                           (match (identifier-is-accessible? identifier source-reference)
+                                  True
+                                      (result-return (Identifier
+                                          (Some (Resolved identifier))
+                                          (identifier-name identifier)
+                                          source-reference
+                                          range))
+                                  False
+                                      (result-error (ErrorNotAccessible text source-reference range)))
                        None
                            (result-error (not-defined (Some text) source-reference range)))
             _

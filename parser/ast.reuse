@@ -1,8 +1,11 @@
 
 (pub typ identifier-kind
-     FunctionIdentifier
-     TypeIdentifier
-     ConstructorIdentifier
+     PublicFunctionIdentifier
+     PublicTypeIdentifier
+     PublicConstructorIdentifier
+     PrivateFunctionIdentifier
+     PrivateTypeIdentifier
+     PrivateConstructorIdentifier
      VariableIdentifier
      TypeVariableIdentifier)
 
@@ -89,9 +92,13 @@
             (Identifier _ __ ___ range)
                 range))
 
-(pub def symbol-constructor? (identifier)
+(pub def identifier-public? (identifier)
      (match (identifier-definition identifier)
-            (Some (Definition _ ConstructorIdentifier))
+            (Some (Definition _ PublicFunctionIdentifier))
+                True
+            (Some (Definition _ PublicTypeIdentifier))
+                True
+            (Some (Definition _ PublicConstructorIdentifier))
                 True
             _
                 False))
@@ -234,6 +241,22 @@
             _
                 (result-return expression)))
 
+(pub def over-match-pattern-identifiers (f pattern)
+     (match pattern
+            (ConstructorPattern identifier patterns range)
+                (result-bind (result-concat (list-map (over-match-pattern-identifiers f) patterns)) (fn (patterns)
+                (result-bind (f identifier) (fn (identifier)
+                (result-return (ConstructorPattern identifier patterns range))))))
+            _
+                (result-return pattern)))
+
+(pub def over-match-rule-identifiers (over-identifiers f rule)
+     (match rule
+            (Pair pattern expression)
+                (result-bind (over-match-pattern-identifiers f pattern) (fn (pattern)
+                (result-bind (over-identifiers f expression) (fn (expression)
+                (result-return (Pair pattern expression))))))))
+
 (pub def over-identifiers (f expression)
      (match expression
             (Variable name)
@@ -254,7 +277,7 @@
                 (result-bind (result-concat (list-map (over-identifiers f) expressions)) (fn (expressions)
                 (result-return (FunctionApplication expressions range))))
             (Match expression rules range)
-                (result-bind (result-concat (list-map (over-match-pair-expression (over-identifiers f)) rules)) (fn (rules)
+                (result-bind (result-concat (list-map (over-match-rule-identifiers over-identifiers f) rules)) (fn (rules)
                 (result-bind (over-identifiers f expression) (fn (expression)
                 (result-return (Match expression rules range))))))
             (ListExpression expressions range)

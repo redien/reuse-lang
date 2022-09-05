@@ -13,6 +13,17 @@ var command = process.argv[3];
 
 var passing = 0, failing = 0, total = 0;
 
+function logBaseTestCase(testCase) {
+    console.log("  expression:      '" + testCase.expression + "'");
+    console.log("  source file:     '" + testCase.context + "'");
+    if (testCase.context2.length > 0) {
+        console.log("  source file 2:   '" + testCase.context2 + "'");
+    }
+    if (testCase.context3.length > 0) {
+        console.log("  source file 3:   '" + testCase.context3 + "'");
+    }
+}
+
 function testSpecFile(filePath) {
     var input = fs.readFileSync(filePath);
 
@@ -34,7 +45,7 @@ function testSpecFile(filePath) {
     , parser.parse_spec(input)));
 
     testCases.forEach(testCase => {
-        var result = child_process.spawnSync(command, [testCase.context, testCase.expression]);
+        var result = child_process.spawnSync(command, [testCase.context, testCase.context2, testCase.context3, testCase.expression]);
         var stderr = result.stderr.toString('utf8');
         var stdout = result.stdout.toString('utf8');
 
@@ -42,9 +53,8 @@ function testSpecFile(filePath) {
             if (result.status !== 0) {
                 console.log("not ok " + total + " - program returned non-zero status code");
                 console.log("---");
-                console.log("  expression:  '" + testCase.expression + "'");
-                console.log("  program:     '" + testCase.context + "'");
-                console.log("  status-code: '" + result.status + "'");
+                logBaseTestCase(testCase);
+                console.log("  status-code:     '" + result.status + "'");
                 console.log("  error:");
                 console.log(stderr);
                 console.log("...");
@@ -55,10 +65,9 @@ function testSpecFile(filePath) {
             } else {
                 console.log("not ok " + total + " - expected '" + testCase.expected + "' but got '" + stdout + "'");
                 console.log("---");
-                console.log("  expression: '" + testCase.expression + "'");
-                console.log("  program:    '" + testCase.context + "'");
-                console.log("  expected:   '" + testCase.expected + "'");
-                console.log("  actual:     '" + stdout + "'");
+                logBaseTestCase(testCase);
+                console.log("  expected:       '" + testCase.expected + "'");
+                console.log("  actual:         '" + stdout + "'");
                 console.log("...");
                 failing++;
             }
@@ -67,9 +76,8 @@ function testSpecFile(filePath) {
             if (result.status === 0) {
                 console.log("not ok " + total + " - expected program to return a non-zero status code");
                 console.log("---");
-                console.log("  expression:  '" + testCase.expression + "'");
-                console.log("  program:     '" + testCase.context + "'");
-                console.log("  actual:      '" + stdout + "'");
+                logBaseTestCase(testCase);
+                console.log("  actual:          '" + stdout + "'");
                 console.log("...");
                 failing++;
             } else if (stderr.indexOf(testCase.expected) !== -1) {
@@ -78,10 +86,9 @@ function testSpecFile(filePath) {
             } else {
                 console.log("not ok " + total + " - expected error to contain '" + testCase.expected + "'");
                 console.log("---");
-                console.log("  expression: '" + testCase.expression + "'");
-                console.log("  program:    '" + testCase.context + "'");
-                console.log("  expected:   '" + testCase.expected + "'");
-                console.log("  actual:     '" + stderr + "'");
+                logBaseTestCase(testCase);
+                console.log("  expected:       '" + testCase.expected + "'");
+                console.log("  actual:         '" + stderr + "'");
                 console.log("...");
                 failing++;
             }

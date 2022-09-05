@@ -64,46 +64,49 @@
 
 (def predefined-identifiers ()
      (list
-         (predefined-identifier data-+ identifier-+ FunctionIdentifier)
-         (predefined-identifier data-- identifier-- FunctionIdentifier)
-         (predefined-identifier data-* identifier-* FunctionIdentifier)
-         (predefined-identifier data-/ identifier-/ FunctionIdentifier)
-         (predefined-identifier data-% identifier-% FunctionIdentifier)
-         (predefined-identifier data-& identifier-& FunctionIdentifier)
+         (predefined-identifier data-+ identifier-+ PrivateFunctionIdentifier)
+         (predefined-identifier data-- identifier-- PrivateFunctionIdentifier)
+         (predefined-identifier data-* identifier-* PrivateFunctionIdentifier)
+         (predefined-identifier data-/ identifier-/ PrivateFunctionIdentifier)
+         (predefined-identifier data-% identifier-% PrivateFunctionIdentifier)
+         (predefined-identifier data-& identifier-& PrivateFunctionIdentifier)
          (predefined-identifier
              data-int32-less-than
              identifier-int32-less-than
-             FunctionIdentifier)
-         (predefined-identifier data-list identifier-list FunctionIdentifier)
-         (predefined-identifier data-pipe identifier-pipe FunctionIdentifier)
-         (predefined-identifier data-dot identifier-dot FunctionIdentifier)
+             PrivateFunctionIdentifier)
+         (predefined-identifier data-list identifier-list PrivateFunctionIdentifier)
+         (predefined-identifier data-pipe identifier-pipe PrivateFunctionIdentifier)
+         (predefined-identifier data-dot identifier-dot PrivateFunctionIdentifier)
          (predefined-identifier
              data-slice-empty
              identifier-slice-empty
-             FunctionIdentifier)
+             PrivateFunctionIdentifier)
          (predefined-identifier
              data-slice-of-u8
              identifier-slice-of-u8
-             FunctionIdentifier)
+             PrivateFunctionIdentifier)
          (predefined-identifier
              data-slice-size
              identifier-slice-size
-             FunctionIdentifier)
-         (predefined-identifier data-slice-get identifier-slice-get FunctionIdentifier)
+             PrivateFunctionIdentifier)
+         (predefined-identifier
+             data-slice-get
+             identifier-slice-get
+             PrivateFunctionIdentifier)
          (predefined-identifier
              data-slice-concat
              identifier-slice-concat
-             FunctionIdentifier)
+             PrivateFunctionIdentifier)
          (predefined-identifier
              data-slice-foldl
              identifier-slice-foldl
-             FunctionIdentifier)
+             PrivateFunctionIdentifier)
          (predefined-identifier
              data-slice-subslice
              identifier-slice-subslice
-             FunctionIdentifier)
-         (predefined-identifier data-int32 identifier-int32 TypeIdentifier)
-         (predefined-identifier data-slice identifier-slice TypeIdentifier)))
+             PrivateFunctionIdentifier)
+         (predefined-identifier data-int32 identifier-int32 PrivateTypeIdentifier)
+         (predefined-identifier data-slice identifier-slice PrivateTypeIdentifier)))
 
 (def predefined-identifier-to-symbol (identifier)
      (pair-cons

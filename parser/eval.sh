@@ -3,4 +3,4 @@
 project_root=$(dirname "$0")/..
 build_dir=$($project_root/dev-env/builddir.sh parser)
 
-echo "$2" | $build_dir/source.out
+echo "$4" | $build_dir/source.out

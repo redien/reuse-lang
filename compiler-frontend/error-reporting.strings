@@ -1,6 +1,7 @@
 internal-error                        |Encountered an error here but it was unexpected. This might be a compiler bug:
 reserved-identifier-error             |Symbols prefixed with ✨ are reserved:
 not-defined-error                     |The following identifier was not defined: 
+not-accessible-error                  |The following identifier is not accessible from this module: 
 already-defined-error                 |The following identifier was already defined: 
 malformed-expression                  |I expected an expression here but it doesn't contain anything:
 malformed-function-definition         |Malformed function definition found:

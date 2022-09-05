@@ -126,6 +126,10 @@
                 (string-format (list
                     (list (string-concat (data-not-defined-error) name))
                     (list (location-information files source-reference range))))
+            (ErrorNotAccessible name source-reference range)
+                (string-format (list
+                    (list (string-concat (data-not-accessible-error) name))
+                    (list (location-information files source-reference range))))
             (ErrorAlreadyDefined name source-reference range)
                 (string-format (list
                     (list (string-concat (data-already-defined-error) name))
