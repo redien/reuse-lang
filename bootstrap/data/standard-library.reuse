@@ -80,6 +80,7 @@
 (pub def list-from-maybe (maybe) (match maybe (Some x) (list x) None Empty))
 (def list-collect-from-indexed-iterator' (predicate iterator initial) (match (indexed-iterator-next iterator) (Pair None _) (Pair iterator initial) (Pair (Some x) next) (match (predicate x) True (list-collect-from-indexed-iterator' predicate next (Cons x initial)) False (Pair iterator initial))))
 (pub def list-collect-from-indexed-iterator (predicate iterator) (match (list-collect-from-indexed-iterator' predicate iterator Empty) (Pair iterator result) (Pair iterator (list-reverse result))))
+(pub def maybe-concat (maybes) (list-foldr (fn (maybe values) (match maybe (Some value) (Cons value values) None values)) Empty maybes))
 (typ string-node (FTValue int32) (FTNode2 int32 string-node string-node) (FTNode3 int32 string-node string-node string-node))
 (pub typ string FTEmpty (FTSingle string-node) (FTDeep (list string-node) string (list string-node)))
 (pub def string-empty () FTEmpty)

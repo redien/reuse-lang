@@ -441,6 +441,13 @@ let rec list_collect_from_indexed_iterator predicate3 iterator4 =
          | (Pair (iterator5, result2)) -> 
             (Pair (iterator5, (list_reverse result2))));;
 
+let rec maybe_concat maybes = 
+    (list_foldr (fun maybe9 values -> (match maybe9 with
+         | (Some (value6)) -> 
+            (Cons (value6, values))
+         | None -> 
+            values)) Empty maybes);;
+
 type string_node  = 
      | FTValue : int32 -> string_node
      | FTNode2 : int32 * string_node * string_node -> string_node
@@ -945,12 +952,12 @@ let rec result_flatmap f34 result8 =
          | (Error (error4)) -> 
             (Error (error4)));;
 
-let rec result_or_else value6 result9 = 
+let rec result_or_else value7 result9 = 
     (match result9 with
          | (Result (x110)) -> 
             x110
          | (Error (x111)) -> 
-            value6);;
+            value7);;
 
 let rec result_error2 result10 = 
     (match result10 with
@@ -982,8 +989,8 @@ let rec result_concat list29 =
          | Empty -> 
             (Result ((result_filter_list list29))));;
 
-let rec result_of_maybe error6 maybe9 = 
-    (match maybe9 with
+let rec result_of_maybe error6 maybe10 = 
+    (match maybe10 with
          | (Some (x120)) -> 
             (Result (x120))
          | None -> 
@@ -992,8 +999,8 @@ let rec result_of_maybe error6 maybe9 =
 let rec result_bind result13 f35 = 
     (result_flatmap f35 result13);;
 
-let rec result_return value7 = 
-    (result_lift value7);;
+let rec result_return value8 = 
+    (result_lift value8);;
 
 type ('Ts,'Tv2) state  = 
      | Operation : ('Ts -> ('Ts,'Tv2) pair) -> ('Ts,'Tv2) state;;
@@ -1005,11 +1012,11 @@ let rec state_run state3 operation =
 
 let rec state_final_value initial_state operation2 = 
     (match (state_run initial_state operation2) with
-         | (Pair (x121, value8)) -> 
-            value8);;
+         | (Pair (x121, value9)) -> 
+            value9);;
 
-let rec state_return value9 = 
-    (Operation ((fun state4 -> (Pair (state4, value9)))));;
+let rec state_return value10 = 
+    (Operation ((fun state4 -> (Pair (state4, value10)))));;
 
 let rec state_bind operation3 f37 = 
     (Operation ((fun state5 -> (match (state_run state5 operation3) with
@@ -1025,8 +1032,8 @@ let rec state_set state7 =
 let rec state_modify f38 = 
     (state_bind (state_get ()) (fun state8 -> (state_set (f38 state8))));;
 
-let rec state_let value10 f39 = 
-    (state_bind (state_return value10) f39);;
+let rec state_let value11 f39 = 
+    (state_bind (state_return value11) f39);;
 
 let rec state_foldr f40 initial_value operations = 
     (list_foldr (fun operation4 chain -> (state_bind operation4 (fun x123 -> (state_bind chain (fun xs19 -> (state_return (f40 x123 xs19))))))) (state_return initial_value) operations);;
@@ -1040,16 +1047,16 @@ let rec state_flatmap f42 operation5 =
 let rec state_map f43 operation6 = 
     (state_flatmap (fun x51 -> (state_return (f43 x51))) operation6);;
 
-let rec state_lift value11 = 
-    (state_return value11);;
+let rec state_lift value12 = 
+    (state_return value12);;
 
 type array_color  = 
      | ArrayRed
      | ArrayBlack;;
 
-type ('Tvalue12) array  = 
+type ('Tvalue13) array  = 
      | ArrayEmpty
-     | ArrayTree : array_color * ('Tvalue12) array * (int32,'Tvalue12) pair * ('Tvalue12) array -> ('Tvalue12) array;;
+     | ArrayTree : array_color * ('Tvalue13) array * (int32,'Tvalue13) pair * ('Tvalue13) array -> ('Tvalue13) array;;
 
 let rec array_empty () = 
     ArrayEmpty;;
@@ -1074,29 +1081,29 @@ let rec array_balance array3 =
          | rest14 -> 
             rest14);;
 
-let rec array_set2 x129 value13 array4 = 
+let rec array_set2 x129 value14 array4 = 
     (match array4 with
          | ArrayEmpty -> 
-            (ArrayTree (ArrayRed, ArrayEmpty, (Pair (x129, value13)), ArrayEmpty))
+            (ArrayTree (ArrayRed, ArrayEmpty, (Pair (x129, value14)), ArrayEmpty))
          | (ArrayTree (color, a48, y14, b44)) -> 
             (match (x2 x129 (pair_left y14)) with
                  | True -> 
-                    (array_balance (ArrayTree (color, (array_set2 x129 value13 a48), y14, b44)))
+                    (array_balance (ArrayTree (color, (array_set2 x129 value14 a48), y14, b44)))
                  | False -> 
                     (match (x3 x129 (pair_left y14)) with
                          | True -> 
-                            (array_balance (ArrayTree (color, a48, y14, (array_set2 x129 value13 b44))))
+                            (array_balance (ArrayTree (color, a48, y14, (array_set2 x129 value14 b44))))
                          | False -> 
-                            (ArrayTree (color, a48, (Pair (x129, value13)), b44)))));;
+                            (ArrayTree (color, a48, (Pair (x129, value14)), b44)))));;
 
-let rec array_set x130 value14 array5 = 
-    (array_make_black (array_set2 x130 value14 array5));;
+let rec array_set x130 value15 array5 = 
+    (array_make_black (array_set2 x130 value15 array5));;
 
 let rec array_get x131 array6 = 
     (match array6 with
          | ArrayEmpty -> 
             None
-         | (ArrayTree (x132, a49, (Pair (y15, value15)), b45)) -> 
+         | (ArrayTree (x132, a49, (Pair (y15, value16)), b45)) -> 
             (match (x2 x131 y15) with
                  | True -> 
                     (array_get x131 a49)
@@ -1105,7 +1112,7 @@ let rec array_get x131 array6 =
                          | True -> 
                             (array_get x131 b45)
                          | False -> 
-                            (Some (value15)))));;
+                            (Some (value16)))));;
 
 let rec array_min array7 default = 
     (match array7 with
@@ -1175,24 +1182,24 @@ let rec array_from_list entries2 =
 
 let rec array_of entries3 = 
     (list_foldl (fun entry2 array14 -> (match entry2 with
-         | (Pair (key, value16)) -> 
-            (array_set key value16 array14))) ArrayEmpty entries3);;
+         | (Pair (key, value17)) -> 
+            (array_set key value17 array14))) ArrayEmpty entries3);;
 
-let rec array_singleton index7 value17 = 
-    (ArrayTree (ArrayBlack, ArrayEmpty, (Pair (index7, value17)), ArrayEmpty));;
+let rec array_singleton index7 value18 = 
+    (ArrayTree (ArrayBlack, ArrayEmpty, (Pair (index7, value18)), ArrayEmpty));;
 
 let rec array_get_or index8 default2 array15 = 
     (match (array_get index8 array15) with
-         | (Some (value18)) -> 
-            value18
+         | (Some (value19)) -> 
+            value19
          | None -> 
             default2);;
 
 let rec array_size array16 = 
     (list_size (array_entries array16));;
 
-type ('Tvalue19) dictionary  = 
-     | Dictionary : (((string,'Tvalue19) pair) list) array -> ('Tvalue19) dictionary;;
+type ('Tvalue20) dictionary  = 
+     | Dictionary : (((string,'Tvalue20) pair) list) array -> ('Tvalue20) dictionary;;
 
 let rec dictionary_empty () = 
     (Dictionary ((array_empty ())));;
@@ -1245,13 +1252,13 @@ let rec dictionary_entries dictionary5 =
 let rec dictionary_of entries4 = 
     (list_foldl (pair_map dictionary_set) (dictionary_empty ()) entries4);;
 
-let rec dictionary_singleton key6 value20 = 
-    (dictionary_set key6 value20 (dictionary_empty ()));;
+let rec dictionary_singleton key6 value21 = 
+    (dictionary_set key6 value21 (dictionary_empty ()));;
 
 let rec dictionary_get_or key7 default3 dictionary6 = 
     (match (dictionary_get key7 dictionary6) with
-         | (Some (value21)) -> 
-            value21
+         | (Some (value22)) -> 
+            value22
          | None -> 
             default3);;
 
@@ -1543,10 +1550,10 @@ type parse_error  =
      | ParseErrorTooFewClosingBrackets
      | ParseErrorTooManyClosingBrackets;;
 
-type ('Tsymbol,'Tvalue22) parser_result  = 
-     | ParserResult : int32 * (int32,('Tsymbol) dictionary) pair * 'Tvalue22 -> ('Tsymbol,'Tvalue22) parser_result
-     | ParserError : parse_error -> ('Tsymbol,'Tvalue22) parser_result
-     | ParserEnd : int32 -> ('Tsymbol,'Tvalue22) parser_result;;
+type ('Tsymbol,'Tvalue23) parser_result  = 
+     | ParserResult : int32 * (int32,('Tsymbol) dictionary) pair * 'Tvalue23 -> ('Tsymbol,'Tvalue23) parser_result
+     | ParserError : parse_error -> ('Tsymbol,'Tvalue23) parser_result
+     | ParserEnd : int32 -> ('Tsymbol,'Tvalue23) parser_result;;
 
 let rec intern_string index9 next_index name symbol_state = 
     (match symbol_state with
@@ -2167,14 +2174,14 @@ let rec parser_run symbols23 parser2 =
          | (Pair (x341, result14)) -> 
             result14);;
 
-let rec parser_return value23 = 
-    (state_return (result_return value23));;
+let rec parser_return value24 = 
+    (state_return (result_return value24));;
 
 let rec parser_error error10 = 
     (state_return (result_error error10));;
 
 let rec parser_bind parser3 f54 = 
-    (state_bind parser3 (fun result15 -> (result_prod state_return (result_bind result15 (fun value24 -> (result_return (f54 value24)))))));;
+    (state_bind parser3 (fun result15 -> (result_prod state_return (result_bind result15 (fun value25 -> (result_return (f54 value25)))))));;
 
 let rec parser_token_is_constructor token5 = 
     (state_bind (state_get ()) (fun context11 -> (parser_return (parser_context_token_is_constructor token5 context11))));;
@@ -2334,8 +2341,8 @@ let rec pattern_to_sexp pattern7 =
             (identifier_to_symbol identifier34)
          | (ConstructorPattern (identifier35, patterns2, range31)) -> 
             (List ((Cons ((identifier_to_symbol identifier35), (list_map pattern_to_sexp patterns2))), range31))
-         | (IntegerPattern (value25, range32)) -> 
-            (Integer (value25, range32))
+         | (IntegerPattern (value26, range32)) -> 
+            (Integer (value26, range32))
          | (Capture (identifier36)) -> 
             (identifier_to_symbol identifier36));;
 
@@ -3355,8 +3362,8 @@ let rec generated_x_variable source_reference55 range100 =
 
 let rec transform_pipe source_reference56 expressions29 range101 = 
     (match expressions29 with
-         | (Cons (value26, expressions30)) -> 
-            (list_foldl (fun expression54 composed -> (FunctionApplication ((Cons (expression54, (Cons (composed, Empty)))), range101))) value26 expressions30)
+         | (Cons (value27, expressions30)) -> 
+            (list_foldl (fun expression54 composed -> (FunctionApplication ((Cons (expression54, (Cons (composed, Empty)))), range101))) value27 expressions30)
          | Empty -> 
             (Lambda ((Cons ((generated_x_variable source_reference56 range101), Empty)), (Variable ((generated_x_variable source_reference56 range101))), range101)));;
 
@@ -4638,6 +4645,9 @@ let rec data_void () =
 let rec data_await () = 
     (string_from_list (Cons ((97l), (Cons ((119l), (Cons ((97l), (Cons ((105l), (Cons ((116l), Empty)))))))))));;
 
+let rec data_module4 () = 
+    (string_from_list (Cons ((109l), (Cons ((111l), (Cons ((100l), (Cons ((117l), (Cons ((108l), (Cons ((101l), Empty)))))))))))));;
+
 let rec data_end_statement () = 
     (string_from_list (Cons ((59l), Empty)));;
 
@@ -4699,7 +4709,7 @@ let rec data_21 () =
     (string_from_list (Cons ((125l), (Cons ((59l), Empty)))));;
 
 let rec reserved_identifiers2 () = 
-    (list_flatten (Cons ((Cons (data_var, (Cons (data_import2, (Cons (data_default2, (Cons (data_case2, (Cons (data_class3, (Cons (data_do3, Empty)))))))))))), (Cons ((Cons (data_else3, (Cons (data_false3, (Cons (data_for3, (Cons (data_function4, (Cons (data_if3, (Cons (data_in3, Empty)))))))))))), (Cons ((Cons (data_new3, (Cons (data_true4, (Cons (data_try3, (Cons (data_with3, (Cons (data_while3, (Cons (data_break, Empty)))))))))))), (Cons ((Cons (data_const, (Cons (data_continue, (Cons (data_catch, (Cons (data_debugger, (Cons (data_delete, Empty)))))))))), (Cons ((Cons (data_export, (Cons (data_extends, (Cons (data_enum, (Cons (data_finally, (Cons (data_instanceof, Empty)))))))))), (Cons ((Cons (data_null, (Cons (data_return, (Cons (data_super, (Cons (data_switch, (Cons (data_this, (Cons (data_throw, Empty)))))))))))), (Cons ((Cons (data_typeof, (Cons (data_void, (Cons (data_await, Empty)))))), Empty)))))))))))))));;
+    (list_flatten (Cons ((Cons (data_var, (Cons (data_import2, (Cons (data_default2, (Cons (data_case2, (Cons (data_class3, (Cons (data_do3, Empty)))))))))))), (Cons ((Cons (data_else3, (Cons (data_false3, (Cons (data_for3, (Cons (data_function4, (Cons (data_if3, (Cons (data_in3, Empty)))))))))))), (Cons ((Cons (data_new3, (Cons (data_true4, (Cons (data_try3, (Cons (data_with3, (Cons (data_while3, (Cons (data_break, Empty)))))))))))), (Cons ((Cons (data_const, (Cons (data_continue, (Cons (data_catch, (Cons (data_debugger, (Cons (data_delete, Empty)))))))))), (Cons ((Cons (data_export, (Cons (data_extends, (Cons (data_enum, (Cons (data_finally, (Cons (data_instanceof, Empty)))))))))), (Cons ((Cons (data_null, (Cons (data_return, (Cons (data_super, (Cons (data_switch, (Cons (data_this, (Cons (data_throw, Empty)))))))))))), (Cons ((Cons (data_typeof, (Cons (data_void, (Cons (data_await, (Cons (data_module4, Empty)))))))), Empty)))))))))))))));;
 
 let rec escape_identifier2 identifier79 = 
     (SourceStringIdentifier (identifier79, IdentifierTransformationNone));;
@@ -5019,7 +5029,7 @@ let rec data_method4 () =
 let rec data_mod4 () = 
     (string_from_list (Cons ((109l), (Cons ((111l), (Cons ((100l), Empty)))))));;
 
-let rec data_module4 () = 
+let rec data_module5 () = 
     (string_from_list (Cons ((109l), (Cons ((111l), (Cons ((100l), (Cons ((117l), (Cons ((108l), (Cons ((101l), Empty)))))))))))));;
 
 let rec data_mutable4 () = 
@@ -5286,7 +5296,7 @@ let rec data_method5 () =
 let rec data_mod5 () = 
     (string_from_list (Cons ((109l), (Cons ((111l), (Cons ((100l), Empty)))))));;
 
-let rec data_module5 () = 
+let rec data_module6 () = 
     (string_from_list (Cons ((109l), (Cons ((111l), (Cons ((100l), (Cons ((117l), (Cons ((108l), (Cons ((101l), Empty)))))))))))));;
 
 let rec data_mutable5 () = 
@@ -5488,7 +5498,7 @@ let rec data_ocaml_language () =
     (string_from_list (Cons ((111l), (Cons ((99l), (Cons ((97l), (Cons ((109l), (Cons ((108l), Empty)))))))))));;
 
 let rec reserved_identifiers3 () = 
-    (list_flatten (Cons ((Cons (data_assert5, (Cons (data_asr5, (Cons (data_begin5, (Cons (data_constraint5, (Cons (data_do5, (Cons (data_done5, Empty)))))))))))), (Cons ((Cons (data_downto5, (Cons (data_type5, (Cons (data_if5, (Cons (data_then5, (Cons (data_else5, (Cons (data_with6, (Cons (data_of5, Empty)))))))))))))), (Cons ((Cons (data_end5, (Cons (data_in5, (Cons (data_fun5, (Cons (data_let5, (Cons (data_open5, (Cons (data_and5, (Cons (data_or5, (Cons (data_as5, Empty)))))))))))))))), (Cons ((Cons (data_class5, (Cons (data_exception5, (Cons (data_external5, (Cons (data_false5, (Cons (data_true6, (Cons (data_for5, Empty)))))))))))), (Cons ((Cons (data_function6, (Cons (data_functor5, (Cons (data_if5, (Cons (data_include5, (Cons (data_inherit5, Empty)))))))))), (Cons ((Cons (data_initializer5, (Cons (data_land5, (Cons (data_lazy5, (Cons (data_lor5, (Cons (data_lsl5, (Cons (data_lsr5, Empty)))))))))))), (Cons ((Cons (data_lxor5, (Cons (data_method5, (Cons (data_mod5, (Cons (data_module5, (Cons (data_mutable5, (Cons (data_new5, Empty)))))))))))), (Cons ((Cons (data_nonrec5, (Cons (data_object5, (Cons (data_private5, (Cons (data_rec5, (Cons (data_sig5, (Cons (data_struct5, Empty)))))))))))), (Cons ((Cons (data_try5, (Cons (data_val5, (Cons (data_virtual5, (Cons (data_when5, (Cons (data_while5, (Cons (data_parser5, Empty)))))))))))), (Cons ((Cons (data_value5, (Cons (data_to5, (Cons (data_slice7, Empty)))))), Empty)))))))))))))))))))));;
+    (list_flatten (Cons ((Cons (data_assert5, (Cons (data_asr5, (Cons (data_begin5, (Cons (data_constraint5, (Cons (data_do5, (Cons (data_done5, Empty)))))))))))), (Cons ((Cons (data_downto5, (Cons (data_type5, (Cons (data_if5, (Cons (data_then5, (Cons (data_else5, (Cons (data_with6, (Cons (data_of5, Empty)))))))))))))), (Cons ((Cons (data_end5, (Cons (data_in5, (Cons (data_fun5, (Cons (data_let5, (Cons (data_open5, (Cons (data_and5, (Cons (data_or5, (Cons (data_as5, Empty)))))))))))))))), (Cons ((Cons (data_class5, (Cons (data_exception5, (Cons (data_external5, (Cons (data_false5, (Cons (data_true6, (Cons (data_for5, Empty)))))))))))), (Cons ((Cons (data_function6, (Cons (data_functor5, (Cons (data_if5, (Cons (data_include5, (Cons (data_inherit5, Empty)))))))))), (Cons ((Cons (data_initializer5, (Cons (data_land5, (Cons (data_lazy5, (Cons (data_lor5, (Cons (data_lsl5, (Cons (data_lsr5, Empty)))))))))))), (Cons ((Cons (data_lxor5, (Cons (data_method5, (Cons (data_mod5, (Cons (data_module6, (Cons (data_mutable5, (Cons (data_new5, Empty)))))))))))), (Cons ((Cons (data_nonrec5, (Cons (data_object5, (Cons (data_private5, (Cons (data_rec5, (Cons (data_sig5, (Cons (data_struct5, Empty)))))))))))), (Cons ((Cons (data_try5, (Cons (data_val5, (Cons (data_virtual5, (Cons (data_when5, (Cons (data_while5, (Cons (data_parser5, Empty)))))))))))), (Cons ((Cons (data_value5, (Cons (data_to5, (Cons (data_slice7, Empty)))))), Empty)))))))))))))))))))));;
 
 let rec operator_translation_map3 () = 
     (dictionary_of (Cons ((Pair ((data_27 ()), (SourceString ((data_int32_plus3 ()))))), (Cons ((Pair ((data__5 ()), (SourceString ((data_int32_minus3 ()))))), (Cons ((Pair ((data_28 ()), (SourceString ((data_int32_multiply3 ()))))), (Cons ((Pair ((data_29 ()), (SourceString ((data_int32_divide3 ()))))), (Cons ((Pair ((data_30 ()), (SourceString ((data_int32_modulus3 ()))))), (Cons ((Pair ((data_31 ()), (SourceString ((data_int32_and3 ()))))), Empty)))))))))))));;
@@ -5801,8 +5811,8 @@ let rec error_bind message f60 =
 
 let rec flag_is_true flag default4 arguments41 = 
     (match (dictionary_get flag arguments41) with
-         | (Some (value27)) -> 
-            (string_equal value27 (data_true7 ()))
+         | (Some (value28)) -> 
+            (string_equal value28 (data_true7 ()))
          | None -> 
             default4);;
 

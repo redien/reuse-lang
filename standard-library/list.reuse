@@ -254,3 +254,14 @@
      (match (list-collect-from-indexed-iterator' predicate iterator Empty)
             (Pair iterator result)
                 (Pair iterator (list-reverse result))))
+
+(pub def maybe-concat (maybes)
+     (list-foldr
+         (fn (maybe values)
+             (match maybe
+                    (Some value)
+                        (Cons value values)
+                    None
+                        values))
+         Empty
+         maybes))
