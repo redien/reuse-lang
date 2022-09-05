@@ -80,3 +80,47 @@ Context should accept empty lines
 = 
 = text
 = 
+
+Second context should accept several lines
+> / con
+> / text
+> > expression
+> = expected
+= ExpectSuccess:expected=expected,expression=expression,context2=con
+= text
+
+Second context should accept empty lines
+> / 
+> / con
+> / 
+> / text
+> / 
+> > expression
+> = expected
+= ExpectSuccess:expected=expected,expression=expression,context2=
+= con
+= 
+= text
+= 
+
+Third context should accept several lines
+> \ con
+> \ text
+> > expression
+> = expected
+= ExpectSuccess:expected=expected,expression=expression,context3=con
+= text
+
+Third context should accept empty lines
+> \ 
+> \ con
+> \ 
+> \ text
+> \ 
+> > expression
+> = expected
+= ExpectSuccess:expected=expected,expression=expression,context3=
+= con
+= 
+= text
+= 

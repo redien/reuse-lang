@@ -1,7 +1,7 @@
 
 (pub typ spec-requirement
-     (ExpectSuccess string string string)
-     (ExpectFailure string string string)
+     (ExpectSuccess string string string string string)
+     (ExpectFailure string string string string string)
      (Comment string))
 
 (def line-matches (first-char line)
@@ -15,12 +15,16 @@
 (def collect-success (lines)
      (ExpectSuccess
          (collect-lines 124 lines)
+         (collect-lines 47 lines)
+         (collect-lines 92 lines)
          (collect-lines 62 lines)
          (collect-lines 61 lines)))
 
 (def collect-failure (lines)
      (ExpectFailure
          (collect-lines 124 lines)
+         (collect-lines 47 lines)
+         (collect-lines 92 lines)
          (collect-lines 62 lines)
          (collect-lines 63 lines)))
 
@@ -72,6 +76,10 @@
             (Some 63)
                 (append-line line result)
             (Some 62)
+                (append-non-assertion line result)
+            (Some 47)
+                (append-non-assertion line result)
+            (Some 92)
                 (append-non-assertion line result)
             (Some 124)
                 (append-non-assertion line result)

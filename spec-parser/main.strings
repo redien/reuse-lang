@@ -5,6 +5,8 @@ error     |*error*
 expression|expression
 expected  |expected
 context   |context
+context2  |context2
+context3  |context3
 success   |ExpectSuccess:
 failure   |ExpectFailure:
 comment   |Comment:

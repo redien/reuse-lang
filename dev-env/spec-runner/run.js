@@ -16,17 +16,19 @@ var passing = 0, failing = 0, total = 0;
 function testSpecFile(filePath) {
     var input = fs.readFileSync(filePath);
 
-    var createTestCase = type => (context, expression, expected) => ({
+    var createTestCase = type => (context, context2, context3, expression, expected) => ({
         type,
         context: parser.reuse_string_to_js(context),
+        context2: parser.reuse_string_to_js(context2),
+        context3: parser.reuse_string_to_js(context3),
         expression: parser.reuse_string_to_js(expression),
         expected: parser.reuse_string_to_js(expected)
     });
 
     var testCases = parser.reuse_list_to_js(parser.list_map(testCase =>
         match(testCase, [
-            [parser.ExpectSuccess, $, $, $], createTestCase('success'),
-            [parser.ExpectFailure, $, $, $], createTestCase('failure'),
+            [parser.ExpectSuccess, $, $, $, $, $], createTestCase('success'),
+            [parser.ExpectFailure, $, $, $, $, $], createTestCase('failure'),
             [parser.Comment, $], comment => ({ type: 'comment', comment: parser.reuse_string_to_js(comment) })
         ])
     , parser.parse_spec(input)));

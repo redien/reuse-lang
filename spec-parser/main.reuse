@@ -3,66 +3,62 @@
      (match requirement
             (Comment comment)
                 (string-join (string-empty) (list (data-comment) comment))
-            (ExpectSuccess context expression expected)
-                (match (string-is-empty? context)
-                       True
-                           (string-join
-                               (string-empty)
-                               (list
-                                   (data-success)
-                                   (data-expected)
-                                   (data-equal)
-                                   expected
-                                   (data-comma)
-                                   (data-expression)
-                                   (data-equal)
-                                   expression))
-                       False
-                           (string-join
-                               (string-empty)
-                               (list
-                                   (data-success)
-                                   (data-expected)
-                                   (data-equal)
-                                   expected
-                                   (data-comma)
-                                   (data-expression)
-                                   (data-equal)
-                                   expression
-                                   (data-comma)
-                                   (data-context)
-                                   (data-equal)
-                                   context)))
-            (ExpectFailure context expression expected)
-                (match (string-is-empty? context)
-                       True
-                           (string-join
-                               (string-empty)
-                               (list
-                                   (data-failure)
-                                   (data-expected)
-                                   (data-equal)
-                                   expected
-                                   (data-comma)
-                                   (data-expression)
-                                   (data-equal)
-                                   expression))
-                       False
-                           (string-join
-                               (string-empty)
-                               (list
-                                   (data-failure)
-                                   (data-expected)
-                                   (data-equal)
-                                   expected
-                                   (data-comma)
-                                   (data-expression)
-                                   (data-equal)
-                                   expression
-                                   (data-comma)
-                                   (data-context)
-                                   (data-equal)
-                                   context)))))
+            (ExpectSuccess context context2 context3 expression expected)
+                (string-join
+                    (string-empty)
+                    (list-flatten (list
+                        (list
+                            (data-success)
+                            (data-expected)
+                            (data-equal)
+                            expected
+                            (data-comma)
+                            (data-expression)
+                            (data-equal)
+                            expression)
+                        (match (string-is-empty? context)
+                               False
+                                   (list (data-comma) (data-context) (data-equal) context)
+                               True
+                                   (list-empty))
+                        (match (string-is-empty? context2)
+                               False
+                                   (list (data-comma) (data-context2) (data-equal) context2)
+                               True
+                                   (list-empty))
+                        (match (string-is-empty? context3)
+                               False
+                                   (list (data-comma) (data-context3) (data-equal) context3)
+                               True
+                                   (list-empty)))))
+            (ExpectFailure context context2 context3 expression expected)
+                (string-join
+                    (string-empty)
+                    (list-flatten (list
+                        (list
+                            (data-failure)
+                            (data-expected)
+                            (data-equal)
+                            expected
+                            (data-comma)
+                            (data-expression)
+                            (data-equal)
+                            expression)
+                        (match (string-is-empty? context)
+                               False
+                                   (list (data-comma) (data-context) (data-equal) context)
+                               True
+                                   (list-empty))
+                        (match (string-is-empty? context2)
+                               False
+                                   (list (data-comma) (data-context2) (data-equal) context2)
+                               True
+                                   (list-empty))
+                        (match (string-is-empty? context3)
+                               False
+                                   (list (data-comma) (data-context3) (data-equal) context3)
+                               True
+                                   (list-empty)))))))
 
 (def stringify-parameters (requirements)
      (string-join (data-pipe) (list-map stringify-requirement requirements)))
