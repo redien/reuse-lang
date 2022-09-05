@@ -1,7 +1,8 @@
 
 (pub typ module-reference
      (ModulePath string boolean)
-     ModuleSelf)
+     ModuleSelf
+     ModuleInternal)
 
 (pub typ source-reference (SourceReference int32 string module-reference))
 
@@ -18,14 +19,20 @@
                 (match b
                        (ModulePath b' _)
                            (string-equal? a' b')
-                       ModuleSelf
+                       _
                            False)
             ModuleSelf
                 (match b
-                       (ModulePath _ __)
-                           False
                        ModuleSelf
-                           True)))
+                           True
+                       _
+                           False)
+            ModuleInternal
+                (match b
+                       ModuleInternal
+                           True
+                       _
+                           False)))
 
 (def source-reference-file-index (source-reference)
      (match source-reference
@@ -72,6 +79,11 @@
      (match file
             (SourceFile reference _)
                 (source-reference-file-index reference)))
+
+(pub def source-file-reference (file)
+     (match file
+            (SourceFile reference _)
+                reference))
 
 (pub def source-file-in-same-module? (a b)
      (module-equal? (source-file-module a) (source-file-module b)))

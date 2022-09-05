@@ -14,12 +14,18 @@ int32-modulus       |Int32.rem
 int32-and           |Int32.logand
 int32               |Int32.of_int 
 comma               |,
+list-open           |[
+list-close          |]
 with                |with
 slice               |slice
-slice-type          |_slice
+slice-type          |slice'
 definition-end      |;;
 let-rec             |let rec 
 constant            |_constant_
 preamble-filename   |preamble.ml
 pervasives-filename |pervasives.ml
 ocaml-language      |ocaml
+ml-list-to-reuse    |ml_list_to_reuse
+x                   |x'
+empty               |Empty
+cons                |Cons

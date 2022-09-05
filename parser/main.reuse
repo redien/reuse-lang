@@ -27,8 +27,8 @@
                 (data-MalformedConstructorError)
             (MalformedTypeError _ __)
                 (data-MalformedTypeError)
-            (ErrorNotDefined _ __ ___)
-                (data-ErrorNotDefined)
+            (ErrorNotDefined name __ ___)
+                (string-concat (data-ErrorNotDefined) name)
             (ErrorAlreadyDefined _ __ ___)
                 (data-ErrorAlreadyDefined)
             (ErrorReservedIdentifier _ __ ___)
@@ -43,5 +43,6 @@
          stdin
          (fn (stdin)
              (list (SourceFile (SourceReference -1 (data-test-file-path) ModuleSelf) stdin)))
-         (parse-source-files (list-empty))
+         parse-source-files
+         (result-map pair-right)
          (result-bimap (. stringify-sexps definitions-to-sexps) stringify-error)))

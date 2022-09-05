@@ -3,10 +3,11 @@ backslash           |\
 arrow               | -> 
 equals              | = 
 vertical-bar        | | 
-pipe-operator       | |> 
+dollar-operator     | $ 
 colon               | : 
 semicolon           | ; 
 star                | * 
+dot-operator        | . 
 Int32               |Int32
 int32-plus          |_int32_add
 int32-multiply      |_int32_mul
@@ -41,3 +42,6 @@ language-exts       |{-# LANGUAGE ExistentialQuantification #-}
 pervasives-filename |Pervasives.hs
 preamble-filename   |preamble.hs
 haskell-language    |haskell
+x                   |x'
+empty               |Empty
+cons                |Cons

@@ -1,9 +1,3 @@
-def                          |def
-typ                          |typ
-fn                           |fn
-match                        |match
-exists                       |exists
-pub                          |pub
 +                            |+
 -                            |-
 *                            |*

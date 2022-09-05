@@ -26,9 +26,9 @@
      (match (Pair value pattern)
             (Pair (ValueInteger a) (IntegerPattern b _2))
                 (= a b)
-            (Pair (ValueConstructor token name values) (ConstructorPattern pattern-symbol patterns _2))
+            (Pair (ValueConstructor identifier values) (ConstructorPattern pattern-identifier patterns _2))
                 (and
-                    (= token (identifier-token pattern-symbol))
+                    (identifier-equal? identifier pattern-identifier)
                     (list-every? (pair-map pattern-matches-value) (list-zip values patterns)))
             (Pair _1 (Capture _2))
                 True
@@ -39,10 +39,14 @@
      (match pair
             (Pair value (IntegerPattern _1 _2))
                 Empty
-            (Pair (ValueConstructor _1 _2 values) (ConstructorPattern _3 patterns _4))
+            (Pair (ValueConstructor _ values) (ConstructorPattern __ patterns ___))
                 (list-flatmap case-capture (list-zip values patterns))
             (Pair value (Capture identifier))
-                (list (Pair (identifier-token identifier) value))
+                (match (identifier-id identifier)
+                       (Some id)
+                           (list (Pair id value))
+                       None
+                           Empty)
             _
                 Empty))
 
@@ -184,10 +188,14 @@
                 (return (ValueClosure
                     (list-skip (list-size values) arguments)
                     expression
-                    (scope-add (list-zip (list-map identifier-token arguments) values) scope)))
+                    (scope-add
+                        (list-zip (list-map (. (maybe-or-else 0) identifier-id) arguments) values)
+                        scope)))
             False
                 (eval-expression
-                    (scope-add (list-zip (list-map identifier-token arguments) values) scope)
+                    (scope-add
+                        (list-zip (list-map (. (maybe-or-else 0) identifier-id) arguments) values)
+                        scope)
                     stack-trace
                     expression)))
 
@@ -201,7 +209,7 @@
                     parameters
                     closed-scope
                     body)
-            (Cons (ValueFunction arguments body) parameters)
+            (Cons (ValueFunction _ arguments body) parameters)
                 (eval-function-application
                     eval-expression
                     (add-stack-trace expression parameters stack-trace)
@@ -212,14 +220,14 @@
             (Cons (ValueIntrinsic evaluator) parameters)
                 (evaluator scope stack-trace (list-rest values))
             _
-                (eval-error)))
+                (Error (data-error-internal-2))))
 
 (def eval-expression (scope stack-trace expression)
      (match expression
             (IntegerConstant value _)
                 (return (ValueInteger value))
             (Variable identifier)
-                (match (scope-get (identifier-token identifier) scope)
+                (match (scope-get (maybe-or-else 0 (identifier-id identifier)) scope)
                        (Some value)
                            (return value)
                        None
@@ -235,10 +243,7 @@
                                    (render-stack-trace stack-trace)))))
             (Constructor identifier arguments _)
                 (bind (sequence (list-map (eval-expression scope stack-trace) arguments)) (fn (values)
-                (return (ValueConstructor
-                    (identifier-token identifier)
-                    (identifier-name identifier)
-                    values))))
+                (return (ValueConstructor identifier values))))
             (Lambda arguments expression _)
                 (return (ValueClosure arguments expression scope))
             (FunctionApplication expressions _)
@@ -247,17 +252,68 @@
                     (apply-function eval-expression scope stack-trace (list-first expressions)))
             (Match expression cases _)
                 (bind (eval-expression scope stack-trace expression) (fn (expression)
-                (pattern-match eval-expression scope stack-trace expression cases)))))
+                (pattern-match eval-expression scope stack-trace expression cases)))
+            (ListExpression expressions _)
+                (match (Pair
+                    (scope-find-constructor (data-cons) scope)
+                    (scope-find-constructor (data-empty) scope))
+                       (Pair (Some (ValueConstructor cons _)) (Some (ValueConstructor empty __)))
+                           (bind (sequence (list-map (eval-expression scope stack-trace) expressions)) (fn (expressions)
+                           (return (list-foldr
+                               (fn (x xs)
+                                   (ValueConstructor cons (list x xs)))
+                               (ValueConstructor empty (list-empty))
+                               expressions))))
+                       _
+                           (Error (data-error-no-list-constructors)))
+            (Pipe (Cons value expressions) _)
+                (bind (sequence (list-map (eval-expression scope stack-trace) expressions)) (fn (functions)
+                (bind (eval-expression scope stack-trace value) (fn (value)
+                (list-foldl
+                    (fn (f value)
+                        (bind value (fn (value)
+                        (apply-function
+                            eval-expression
+                            scope
+                            stack-trace
+                            (Some (pair-left f))
+                            (list (pair-right f) value)))))
+                    (return value)
+                    (list-zip expressions functions))))))
+            (Compose expressions _)
+                (match (list-reverse expressions)
+                       (Cons first rest)
+                           (bind (eval-expression scope stack-trace first) (fn (first-function)
+                           (bind (sequence (list-map (eval-expression scope stack-trace) rest)) (fn (functions)
+                           (return (ValueIntrinsic (fn (scope stack-trace arguments)
+                               (bind (apply-function eval-expression scope stack-trace (Some first) (Cons first-function arguments)) (fn (value)
+                               (list-foldl
+                                   (fn (f value)
+                                       (bind value (fn (value)
+                                       (apply-function
+                                           eval-expression
+                                           scope
+                                           stack-trace
+                                           (Some (pair-left f))
+                                           (list (pair-right f) value)))))
+                                   (return value)
+                                   (list-zip rest functions)))))))))))
+                       Empty
+                           (Error (data-error-internal-3)))
+            _
+                (Error (data-error-internal-1))))
 
 (def eval (scope values)
-     (match (scope-get (identifier-main) scope)
-            (Some (ValueFunction arguments expression))
+     (match (scope-find-function (data-main) scope)
+            (Some (ValueFunction _ arguments expression))
                 (eval-expression
-                    (scope-add (list-zip (list-map identifier-token arguments) values) scope)
+                    (scope-add
+                        (list-zip (list-map (. (maybe-or-else 0) identifier-id) arguments) values)
+                        scope)
                     Empty
                     expression)
             _
-                (eval-error)))
+                (Error (data-error-no-main))))
 
 (def add-intrinsics (scope)
      (scope-add
@@ -285,12 +341,7 @@
 
 (def main-takes-argument (scope)
      (match (scope-get (identifier-main) scope)
-            (Some (ValueFunction (Cons _ __) ___))
+            (Some (ValueFunction _ (Cons __ ___) ____))
                 True
             _
                 False))
-
-(def internal-symbols ()
-     (list-concat
-         (intrinsic-identifiers)
-         (list (Pair (identifier-main) (data-main)))))

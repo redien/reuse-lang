@@ -10,15 +10,35 @@
                 (Scope (list-foldl
                     (fn (variable scope)
                         (match variable
-                               (Pair name value)
-                                   (array-set name value scope)))
+                               (Pair id value)
+                                   (array-set id value scope)))
                     scope
                     variables))))
 
-(def scope-get (name scope)
+(def scope-get (id scope)
      (match scope
             (Scope scope)
-                (array-get name scope)))
+                (array-get id scope)))
+
+(def scope-find-constructor (name scope)
+     (match scope
+            (Scope scope)
+                (list-find-first
+                    (.
+                        (maybe-or-else False)
+                        (maybe-map (. (string-equal? name) identifier-name))
+                        value-constructor-identifier)
+                    (list-map pair-right (array-entries scope)))))
+
+(def scope-find-function (name scope)
+     (match scope
+            (Scope scope)
+                (list-find-first
+                    (.
+                        (maybe-or-else False)
+                        (maybe-map (. (string-equal? name) identifier-name))
+                        value-function-identifier)
+                    (list-map pair-right (array-entries scope)))))
 
 (def scope-add-definitions (definitions scope)
      (match scope
@@ -27,10 +47,24 @@
                     (fn (definition scope)
                         (match definition
                                (FunctionDefinition identifier _ arguments expression __)
-                                   (array-set
-                                       (identifier-token identifier)
-                                       (ValueFunction arguments expression)
-                                       scope)
+                                   (match (identifier-id identifier)
+                                          (Some id)
+                                              (array-set id (ValueFunction identifier arguments expression) scope)
+                                          None
+                                              scope)
+                               (TypeDefinition _ __ ___ constructors ____)
+                                   (list-foldl
+                                       (fn (constructor scope)
+                                           (match (identifier-id (constructor-identifier constructor))
+                                                  (Some id)
+                                                      (array-set
+                                                          id
+                                                          (ValueConstructor (constructor-identifier constructor) (list-empty))
+                                                          scope)
+                                                  _
+                                                      scope))
+                                       scope
+                                       constructors)
                                _
                                    scope))
                     scope

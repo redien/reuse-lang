@@ -23,7 +23,7 @@
          (Pair (data-&) (SourceString (data-int32-and))))))
 
 (def translate-identifier (identifier)
-     (match (token-is-operator? (identifier-token identifier))
+     (match (identifier-is-operator? identifier)
             True
                 (match (dictionary-get (identifier-name identifier) (operator-translation-map))
                        (Some translation)
@@ -37,11 +37,11 @@
      (SourceStringIdentifier identifier IdentifierTransformationLowercase))
 
 (def prefix-type (identifier)
-     (match (identifier-is? identifier (identifier-slice))
+     (match (identifier-is? (identifier-slice) identifier)
             True
                 (SourceString (data-slice-type))
             False
-                (match (identifier-is? identifier (identifier-int32))
+                (match (identifier-is? (identifier-int32) identifier)
                        True
                            (SourceString (data-Int32))
                        False
@@ -132,7 +132,7 @@
 (def translate-function-application (translate-expression expressions)
      (match expressions
             (Cons (Variable identifier) rest)
-                (match (= (identifier-token identifier) (identifier-int32-less-than))
+                (match (identifier-is? (identifier-int32-less-than) identifier)
                        True
                            (translate-less-than translate-expression rest)
                        False
@@ -155,6 +155,18 @@
                     (SourceString (data-arrow))
                     (translate-expression expression)))))
 
+(def translate-list-expression (translate-expression expressions)
+     (list-foldr
+         (fn (expression source)
+             (wrap-in-brackets' (join' (list
+                 (SourceString (data-cons))
+                 (SourceString (data-space))
+                 (translate-expression expression)
+                 (SourceString (data-space))
+                 source))))
+         (SourceString (data-empty))
+         expressions))
+
 (def translate-expression (n expression)
      (match expression
             (Lambda arguments expression _)
@@ -174,7 +186,17 @@
             (Variable identifier)
                 (translate-identifier identifier)
             (Match expression rules _)
-                (wrap-in-brackets' (translate-match-expression translate-expression (+ n 1) expression rules))))
+                (wrap-in-brackets' (translate-match-expression translate-expression (+ n 1) expression rules))
+            (ListExpression expressions _)
+                (wrap-in-brackets' (translate-list-expression (translate-expression n) expressions))
+            (Pipe expressions _)
+                (wrap-in-brackets' (source-string-join
+                    (data-dollar-operator)
+                    (list-reverse (list-map (translate-expression n) expressions))))
+            (Compose expressions _)
+                (wrap-in-brackets' (source-string-join
+                    (data-dot-operator)
+                    (list-map (translate-expression n) expressions)))))
 
 (def translate-function-definition (name arguments expression)
      (match (list-is-empty? arguments)
@@ -338,4 +360,4 @@
          (list (data-pervasives-filename))
          generate-source
          (reserved-identifiers)
-         (. local-transforms validate-reserved-identifiers)))
+         validate-reserved-identifiers))

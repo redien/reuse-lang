@@ -25,7 +25,7 @@
          (Pair (data-&) (SourceString (data-int32-and))))))
 
 (def translate-identifier (identifier)
-     (match (token-is-operator? (identifier-token identifier))
+     (match (identifier-is-operator? identifier)
             True
                 (match (dictionary-get (identifier-name identifier) (operator-translation-map))
                        (Some translation)
@@ -128,7 +128,7 @@
 (def translate-function-application (translate-expression expressions)
      (match expressions
             (Cons (Variable identifier) rest)
-                (match (= (identifier-token identifier) (identifier-int32-less-than))
+                (match (identifier-is? (identifier-int32-less-than) identifier)
                        True
                            (translate-less-than translate-expression rest)
                        False
@@ -148,6 +148,25 @@
          (translate-argument-list arguments)
          (SourceString (data-lambda-arrow))
          (translate-expression expression))))
+
+(def translate-list-expression (translate-expression expressions)
+     (list-foldr
+         (fn (expression source)
+             (join' (list
+                 (SourceString (data-open-array))
+                 (SourceString (data-cons))
+                 (SourceString (data-comma))
+                 (translate-expression expression)
+                 (SourceString (data-comma))
+                 source
+                 (SourceString (data-close-array)))))
+         (SourceString (data-empty))
+         expressions))
+
+(def translate-special-form (identifier translate-expression expressions)
+     (source-string-concat
+         (SourceString identifier)
+         (wrap-in-brackets' (source-string-join (data-comma) (list-map translate-expression expressions)))))
 
 (def translate-expression (n expression)
      (match expression
@@ -169,7 +188,13 @@
                     translate-expression
                     translate-rule
                     expression
-                    rules)))
+                    rules)
+            (ListExpression expressions _)
+                (translate-list-expression (translate-expression n) expressions)
+            (Pipe expressions _)
+                (translate-special-form (data-pipe) (translate-expression n) expressions)
+            (Compose expressions _)
+                (translate-special-form (data-compose) (translate-expression n) expressions)))
 
 (def mark-as-return-value (source)
      (join' (list
@@ -373,4 +398,4 @@
          (list (data-pervasives-filename))
          generate-source
          (reserved-identifiers)
-         (. local-transforms validate-reserved-identifiers)))
+         validate-reserved-identifiers))

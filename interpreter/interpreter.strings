@@ -1,16 +1,21 @@
-main                   |reuse-main
-no-input-files         |No input files
-intrinsic              |[intrinsic]
-slice                  |[slice]
-pipe                   |pipe
-list                   |list
-Empty                  |Empty
-Cons                   |Cons
-space                  | 
-error-generic          |Error evaluating expression
-error-int32-op         |Integer operator called with incorrect arguments
-error-slice-op         |Slice operator called with incorrect arguments
-error-unmatched-case   |This value does not match any of the cases in a match expression:
-error-unmatched-case2  |Patterns:
-error-stack-trace      |Stack trace:
-error-no-symbol        |This symbol was not defined:
+main                        |reuse-main
+no-input-files              |No input files
+intrinsic                   |[intrinsic]
+slice                       |[slice]
+pipe                        |pipe
+list                        |list
+empty                       |Empty
+cons                        |Cons
+space                       | 
+error-generic               |Error evaluating expression
+error-int32-op              |Integer operator called with incorrect arguments
+error-slice-op              |Slice operator called with incorrect arguments
+error-unmatched-case        |This value does not match any of the cases in a match expression:
+error-unmatched-case2       |Patterns:
+error-stack-trace           |Stack trace:
+error-no-symbol             |This symbol was not defined:
+error-no-list-constructors  |Could not find Cons or Empty constructors
+error-no-main               |Could not find a 'reuse-main' function
+error-internal-1            |Internal error: No cases matched when evaluating expression
+error-internal-2            |Internal error: No cases matched when applying function
+error-internal-3            |Internal error: Compose operator called with no arguments

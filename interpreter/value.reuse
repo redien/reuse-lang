@@ -1,9 +1,9 @@
 
 (typ (value expression scope iterable)
      (ValueInteger int32)
-     (ValueConstructor int32 string (list (value expression scope iterable)))
+     (ValueConstructor identifier (list (value expression scope iterable)))
      (ValueClosure (list identifier) expression scope)
-     (ValueFunction (list identifier) expression)
+     (ValueFunction identifier (list identifier) expression)
      (ValueIntrinsic (fn (scope (list string) (list (value expression scope iterable))) (result (value expression scope iterable) string)))
      (ValueSlice iterable))
 
@@ -23,22 +23,36 @@
      (match value
             (ValueInteger integer)
                 (string-from-int32 integer)
-            (ValueConstructor _ name values)
+            (ValueConstructor identifier values)
                 (match values
                        Empty
-                           name
+                           (identifier-name identifier)
                        _
                            (pipe
                                values
                                (list-map value-to-string)
-                               (list-cons name)
+                               (list-cons (identifier-name identifier))
                                (string-join (data-space))
                                wrap-in-brackets))
             (ValueClosure arguments expression scope)
                 (value-function-to-string arguments expression)
-            (ValueFunction arguments expression)
+            (ValueFunction _ arguments expression)
                 (value-function-to-string arguments expression)
             (ValueSlice _)
                 (data-slice)
             (ValueIntrinsic _)
                 (data-intrinsic)))
+
+(def value-constructor-identifier (value)
+     (match value
+            (ValueConstructor identifier _)
+                (Some identifier)
+            _
+                None))
+
+(def value-function-identifier (value)
+     (match value
+            (ValueFunction identifier _ __)
+                (Some identifier)
+            _
+                None))

@@ -11,15 +11,21 @@ var int32_mul = a => b => a * b | 0;
 var int32_div = a => b => a / b | 0;
 var int32_mod = a => b => a % b | 0;
 var int32_and = a => b => a & b;
-function _trampoline(f) {
-    while (f && f._k) {
-        f = f._k();
+function $compose(...fs) {
+    return x => fs.reduceRight((value, f) => f(value), x);
+}
+function $pipe(...fs) {
+    return fs.reduce((value, f) => f(value));
+}
+function $trampoline(f) {
+    while (f && f.$k) {
+        f = f.$k();
     }
     return f;
 }
 var $ = {};
 module.exports.$ = $;
-function _match(value, cases) {
+function $match(value, cases) {
     for (var i = 0; i < cases.length; i += 2) {
         var captures = [];
         var match = match_pattern(value, cases[i], captures);
@@ -41,4 +47,4 @@ function _match(value, cases) {
         }
     }
 }
-module.exports.match = _match;
+module.exports.match = $match;

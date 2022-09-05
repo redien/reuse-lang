@@ -1,12 +1,132 @@
 
-(def identifier-def () -1)
+(def symbol-def () -1)
 
-(def identifier-typ () -2)
+(def symbol-typ () -2)
 
-(def identifier-fn () -3)
+(def symbol-fn () -3)
 
-(def identifier-match () -4)
+(def symbol-match () -4)
 
-(def identifier-exists () -5)
+(def symbol-exists () -5)
 
-(def identifier-pub () -6)
+(def symbol-pub () -6)
+
+(pub def identifier-+ () -7)
+
+(pub def identifier-- () -8)
+
+(pub def identifier-* () -9)
+
+(pub def identifier-/ () -10)
+
+(pub def identifier-% () -11)
+
+(pub def identifier-& () -12)
+
+(pub def identifier-int32-less-than () -13)
+
+(pub def identifier-list () -14)
+
+(pub def identifier-pipe () -15)
+
+(pub def identifier-dot () -16)
+
+(pub def identifier-slice-empty () -17)
+
+(pub def identifier-slice-of-u8 () -18)
+
+(pub def identifier-slice-size () -19)
+
+(pub def identifier-slice-get () -20)
+
+(pub def identifier-slice-concat () -21)
+
+(pub def identifier-slice-foldl () -22)
+
+(pub def identifier-slice-subslice () -23)
+
+(pub def identifier-int32 () -24)
+
+(pub def identifier-slice () -25)
+
+(pub def identifier-is-operator? (identifier)
+     (maybe-or-else
+         False
+         (maybe-bind (identifier-id identifier) (fn (id)
+         (maybe-return (and (<= id -7) (>= id -12)))))))
+
+(def predefined-identifier (text id kind)
+     (Identifier
+         (Some (Definition (id) kind))
+         (text)
+         (SourceReference -1 (string-empty) ModuleInternal)
+         (Range 0 0)))
+
+(def predefined-identifiers ()
+     (list
+         (predefined-identifier data-+ identifier-+ FunctionIdentifier)
+         (predefined-identifier data-- identifier-- FunctionIdentifier)
+         (predefined-identifier data-* identifier-* FunctionIdentifier)
+         (predefined-identifier data-/ identifier-/ FunctionIdentifier)
+         (predefined-identifier data-% identifier-% FunctionIdentifier)
+         (predefined-identifier data-& identifier-& FunctionIdentifier)
+         (predefined-identifier
+             data-int32-less-than
+             identifier-int32-less-than
+             FunctionIdentifier)
+         (predefined-identifier data-list identifier-list FunctionIdentifier)
+         (predefined-identifier data-pipe identifier-pipe FunctionIdentifier)
+         (predefined-identifier data-dot identifier-dot FunctionIdentifier)
+         (predefined-identifier
+             data-slice-empty
+             identifier-slice-empty
+             FunctionIdentifier)
+         (predefined-identifier
+             data-slice-of-u8
+             identifier-slice-of-u8
+             FunctionIdentifier)
+         (predefined-identifier
+             data-slice-size
+             identifier-slice-size
+             FunctionIdentifier)
+         (predefined-identifier data-slice-get identifier-slice-get FunctionIdentifier)
+         (predefined-identifier
+             data-slice-concat
+             identifier-slice-concat
+             FunctionIdentifier)
+         (predefined-identifier
+             data-slice-foldl
+             identifier-slice-foldl
+             FunctionIdentifier)
+         (predefined-identifier
+             data-slice-subslice
+             identifier-slice-subslice
+             FunctionIdentifier)
+         (predefined-identifier data-int32 identifier-int32 TypeIdentifier)
+         (predefined-identifier data-slice identifier-slice TypeIdentifier)))
+
+(def predefined-identifier-to-symbol (identifier)
+     (pair-cons
+         (maybe-or-else -1 (identifier-id identifier))
+         (identifier-name identifier)))
+
+(def max-symbol-id (symbols)
+     (list-foldl (fn (x xs)
+         (max xs (pair-left x))) 0 symbols))
+
+(def symbol-state (symbols)
+     (Pair
+         (+ (max-symbol-id symbols) 1)
+         (dictionary-of (list-map (fn (x)
+             (Pair (pair-right x) x)) symbols))))
+
+(def predefined-symbols ()
+     (symbol-state (list-concat
+         (list
+             (Pair (symbol-def) (data-def))
+             (Pair (symbol-typ) (data-typ))
+             (Pair (symbol-fn) (data-fn))
+             (Pair (symbol-match) (data-match))
+             (Pair (symbol-exists) (data-exists))
+             (Pair (symbol-pub) (data-pub)))
+         (list-map predefined-identifier-to-symbol (predefined-identifiers)))))

@@ -1,8 +1,8 @@
 
 (def identifier-to-symbol (identifier)
      (match identifier
-            (Identifier token name _ range __)
-                (Symbol token name range)))
+            (Identifier _ name __ range)
+                (Symbol 0 name range)))
 
 (def type-to-sexp (types-to-sexp type)
      (match type
@@ -11,7 +11,7 @@
             (FunctionType arg-types return-type range)
                 (List
                     (list
-                        (Symbol (identifier-fn) (data-fn) range)
+                        (Symbol (symbol-fn) (data-fn) range)
                         (List (types-to-sexp arg-types) range)
                         (type-to-sexp types-to-sexp return-type))
                     range)
@@ -36,19 +36,19 @@
             (ExistentialParameter identifier)
                 (List
                     (list
-                        (Symbol (identifier-exists) (data-exists) (identifier-range identifier))
+                        (Symbol (symbol-exists) (data-exists) (identifier-range identifier))
                         (identifier-to-symbol identifier))
                     (identifier-range identifier))
             (UniversalParameter identifier)
                 (identifier-to-symbol identifier)))
 
-(def type-name-to-sexp (token range name parameters)
+(def type-name-to-sexp (id range name parameters)
      (match parameters
             Empty
-                (Symbol token name range)
+                (Symbol id name range)
             _
                 (List
-                    (Cons (Symbol token name range) (list-map type-parameter-to-sexp parameters))
+                    (Cons (Symbol id name range) (list-map type-parameter-to-sexp parameters))
                     range)))
 
 (def function-arguments-to-sexp (arguments range)
@@ -76,19 +76,19 @@
      (match expression
             (IntegerConstant integer range)
                 (Integer integer range)
-            (Variable (Identifier token string _ range __))
-                (Symbol token string range)
+            (Variable (Identifier _ string __ range))
+                (Symbol 0 string range)
             (Lambda arguments expression range)
                 (List
                     (list
-                        (Symbol (identifier-fn) (data-fn) range)
+                        (Symbol (symbol-fn) (data-fn) range)
                         (function-arguments-to-sexp arguments range)
                         (expression-to-sexp expression))
                     range)
             (Match expression pairs range)
                 (List
                     (Cons
-                        (Symbol (identifier-match) (data-match) range)
+                        (Symbol (symbol-match) (data-match) range)
                         (Cons
                             (expression-to-sexp expression)
                             (list-flatmap (match-pair-to-sexp expression-to-sexp) pairs)))
@@ -104,18 +104,36 @@
                                    (list-map expression-to-sexp expressions))
                                range))
             (FunctionApplication expressions range)
-                (List (list-map expression-to-sexp expressions) range)))
+                (List (list-map expression-to-sexp expressions) range)
+            (ListExpression expressions range)
+                (List
+                    (Cons
+                        (Symbol (identifier-list) (data-list) range)
+                        (list-map expression-to-sexp expressions))
+                    range)
+            (Pipe expressions range)
+                (List
+                    (Cons
+                        (Symbol (identifier-pipe) (data-pipe) range)
+                        (list-map expression-to-sexp expressions))
+                    range)
+            (Compose expressions range)
+                (List
+                    (Cons
+                        (Symbol (identifier-dot) (data-dot) range)
+                        (list-map expression-to-sexp expressions))
+                    range)))
 
-(def type-definition-to-sexp (token name parameters constructors range)
+(def type-definition-to-sexp (id name parameters constructors range)
      (list-concat
          (list
-             (Symbol (identifier-typ) (data-typ) range)
-             (type-name-to-sexp token range name parameters))
+             (Symbol (symbol-typ) (data-typ) range)
+             (type-name-to-sexp id range name parameters))
          (constructors-to-sexp constructors)))
 
 (def function-definition-to-sexp (name arguments expression range)
      (list
-         (Symbol (identifier-def) (data-def) range)
+         (Symbol (symbol-def) (data-def) range)
          (identifier-to-symbol name)
          (function-arguments-to-sexp arguments range)
          (expression-to-sexp expression)))
@@ -124,18 +142,18 @@
      (List
          (match public?
                 True
-                    (Cons (Symbol (identifier-pub) (data-pub) range) sexp)
+                    (Cons (Symbol (symbol-pub) (data-pub) range) sexp)
                 False
                     sexp)
          range))
 
 (pub def definition-to-sexp (definition)
      (match definition
-            (TypeDefinition (Identifier token name _ __ ___) public? parameters constructors range)
+            (TypeDefinition (Identifier _ name __ ___) public? parameters constructors range)
                 (definition-to-sexp'
                     public?
                     range
-                    (type-definition-to-sexp token name parameters constructors range))
+                    (type-definition-to-sexp 0 name parameters constructors range))
             (FunctionDefinition name public? arguments expression range)
                 (definition-to-sexp'
                     public?

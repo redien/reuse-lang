@@ -11,7 +11,7 @@ MalformedMatchExpressionError                     |MalformedMatchExpressionError
 MalformedSymbolError                              |MalformedSymbolError
 MalformedConstructorError                         |MalformedConstructorError
 MalformedTypeError                                |MalformedTypeError
-ErrorNotDefined                                   |ErrorNotDefined
+ErrorNotDefined                                   |ErrorNotDefined: 
 ErrorAlreadyDefined                               |ErrorAlreadyDefined
 ErrorReservedIdentifier                           |ErrorReservedIdentifier
 MalformedSexpTooFewClosingBrackets                |MalformedSexpTooFewClosingBrackets

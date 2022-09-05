@@ -35,7 +35,7 @@
      (SourceStringIdentifier identifier IdentifierTransformationLowercase))
 
 (def translate-type-identifier (identifier)
-     (match (identifier-is? identifier (identifier-slice))
+     (match (identifier-is? (identifier-slice) identifier)
             True
                 (SourceString (data-slice-type))
             False
@@ -45,7 +45,7 @@
      (SourceStringIdentifier identifier IdentifierTransformationCapitalize))
 
 (def translate-identifier (identifier)
-     (match (token-is-operator? (identifier-token identifier))
+     (match (identifier-is-operator? identifier)
             True
                 (match (dictionary-get (identifier-name identifier) (operator-translation-map))
                        (Some translation)
@@ -75,9 +75,9 @@
             _
                 (SourceString (data-compile-error))))
 
-(def translate-constructor (translator identifier constructor)
+(def translate-constructor (translator identifier argument-list)
      (pipe
-         constructor
+         argument-list
          (list-map translator)
          (source-string-join (string-concat (data-comma) (string-of-char 32)))
          wrap-in-brackets'
@@ -98,7 +98,7 @@
             (ConstructorPattern identifier Empty _)
                 (translate-constructor-identifier identifier)
             (ConstructorPattern identifier patterns _)
-                ((translate-constructor translate-pattern identifier) patterns)))
+                (translate-constructor translate-pattern identifier patterns)))
 
 (def translate-rule (translate-expression n rule)
      (match rule
@@ -138,7 +138,7 @@
 (def translate-function-application (translate-expression expressions)
      (match expressions
             (Cons (Variable identifier) rest)
-                (match (= (identifier-token identifier) (identifier-int32-less-than))
+                (match (identifier-is? (identifier-int32-less-than) identifier)
                        True
                            (translate-less-than translate-expression rest)
                        False
@@ -161,6 +161,28 @@
          (SourceString (data-arrow))
          (translate-expression expression))))
 
+(def translate-list-expression (translate-expression expressions)
+     (list-foldr
+         (fn (expression source)
+             (join' (list
+                 (SourceString (data-cons))
+                 (SourceString (data-space))
+                 (wrap-in-brackets' (join' (list (translate-expression expression) (SourceString (data-comma)) source))))))
+         (SourceString (data-empty))
+         expressions))
+
+(def translate-compose-expression (translate-expression expressions)
+     (join' (list
+         (SourceString (data-fun))
+         (SourceString (data-space))
+         (SourceString (data-x))
+         (SourceString (data-arrow))
+         (source-string-join
+             (data-pipe-operator)
+             (Cons
+                 (SourceString (data-x))
+                 (list-map translate-expression (list-reverse expressions)))))))
+
 (def translate-expression (n expression)
      (match expression
             (Lambda arguments expression _)
@@ -176,7 +198,15 @@
             (Variable identifier)
                 (translate-identifier identifier)
             (Match expression rules _)
-                (wrap-in-brackets' (translate-match-expression translate-expression (+ n 1) expression rules))))
+                (wrap-in-brackets' (translate-match-expression translate-expression (+ n 1) expression rules))
+            (ListExpression expressions _)
+                (wrap-in-brackets' (translate-list-expression (translate-expression n) expressions))
+            (Pipe expressions _)
+                (wrap-in-brackets' (source-string-join
+                    (data-pipe-operator)
+                    (list-map (translate-expression n) expressions)))
+            (Compose expressions _)
+                (wrap-in-brackets' (translate-compose-expression (translate-expression n) expressions))))
 
 (def translate-function-definition (identifier arguments expression)
      (join-lines (list
@@ -325,4 +355,4 @@
          (list (data-pervasives-filename))
          generate-source
          (reserved-identifiers)
-         (. local-transforms validate-reserved-identifiers)))
+         validate-reserved-identifiers))

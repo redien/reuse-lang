@@ -1,5 +1,20 @@
 
-(pub typ identifier (Identifier int32 string source-reference range (maybe int32)))
+(pub typ identifier-kind
+     FunctionIdentifier
+     TypeIdentifier
+     ConstructorIdentifier
+     VariableIdentifier
+     TypeVariableIdentifier)
+
+(pub typ (identifier-reference identifier)
+     (Resolved identifier)
+     (Definition int32 identifier-kind))
+
+(pub typ identifier
+     (Identifier (maybe (identifier-reference identifier))
+                 string
+                 source-reference
+                 range))
 
 (pub typ ast-type
      (SimpleType identifier)
@@ -25,31 +40,45 @@
      (Lambda (list identifier) expression range)
      (Match expression (list (pair pattern expression)) range)
      (Constructor identifier (list expression) range)
-     (FunctionApplication (list expression) range))
+     (FunctionApplication (list expression) range)
+     (ListExpression (list expression) range)
+     (Pipe (list expression) range)
+     (Compose (list expression) range))
 
 (pub typ definition
      (TypeDefinition identifier boolean (list type-parameter) (list constructor) range)
      (FunctionDefinition identifier boolean (list identifier) expression range)
      (TargetDefinition source-reference slice))
 
-(pub def identifier-token (identifier)
+(def identifier-definition (identifier)
      (match identifier
-            (Identifier token _ __ ___ ____)
-                token))
+            (Identifier (Some (Resolved (Identifier (Some (Definition id kind)) __ ___ ____))) _____ ______ _______)
+                (Some (Definition id kind))
+            (Identifier (Some (Definition id kind)) __ ___ ____)
+                (Some (Definition id kind))
+            _
+                None))
+
+(pub def identifier-id (identifier)
+     (match (identifier-definition identifier)
+            (Some (Definition id _))
+                (Some id)
+            _
+                None))
 
 (pub def identifier-name (identifier)
      (match identifier
-            (Identifier _ name __ ___ ____)
+            (Identifier _ name __ ___)
                 name))
 
 (pub def identifier-with-name (name identifier)
      (match identifier
-            (Identifier _1 _ _2 _3 _4)
-                (Identifier _1 name _2 _3 _4)))
+            (Identifier _1 _ _2 _3)
+                (Identifier _1 name _2 _3)))
 
 (pub def identifier-source-reference (identifier)
      (match identifier
-            (Identifier _ __ source-reference ___ ____)
+            (Identifier _ __ source-reference ___)
                 source-reference))
 
 (pub def identifier-module (identifier)
@@ -57,28 +86,21 @@
 
 (pub def identifier-range (identifier)
      (match identifier
-            (Identifier _ __ ___ range ____)
+            (Identifier _ __ ___ range)
                 range))
 
-(def identifier-id' (identifier)
-     (match identifier
-            (Identifier _ __ ___ ____ id)
-                id))
-
-(pub def identifier-is? (identifier id)
-     (match (identifier-id' identifier)
-            (Some a)
-                (= a id)
-            None
+(pub def symbol-constructor? (identifier)
+     (match (identifier-definition identifier)
+            (Some (Definition _ ConstructorIdentifier))
+                True
+            _
                 False))
 
-(def identifier-with-id (id identifier)
-     (match identifier
-            (Identifier _1 _2 _3 _4 _)
-                (Identifier _1 _2 _3 _4 id)))
+(pub def identifier-is? (id identifier)
+     (maybe-or-else False (maybe-map (= id) (identifier-id identifier))))
 
 (pub def identifier-equal? (a b)
-     (= (identifier-token a) (identifier-token b)))
+     (maybe-or-else False (maybe-map ((flip identifier-is?) b) (identifier-id a))))
 
 (pub def definition-source-reference (definition)
      (match definition
@@ -110,7 +132,7 @@
             (TargetDefinition _ __)
                 None))
 
-(def constructor-identifier (constructor)
+(pub def constructor-identifier (constructor)
      (match constructor
             (ComplexConstructor identifier _ __)
                 identifier
@@ -178,6 +200,15 @@
             (FunctionApplication expressions range)
                 (result-bind (result-concat (list-map (. (result-flatmap (over-subexpressions f)) f) expressions)) (fn (expressions)
                 (result-return (FunctionApplication expressions range))))
+            (ListExpression expressions range)
+                (result-bind (result-concat (list-map (. (result-flatmap (over-subexpressions f)) f) expressions)) (fn (expressions)
+                (result-return (ListExpression expressions range))))
+            (Pipe expressions range)
+                (result-bind (result-concat (list-map (. (result-flatmap (over-subexpressions f)) f) expressions)) (fn (expressions)
+                (result-return (Pipe expressions range))))
+            (Compose expressions range)
+                (result-bind (result-concat (list-map (. (result-flatmap (over-subexpressions f)) f) expressions)) (fn (expressions)
+                (result-return (Compose expressions range))))
             _
                 (result-return expression)))))
 
@@ -226,8 +257,41 @@
                 (result-bind (result-concat (list-map (over-match-pair-expression (over-identifiers f)) rules)) (fn (rules)
                 (result-bind (over-identifiers f expression) (fn (expression)
                 (result-return (Match expression rules range))))))
+            (ListExpression expressions range)
+                (result-bind (result-concat (list-map (over-identifiers f) expressions)) (fn (expressions)
+                (result-return (ListExpression expressions range))))
+            (Pipe expressions range)
+                (result-bind (result-concat (list-map (over-identifiers f) expressions)) (fn (expressions)
+                (result-return (Pipe expressions range))))
+            (Compose expressions range)
+                (result-bind (result-concat (list-map (over-identifiers f) expressions)) (fn (expressions)
+                (result-return (Compose expressions range))))
             _
                 (result-return expression)))
+
+(def over-identifiers-in-type (f type)
+     (match type
+            (SimpleType identifier)
+                (result-bind (f identifier) (fn (identifier)
+                (result-return (SimpleType identifier))))
+            (ComplexType identifier types range)
+                (result-bind (f identifier) (fn (identifier)
+                (result-bind (result-concat (list-map (over-identifiers-in-type f) types)) (fn (types)
+                (result-return (ComplexType identifier types range))))))
+            (FunctionType types result-type range)
+                (result-bind (over-identifiers-in-type f result-type) (fn (result-type)
+                (result-bind (result-concat (list-map (over-identifiers-in-type f) types)) (fn (types)
+                (result-return (FunctionType types result-type range))))))))
+
+(pub def over-identifiers-in-constructor (f constructor)
+     (match constructor
+            (SimpleConstructor identifier)
+                (result-bind (f identifier) (fn (identifier)
+                (result-return (SimpleConstructor identifier))))
+            (ComplexConstructor identifier types range)
+                (result-bind (f identifier) (fn (identifier)
+                (result-bind (result-concat (list-map (over-identifiers-in-type f) types)) (fn (types)
+                (result-return (ComplexConstructor identifier types range))))))))
 
 (pub def expression-calls-function-in-tail-position? (name expression)
      (match expression

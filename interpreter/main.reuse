@@ -37,9 +37,7 @@
             (EventReadStdin stdin state)
                 (output-result (eval state (list (ValueSlice stdin))))
             (EventReadFiles source-files state)
-                (match (local-transforms (validate-reserved-identifiers (parse-source-files
-                    (with-local-transform-keywords (internal-symbols))
-                    source-files)))
+                (match (validate-reserved-identifiers (result-map pair-right (parse-source-files source-files)))
                        (Result definitions)
                            (process-definitions (definitions-to-scope definitions))
                        (Error error)

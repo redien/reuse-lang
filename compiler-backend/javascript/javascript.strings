@@ -9,9 +9,9 @@ int32-divide        |int32_div
 int32-modulus       |int32_mod
 int32-and           |int32_and
 slice               |slice
-trampoline          |_trampoline
-return-value-marker |_k:
-tailcall            |_tailcall
+trampoline          |$trampoline
+return-value-marker |$k:
+tailcall            |$tailcall
 var                 |var
 return              |return
 function            |function
@@ -48,7 +48,7 @@ close-block         |}
 open-array          |[
 close-array         |]
 comma               |,
-match-func          |_match
+match-func          |$match
 capture             |$
 question-mark       |?
 colon               |:
@@ -58,3 +58,7 @@ dot                 |.
 exports             |exports
 module.exports.     |module.exports.
 };                  |};
+cons                |Cons
+empty               |Empty
+compose             |$compose
+pipe                |$pipe
