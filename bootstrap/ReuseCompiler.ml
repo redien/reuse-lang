@@ -1480,6 +1480,9 @@ let ml_string_to_reuse s =
 let ml_list_to_reuse l =
     List.fold_right list_cons l Empty;;
 
+let reuse_list_to_ml l =
+    list_foldr List.cons [] l;;
+
 let reuse_string_to_ml s =
     Buffer.contents (string_foldl (fun a b -> Buffer.add_char b (Char.chr (Int32.to_int a)); b) (Buffer.create 32) s);;
 
