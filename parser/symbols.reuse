@@ -58,55 +58,56 @@
 (def predefined-identifier (text id kind)
      (Identifier
          (Some (Definition (id) kind))
+         (identifier-universe-from-kind kind)
          (text)
          (SourceReference -1 (string-empty) ModuleInternal)
          (Range 0 0)))
 
 (def predefined-identifiers ()
      (list
-         (predefined-identifier data-+ identifier-+ PrivateFunctionIdentifier)
-         (predefined-identifier data-- identifier-- PrivateFunctionIdentifier)
-         (predefined-identifier data-* identifier-* PrivateFunctionIdentifier)
-         (predefined-identifier data-/ identifier-/ PrivateFunctionIdentifier)
-         (predefined-identifier data-% identifier-% PrivateFunctionIdentifier)
-         (predefined-identifier data-& identifier-& PrivateFunctionIdentifier)
+         (predefined-identifier data-+ identifier-+ PrivateFunctionDefinition)
+         (predefined-identifier data-- identifier-- PrivateFunctionDefinition)
+         (predefined-identifier data-* identifier-* PrivateFunctionDefinition)
+         (predefined-identifier data-/ identifier-/ PrivateFunctionDefinition)
+         (predefined-identifier data-% identifier-% PrivateFunctionDefinition)
+         (predefined-identifier data-& identifier-& PrivateFunctionDefinition)
          (predefined-identifier
              data-int32-less-than
              identifier-int32-less-than
-             PrivateFunctionIdentifier)
-         (predefined-identifier data-list identifier-list PrivateFunctionIdentifier)
-         (predefined-identifier data-pipe identifier-pipe PrivateFunctionIdentifier)
-         (predefined-identifier data-dot identifier-dot PrivateFunctionIdentifier)
+             PrivateFunctionDefinition)
+         (predefined-identifier data-list identifier-list PrivateFunctionDefinition)
+         (predefined-identifier data-pipe identifier-pipe PrivateFunctionDefinition)
+         (predefined-identifier data-dot identifier-dot PrivateFunctionDefinition)
          (predefined-identifier
              data-slice-empty
              identifier-slice-empty
-             PrivateFunctionIdentifier)
+             PrivateFunctionDefinition)
          (predefined-identifier
              data-slice-of-u8
              identifier-slice-of-u8
-             PrivateFunctionIdentifier)
+             PrivateFunctionDefinition)
          (predefined-identifier
              data-slice-size
              identifier-slice-size
-             PrivateFunctionIdentifier)
+             PrivateFunctionDefinition)
          (predefined-identifier
              data-slice-get
              identifier-slice-get
-             PrivateFunctionIdentifier)
+             PrivateFunctionDefinition)
          (predefined-identifier
              data-slice-concat
              identifier-slice-concat
-             PrivateFunctionIdentifier)
+             PrivateFunctionDefinition)
          (predefined-identifier
              data-slice-foldl
              identifier-slice-foldl
-             PrivateFunctionIdentifier)
+             PrivateFunctionDefinition)
          (predefined-identifier
              data-slice-subslice
              identifier-slice-subslice
-             PrivateFunctionIdentifier)
-         (predefined-identifier data-int32 identifier-int32 PrivateTypeIdentifier)
-         (predefined-identifier data-slice identifier-slice PrivateTypeIdentifier)))
+             PrivateFunctionDefinition)
+         (predefined-identifier data-int32 identifier-int32 PrivateTypeDefinition)
+         (predefined-identifier data-slice identifier-slice PrivateTypeDefinition)))
 
 (def predefined-identifier-to-symbol (identifier)
      (pair-cons

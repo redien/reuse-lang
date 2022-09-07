@@ -6,12 +6,12 @@ project_root=$script_path/..
 run() {
     case $1 in
         test)                           run test-string-gen && run test-sexp-parser && run test-parser && run test-formatter && run test-compilers && run test-interpreter && run test-standard-library;;
-        test-interpreter)               >&2 echo "Testing interpreter" && $project_root/interpreter/build.sh && $project_root/dev-env/spec-runner/run.js specification/minimal $project_root/interpreter/eval.sh | $project_root/dev-env/tap-format/tap-format.sh && $project_root/dev-env/spec-runner/run.js specification/extended $project_root/interpreter/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
+        test-interpreter)               >&2 echo "Testing interpreter" && $project_root/interpreter/build.sh && $project_root/dev-env/spec-runner/run.js specification/core $project_root/interpreter/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
         test-compilers)                 run test-ocaml-compiler && run test-haskell-compiler && run test-javascript-compiler && run test-module-compiler ;;
-        test-module-compiler)           >&2 echo "Testing module backend" && $project_root/interpreter/build.sh && $project_root/cli/build.sh && IMPL=module SOURCE=executable.reuse run test-minimal && IMPL=module SOURCE=executable.reuse run test-extended ;;
-        test-ocaml-compiler)            >&2 echo "Testing ocaml backend" && $project_root/cli/build.sh && IMPL=ocaml SOURCE=executable.ml run test-minimal && IMPL=ocaml SOURCE=executable.ml run test-extended ;;
-        test-haskell-compiler)          >&2 echo "Testing haskell backend" && $project_root/cli/build.sh && IMPL=haskell SOURCE=Executable.hs run test-minimal && IMPL=haskell SOURCE=Executable.hs run test-extended ;;
-        test-javascript-compiler)       >&2 echo "Testing javascript backend" && $project_root/cli/build.sh && IMPL=javascript SOURCE=executable.js run test-minimal && IMPL=javascript SOURCE=executable.js run test-extended ;;
+        test-module-compiler)           >&2 echo "Testing module backend" && $project_root/interpreter/build.sh && $project_root/cli/build.sh && IMPL=module SOURCE=executable.reuse run test-core ;;
+        test-ocaml-compiler)            >&2 echo "Testing ocaml backend" && $project_root/cli/build.sh && IMPL=ocaml SOURCE=executable.ml run test-core && IMPL=ocaml SOURCE=executable.ml run test-modules ;;
+        test-haskell-compiler)          >&2 echo "Testing haskell backend" && $project_root/cli/build.sh && IMPL=haskell SOURCE=Executable.hs run test-core && IMPL=haskell SOURCE=Executable.hs run test-modules ;;
+        test-javascript-compiler)       >&2 echo "Testing javascript backend" && $project_root/cli/build.sh && IMPL=javascript SOURCE=executable.js run test-core && IMPL=javascript SOURCE=executable.js run test-modules ;;
         test-sexp-parser)               >&2 echo "Testing sexp parser" && $project_root/sexp-parser/build-for-test.sh && $project_root/dev-env/spec-runner/run.js sexp-parser/specification $project_root/sexp-parser/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
         test-parser)                    >&2 echo "Testing parser" && $project_root/parser/build-for-test.sh && $project_root/dev-env/spec-runner/run.js parser/specification $project_root/parser/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
         test-new-parser)                >&2 echo "Testing new parser" && $project_root/new-parser/build-for-test.sh && $project_root/dev-env/spec-runner/run.js parser/specification $project_root/new-parser/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
@@ -26,8 +26,8 @@ run() {
         test-type-inference)            $project_root/type-inference/build-for-test.sh && $project_root/dev-env/spec-runner/run.js type-inference/specification $project_root/type-inference/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
         test-type-unification)          $project_root/type-unification/build-for-test.sh && $project_root/dev-env/spec-runner/run.js type-unification/specification $project_root/type-unification/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
         test-string-gen)                >&2 echo "Testing string-gen" && $project_root/string-gen/build-for-test.sh && $project_root/dev-env/spec-runner/run.js string-gen/specification $project_root/string-gen/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
-        test-minimal)                   $project_root/dev-env/spec-runner/run.js specification/minimal $project_root/cli/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
-        test-extended)                  $project_root/dev-env/spec-runner/run.js specification/extended $project_root/cli/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
+        test-core)                   $project_root/dev-env/spec-runner/run.js specification/core $project_root/cli/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
+        test-modules)                  $project_root/dev-env/spec-runner/run.js specification/modules $project_root/cli/eval.sh | $project_root/dev-env/tap-format/tap-format.sh ;;
         line-count)                     (cd $project_root ; git ls-files | grep -v 'bootstrap/' | grep -E '\.(reuse|strings)' | xargs wc -l) ;;
         line-count-with-spec)           (cd $project_root ; git ls-files | grep -v 'bootstrap/' | grep -E '\.(reuse|strings|spec)' | xargs wc -l) ;;
         vscode-install)                 ln -s $PWD/$project_root/dev-env/editor-support/vs-code-reuse ~/.vscode/extensions/vs-code-reuse ;;

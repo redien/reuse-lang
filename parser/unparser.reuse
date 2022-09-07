@@ -1,7 +1,7 @@
 
 (def identifier-to-symbol (identifier)
      (match identifier
-            (Identifier _ name __ range)
+            (Identifier _ __ name ___ range)
                 (Symbol 0 name range)))
 
 (def type-to-sexp (types-to-sexp type)
@@ -76,7 +76,7 @@
      (match expression
             (IntegerConstant integer range)
                 (Integer integer range)
-            (Variable (Identifier _ string __ range))
+            (Variable (Identifier _ __ string ___ range))
                 (Symbol 0 string range)
             (Lambda arguments expression range)
                 (List
@@ -149,7 +149,7 @@
 
 (pub def definition-to-sexp (definition)
      (match definition
-            (TypeDefinition (Identifier _ name __ ___) public? parameters constructors range)
+            (TypeDefinition (Identifier _ __ name ___ ____) public? parameters constructors range)
                 (definition-to-sexp'
                     public?
                     range

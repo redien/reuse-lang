@@ -1,4 +1,4 @@
-type _slice = bytes;;
+type slice' = bytes;;
 let slice_empty x = Bytes.empty;;
 let slice_of_u8 x count = if x >= 0l && x < 256l && count > 0l then Bytes.make (Int32.to_int count) (Char.chr (Int32.to_int x)) else Bytes.make 1 (Char.chr 0);;
 let slice_size slice = Int32.of_int (Bytes.length slice);;

@@ -40,7 +40,7 @@ Another example involving algebraic data-types:
             (Cons x xs) (reduce f (f x initial) xs)))
 ```
 
-For more examples please look through the `specification/minimal` and `specification/extended` directories. Also see the [getting started section](#Getting-Started).
+For more examples please look through the `specification/core` directory. Also see the [getting started section](#Getting-Started).
 
 ## Installation
 
@@ -146,9 +146,12 @@ Usage: reusec [flags] --output [OUTPUT FILE] [FILE]...
 Compiler for the Reuse programming language
 
        --stdlib [BOOL]    Include the standard library, default: true
-       --language [LANG]  Target language to compile to.
-                          Can be ocaml or minimal.
+       --language [LANG]  Target language to compile to
        --output [FILE]    Write output to FILE
+       -h                 Print usage information
+       -f                 Format input files by writing directly to them
+
+Languages: haskell javascript module ocaml
 ```
 
 ## Design Restrictions
@@ -252,13 +255,13 @@ func parse-symbol iterator end next
         | Pair next-iterator name
                case string-to-int32 name
                   | Some integer
-                    next next-iterator (Integer integer (identifier-range iterator next-iterator))
+                       next next-iterator (Integer integer (identifier-range iterator next-iterator))
                   | None
                case string-empty? name
                   | False
-                    next next-iterator (Symbol name (identifier-range iterator next-iterator))
+                       next next-iterator (Symbol name (identifier-range iterator next-iterator))
                   | True
-                    end iterator
+                       end iterator
 
 ...
 
@@ -266,11 +269,11 @@ func parse-symbol iterator end next
 func sexp-to-function-type sexp-to-types sexp-to-type name parameters range
      case parameters
         | Cons (List arg-types _) (Cons return-type Empty)
-                result-bind   (sexp-to-types arg-types)   func arg-types
-                result-bind   (sexp-to-type return-type)  func return-type
-                result-return (FunctionType arg-types return-type range)
+               result-bind   (sexp-to-types arg-types)   func arg-types
+               result-bind   (sexp-to-type return-type)  func return-type
+               result-return (FunctionType arg-types return-type range)
         | _
-                Error (MalformedTypeError range)
+               Error (MalformedTypeError range)
 ```
 
 - Indentation is not significant

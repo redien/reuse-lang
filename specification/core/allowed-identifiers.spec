@@ -967,3 +967,8 @@ Type names should be allowed as function arguments
 | (def f (a) a)
 > (match (B 12) (B x) (f x))
 = 12
+
+Should not allow reserved symbols
+| (def ✨x () 1)
+> ✨x
+? Symbols prefixed with ✨ are reserved

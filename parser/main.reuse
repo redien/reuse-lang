@@ -29,6 +29,8 @@
                 (data-MalformedTypeError)
             (ErrorNotDefined name __ ___)
                 (string-concat (data-ErrorNotDefined) name)
+            (ErrorNotAccessible name __ ___)
+                (string-concat (data-ErrorNotAccessible) name)
             (ErrorAlreadyDefined _ __ ___)
                 (data-ErrorAlreadyDefined)
             (ErrorReservedIdentifier _ __ ___)

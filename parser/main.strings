@@ -12,6 +12,7 @@ MalformedSymbolError                              |MalformedSymbolError
 MalformedConstructorError                         |MalformedConstructorError
 MalformedTypeError                                |MalformedTypeError
 ErrorNotDefined                                   |ErrorNotDefined: 
+ErrorNotAccessible                                |ErrorNotAccessible: 
 ErrorAlreadyDefined                               |ErrorAlreadyDefined
 ErrorReservedIdentifier                           |ErrorReservedIdentifier
 MalformedSexpTooFewClosingBrackets                |MalformedSexpTooFewClosingBrackets

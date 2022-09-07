@@ -1,20 +1,25 @@
 
-(pub typ identifier-kind
-     PublicFunctionIdentifier
-     PublicTypeIdentifier
-     PublicConstructorIdentifier
-     PrivateFunctionIdentifier
-     PrivateTypeIdentifier
-     PrivateConstructorIdentifier
-     VariableIdentifier
-     TypeVariableIdentifier)
+(pub typ definition-kind
+     PublicFunctionDefinition
+     PublicTypeDefinition
+     PublicConstructorDefinition
+     PrivateFunctionDefinition
+     PrivateTypeDefinition
+     PrivateConstructorDefinition
+     VariableDefinition
+     TypeVariableDefinition)
+
+(pub typ identifier-universe
+     TypeUniverse
+     ValueUniverse)
 
 (pub typ (identifier-reference identifier)
      (Resolved identifier)
-     (Definition int32 identifier-kind))
+     (Definition int32 definition-kind))
 
 (pub typ identifier
      (Identifier (maybe (identifier-reference identifier))
+                 identifier-universe
                  string
                  source-reference
                  range))
@@ -53,11 +58,30 @@
      (FunctionDefinition identifier boolean (list identifier) expression range)
      (TargetDefinition source-reference slice))
 
+(def identifier-universe-from-kind (kind)
+     (match kind
+            PublicFunctionDefinition
+                ValueUniverse
+            PublicConstructorDefinition
+                ValueUniverse
+            PublicTypeDefinition
+                TypeUniverse
+            PrivateFunctionDefinition
+                ValueUniverse
+            PrivateConstructorDefinition
+                ValueUniverse
+            PrivateTypeDefinition
+                TypeUniverse
+            VariableDefinition
+                ValueUniverse
+            TypeVariableDefinition
+                TypeUniverse))
+
 (def identifier-definition (identifier)
      (match identifier
-            (Identifier (Some (Resolved (Identifier (Some (Definition id kind)) __ ___ ____))) _____ ______ _______)
+            (Identifier (Some (Resolved (Identifier (Some (Definition id kind)) __ ___ ____ _____))) _____ ______ _______ ________)
                 (Some (Definition id kind))
-            (Identifier (Some (Definition id kind)) __ ___ ____)
+            (Identifier (Some (Definition id kind)) __ ___ ____ _____)
                 (Some (Definition id kind))
             _
                 None))
@@ -71,17 +95,17 @@
 
 (pub def identifier-name (identifier)
      (match identifier
-            (Identifier _ name __ ___)
+            (Identifier _ __ name ___ ____)
                 name))
 
 (pub def identifier-with-name (name identifier)
      (match identifier
-            (Identifier _1 _ _2 _3)
-                (Identifier _1 name _2 _3)))
+            (Identifier _1 _2 _ _3 _4)
+                (Identifier _1 _2 name _3 _4)))
 
 (pub def identifier-source-reference (identifier)
      (match identifier
-            (Identifier _ __ source-reference ___)
+            (Identifier _ __ ___ source-reference ____)
                 source-reference))
 
 (pub def identifier-module (identifier)
@@ -89,25 +113,53 @@
 
 (pub def identifier-range (identifier)
      (match identifier
-            (Identifier _ __ ___ range)
+            (Identifier _ __ ___ ____ range)
                 range))
 
 (pub def identifier-public? (identifier)
      (match (identifier-definition identifier)
-            (Some (Definition _ PublicFunctionIdentifier))
+            (Some (Definition _ PublicFunctionDefinition))
                 True
-            (Some (Definition _ PublicTypeIdentifier))
+            (Some (Definition _ PublicTypeDefinition))
                 True
-            (Some (Definition _ PublicConstructorIdentifier))
+            (Some (Definition _ PublicConstructorDefinition))
                 True
             _
                 False))
+
+(def identifier-universe (identifier)
+     (match identifier
+            (Identifier _ universe __ ___ ____)
+                universe))
 
 (pub def identifier-is? (id identifier)
      (maybe-or-else False (maybe-map (= id) (identifier-id identifier))))
 
 (pub def identifier-equal? (a b)
-     (maybe-or-else False (maybe-map ((flip identifier-is?) b) (identifier-id a))))
+     (maybe-or-else
+         (source-reference-equal?
+             (identifier-source-reference a)
+             (identifier-source-reference b))
+         (maybe-map ((flip identifier-is?) b) (identifier-id a))))
+
+(def identifier-from-definition (id kind text source-reference range)
+     (Identifier
+         (Some (Definition id kind))
+         (identifier-universe-from-kind kind)
+         text
+         source-reference
+         range))
+
+(def identifier-resolved (defined-identifier source-reference range)
+     (Identifier
+         (Some (Resolved defined-identifier))
+         (identifier-universe defined-identifier)
+         (identifier-name defined-identifier)
+         source-reference
+         range))
+
+(def identifier-unresolved (universe text source-reference range)
+     (Identifier None universe text source-reference range))
 
 (pub def definition-source-reference (definition)
      (match definition
