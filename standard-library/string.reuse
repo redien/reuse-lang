@@ -337,28 +337,34 @@
             (Some xa)
                 (match (string-first b)
                        (Some xb)
-                            (match (= xa xb)
-                                   True
-                                        (string-equal? (string-rest a) (string-rest b))
-                                   False
-                                        False)
+                           (match (= xa xb)
+                                  True
+                                      (string-equal? (string-rest a) (string-rest b))
+                                  False
+                                      False)
                        None
                            (string-is-empty? a))
             None
                 (string-is-empty? b)))
 
-(pub def string-index-of (index substring string)
-     (match (>= index (string-size string))
+(def string-index-of' (index substring substring-size string string-size)
+     (match (>= index string-size)
             True
                 None
             False
-                (match (string-equal?
-                    substring
-                    (string-substring index (string-size substring) string))
+                (match (string-equal? substring (string-substring index substring-size string))
                        True
                            (Some index)
                        False
-                           (string-index-of (+ index 1) substring string))))
+                           (string-index-of' (+ index 1) substring substring-size string string-size))))
+
+(pub def string-index-of (index substring string)
+     (string-index-of'
+         index
+         substring
+         (string-size substring)
+         string
+         (string-size string)))
 
 (pub def string-point-is-digit (point)
      (match (> point 47)
