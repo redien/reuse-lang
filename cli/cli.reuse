@@ -12,9 +12,10 @@
              (data-usage5)
              (data-usage6)
              (data-usage7)
+             (data-usage8)
              (string-empty)
              (string-concat
-                 (data-usage8)
+                 (data-usage9)
                  (string-join (string-of-char 32) (list-map compiler-backend-name modules))))))
 
 (typ cli-program
@@ -81,7 +82,7 @@
          (string-of-char 10)
          (list-map (string-join (string-of-char 32)) table)))
 
-(def print-diagnostics (arguments file-entries max-heap-size start-parse end-parse start-transform end-transform start-generate end-generate start-read-files end-read-files start-write-files end-write-files k)
+(def print-diagnostics (arguments file-entries max-heap-size start-parse end-parse start-resolve end-resolve start-transform end-transform start-generate end-generate start-read-files end-read-files start-write-files end-write-files k)
      (match (flag-is-true? (data-diagnostics-flag) False arguments)
             True
                 (CliError
@@ -95,6 +96,7 @@
                             (data-bytes-read))
                         (list (string-from-int32 max-heap-size) (data-max-heap-size))
                         (list (string-from-int32 (- end-parse start-parse)) (data-parse-time))
+                        (list (string-from-int32 (- end-resolve start-resolve)) (data-resolve-time))
                         (list
                             (string-from-int32 (- end-transform start-transform))
                             (data-transform-time))
@@ -130,8 +132,11 @@
             (Some output-path)
                 (let-bind (path-filename-without-extension output-path) (fn (module-name)
                 (time-bind (fn (start-parse)
-                (let-bind (parse-source-files file-entries) (fn (definitions)
+                (let-bind (list-map parse-source-file file-entries) (fn (parsed-files)
                 (time-bind (fn (end-parse)
+                (time-bind (fn (start-resolve)
+                (let-bind (resolve-files parsed-files) (fn (definitions)
+                (time-bind (fn (end-resolve)
                 (time-bind (fn (start-transform)
                 (let-bind (compiler-backend-transform-definitions backend (result-map pair-right definitions)) (fn (definitions)
                 (time-bind (fn (end-transform)
@@ -150,6 +155,8 @@
                                    max-heap-size
                                    start-parse
                                    end-parse
+                                   start-resolve
+                                   end-resolve
                                    start-transform
                                    end-transform
                                    start-generate
@@ -162,7 +169,7 @@
                                        (CliExit 0)))))))))))))))
                        (Error error)
                            (error-bind (error-to-string file-entries error) (fn ()
-                           (CliExit 1))))))))))))))))))))
+                           (CliExit 1))))))))))))))))))))))))))
             None
                 (error-bind (data-no-output-path) (fn ()
                 (CliExit 1)))))))))))))

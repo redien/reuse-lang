@@ -362,7 +362,7 @@
                     reference
                     (transform-strings (source-reference-file-path reference) content)))))
 
-(def parse-source-file (file)
+(pub def parse-source-file (file)
      (match (source-file-type file)
             SourceFileTypeStrings
                 (parse-strings-file file)
@@ -419,15 +419,12 @@
          (Result (Pair (scope-empty) Empty))
          parsed-files))
 
-(def resolve-files (files)
+(pub def resolve-files (files)
      (match (result-partition (parser-run files))
             (Pair parsed-files Empty)
                 (resolve-identifiers parsed-files)
             (Pair _ (Cons error __))
                 (Error error)))
 
-(def resolve-modules (definitions)
-     definitions)
-
 (pub def parse-source-files (files)
-     (resolve-modules (resolve-files (list-map parse-source-file files))))
+     (resolve-files (list-map parse-source-file files)))

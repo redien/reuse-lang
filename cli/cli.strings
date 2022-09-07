@@ -11,6 +11,7 @@ write-files                  |write files (μs)
 bytes-read                   |read files (bytes)
 max-heap-size                |max heap size (bytes)
 parse-time                   |parsing (μs)
+resolve-time                 |resolving identifiers (μs)
 transform-time               |ast transformation (μs)
 generate-time                |code generation (μs)
 true                         |true
@@ -22,6 +23,7 @@ usage4                       |       --language [LANG]  Target language to compi
 usage5                       |       --output [FILE]    Write output to FILE
 usage6                       |       -h                 Print usage information
 usage7                       |       -f                 Format input files by writing directly to them
-usage8                       |Languages: 
+usage8                       |       --diagnostics      Print compiler timing information
+usage9                       |Languages: 
 h                            |h
 f                            |f
