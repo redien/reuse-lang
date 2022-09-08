@@ -20,6 +20,7 @@
 (pub typ identifier
      (Identifier (maybe (identifier-reference identifier))
                  identifier-universe
+                 int32
                  string
                  source-reference
                  range))
@@ -79,9 +80,9 @@
 
 (def identifier-definition (identifier)
      (match identifier
-            (Identifier (Some (Resolved (Identifier (Some (Definition id kind)) __ ___ ____ _____))) _____ ______ _______ ________)
+            (Identifier (Some (Resolved (Identifier (Some (Definition id kind)) __ ___ ____ _____ ______))) ______ _______ ________ _________ __________)
                 (Some (Definition id kind))
-            (Identifier (Some (Definition id kind)) __ ___ ____ _____)
+            (Identifier (Some (Definition id kind)) __ ___ ____ _____ ______)
                 (Some (Definition id kind))
             _
                 None))
@@ -95,17 +96,22 @@
 
 (pub def identifier-name (identifier)
      (match identifier
-            (Identifier _ __ name ___ ____)
+            (Identifier _ __ __ name ____ _____)
                 name))
+
+(pub def identifier-token (identifier)
+     (match identifier
+            (Identifier _ __ token __ ____ _____)
+                token))
 
 (pub def identifier-with-name (name identifier)
      (match identifier
-            (Identifier _1 _2 _ _3 _4)
-                (Identifier _1 _2 name _3 _4)))
+            (Identifier _1 _2 _3 _ _4 _5)
+                (Identifier _1 _2 _3 name _4 _5)))
 
 (pub def identifier-source-reference (identifier)
      (match identifier
-            (Identifier _ __ ___ source-reference ____)
+            (Identifier _ __ ___ ____ source-reference _____)
                 source-reference))
 
 (pub def identifier-module (identifier)
@@ -113,7 +119,7 @@
 
 (pub def identifier-range (identifier)
      (match identifier
-            (Identifier _ __ ___ ____ range)
+            (Identifier _ __ ___ ____ _____ range)
                 range))
 
 (pub def identifier-public? (identifier)
@@ -129,37 +135,41 @@
 
 (def identifier-universe (identifier)
      (match identifier
-            (Identifier _ universe __ ___ ____)
+            (Identifier _ universe __ ___ ____ _____)
                 universe))
 
 (pub def identifier-is? (id identifier)
      (maybe-or-else False (maybe-map (= id) (identifier-id identifier))))
 
 (pub def identifier-equal? (a b)
-     (maybe-or-else
-         (source-reference-equal?
-             (identifier-source-reference a)
-             (identifier-source-reference b))
-         (maybe-map ((flip identifier-is?) b) (identifier-id a))))
+     (match (source-reference-equal?
+         (identifier-source-reference a)
+         (identifier-source-reference b))
+            True
+                (maybe-or-else False (maybe-map ((flip identifier-is?) b) (identifier-id a)))
+            False
+                False))
 
-(def identifier-from-definition (id kind text source-reference range)
+(def identifier-from-definition (id kind token text source-reference range)
      (Identifier
          (Some (Definition id kind))
          (identifier-universe-from-kind kind)
+         token
          text
          source-reference
          range))
 
-(def identifier-resolved (defined-identifier source-reference range)
+(def identifier-resolved (defined-identifier token source-reference range)
      (Identifier
          (Some (Resolved defined-identifier))
          (identifier-universe defined-identifier)
+         token
          (identifier-name defined-identifier)
          source-reference
          range))
 
-(def identifier-unresolved (universe text source-reference range)
-     (Identifier None universe text source-reference range))
+(def identifier-unresolved (universe token text source-reference range)
+     (Identifier None universe token text source-reference range))
 
 (pub def definition-source-reference (definition)
      (match definition

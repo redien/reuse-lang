@@ -59,6 +59,7 @@
      (Identifier
          (Some (Definition (id) kind))
          (identifier-universe-from-kind kind)
+         (id)
          (text)
          (SourceReference -1 (string-empty) ModuleInternal)
          (Range 0 0)))

@@ -64,7 +64,7 @@
      (match symbol
             (Symbol token text range)
                 (parser-bind (increment-id!) (fn (id)
-                (parser-return (identifier-from-definition id kind text source-reference range))))
+                (parser-return (identifier-from-definition id kind token text source-reference range))))
             (Integer _ range)
                 (parser-error (error source-reference range))
             (List _ range)
@@ -100,12 +100,12 @@
 
 (def lookup-identifier (source-reference error scope universe name)
      (match name
-            (Symbol _ text range)
+            (Symbol token text range)
                 (match (scope-resolve text universe scope)
                        (Some identifier)
-                           (parser-return (identifier-resolved identifier source-reference range))
+                           (parser-return (identifier-resolved identifier token source-reference range))
                        None
-                           (parser-return (identifier-unresolved universe text source-reference range)))
+                           (parser-return (identifier-unresolved universe token text source-reference range)))
             _
                 (parser-error (error source-reference (sexp-range name)))))
 
@@ -382,12 +382,12 @@
 
 (def resolve-variable (scope identifier)
      (match identifier
-            (Identifier None universe text source-reference range)
+            (Identifier None universe token text source-reference range)
                 (match (scope-resolve text universe scope)
                        (Some identifier)
                            (match (identifier-is-accessible? identifier source-reference)
                                   True
-                                      (result-return (identifier-resolved identifier source-reference range))
+                                      (result-return (identifier-resolved identifier token source-reference range))
                                   False
                                       (result-error (ErrorNotAccessible text source-reference range)))
                        None
