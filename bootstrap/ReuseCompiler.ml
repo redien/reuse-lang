@@ -1173,33 +1173,36 @@ let rec array_entries array12 =
          | (ArrayTree (x143, a55, entry, b51)) -> 
             (list_flatten (Cons ((array_entries a55),Cons ((Cons (entry,Empty)),Cons ((array_entries b51),Empty))))));;
 
-let rec array_from_list2 entries index7 array13 = 
+let rec array_values array13 = 
+    (list_map pair_right (array_entries array13));;
+
+let rec array_from_list2 entries index7 array14 = 
     (match entries with
          | (Cons (x144, xs21)) -> 
-            (array_from_list2 xs21 (Int32.add index7 (1l)) (array_set index7 x144 array13))
+            (array_from_list2 xs21 (Int32.add index7 (1l)) (array_set index7 x144 array14))
          | Empty -> 
-            array13);;
+            array14);;
 
 let rec array_from_list entries2 = 
     (array_from_list2 entries2 (0l) ArrayEmpty);;
 
 let rec array_of entries3 = 
-    (list_foldl (fun entry2 array14 -> (match entry2 with
+    (list_foldl (fun entry2 array15 -> (match entry2 with
          | (Pair (key, value17)) -> 
-            (array_set key value17 array14))) ArrayEmpty entries3);;
+            (array_set key value17 array15))) ArrayEmpty entries3);;
 
 let rec array_singleton index8 value18 = 
     (ArrayTree (ArrayBlack, ArrayEmpty, (Pair (index8, value18)), ArrayEmpty));;
 
-let rec array_get_or index9 default2 array15 = 
-    (match (array_get index9 array15) with
+let rec array_get_or index9 default2 array16 = 
+    (match (array_get index9 array16) with
          | (Some (value19)) -> 
             value19
          | None -> 
             default2);;
 
-let rec array_size array16 = 
-    (list_size (array_entries array16));;
+let rec array_size array17 = 
+    (list_size (array_entries array17));;
 
 type ('Tvalue20) dictionary  = 
      | Dictionary : (((string,'Tvalue20) pair) list) array -> ('Tvalue20) dictionary;;
@@ -1212,23 +1215,23 @@ let rec dictionary_bucket_from_key key2 =
 
 let rec dictionary_set key3 new_value3 dictionary2 = 
     (match dictionary2 with
-         | (Dictionary (array17)) -> 
+         | (Dictionary (array18)) -> 
             (match (dictionary_bucket_from_key key3) with
                  | bucket_id -> 
-                    (match (array_get bucket_id array17) with
+                    (match (array_get bucket_id array18) with
                          | (Some (bucket)) -> 
                             (match (list_filter (fun entry3 -> (not (string_equal (pair_left entry3) key3))) bucket) with
                                  | new_bucket -> 
-                                    (Dictionary ((array_set bucket_id (Cons ((Pair (key3, new_value3)), new_bucket)) array17))))
+                                    (Dictionary ((array_set bucket_id (Cons ((Pair (key3, new_value3)), new_bucket)) array18))))
                          | None -> 
-                            (Dictionary ((array_set bucket_id (Cons ((Pair (key3, new_value3)),Empty)) array17))))));;
+                            (Dictionary ((array_set bucket_id (Cons ((Pair (key3, new_value3)),Empty)) array18))))));;
 
 let rec dictionary_get key4 dictionary3 = 
     (match dictionary3 with
-         | (Dictionary (array18)) -> 
+         | (Dictionary (array19)) -> 
             (match (dictionary_bucket_from_key key4) with
                  | bucket_id2 -> 
-                    (match (array_get bucket_id2 array18) with
+                    (match (array_get bucket_id2 array19) with
                          | (Some (bucket2)) -> 
                             (maybe_map pair_right (list_find_first (fun entry4 -> (string_equal (pair_left entry4) key4)) bucket2))
                          | None -> 
@@ -1236,21 +1239,21 @@ let rec dictionary_get key4 dictionary3 =
 
 let rec dictionary_remove key5 dictionary4 = 
     (match dictionary4 with
-         | (Dictionary (array19)) -> 
+         | (Dictionary (array20)) -> 
             (match (dictionary_bucket_from_key key5) with
                  | bucket_id3 -> 
-                    (match (array_get bucket_id3 array19) with
+                    (match (array_get bucket_id3 array20) with
                          | (Some (bucket3)) -> 
                             (match (list_filter (fun entry5 -> (not (string_equal (pair_left entry5) key5))) bucket3) with
                                  | new_bucket2 -> 
-                                    (Dictionary ((array_set bucket_id3 new_bucket2 array19))))
+                                    (Dictionary ((array_set bucket_id3 new_bucket2 array20))))
                          | None -> 
                             dictionary4)));;
 
 let rec dictionary_entries dictionary5 = 
     (match dictionary5 with
-         | (Dictionary (array20)) -> 
-            (list_flatten (list_map pair_right (array_entries array20))));;
+         | (Dictionary (array21)) -> 
+            (list_flatten (list_map pair_right (array_entries array21))));;
 
 let rec dictionary_of entries4 = 
     (list_foldl (pair_map dictionary_set) (dictionary_empty ()) entries4);;

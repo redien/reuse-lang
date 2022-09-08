@@ -135,6 +135,9 @@
             (ArrayTree _ a entry b)
                 (list-flatten (list (array-entries a) (list entry) (array-entries b)))))
 
+(pub def array-values (array)
+     (list-map pair-right (array-entries array)))
+
 (def array-from-list' (entries index array)
      (match entries
             (Cons x xs)
