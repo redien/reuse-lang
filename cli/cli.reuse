@@ -65,7 +65,7 @@
      (pipe
          arguments
          (list-filter (. (string-equal? (data-module-flag)) pair-left))
-         (list-map (. (module-name-and-path False) pair-right))
+         (list-map (. module-name-and-path pair-right))
          (match (flag-is-true? (data-parser-flag) False (dictionary-of arguments))
                 True
                     (list-cons (parser-module backend data-path))

@@ -1,6 +1,6 @@
 
 (pub typ module-reference
-     (ModulePath string boolean)
+     (ModulePath string)
      ModuleSelf
      ModuleInternal)
 
@@ -15,9 +15,9 @@
 
 (pub def module-equal? (a b)
      (match a
-            (ModulePath a' _)
+            (ModulePath a')
                 (match b
-                       (ModulePath b' _)
+                       (ModulePath b')
                            (string-equal? a' b')
                        _
                            False)
