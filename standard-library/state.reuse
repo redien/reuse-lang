@@ -1,33 +1,39 @@
 
-(pub typ (state s v) (Operation (fn (s) (pair s v))))
+(pub typ (state s v) (Operation (fn (s) (trampoline (pair s v)))))
 
-(pub def state-run (state operation)
+(def state-run-internal (state operation)
      (match operation
             (Operation f)
                 (f state)))
 
+(pub def state-run (state operation)
+     (trampoline-run (state-run-internal state operation)))
+
 (pub def state-final-value (initial-state operation)
-     (match (state-run initial-state operation)
+     (match (trampoline-run (state-run-internal initial-state operation))
             (Pair _ value)
                 value))
 
 (pub def state-return (value)
      (Operation (fn (state)
-         (Pair state value))))
+         (TrampolineDone (Pair state value)))))
 
 (pub def state-bind (operation f)
      (Operation (fn (state)
-         (match (state-run state operation)
-                (Pair new-state new-value)
-                    (state-run new-state (f new-value))))))
+         (TrampolineMore (fn ()
+             (trampoline-bind (state-run-internal state operation) (fn (v)
+             (match v
+                    (Pair state value)
+                        (TrampolineMore (fn ()
+                            (state-run-internal state (f value))))))))))))
 
 (pub def state-get ()
      (Operation (fn (state)
-         (Pair state state))))
+         (TrampolineDone (Pair state state)))))
 
 (pub def state-set (state)
      (Operation (fn (_)
-         (Pair state state))))
+         (TrampolineDone (Pair state state)))))
 
 (pub def state-modify (f)
      (state-bind (state-get) (fn (state)

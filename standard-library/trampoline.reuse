@@ -1,0 +1,41 @@
+
+(pub typ (trampoline v (exists a))
+     (TrampolineDone v)
+     (TrampolineMore (fn () (trampoline v)))
+     (TrampolineFlatmap (trampoline a) (fn (a) (trampoline v))))
+
+(pub def trampoline-bind (trampoline f)
+     (match trampoline
+            (TrampolineFlatmap a g)
+                (TrampolineFlatmap a (fn (x)
+                    (trampoline-bind (g x) f)))
+            x
+                (TrampolineFlatmap x f)))
+
+(pub def trampoline-map (trampoline f)
+     (trampoline-bind trampoline (fn (a)
+     (TrampolineDone (f a)))))
+
+(def resume (trampoline)
+     (match trampoline
+            (TrampolineDone v)
+                (Result v)
+            (TrampolineMore k)
+                (Error k)
+            (TrampolineFlatmap a f)
+                (match a
+                       (TrampolineDone v)
+                           (resume (f v))
+                       (TrampolineMore k)
+                           (Error (fn ()
+                               (trampoline-bind (k) f)))
+                       (TrampolineFlatmap b g)
+                           (resume (trampoline-bind b (fn (x)
+                           (trampoline-bind (g x) f)))))))
+
+(pub def trampoline-run (trampoline)
+     (match (resume trampoline)
+            (Result a)
+                a
+            (Error k)
+                (trampoline-run (k))))

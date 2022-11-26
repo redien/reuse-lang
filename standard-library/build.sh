@@ -17,6 +17,7 @@ $project_root/bin/reusec --language module\
                          $script_path/list.reuse\
                          $script_path/string.reuse\
                          $script_path/result.reuse\
+                         $script_path/trampoline.reuse\
                          $script_path/state.reuse\
                          $script_path/array.reuse\
                          $script_path/dictionary.reuse\
