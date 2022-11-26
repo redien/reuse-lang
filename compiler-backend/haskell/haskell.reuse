@@ -263,8 +263,22 @@
             (ExistentialParameter identifier)
                 (SourceString (identifier-name identifier))))
 
+(def append-existential-parameter (parameter s)
+     (match parameter
+            (UniversalParameter _)
+                s
+            (ExistentialParameter identifier)
+                (join' (list
+                    s
+                    (SourceString (data-forall))
+                    (source-space)
+                    (prefix-type-variable identifier)
+                    (SourceString (data-dot))
+                    (source-space)))))
+
 (def translate-complex-constructor-definition (name types parameters)
      (join' (list
+         (list-foldl append-existential-parameter (source-string-empty) parameters)
          (translate-constructor-identifier name)
          (source-space)
          (translate-types parameters (data-space) types))))
@@ -289,19 +303,6 @@
             (ExistentialParameter _)
                 s))
 
-(def append-existential-parameter (parameter s)
-     (match parameter
-            (UniversalParameter _)
-                s
-            (ExistentialParameter identifier)
-                (join' (list
-                    s
-                    (SourceString (data-forall))
-                    (source-space)
-                    (prefix-type-variable identifier)
-                    (SourceString (data-dot))
-                    (source-space)))))
-
 (def translate-type-definition (name parameters constructors)
      (join-lines (list
          ((line 0) (list
@@ -309,8 +310,7 @@
              (source-space)
              (prefix-type name)
              (list-foldl append-universal-parameter (source-string-empty) parameters)
-             (SourceString (data-equals))
-             (list-foldl append-existential-parameter (source-string-empty) parameters)))
+             (SourceString (data-equals))))
          ((line 1) (list
              (SourceString (string-repeat (data-space) 3))
              (translate-constructor-definitions 1 parameters constructors))))))

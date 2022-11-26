@@ -57,23 +57,30 @@ Existential type parameters
 > (apply (first (Pair (Closure identity 10) (Closure first (Pair 1 2)))))
 = 10
 
+| (typ (trampoline v (exists a))
+|      (TrampolineDone v)
+|      (TrampolineMore (fn () (trampoline v)))
+|      (TrampolineFlatmap (trampoline a) (fn (a) (trampoline v))))
+> 11
+= 11
+
 Universal type parameters
 | (typ (universal a) (Universal a))
 | (def destruct (u) (match u (Universal a) a))
-> (destruct (destruct (Universal (Universal 11))))
-= 11
+> (destruct (destruct (Universal (Universal 12))))
+= 12
 
 Pattern is parameterised constructor but not value
 | (typ (list a) (Cons a) Empty)
-> (match Empty (Cons x) x Empty 12)
-= 12
+> (match Empty (Cons x) x Empty 13)
+= 13
 
 Public types work the same way as normal types
 | (pub typ my-boolean MyTrue MyFalse)
-> (match MyFalse MyTrue 0 MyFalse 13)
-= 13
+> (match MyFalse MyTrue 0 MyFalse 14)
+= 14
 
 Function types with zero input arguments
 | (typ my-type (MyType (fn () int32)))
-> (match (MyType (fn () 14)) (MyType f) (f))
-= 14
+> (match (MyType (fn () 15)) (MyType f) (f))
+= 15
