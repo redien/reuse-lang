@@ -16,24 +16,24 @@
 
 (pub def state-return (value)
      (Operation (fn (state)
-         (TrampolineDone (Pair state value)))))
+         (trampoline-return (Pair state value)))))
 
 (pub def state-bind (operation f)
      (Operation (fn (state)
-         (TrampolineMore (fn ()
+         (trampoline-yield (fn ()
              (trampoline-bind (state-run-internal state operation) (fn (v)
              (match v
                     (Pair state value)
-                        (TrampolineMore (fn ()
+                        (trampoline-yield (fn ()
                             (state-run-internal state (f value))))))))))))
 
 (pub def state-get ()
      (Operation (fn (state)
-         (TrampolineDone (Pair state state)))))
+         (trampoline-return (Pair state state)))))
 
 (pub def state-set (state)
      (Operation (fn (_)
-         (TrampolineDone (Pair state state)))))
+         (trampoline-return (Pair state state)))))
 
 (pub def state-modify (f)
      (state-bind (state-get) (fn (state)

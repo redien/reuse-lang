@@ -4,6 +4,12 @@
      (TrampolineMore (fn () (trampoline v)))
      (TrampolineFlatmap (trampoline a) (fn (a) (trampoline v))))
 
+(pub def trampoline-return (value)
+     (TrampolineDone value))
+
+(pub def trampoline-yield (k)
+     (TrampolineMore k))
+
 (pub def trampoline-bind (trampoline f)
      (match trampoline
             (TrampolineFlatmap a g)

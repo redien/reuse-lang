@@ -1010,6 +1010,12 @@ type ('Tv2) trampoline  =
      | TrampolineMore : ( unit  -> ('Tv2) trampoline) -> ('Tv2) trampoline
      | TrampolineFlatmap : ('Ta43) trampoline * ('Ta43 -> ('Tv2) trampoline) -> ('Tv2) trampoline;;
 
+let rec trampoline_return value9 = 
+    (TrampolineDone (value9));;
+
+let rec trampoline_yield k = 
+    (TrampolineMore (k));;
+
 let rec trampoline_bind trampoline2 f36 = 
     (match trampoline2 with
          | (TrampolineFlatmap (a44, g5)) -> 
@@ -1024,14 +1030,14 @@ let rec resume trampoline4 =
     (match trampoline4 with
          | (TrampolineDone (v3)) -> 
             (Result (v3))
-         | (TrampolineMore (k)) -> 
-            (Error (k))
+         | (TrampolineMore (k2)) -> 
+            (Error (k2))
          | (TrampolineFlatmap (a46, f38)) -> 
             (match a46 with
                  | (TrampolineDone (v4)) -> 
                     (resume (f38 v4))
-                 | (TrampolineMore (k2)) -> 
-                    (Error ((fun () -> (trampoline_bind (k2 ()) f38))))
+                 | (TrampolineMore (k3)) -> 
+                    (Error ((fun () -> (trampoline_bind (k3 ()) f38))))
                  | (TrampolineFlatmap (b39, g6)) -> 
                     (resume (trampoline_bind b39 (fun x122 -> (trampoline_bind (g6 x122) f38))))));;
 
@@ -1039,8 +1045,8 @@ let rec trampoline_run trampoline5 =
     (match (resume trampoline5) with
          | (Result (a47)) -> 
             a47
-         | (Error (k3)) -> 
-            (trampoline_run (k3 ())));;
+         | (Error (k4)) -> 
+            (trampoline_run (k4 ())));;
 
 type ('Ts,'Tv5) state  = 
      | Operation : ('Ts -> (('Ts,'Tv5) pair) trampoline) -> ('Ts,'Tv5) state;;
@@ -1055,28 +1061,28 @@ let rec state_run state4 operation2 =
 
 let rec state_final_value initial_state operation3 = 
     (match (trampoline_run (state_run_internal initial_state operation3)) with
-         | (Pair (x123, value9)) -> 
-            value9);;
+         | (Pair (x123, value10)) -> 
+            value10);;
 
-let rec state_return value10 = 
-    (Operation ((fun state5 -> (TrampolineDone ((Pair (state5, value10)))))));;
+let rec state_return value11 = 
+    (Operation ((fun state5 -> (trampoline_return (Pair (state5, value11))))));;
 
 let rec state_bind operation4 f40 = 
-    (Operation ((fun state6 -> (TrampolineMore ((fun () -> (trampoline_bind (state_run_internal state6 operation4) (fun v6 -> (match v6 with
-         | (Pair (state7, value11)) -> 
-            (TrampolineMore ((fun () -> (state_run_internal state7 (f40 value11))))))))))))));;
+    (Operation ((fun state6 -> (trampoline_yield (fun () -> (trampoline_bind (state_run_internal state6 operation4) (fun v6 -> (match v6 with
+         | (Pair (state7, value12)) -> 
+            (trampoline_yield (fun () -> (state_run_internal state7 (f40 value12))))))))))));;
 
 let rec state_get () = 
-    (Operation ((fun state8 -> (TrampolineDone ((Pair (state8, state8)))))));;
+    (Operation ((fun state8 -> (trampoline_return (Pair (state8, state8))))));;
 
 let rec state_set state9 = 
-    (Operation ((fun x124 -> (TrampolineDone ((Pair (state9, state9)))))));;
+    (Operation ((fun x124 -> (trampoline_return (Pair (state9, state9))))));;
 
 let rec state_modify f41 = 
     (state_bind (state_get ()) (fun state10 -> (state_set (f41 state10))));;
 
-let rec state_let value12 f42 = 
-    (state_bind (state_return value12) f42);;
+let rec state_let value13 f42 = 
+    (state_bind (state_return value13) f42);;
 
 let rec state_foldr f43 initial_value operations = 
     (list_foldr (fun operation5 chain -> (state_bind operation5 (fun x125 -> (state_bind chain (fun xs19 -> (state_return (f43 x125 xs19))))))) (state_return initial_value) operations);;
@@ -1090,16 +1096,16 @@ let rec state_flatmap f45 operation6 =
 let rec state_map f46 operation7 = 
     (state_flatmap (fun x' -> x' |> f46 |> state_return) operation7);;
 
-let rec state_lift value13 = 
-    (state_return value13);;
+let rec state_lift value14 = 
+    (state_return value14);;
 
 type array_color  = 
      | ArrayRed
      | ArrayBlack;;
 
-type ('Tvalue14) array  = 
+type ('Tvalue15) array  = 
      | ArrayEmpty
-     | ArrayTree : array_color * ('Tvalue14) array * (int32,'Tvalue14) pair * ('Tvalue14) array -> ('Tvalue14) array;;
+     | ArrayTree : array_color * ('Tvalue15) array * (int32,'Tvalue15) pair * ('Tvalue15) array -> ('Tvalue15) array;;
 
 let rec array_empty () = 
     ArrayEmpty;;
@@ -1124,29 +1130,29 @@ let rec array_balance array3 =
          | rest14 -> 
             rest14);;
 
-let rec array_set2 x131 value15 array4 = 
+let rec array_set2 x131 value16 array4 = 
     (match array4 with
          | ArrayEmpty -> 
-            (ArrayTree (ArrayRed, ArrayEmpty, (Pair (x131, value15)), ArrayEmpty))
+            (ArrayTree (ArrayRed, ArrayEmpty, (Pair (x131, value16)), ArrayEmpty))
          | (ArrayTree (color, a53, y14, b45)) -> 
             (match (x2 x131 (pair_left y14)) with
                  | True -> 
-                    (array_balance (ArrayTree (color, (array_set2 x131 value15 a53), y14, b45)))
+                    (array_balance (ArrayTree (color, (array_set2 x131 value16 a53), y14, b45)))
                  | False -> 
                     (match (x3 x131 (pair_left y14)) with
                          | True -> 
-                            (array_balance (ArrayTree (color, a53, y14, (array_set2 x131 value15 b45))))
+                            (array_balance (ArrayTree (color, a53, y14, (array_set2 x131 value16 b45))))
                          | False -> 
-                            (ArrayTree (color, a53, (Pair (x131, value15)), b45)))));;
+                            (ArrayTree (color, a53, (Pair (x131, value16)), b45)))));;
 
-let rec array_set x132 value16 array5 = 
-    (array_make_black (array_set2 x132 value16 array5));;
+let rec array_set x132 value17 array5 = 
+    (array_make_black (array_set2 x132 value17 array5));;
 
 let rec array_get x133 array6 = 
     (match array6 with
          | ArrayEmpty -> 
             None
-         | (ArrayTree (x134, a54, (Pair (y15, value17)), b46)) -> 
+         | (ArrayTree (x134, a54, (Pair (y15, value18)), b46)) -> 
             (match (x2 x133 y15) with
                  | True -> 
                     (array_get x133 a54)
@@ -1155,7 +1161,7 @@ let rec array_get x133 array6 =
                          | True -> 
                             (array_get x133 b46)
                          | False -> 
-                            (Some (value17)))));;
+                            (Some (value18)))));;
 
 let rec array_min array7 default = 
     (match array7 with
@@ -1228,24 +1234,24 @@ let rec array_from_list entries2 =
 
 let rec array_of entries3 = 
     (list_foldl (fun entry2 array15 -> (match entry2 with
-         | (Pair (key, value18)) -> 
-            (array_set key value18 array15))) ArrayEmpty entries3);;
+         | (Pair (key, value19)) -> 
+            (array_set key value19 array15))) ArrayEmpty entries3);;
 
-let rec array_singleton index8 value19 = 
-    (ArrayTree (ArrayBlack, ArrayEmpty, (Pair (index8, value19)), ArrayEmpty));;
+let rec array_singleton index8 value20 = 
+    (ArrayTree (ArrayBlack, ArrayEmpty, (Pair (index8, value20)), ArrayEmpty));;
 
 let rec array_get_or index9 default2 array16 = 
     (match (array_get index9 array16) with
-         | (Some (value20)) -> 
-            value20
+         | (Some (value21)) -> 
+            value21
          | None -> 
             default2);;
 
 let rec array_size array17 = 
     (list_size (array_entries array17));;
 
-type ('Tvalue21) dictionary  = 
-     | Dictionary : (((string,'Tvalue21) pair) list) array -> ('Tvalue21) dictionary;;
+type ('Tvalue22) dictionary  = 
+     | Dictionary : (((string,'Tvalue22) pair) list) array -> ('Tvalue22) dictionary;;
 
 let rec dictionary_empty () = 
     (Dictionary ((array_empty ())));;
@@ -1298,13 +1304,13 @@ let rec dictionary_entries dictionary5 =
 let rec dictionary_of entries4 = 
     (list_foldl (pair_map dictionary_set) (dictionary_empty ()) entries4);;
 
-let rec dictionary_singleton key6 value22 = 
-    (dictionary_set key6 value22 (dictionary_empty ()));;
+let rec dictionary_singleton key6 value23 = 
+    (dictionary_set key6 value23 (dictionary_empty ()));;
 
 let rec dictionary_get_or key7 default3 dictionary6 = 
     (match (dictionary_get key7 dictionary6) with
-         | (Some (value23)) -> 
-            value23
+         | (Some (value24)) -> 
+            value24
          | None -> 
             default3);;
 
@@ -1599,10 +1605,10 @@ type parse_error  =
      | ParseErrorTooFewClosingBrackets
      | ParseErrorTooManyClosingBrackets;;
 
-type ('Tsymbol,'Tvalue24) parser_result  = 
-     | ParserResult : int32 * (int32,('Tsymbol) dictionary) pair * 'Tvalue24 -> ('Tsymbol,'Tvalue24) parser_result
-     | ParserError : parse_error -> ('Tsymbol,'Tvalue24) parser_result
-     | ParserEnd : int32 -> ('Tsymbol,'Tvalue24) parser_result;;
+type ('Tsymbol,'Tvalue25) parser_result  = 
+     | ParserResult : int32 * (int32,('Tsymbol) dictionary) pair * 'Tvalue25 -> ('Tsymbol,'Tvalue25) parser_result
+     | ParserError : parse_error -> ('Tsymbol,'Tvalue25) parser_result
+     | ParserEnd : int32 -> ('Tsymbol,'Tvalue25) parser_result;;
 
 let rec intern_string index10 next_index name symbol_state = 
     (match symbol_state with
@@ -2452,8 +2458,8 @@ let rec pattern_to_sexp pattern10 =
             (identifier_to_symbol identifier44)
          | (ConstructorPattern (identifier45, patterns4, range44)) -> 
             (List ((Cons ((identifier_to_symbol identifier45), (list_map pattern_to_sexp patterns4))), range44))
-         | (IntegerPattern (value25, range45)) -> 
-            (Integer (value25, range45))
+         | (IntegerPattern (value26, range45)) -> 
+            (Integer (value26, range45))
          | (Capture (identifier46)) -> 
             (identifier_to_symbol identifier46));;
 
@@ -2580,8 +2586,8 @@ let rec parser_run parsers =
          | (Parser (parser4)) -> 
             (pair_bimap id ((flip list_cons) (pair_right state11)) (state_run (pair_left state11) parser4)))) (Pair ((0l), Empty)) parsers));;
 
-let rec parser_return value26 = 
-    (Parser ((state_return (result_return value26))));;
+let rec parser_return value27 = 
+    (Parser ((state_return (result_return value27))));;
 
 let rec parser_error error10 = 
     (Parser ((state_return (result_error error10))));;
@@ -2589,9 +2595,9 @@ let rec parser_error error10 =
 let rec parser_bind parser5 f61 = 
     (match parser5 with
          | (Parser (parser6)) -> 
-            (Parser ((state_bind parser6 (fun result14 -> (result_prod state_return (result_bind result14 (fun value27 -> (match (f61 value27) with
-                 | (Parser (value28)) -> 
-                    (result_return value28))))))))));;
+            (Parser ((state_bind parser6 (fun result14 -> (result_prod state_return (result_bind result14 (fun value28 -> (match (f61 value28) with
+                 | (Parser (value29)) -> 
+                    (result_return value29))))))))));;
 
 let rec increment_id () = 
     (Parser ((state_bind (state_get ()) (fun state12 -> (state_bind (state_set (Int32.add state12 (1l))) (fun id11 -> (state_return (result_return id11))))))));;
@@ -2661,7 +2667,7 @@ let rec collect_captures pattern12 =
     (match pattern12 with
          | (Capture (identifier49)) -> 
             (Cons (identifier49,Empty))
-         | (IntegerPattern (value29, range64)) -> 
+         | (IntegerPattern (value30, range64)) -> 
             Empty
          | (ConstructorPattern (x348, patterns5, x349)) -> 
             (list_flatten (list_map collect_captures patterns5)));;
@@ -2680,8 +2686,8 @@ let rec parse_pattern source_reference18 scope6 pattern13 =
                     (parser_bind (lookup_identifier source_reference18 (not_defined (Some (text10))) scope6 ValueUniverse pattern13) (fun constructor5 -> (parser_return (ConstructorPattern (constructor5, Empty, range65)))))
                  | False -> 
                     (parser_bind (new_identifier source_reference18 malformed_pattern VariableDefinition pattern13) (fun identifier50 -> (parser_return (Capture (identifier50))))))
-         | (Integer (value30, range66)) -> 
-            (parser_return (IntegerPattern (value30, range66)))
+         | (Integer (value31, range66)) -> 
+            (parser_return (IntegerPattern (value31, range66)))
          | (List ((Cons (constructor6, patterns6)), range67)) -> 
             (parser_bind (lookup_identifier source_reference18 (not_defined (sexp_symbol_text constructor6)) scope6 ValueUniverse constructor6) (fun constructor7 -> (parser_bind (sequence (parse_pattern source_reference18 scope6) patterns6) (fun patterns7 -> (parser_return (ConstructorPattern (constructor7, patterns7, range67)))))))
          | (List (x351, range68)) -> 
@@ -2694,8 +2700,8 @@ let rec parse_match_rule parse_expression2 source_reference19 scope7 rule3 =
 
 let rec parse_expression3 source_reference20 scope8 expression40 = 
     (match expression40 with
-         | (Integer (value31, range69)) -> 
-            (parser_return (IntegerConstant (value31, range69)))
+         | (Integer (value32, range69)) -> 
+            (parser_return (IntegerConstant (value32, range69)))
          | (Symbol (x352, text11, range70)) -> 
             (match (capitalized text11) with
                  | True -> 
@@ -5976,8 +5982,8 @@ let rec error_bind message f68 =
 
 let rec flag_is_true flag default4 arguments40 = 
     (match (dictionary_get flag arguments40) with
-         | (Some (value32)) -> 
-            (string_equal value32 (data_true7 ()))
+         | (Some (value33)) -> 
+            (string_equal value33 (data_true7 ()))
          | None -> 
             default4);;
 
@@ -5998,12 +6004,12 @@ let rec modules_from_arguments backend12 data_path5 arguments42 =
 let rec table_to_string table = 
     (string_join (string_of_char (10l)) (list_map (string_join (string_of_char (32l))) table));;
 
-let rec print_diagnostics arguments43 file_entries max_heap_size start_parse end_parse start_resolve end_resolve start_transform end_transform start_generate end_generate start_read_files end_read_files start_write_files end_write_files k4 = 
+let rec print_diagnostics arguments43 file_entries max_heap_size start_parse end_parse start_resolve end_resolve start_transform end_transform start_generate end_generate start_read_files end_read_files start_write_files end_write_files k5 = 
     (match (flag_is_true (data_diagnostics_flag ()) False arguments43) with
          | True -> 
-            (CliError ((table_to_string (Cons ((Cons ((string_from_int32 (list_foldl (fun file19 bytes -> (Int32.add bytes (source_file_size file19))) (0l) file_entries)),Cons ((data_bytes_read ()),Empty))),Cons ((Cons ((string_from_int32 max_heap_size),Cons ((data_max_heap_size ()),Empty))),Cons ((Cons ((string_from_int32 (Int32.sub end_parse start_parse)),Cons ((data_parse_time ()),Empty))),Cons ((Cons ((string_from_int32 (Int32.sub end_resolve start_resolve)),Cons ((data_resolve_time ()),Empty))),Cons ((Cons ((string_from_int32 (Int32.sub end_transform start_transform)),Cons ((data_transform_time ()),Empty))),Cons ((Cons ((string_from_int32 (Int32.sub end_generate start_generate)),Cons ((data_generate_time ()),Empty))),Cons ((Cons ((string_from_int32 (Int32.sub end_read_files start_read_files)),Cons ((data_read_files ()),Empty))),Cons ((Cons ((string_from_int32 (Int32.sub end_write_files start_write_files)),Cons ((data_write_files ()),Empty))),Empty)))))))))), k4))
+            (CliError ((table_to_string (Cons ((Cons ((string_from_int32 (list_foldl (fun file19 bytes -> (Int32.add bytes (source_file_size file19))) (0l) file_entries)),Cons ((data_bytes_read ()),Empty))),Cons ((Cons ((string_from_int32 max_heap_size),Cons ((data_max_heap_size ()),Empty))),Cons ((Cons ((string_from_int32 (Int32.sub end_parse start_parse)),Cons ((data_parse_time ()),Empty))),Cons ((Cons ((string_from_int32 (Int32.sub end_resolve start_resolve)),Cons ((data_resolve_time ()),Empty))),Cons ((Cons ((string_from_int32 (Int32.sub end_transform start_transform)),Cons ((data_transform_time ()),Empty))),Cons ((Cons ((string_from_int32 (Int32.sub end_generate start_generate)),Cons ((data_generate_time ()),Empty))),Cons ((Cons ((string_from_int32 (Int32.sub end_read_files start_read_files)),Cons ((data_read_files ()),Empty))),Cons ((Cons ((string_from_int32 (Int32.sub end_write_files start_write_files)),Cons ((data_write_files ()),Empty))),Empty)))))))))), k5))
          | False -> 
-            (k4 ()));;
+            (k5 ()));;
 
 let rec format_input_files input_files = 
     (CliReadFiles ((list_map (pair_cons ModuleSelf) input_files), (fun source_files -> (match (format_source_files source_files) with
