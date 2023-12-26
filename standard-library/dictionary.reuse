@@ -89,3 +89,6 @@
 
 (pub def dictionary-keys (dictionary)
      (list-map pair-left (dictionary-entries dictionary)))
+
+(pub def dictionary-merge (a b)
+     (list-foldl (pair-map dictionary-set) a (dictionary-entries b)))
