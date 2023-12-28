@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/redien/reuse-lang/workflows/CI/badge.svg)](https://github.com/redien/reuse-lang/actions?query=workflow%3ACI)
 
-**WARNING: Reuse is experimental software and should not be used for systems where security, safety, availability, integrity or confidentiality is needed.**
+**WARNING: Reuse is experimental software and should not be used for systems where safety, security, availability, integrity, confidentiality or privacy is needed.**
 
 Reuse exists to create a universal standard library. It is a general-purpose programming language designed to compile to other programming languages. This dramatically increases the number of platforms and languages that libraries written in Reuse support.
 
