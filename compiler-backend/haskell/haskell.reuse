@@ -41,11 +41,15 @@
             True
                 (SourceString (data-slice-type))
             False
-                (match (identifier-is? (identifier-int32) identifier)
+                (match (identifier-is? (identifier-array) identifier)
                        True
-                           (SourceString (data-Int32))
+                           (SourceString (data-array-type))
                        False
-                           (SourceStringIdentifier identifier IdentifierTransformationCapitalize))))
+                           (match (identifier-is? (identifier-int32) identifier)
+                                  True
+                                      (SourceString (data-Int32))
+                                  False
+                                      (SourceStringIdentifier identifier IdentifierTransformationCapitalize)))))
 
 (def translate-less-than (translate-expression expressions)
      (match expressions

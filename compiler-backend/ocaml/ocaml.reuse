@@ -10,7 +10,7 @@
          (list data-lxor data-method data-mod data-module data-mutable data-new)
          (list data-nonrec data-object data-private data-rec data-sig data-struct)
          (list data-try data-val data-virtual data-when data-while data-parser)
-         (list data-value data-to data-slice))))
+         (list data-value data-to data-slice data-array))))
 
 (def operator-translation-map ()
      (dictionary-of (list
@@ -39,7 +39,11 @@
             True
                 (SourceString (data-slice-type))
             False
-                (escape-identifier identifier)))
+                (match (identifier-is? (identifier-array) identifier)
+                       True
+                           (SourceString (data-array-type))
+                       False
+                           (escape-identifier identifier))))
 
 (def translate-constructor-identifier (identifier)
      (SourceStringIdentifier identifier IdentifierTransformationCapitalize))

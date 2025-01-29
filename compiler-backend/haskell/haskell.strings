@@ -16,6 +16,7 @@ int32-divide        |Prelude.quot
 int32-modulus       |Prelude.rem
 int32-and           |_int32_and
 slice-type          |Bytes
+array-type          |Array Int32
 cempty              |CEmpty
 ccons               |CCons
 comma               |,
@@ -38,7 +39,7 @@ where               |where
 open-bracket        |(
 close-bracket       |)
 dot                 |.
-language-exts       |{-# LANGUAGE ExistentialQuantification #-}
+language-exts       |{-# LANGUAGE ExistentialQuantification, UnboxedTuples, MagicHash #-}
 pervasives-filename |Pervasives.hs
 preamble-filename   |preamble.hs
 haskell-language    |haskell
