@@ -182,6 +182,110 @@
             _
                 (Error (data-error-slice-op))))
 
+(def parse-array-op (op scope)
+     (match op
+            (ValueConstructor identifier Empty)
+                (match (identifier-id identifier)
+                       (Some -48)
+                           (return ArrayAdd)
+                       (Some -49)
+                           (return ArraySubtract)
+                       (Some -50)
+                           (return ArrayMultiply)
+                       (Some -51)
+                           (return ArrayDivide)
+                       (Some -52)
+                           (return ArrayAnd)
+                       (Some -53)
+                           (return ArrayOr)
+                       (Some -54)
+                           (return ArrayNand)
+                       (Some -55)
+                           (return ArrayXor)
+                       (Some -56)
+                           (return ArrayEqual)
+                       (Some -57)
+                           (return ArrayNotEqual)
+                       (Some -58)
+                           (return ArrayGreaterThan)
+                       (Some -59)
+                           (return ArrayGreaterThanEqual)
+                       (Some -60)
+                           (return ArrayLessThan)
+                       (Some -61)
+                           (return ArrayLessThanEqual)
+                       _
+                           (Error (data-error-array-foldl)))
+            _
+                (Error (data-error-array-foldl))))
+
+(def parse-array-constructor (constructor scope)
+     (match constructor
+            (ValueConstructor identifier (Cons (ValueInteger i) Empty))
+                (match (identifier-id identifier)
+                       (Some -40)
+                           (return (ArrayOfInt32 i))
+                       _
+                           (Error (data-error-array-foldl)))
+            (ValueConstructor identifier (Cons array Empty))
+                (bind (parse-array-constructor array scope) (fn (array)
+                (match (identifier-id identifier)
+                       (Some -43)
+                           (return (ArrayShape array))
+                       _
+                           (Error (data-error-array-foldl)))))
+            (ValueConstructor identifier (Cons a (Cons (ValueInteger b) Empty)))
+                (bind (parse-array-constructor a scope) (fn (a)
+                (match (identifier-id identifier)
+                       (Some -42)
+                           (return (ArrayGenerate a b))
+                       _
+                           (Error (data-error-array-foldl)))))
+            (ValueConstructor identifier (Cons a (Cons b Empty)))
+                (bind (parse-array-constructor a scope) (fn (a)
+                (bind (parse-array-constructor b scope) (fn (b)
+                (match (identifier-id identifier)
+                       (Some -41)
+                           (return (ArrayConcat a b))
+                       (Some -63)
+                           (return (ArrayCompress a b))
+                       _
+                           (Error (data-error-array-foldl)))))))
+            (ValueConstructor identifier (Cons op (Cons (ValueInteger k) (Cons array Empty))))
+                (bind (parse-array-op op scope) (fn (op)
+                (bind (parse-array-constructor array scope) (fn (array)
+                (match (identifier-id identifier)
+                       (Some -46)
+                           (return (ArrayReduce op k array))
+                       (Some -47)
+                           (return (ArrayScan op k array))
+                       _
+                           (Error (data-error-array-foldl)))))))
+            (ValueConstructor identifier (Cons op (Cons a (Cons b Empty))))
+                (bind (parse-array-op op scope) (fn (op)
+                (bind (parse-array-constructor a scope) (fn (a)
+                (bind (parse-array-constructor b scope) (fn (b)
+                (match (identifier-id identifier)
+                       (Some -45)
+                           (return (ArrayMap op a b))
+                       _
+                           (Error (data-error-array-foldl)))))))))
+            _
+                (Error (data-error-array-foldl))))
+
+(def eval-array-foldl (eval-expression apply-function scope stack-trace arguments)
+     (match arguments
+            (Cons f (Cons ys (Cons constructor Empty)))
+                (bind (parse-array-constructor constructor scope) (fn (array)
+                (array-foldl
+                    (fn (ys y)
+                        (bind ys (fn (ys-value)
+                        (apply-function scope stack-trace None (list f ys-value (ValueInteger y))))))
+                    (return ys)
+                    array)))
+            _
+                (Error (data-error-array-foldl))))
+
 (def eval-function-application (eval-expression stack-trace arguments values scope expression)
      (match (< (list-size values) (list-size arguments))
             True
@@ -333,7 +437,10 @@
              (Pair
                  (identifier-slice-foldl)
                  (ValueIntrinsic (eval-slice-foldl (apply-function eval-expression))))
-             (Pair (identifier-slice-subslice) (ValueIntrinsic eval-slice-subslice)))
+             (Pair (identifier-slice-subslice) (ValueIntrinsic eval-slice-subslice))
+             (Pair
+                 (identifier-array-foldl)
+                 (ValueIntrinsic (eval-array-foldl eval-expression (apply-function eval-expression)))))
          scope))
 
 (def definitions-to-scope (definitions)

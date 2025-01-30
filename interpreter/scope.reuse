@@ -1,5 +1,5 @@
 
-(typ (scope expression iterable) (Scope (array (value expression (scope expression iterable) iterable))))
+(typ (scope expression iterable) (Scope (array-type (value expression (scope expression iterable) iterable))))
 
 (def scope-empty ()
      (Scope (array-empty)))

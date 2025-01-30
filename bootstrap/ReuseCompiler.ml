@@ -24,6 +24,119 @@ let slice_subslice slice s e =
     else
         Bytes.sub slice (Int32.to_int s') (Int32.to_int (Int32.sub e' s'));;
 
+type array_binary_operator' =
+   | ArrayAdd
+   | ArraySubtract
+   | ArrayMultiply
+   | ArrayDivide
+   | ArrayAnd
+   | ArrayOr
+   | ArrayNand
+   | ArrayXor
+   | ArrayEqual
+   | ArrayNotEqual
+   | ArrayLessThan
+   | ArrayLessThanEqual
+   | ArrayGreaterThan
+   | ArrayGreaterThanEqual;;
+
+type array' = ArrayOfInt32 of int32
+            | ArrayConcat of array' * array'
+            | ArrayGenerate of array' * int32
+            | ArrayShape of array'
+            | ArrayMap of array_binary_operator' * array' * array'
+            | ArrayReduce of array_binary_operator' * int32 * array'
+            | ArrayScan of array_binary_operator' * int32 * array'
+            | ArrayCompress of array' * array';;
+
+(** Reuse array expressions are evaluated to a tuple of OCaml Arrays where the first value is the shape and
+    the second value is an array with the actual data. *)
+
+let array_add' = Int32.add;;
+let array_subtract' = Int32.sub;;
+let array_multiply' = Int32.mul;;
+let array_divide' x y = if y <> 0l then Int32.div x y else 0l;;
+let array_and' = Int32.logand;;
+let array_or' = Int32.logor;;
+let array_xor' = Int32.logxor;;
+let array_nand' x y = Int32.lognot (Int32.logand x y);;
+let array_equal' x y = if x = y then 1l else 0l;;
+let array_not_equal' x y = if x <> y then 1l else 0l;;
+let array_less_than' x y = if x < y then 1l else 0l;;
+let array_less_than_equal' x y = if x <= y then 1l else 0l;;
+let array_greater_than' x y = if x > y then 1l else 0l;;
+let array_greater_than_equal' x y = if x >= y then 1l else 0l;;
+let select_op' op = match op with
+    | ArrayAdd -> array_add'
+    | ArraySubtract -> array_subtract'
+    | ArrayMultiply -> array_multiply'
+    | ArrayDivide -> array_divide'
+    | ArrayAnd -> array_and'
+    | ArrayOr -> array_or'
+    | ArrayNand -> array_nand'
+    | ArrayXor -> array_xor'
+    | ArrayEqual -> array_equal'
+    | ArrayNotEqual -> array_not_equal'
+    | ArrayLessThan -> array_less_than'
+    | ArrayLessThanEqual -> array_less_than_equal'
+    | ArrayGreaterThan -> array_greater_than'
+    | ArrayGreaterThanEqual -> array_greater_than_equal';;
+
+let compress' selection values =
+    let length = min (Array.length selection) (Array.length values) in
+    let j = ref 0 in
+    let result = Array.make length 0l in
+    for i = 0 to length - 1 do
+        result.(!j) <- values.(i);
+        j := !j + (if selection.(i) <> 0l then 1 else 0)
+    done;
+    Array.sub result 0 !j;;
+
+let rec array_eval' arr =
+    let sizeFromShape shape = Int32.to_int (Array.fold_left (fun a b -> Int32.mul a (Int32.max b 0l)) 1l shape) in
+    match arr with
+        | ArrayOfInt32 x -> (Array.make 1 1l, Array.make 1 x)
+        | ArrayConcat (a', b') ->
+            let a = array_eval' a' in
+            let b = array_eval' b' in
+            let data = Array.append (snd a) (snd b) in
+            (Array.make 1 (Int32.of_int (Array.length data)), data)
+        | ArrayGenerate (shape', x) ->
+            let (_, shape'') = array_eval' shape' in
+            let shape = compress' (Array.map (array_less_than_equal' 0l) shape'') shape'' in
+            if Array.length shape > 0 then
+                (shape, Array.make (sizeFromShape shape) x)
+            else
+                (Array.make 0 0l, Array.make 0 0l)
+        | ArrayShape array' ->
+            let array = array_eval' array' in
+            (Array.make 1 (Int32.of_int (Array.length (fst array))), fst array)
+        | ArrayMap (op, a', b') ->
+            let a = array_eval' a' in
+            let b = array_eval' b' in
+            let result = Array.map2 (select_op' op) (snd a) (snd b) in
+            (Array.make 1 (Int32.of_int (Array.length result)), result)
+        | ArrayReduce (op, k, array') ->
+            let array = array_eval' array' in
+            (Array.make 1 1l, Array.make 1 (Array.fold_left (select_op' op) k (snd array)))
+        | ArrayScan (op, k, array') ->
+            let array = array_eval' array' in
+            let partial_op y x = (select_op' op x y, select_op' op x y) in
+            (match Array.fold_left_map partial_op k (snd array) with
+                (_, data) -> (fst array, data))
+        | ArrayCompress (a', b') ->
+            let a = array_eval' a' in
+            let b = array_eval' b' in
+            let selection = snd a in
+            let values = snd b in
+            let result = compress' selection values in
+            let len = Array.length result in
+            (Array.make 1 (Int32.of_int len), result);;
+
+let array_foldl f ys xs =
+    Array.fold_left f ys (snd (array_eval' xs));;
+
+
 let rec id x7 = 
     x7;;
 
@@ -1103,9 +1216,9 @@ type array_color  =
      | ArrayRed
      | ArrayBlack;;
 
-type ('Tvalue15) array  = 
+type ('Tvalue15) array_type  = 
      | ArrayEmpty
-     | ArrayTree : array_color * ('Tvalue15) array * (int32,'Tvalue15) pair * ('Tvalue15) array -> ('Tvalue15) array;;
+     | ArrayTree : array_color * ('Tvalue15) array_type * (int32,'Tvalue15) pair * ('Tvalue15) array_type -> ('Tvalue15) array_type;;
 
 let rec array_empty () = 
     ArrayEmpty;;
@@ -1251,7 +1364,7 @@ let rec array_size array17 =
     (list_size (array_entries array17));;
 
 type ('Tvalue22) dictionary  = 
-     | Dictionary : (((string,'Tvalue22) pair) list) array -> ('Tvalue22) dictionary;;
+     | Dictionary : (((string,'Tvalue22) pair) list) array_type -> ('Tvalue22) dictionary;;
 
 let rec dictionary_empty () = 
     (Dictionary ((array_empty ())));;
@@ -1330,6 +1443,9 @@ let rec dictionary_values dictionary9 =
 let rec dictionary_keys dictionary10 = 
     (list_map pair_left (dictionary_entries dictionary10));;
 
+let rec dictionary_merge a61 b53 = 
+    (list_foldl (pair_map dictionary_set) a61 (dictionary_entries b53));;
+
 type bigint  = 
      | Bigint : boolean * (int32) list -> bigint;;
 
@@ -1397,8 +1513,8 @@ let rec less_than_with_carry x152 y24 previous_less_than =
                  | False -> 
                     False));;
 
-let rec bigint_less_than_parts a61 b53 previous_less_than2 = 
-    (match (Pair (a61, b53)) with
+let rec bigint_less_than_parts a62 b54 previous_less_than2 = 
+    (match (Pair (a62, b54)) with
          | (Pair (Empty, Empty)) -> 
             False
          | (Pair ((Cons (x153, x154)), Empty)) -> 
@@ -1410,8 +1526,8 @@ let rec bigint_less_than_parts a61 b53 previous_less_than2 =
          | (Pair ((Cons (x158, xs23)), (Cons (y26, ys4)))) -> 
             (bigint_less_than_parts xs23 ys4 (less_than_with_carry x158 y26 previous_less_than2)));;
 
-let rec bigint_less_than a62 b54 = 
-    (match (Pair (a62, b54)) with
+let rec bigint_less_than a63 b55 = 
+    (match (Pair (a63, b55)) with
          | (Pair ((Bigint (True, x159)), (Bigint (False, x160)))) -> 
             True
          | (Pair ((Bigint (False, x161)), (Bigint (True, x162)))) -> 
@@ -1421,10 +1537,10 @@ let rec bigint_less_than a62 b54 =
          | (Pair ((Bigint (x163, a_parts2)), (Bigint (x164, b_parts2)))) -> 
             (bigint_less_than_parts a_parts2 b_parts2 False));;
 
-let rec bigint_subtract_parts a63 b55 carry = 
-    (match (Pair (a63, b55)) with
+let rec bigint_subtract_parts a64 b56 carry = 
+    (match (Pair (a64, b56)) with
          | (Pair ((Cons (x165, xs24)), Empty)) -> 
-            (bigint_subtract_parts a63 (Cons ((0l), Empty)) carry)
+            (bigint_subtract_parts a64 (Cons ((0l), Empty)) carry)
          | (Pair ((Cons (x166, xs25)), (Cons (y27, ys5)))) -> 
             (match (x2 (Int32.sub x166 (Int32.add y27 carry)) (0l)) with
                  | True -> 
@@ -1434,8 +1550,8 @@ let rec bigint_subtract_parts a63 b55 carry =
          | x167 -> 
             Empty);;
 
-let rec bigint_add_parts a64 b56 carry2 = 
-    (match (Pair (a64, b56)) with
+let rec bigint_add_parts a65 b57 carry2 = 
+    (match (Pair (a65, b57)) with
          | (Pair ((Cons (x168, xs26)), (Cons (y28, ys6)))) -> 
             (match (x3 (Int32.add x168 (Int32.add y28 carry2)) (9l)) with
                  | True -> 
@@ -1443,9 +1559,9 @@ let rec bigint_add_parts a64 b56 carry2 =
                  | False -> 
                     (Cons ((Int32.add x168 (Int32.add y28 carry2)), (bigint_add_parts xs26 ys6 (0l)))))
          | (Pair ((Cons (x169, x170)), Empty)) -> 
-            (bigint_add_parts a64 (Cons ((0l), Empty)) carry2)
+            (bigint_add_parts a65 (Cons ((0l), Empty)) carry2)
          | (Pair (Empty, (Cons (x171, x172)))) -> 
-            (bigint_add_parts (Cons ((0l), Empty)) b56 carry2)
+            (bigint_add_parts (Cons ((0l), Empty)) b57 carry2)
          | (Pair (Empty, Empty)) -> 
             (match (x3 carry2 (0l)) with
                  | True -> 
@@ -1471,45 +1587,45 @@ let rec bigint_multiply_digit x174 digits2 carry3 =
          | (Cons (y29, ys7)) -> 
             (Cons ((Int32.rem (Int32.add (Int32.mul x174 y29) carry3) (10l)), (bigint_multiply_digit x174 ys7 (Int32.div (Int32.add (Int32.mul x174 y29) carry3) (10l))))));;
 
-let rec bigint_multiply_parts a65 b57 base = 
-    (match a65 with
+let rec bigint_multiply_parts a66 b58 base = 
+    (match a66 with
          | (Cons (x175, xs27)) -> 
-            (bigint_add_parts (bigint_add_zeroes base (bigint_multiply_digit x175 b57 (0l))) (bigint_multiply_parts xs27 b57 (Int32.add base (1l))) (0l))
+            (bigint_add_parts (bigint_add_zeroes base (bigint_multiply_digit x175 b58 (0l))) (bigint_multiply_parts xs27 b58 (Int32.add base (1l))) (0l))
          | Empty -> 
             Empty);;
 
-let rec bigint_subtract a66 b58 = 
-    (match (Pair (a66, b58)) with
+let rec bigint_subtract a67 b59 = 
+    (match (Pair (a67, b59)) with
          | (Pair ((Bigint (False, a_parts3)), (Bigint (True, b_parts3)))) -> 
             (Bigint (False, (bigint_add_parts a_parts3 b_parts3 (0l))))
          | (Pair ((Bigint (True, a_parts4)), (Bigint (False, b_parts4)))) -> 
             (Bigint (True, (bigint_add_parts a_parts4 b_parts4 (0l))))
          | (Pair ((Bigint (True, a_parts5)), (Bigint (True, b_parts5)))) -> 
-            (match (bigint_less_than a66 b58) with
+            (match (bigint_less_than a67 b59) with
                  | True -> 
                     (Bigint (True, (bigint_trim_parts (bigint_subtract_parts a_parts5 b_parts5 (0l)))))
                  | False -> 
                     (Bigint (False, (bigint_trim_parts (bigint_subtract_parts b_parts5 a_parts5 (0l))))))
          | (Pair ((Bigint (False, a_parts6)), (Bigint (False, b_parts6)))) -> 
-            (match (bigint_less_than a66 b58) with
+            (match (bigint_less_than a67 b59) with
                  | True -> 
                     (Bigint (True, (bigint_trim_parts (bigint_subtract_parts b_parts6 a_parts6 (0l)))))
                  | False -> 
                     (Bigint (False, (bigint_trim_parts (bigint_subtract_parts a_parts6 b_parts6 (0l)))))));;
 
-let rec bigint_add a67 b59 = 
-    (match (Pair (a67, b59)) with
+let rec bigint_add a68 b60 = 
+    (match (Pair (a68, b60)) with
          | (Pair ((Bigint (False, a_parts7)), (Bigint (False, b_parts7)))) -> 
             (Bigint (False, (bigint_add_parts a_parts7 b_parts7 (0l))))
          | (Pair ((Bigint (True, a_parts8)), (Bigint (True, b_parts8)))) -> 
             (Bigint (True, (bigint_add_parts a_parts8 b_parts8 (0l))))
          | (Pair ((Bigint (True, x176)), (Bigint (False, x177)))) -> 
-            (bigint_subtract b59 (bigint_negate a67))
+            (bigint_subtract b60 (bigint_negate a68))
          | (Pair ((Bigint (False, x178)), (Bigint (True, x179)))) -> 
-            (bigint_subtract a67 (bigint_negate b59)));;
+            (bigint_subtract a68 (bigint_negate b60)));;
 
-let rec bigint_multiply a68 b60 = 
-    (match (Pair (a68, b60)) with
+let rec bigint_multiply a69 b61 = 
+    (match (Pair (a69, b61)) with
          | (Pair ((Bigint (x180, (Cons (0l, Empty)))), (Bigint (x181, x182)))) -> 
             (Bigint (False, (Cons ((0l), Empty))))
          | (Pair ((Bigint (x183, x184)), (Bigint (x185, (Cons (0l, Empty)))))) -> 
@@ -1749,22 +1865,22 @@ type source_file_type  =
      | SourceFileTypeStrings
      | SourceFileTypeTargetLanguage;;
 
-let rec module_equal a69 b61 = 
-    (match a69 with
-         | (ModulePath (a70)) -> 
-            (match b61 with
-                 | (ModulePath (b62)) -> 
-                    (string_equal a70 b62)
+let rec module_equal a70 b62 = 
+    (match a70 with
+         | (ModulePath (a71)) -> 
+            (match b62 with
+                 | (ModulePath (b63)) -> 
+                    (string_equal a71 b63)
                  | x208 -> 
                     False)
          | ModuleSelf -> 
-            (match b61 with
+            (match b62 with
                  | ModuleSelf -> 
                     True
                  | x209 -> 
                     False)
          | ModuleInternal -> 
-            (match b61 with
+            (match b62 with
                  | ModuleInternal -> 
                     True
                  | x210 -> 
@@ -1785,8 +1901,8 @@ let rec source_reference_module source_reference4 =
          | (SourceReference (x215, x216, module2)) -> 
             module2);;
 
-let rec source_reference_equal a71 b63 = 
-    (x4 (source_reference_file_index a71) (source_reference_file_index b63));;
+let rec source_reference_equal a72 b64 = 
+    (x4 (source_reference_file_index a72) (source_reference_file_index b64));;
 
 let rec source_file_of module3 path iterator9 index18 = 
     (SourceFile ((SourceReference (index18, path, module3)), iterator9));;
@@ -1821,8 +1937,8 @@ let rec source_file_reference file6 =
          | (SourceFile (reference4, x222)) -> 
             reference4);;
 
-let rec source_file_in_same_module a72 b64 = 
-    (module_equal (source_file_module a72) (source_file_module b64));;
+let rec source_file_in_same_module a73 b65 = 
+    (module_equal (source_file_module a73) (source_file_module b65));;
 
 let rec last_n_chars n7 path2 = 
     (string_substring (Int32.sub (string_size path2) n7) n7 path2);;
@@ -1981,10 +2097,10 @@ let rec identifier_universe2 identifier12 =
 let rec identifier_is id5 identifier13 = 
     (maybe_or_else False (maybe_map (x4 id5) (identifier_id identifier13)));;
 
-let rec identifier_equal a73 b65 = 
-    (match (source_reference_equal (identifier_source_reference a73) (identifier_source_reference b65)) with
+let rec identifier_equal a74 b66 = 
+    (match (source_reference_equal (identifier_source_reference a74) (identifier_source_reference b66)) with
          | True -> 
-            (maybe_or_else False (maybe_map ((flip identifier_is) b65) (identifier_id a73)))
+            (maybe_or_else False (maybe_map ((flip identifier_is) b66) (identifier_id a74)))
          | False -> 
             False);;
 
@@ -2272,6 +2388,84 @@ let rec data_slice () =
 let rec data_int32 () = 
     (string_from_list (Cons ((105l),Cons ((110l),Cons ((116l),Cons ((51l),Cons ((50l),Empty)))))));;
 
+let rec data_array_foldl () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((102l),Cons ((111l),Cons ((108l),Cons ((100l),Cons ((108l),Empty)))))))))))));;
+
+let rec data_arrayadd () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((100l),Cons ((100l),Empty))))))))));;
+
+let rec data_arraysubtract () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((117l),Cons ((98l),Cons ((116l),Cons ((114l),Cons ((97l),Cons ((99l),Cons ((116l),Empty)))))))))))))));;
+
+let rec data_arraymultiply () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((77l),Cons ((117l),Cons ((108l),Cons ((116l),Cons ((105l),Cons ((112l),Cons ((108l),Cons ((121l),Empty)))))))))))))));;
+
+let rec data_arraydivide () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((68l),Cons ((105l),Cons ((118l),Cons ((105l),Cons ((100l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arrayand () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((110l),Cons ((100l),Empty))))))))));;
+
+let rec data_arrayor () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((79l),Cons ((114l),Empty)))))))));;
+
+let rec data_arraynand () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((78l),Cons ((97l),Cons ((110l),Cons ((100l),Empty)))))))))));;
+
+let rec data_arrayxor () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((88l),Cons ((111l),Cons ((114l),Empty))))))))));;
+
+let rec data_arrayequal () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty))))))))))));;
+
+let rec data_arraynotequal () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((78l),Cons ((111l),Cons ((116l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty)))))))))))))));;
+
+let rec data_arraylessthan () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((76l),Cons ((101l),Cons ((115l),Cons ((115l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Empty)))))))))))))));;
+
+let rec data_arraygreaterthan () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((114l),Cons ((101l),Cons ((97l),Cons ((116l),Cons ((101l),Cons ((114l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Empty))))))))))))))))));;
+
+let rec data_arraylessthanequal () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((76l),Cons ((101l),Cons ((115l),Cons ((115l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty))))))))))))))))))));;
+
+let rec data_arraygreaterthanequal () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((114l),Cons ((101l),Cons ((97l),Cons ((116l),Cons ((101l),Cons ((114l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty)))))))))))))))))))))));;
+
+let rec data_arrayofint32 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((79l),Cons ((102l),Cons ((73l),Cons ((110l),Cons ((116l),Cons ((51l),Cons ((50l),Empty))))))))))))));;
+
+let rec data_arrayconcat () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((110l),Cons ((99l),Cons ((97l),Cons ((116l),Empty)))))))))))));;
+
+let rec data_arraygenerate () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((101l),Cons ((110l),Cons ((101l),Cons ((114l),Cons ((97l),Cons ((116l),Cons ((101l),Empty)))))))))))))));;
+
+let rec data_arrayshape () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((104l),Cons ((97l),Cons ((112l),Cons ((101l),Empty))))))))))));;
+
+let rec data_arrayreshape () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((101l),Cons ((115l),Cons ((104l),Cons ((97l),Cons ((112l),Cons ((101l),Empty))))))))))))));;
+
+let rec data_arraymap () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((77l),Cons ((97l),Cons ((112l),Empty))))))))));;
+
+let rec data_arrayreduce () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((101l),Cons ((100l),Cons ((117l),Cons ((99l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arrayscan () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((99l),Cons ((97l),Cons ((110l),Empty)))))))))));;
+
+let rec data_arrayrotate () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((111l),Cons ((116l),Cons ((97l),Cons ((116l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arraycompress () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((109l),Cons ((112l),Cons ((114l),Cons ((101l),Cons ((115l),Cons ((115l),Empty)))))))))))))));;
+
+let rec data_array () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Empty)))))));;
+
 let rec symbol_def () = 
     (-1l);;
 
@@ -2341,11 +2535,89 @@ let rec identifier_slice_foldl () =
 let rec identifier_slice_subslice () = 
     (-23l);;
 
-let rec identifier_int32 () = 
+let rec identifier_array_foldl () = 
     (-24l);;
 
+let rec identifier_arrayofint32 () = 
+    (-40l);;
+
+let rec identifier_arrayconcat () = 
+    (-41l);;
+
+let rec identifier_arraygenerate () = 
+    (-42l);;
+
+let rec identifier_arrayshape () = 
+    (-43l);;
+
+let rec identifier_arrayreshape () = 
+    (-44l);;
+
+let rec identifier_arraymap () = 
+    (-45l);;
+
+let rec identifier_arrayreduce () = 
+    (-46l);;
+
+let rec identifier_arrayscan () = 
+    (-47l);;
+
+let rec identifier_arrayadd () = 
+    (-48l);;
+
+let rec identifier_arraysubtract () = 
+    (-49l);;
+
+let rec identifier_arraymultiply () = 
+    (-50l);;
+
+let rec identifier_arraydivide () = 
+    (-51l);;
+
+let rec identifier_arrayand () = 
+    (-52l);;
+
+let rec identifier_arrayor () = 
+    (-53l);;
+
+let rec identifier_arraynand () = 
+    (-54l);;
+
+let rec identifier_arrayxor () = 
+    (-55l);;
+
+let rec identifier_arrayequal () = 
+    (-56l);;
+
+let rec identifier_arraynotequal () = 
+    (-57l);;
+
+let rec identifier_arraygreaterthan () = 
+    (-58l);;
+
+let rec identifier_arraygreaterthanequal () = 
+    (-59l);;
+
+let rec identifier_arraylessthan () = 
+    (-60l);;
+
+let rec identifier_arraylessthanequal () = 
+    (-61l);;
+
+let rec identifier_arrayrotate () = 
+    (-62l);;
+
+let rec identifier_arraycompress () = 
+    (-63l);;
+
+let rec identifier_int32 () = 
+    (-100l);;
+
 let rec identifier_slice () = 
-    (-25l);;
+    (-101l);;
+
+let rec identifier_array () = 
+    (-102l);;
 
 let rec identifier_is_operator identifier35 = 
     (maybe_or_else False (maybe_bind (identifier_id identifier35) (fun id7 -> (maybe_return (and2 (x5 id7 (-7l)) (x6 id7 (-12l)))))));;
@@ -2354,7 +2626,7 @@ let rec predefined_identifier text4 id8 kind5 =
     (Identifier ((Some ((Definition ((id8 ()), kind5)))), (identifier_universe_from_kind kind5), (id8 ()), (text4 ()), (SourceReference ((-1l), (string_empty ()), ModuleInternal)), (Range ((0l), (0l)))));;
 
 let rec predefined_identifiers () = 
-    (Cons ((predefined_identifier data_ identifier_ PrivateFunctionDefinition),Cons ((predefined_identifier data__ identifier__ PrivateFunctionDefinition),Cons ((predefined_identifier data_2 identifier_2 PrivateFunctionDefinition),Cons ((predefined_identifier data_3 identifier_3 PrivateFunctionDefinition),Cons ((predefined_identifier data_4 identifier_4 PrivateFunctionDefinition),Cons ((predefined_identifier data_5 identifier_5 PrivateFunctionDefinition),Cons ((predefined_identifier data_int32_less_than identifier_int32_less_than PrivateFunctionDefinition),Cons ((predefined_identifier data_list identifier_list PrivateFunctionDefinition),Cons ((predefined_identifier data_pipe identifier_pipe PrivateFunctionDefinition),Cons ((predefined_identifier data_dot identifier_dot PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_empty identifier_slice_empty PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_of_u8 identifier_slice_of_u8 PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_size identifier_slice_size PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_get identifier_slice_get PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_concat identifier_slice_concat PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_foldl identifier_slice_foldl PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_subslice identifier_slice_subslice PrivateFunctionDefinition),Cons ((predefined_identifier data_int32 identifier_int32 PrivateTypeDefinition),Cons ((predefined_identifier data_slice identifier_slice PrivateTypeDefinition),Empty))))))))))))))))))));;
+    (Cons ((predefined_identifier data_ identifier_ PrivateFunctionDefinition),Cons ((predefined_identifier data__ identifier__ PrivateFunctionDefinition),Cons ((predefined_identifier data_2 identifier_2 PrivateFunctionDefinition),Cons ((predefined_identifier data_3 identifier_3 PrivateFunctionDefinition),Cons ((predefined_identifier data_4 identifier_4 PrivateFunctionDefinition),Cons ((predefined_identifier data_5 identifier_5 PrivateFunctionDefinition),Cons ((predefined_identifier data_int32_less_than identifier_int32_less_than PrivateFunctionDefinition),Cons ((predefined_identifier data_list identifier_list PrivateFunctionDefinition),Cons ((predefined_identifier data_pipe identifier_pipe PrivateFunctionDefinition),Cons ((predefined_identifier data_dot identifier_dot PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_empty identifier_slice_empty PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_of_u8 identifier_slice_of_u8 PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_size identifier_slice_size PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_get identifier_slice_get PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_concat identifier_slice_concat PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_foldl identifier_slice_foldl PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_subslice identifier_slice_subslice PrivateFunctionDefinition),Cons ((predefined_identifier data_array_foldl identifier_array_foldl PrivateFunctionDefinition),Cons ((predefined_identifier data_arrayofint32 identifier_arrayofint32 PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayconcat identifier_arrayconcat PrivateConstructorDefinition),Cons ((predefined_identifier data_arraygenerate identifier_arraygenerate PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayshape identifier_arrayshape PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayreshape identifier_arrayreshape PrivateConstructorDefinition),Cons ((predefined_identifier data_arraymap identifier_arraymap PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayreduce identifier_arrayreduce PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayscan identifier_arrayscan PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayadd identifier_arrayadd PrivateConstructorDefinition),Cons ((predefined_identifier data_arraysubtract identifier_arraysubtract PrivateConstructorDefinition),Cons ((predefined_identifier data_arraymultiply identifier_arraymultiply PrivateConstructorDefinition),Cons ((predefined_identifier data_arraydivide identifier_arraydivide PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayand identifier_arrayand PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayor identifier_arrayor PrivateConstructorDefinition),Cons ((predefined_identifier data_arraynand identifier_arraynand PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayxor identifier_arrayxor PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayequal identifier_arrayequal PrivateConstructorDefinition),Cons ((predefined_identifier data_arraynotequal identifier_arraynotequal PrivateConstructorDefinition),Cons ((predefined_identifier data_arraygreaterthan identifier_arraygreaterthan PrivateConstructorDefinition),Cons ((predefined_identifier data_arraygreaterthanequal identifier_arraygreaterthanequal PrivateConstructorDefinition),Cons ((predefined_identifier data_arraylessthan identifier_arraylessthan PrivateConstructorDefinition),Cons ((predefined_identifier data_arraylessthanequal identifier_arraylessthanequal PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayrotate identifier_arrayrotate PrivateConstructorDefinition),Cons ((predefined_identifier data_arraycompress identifier_arraycompress PrivateConstructorDefinition),Cons ((predefined_identifier data_int32 identifier_int32 PrivateTypeDefinition),Cons ((predefined_identifier data_slice identifier_slice PrivateTypeDefinition),Cons ((predefined_identifier data_array identifier_array PrivateTypeDefinition),Empty))))))))))))))))))))))))))))))))))))))))))))));;
 
 let rec predefined_identifier_to_symbol identifier36 = 
     (pair_cons (maybe_or_else (-1l) (identifier_id identifier36)) (identifier_name identifier36));;
@@ -2575,11 +2847,89 @@ let rec data_slice2 () =
 let rec data_int322 () = 
     (string_from_list (Cons ((105l),Cons ((110l),Cons ((116l),Cons ((51l),Cons ((50l),Empty)))))));;
 
+let rec data_array_foldl2 () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((102l),Cons ((111l),Cons ((108l),Cons ((100l),Cons ((108l),Empty)))))))))))));;
+
+let rec data_arrayadd2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((100l),Cons ((100l),Empty))))))))));;
+
+let rec data_arraysubtract2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((117l),Cons ((98l),Cons ((116l),Cons ((114l),Cons ((97l),Cons ((99l),Cons ((116l),Empty)))))))))))))));;
+
+let rec data_arraymultiply2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((77l),Cons ((117l),Cons ((108l),Cons ((116l),Cons ((105l),Cons ((112l),Cons ((108l),Cons ((121l),Empty)))))))))))))));;
+
+let rec data_arraydivide2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((68l),Cons ((105l),Cons ((118l),Cons ((105l),Cons ((100l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arrayand2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((110l),Cons ((100l),Empty))))))))));;
+
+let rec data_arrayor2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((79l),Cons ((114l),Empty)))))))));;
+
+let rec data_arraynand2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((78l),Cons ((97l),Cons ((110l),Cons ((100l),Empty)))))))))));;
+
+let rec data_arrayxor2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((88l),Cons ((111l),Cons ((114l),Empty))))))))));;
+
+let rec data_arrayequal2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty))))))))))));;
+
+let rec data_arraynotequal2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((78l),Cons ((111l),Cons ((116l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty)))))))))))))));;
+
+let rec data_arraylessthan2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((76l),Cons ((101l),Cons ((115l),Cons ((115l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Empty)))))))))))))));;
+
+let rec data_arraygreaterthan2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((114l),Cons ((101l),Cons ((97l),Cons ((116l),Cons ((101l),Cons ((114l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Empty))))))))))))))))));;
+
+let rec data_arraylessthanequal2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((76l),Cons ((101l),Cons ((115l),Cons ((115l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty))))))))))))))))))));;
+
+let rec data_arraygreaterthanequal2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((114l),Cons ((101l),Cons ((97l),Cons ((116l),Cons ((101l),Cons ((114l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty)))))))))))))))))))))));;
+
+let rec data_arrayofint322 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((79l),Cons ((102l),Cons ((73l),Cons ((110l),Cons ((116l),Cons ((51l),Cons ((50l),Empty))))))))))))));;
+
+let rec data_arrayconcat2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((110l),Cons ((99l),Cons ((97l),Cons ((116l),Empty)))))))))))));;
+
+let rec data_arraygenerate2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((101l),Cons ((110l),Cons ((101l),Cons ((114l),Cons ((97l),Cons ((116l),Cons ((101l),Empty)))))))))))))));;
+
+let rec data_arrayshape2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((104l),Cons ((97l),Cons ((112l),Cons ((101l),Empty))))))))))));;
+
+let rec data_arrayreshape2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((101l),Cons ((115l),Cons ((104l),Cons ((97l),Cons ((112l),Cons ((101l),Empty))))))))))))));;
+
+let rec data_arraymap2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((77l),Cons ((97l),Cons ((112l),Empty))))))))));;
+
+let rec data_arrayreduce2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((101l),Cons ((100l),Cons ((117l),Cons ((99l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arrayscan2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((99l),Cons ((97l),Cons ((110l),Empty)))))))))));;
+
+let rec data_arrayrotate2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((111l),Cons ((116l),Cons ((97l),Cons ((116l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arraycompress2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((109l),Cons ((112l),Cons ((114l),Cons ((101l),Cons ((115l),Cons ((115l),Empty)))))))))))))));;
+
+let rec data_array2 () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Empty)))))));;
+
 let rec source_reference_from file10 = 
     (SourceReference ((source_file_index file10), (source_file_path file10), (source_file_module file10)));;
 
-type ('Ta74,'Te5) parser2  = 
-     | Parser : (int32,('Ta74,'Te5) result) state -> ('Ta74,'Te5) parser2;;
+type ('Ta75,'Te5) parser2  = 
+     | Parser : (int32,('Ta75,'Te5) result) state -> ('Ta75,'Te5) parser2;;
 
 let rec parser_run parsers = 
     (pair_right (list_foldr (fun parser3 state11 -> (match parser3 with
@@ -2603,7 +2953,7 @@ let rec increment_id () =
     (Parser ((state_bind (state_get ()) (fun state12 -> (state_bind (state_set (Int32.add state12 (1l))) (fun id11 -> (state_return (result_return id11))))))));;
 
 let rec parser_sequence parsers2 = 
-    (list_foldr (fun a75 b66 -> (parser_bind a75 (fun a76 -> (parser_bind b66 (fun b67 -> (parser_return (Cons (a76, b67)))))))) (parser_return Empty) parsers2);;
+    (list_foldr (fun a76 b67 -> (parser_bind a76 (fun a77 -> (parser_bind b67 (fun b68 -> (parser_return (Cons (a77, b68)))))))) (parser_return Empty) parsers2);;
 
 let rec sequence f62 items = 
     (parser_sequence (list_map f62 items));;
@@ -3198,8 +3548,8 @@ let rec source_string_string string37 =
 let rec source_string_empty () = 
     SourceStringEmpty;;
 
-let rec source_string_concat a77 b68 = 
-    (SourceStringConcat (a77, b68));;
+let rec source_string_concat a78 b69 = 
+    (SourceStringConcat (a78, b69));;
 
 let rec source_string_join separator4 strings2 = 
     (match strings2 with
@@ -3460,6 +3810,87 @@ let rec data_slice3 () =
 let rec data_int323 () = 
     (string_from_list (Cons ((105l),Cons ((110l),Cons ((116l),Cons ((51l),Cons ((50l),Empty)))))));;
 
+let rec data_array_foldl3 () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((102l),Cons ((111l),Cons ((108l),Cons ((100l),Cons ((108l),Empty)))))))))))));;
+
+let rec data_arrayadd3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((100l),Cons ((100l),Empty))))))))));;
+
+let rec data_arraysubtract3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((117l),Cons ((98l),Cons ((116l),Cons ((114l),Cons ((97l),Cons ((99l),Cons ((116l),Empty)))))))))))))));;
+
+let rec data_arraymultiply3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((77l),Cons ((117l),Cons ((108l),Cons ((116l),Cons ((105l),Cons ((112l),Cons ((108l),Cons ((121l),Empty)))))))))))))));;
+
+let rec data_arraydivide3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((68l),Cons ((105l),Cons ((118l),Cons ((105l),Cons ((100l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arrayand3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((110l),Cons ((100l),Empty))))))))));;
+
+let rec data_arrayor3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((79l),Cons ((114l),Empty)))))))));;
+
+let rec data_arraynand3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((78l),Cons ((97l),Cons ((110l),Cons ((100l),Empty)))))))))));;
+
+let rec data_arrayxor3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((88l),Cons ((111l),Cons ((114l),Empty))))))))));;
+
+let rec data_arrayequal3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty))))))))))));;
+
+let rec data_arraynotequal3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((78l),Cons ((111l),Cons ((116l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty)))))))))))))));;
+
+let rec data_arraylessthan3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((76l),Cons ((101l),Cons ((115l),Cons ((115l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Empty)))))))))))))));;
+
+let rec data_arraygreaterthan3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((114l),Cons ((101l),Cons ((97l),Cons ((116l),Cons ((101l),Cons ((114l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Empty))))))))))))))))));;
+
+let rec data_arraylessthanequal3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((76l),Cons ((101l),Cons ((115l),Cons ((115l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty))))))))))))))))))));;
+
+let rec data_arraygreaterthanequal3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((114l),Cons ((101l),Cons ((97l),Cons ((116l),Cons ((101l),Cons ((114l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty)))))))))))))))))))))));;
+
+let rec data_arrayofint323 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((79l),Cons ((102l),Cons ((73l),Cons ((110l),Cons ((116l),Cons ((51l),Cons ((50l),Empty))))))))))))));;
+
+let rec data_arrayconcat3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((110l),Cons ((99l),Cons ((97l),Cons ((116l),Empty)))))))))))));;
+
+let rec data_arraygenerate3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((101l),Cons ((110l),Cons ((101l),Cons ((114l),Cons ((97l),Cons ((116l),Cons ((101l),Empty)))))))))))))));;
+
+let rec data_arrayshape3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((104l),Cons ((97l),Cons ((112l),Cons ((101l),Empty))))))))))));;
+
+let rec data_arrayreshape3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((101l),Cons ((115l),Cons ((104l),Cons ((97l),Cons ((112l),Cons ((101l),Empty))))))))))))));;
+
+let rec data_arraymap3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((77l),Cons ((97l),Cons ((112l),Empty))))))))));;
+
+let rec data_arrayreduce3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((101l),Cons ((100l),Cons ((117l),Cons ((99l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arrayscan3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((99l),Cons ((97l),Cons ((110l),Empty)))))))))));;
+
+let rec data_arrayrotate3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((111l),Cons ((116l),Cons ((97l),Cons ((116l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arraycompress3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((109l),Cons ((112l),Cons ((114l),Cons ((101l),Cons ((115l),Cons ((115l),Empty)))))))))))))));;
+
+let rec data_array3 () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Empty)))))));;
+
+let rec data_16 () = 
+    (string_from_list Empty);;
+
 let rec join strings3 = 
     (source_string_join (string_empty ()) strings3);;
 
@@ -3484,7 +3915,7 @@ let rec source_space () =
 let rec data_sparkle () = 
     (string_from_list (Cons ((226l),Cons ((156l),Cons ((168l),Empty)))));;
 
-let rec data_16 () = 
+let rec data_17 () = 
     (string_from_list Empty);;
 
 let rec identifier_is_reserved identifier61 = 
@@ -3710,7 +4141,7 @@ let rec error_to_string files8 error18 =
          | MalformedSexpTooManyClosingBrackets -> 
             (string_format (Cons ((Cons ((data_too_many_closing_brackets ()),Empty)),Empty))));;
 
-let rec data_17 () = 
+let rec data_18 () = 
     (string_from_list (Cons ((47l),Empty)));;
 
 let rec path_filename path4 = 
@@ -3735,7 +4166,7 @@ let rec path_filename_extension path6 =
             (string_empty ()));;
 
 let rec path_join paths = 
-    (string_join (data_17 ()) paths);;
+    (string_join (data_18 ()) paths);;
 
 let rec data_standard_library_filename () = 
     (string_from_list (Cons ((115l),Cons ((116l),Cons ((97l),Cons ((110l),Cons ((100l),Cons ((97l),Cons ((114l),Cons ((100l),Cons ((45l),Cons ((108l),Cons ((105l),Cons ((98l),Cons ((114l),Cons ((97l),Cons ((114l),Cons ((121l),Cons ((46l),Cons ((114l),Cons ((101l),Cons ((117l),Cons ((115l),Cons ((101l),Empty))))))))))))))))))))))));;
@@ -3743,7 +4174,7 @@ let rec data_standard_library_filename () =
 let rec data_parser_filename () = 
     (string_from_list (Cons ((112l),Cons ((97l),Cons ((114l),Cons ((115l),Cons ((101l),Cons ((114l),Cons ((46l),Cons ((114l),Cons ((101l),Cons ((117l),Cons ((115l),Cons ((101l),Empty))))))))))))));;
 
-let rec data_18 () = 
+let rec data_19 () = 
     (string_from_list Empty);;
 
 let rec generate backend7 module_name2 definitions10 = 
@@ -3959,22 +4390,22 @@ let rec data_exists4 () =
 let rec data_pub4 () = 
     (string_from_list (Cons ((112l),Cons ((117l),Cons ((98l),Empty)))));;
 
-let rec data_19 () = 
+let rec data_20 () = 
     (string_from_list (Cons ((43l),Empty)));;
 
 let rec data__4 () = 
     (string_from_list (Cons ((45l),Empty)));;
 
-let rec data_20 () = 
+let rec data_21 () = 
     (string_from_list (Cons ((42l),Empty)));;
 
-let rec data_21 () = 
+let rec data_22 () = 
     (string_from_list (Cons ((47l),Empty)));;
 
-let rec data_22 () = 
+let rec data_23 () = 
     (string_from_list (Cons ((37l),Empty)));;
 
-let rec data_23 () = 
+let rec data_24 () = 
     (string_from_list (Cons ((38l),Empty)));;
 
 let rec data_int32_less_than4 () = 
@@ -4015,6 +4446,87 @@ let rec data_slice4 () =
 
 let rec data_int324 () = 
     (string_from_list (Cons ((105l),Cons ((110l),Cons ((116l),Cons ((51l),Cons ((50l),Empty)))))));;
+
+let rec data_array_foldl4 () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((102l),Cons ((111l),Cons ((108l),Cons ((100l),Cons ((108l),Empty)))))))))))));;
+
+let rec data_arrayadd4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((100l),Cons ((100l),Empty))))))))));;
+
+let rec data_arraysubtract4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((117l),Cons ((98l),Cons ((116l),Cons ((114l),Cons ((97l),Cons ((99l),Cons ((116l),Empty)))))))))))))));;
+
+let rec data_arraymultiply4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((77l),Cons ((117l),Cons ((108l),Cons ((116l),Cons ((105l),Cons ((112l),Cons ((108l),Cons ((121l),Empty)))))))))))))));;
+
+let rec data_arraydivide4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((68l),Cons ((105l),Cons ((118l),Cons ((105l),Cons ((100l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arrayand4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((110l),Cons ((100l),Empty))))))))));;
+
+let rec data_arrayor4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((79l),Cons ((114l),Empty)))))))));;
+
+let rec data_arraynand4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((78l),Cons ((97l),Cons ((110l),Cons ((100l),Empty)))))))))));;
+
+let rec data_arrayxor4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((88l),Cons ((111l),Cons ((114l),Empty))))))))));;
+
+let rec data_arrayequal4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty))))))))))));;
+
+let rec data_arraynotequal4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((78l),Cons ((111l),Cons ((116l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty)))))))))))))));;
+
+let rec data_arraylessthan4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((76l),Cons ((101l),Cons ((115l),Cons ((115l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Empty)))))))))))))));;
+
+let rec data_arraygreaterthan4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((114l),Cons ((101l),Cons ((97l),Cons ((116l),Cons ((101l),Cons ((114l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Empty))))))))))))))))));;
+
+let rec data_arraylessthanequal4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((76l),Cons ((101l),Cons ((115l),Cons ((115l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty))))))))))))))))))));;
+
+let rec data_arraygreaterthanequal4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((114l),Cons ((101l),Cons ((97l),Cons ((116l),Cons ((101l),Cons ((114l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty)))))))))))))))))))))));;
+
+let rec data_arrayofint324 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((79l),Cons ((102l),Cons ((73l),Cons ((110l),Cons ((116l),Cons ((51l),Cons ((50l),Empty))))))))))))));;
+
+let rec data_arrayconcat4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((110l),Cons ((99l),Cons ((97l),Cons ((116l),Empty)))))))))))));;
+
+let rec data_arraygenerate4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((101l),Cons ((110l),Cons ((101l),Cons ((114l),Cons ((97l),Cons ((116l),Cons ((101l),Empty)))))))))))))));;
+
+let rec data_arrayshape4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((104l),Cons ((97l),Cons ((112l),Cons ((101l),Empty))))))))))));;
+
+let rec data_arrayreshape4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((101l),Cons ((115l),Cons ((104l),Cons ((97l),Cons ((112l),Cons ((101l),Empty))))))))))))));;
+
+let rec data_arraymap4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((77l),Cons ((97l),Cons ((112l),Empty))))))))));;
+
+let rec data_arrayreduce4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((101l),Cons ((100l),Cons ((117l),Cons ((99l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arrayscan4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((99l),Cons ((97l),Cons ((110l),Empty)))))))))));;
+
+let rec data_arrayrotate4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((111l),Cons ((116l),Cons ((97l),Cons ((116l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arraycompress4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((109l),Cons ((112l),Cons ((114l),Cons ((101l),Cons ((115l),Cons ((115l),Empty)))))))))))))));;
+
+let rec data_array4 () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Empty)))))));;
+
+let rec data_25 () = 
+    (string_from_list Empty);;
 
 let rec data_compile_error () = 
     (string_from_list (Cons ((42l),Cons ((99l),Cons ((111l),Cons ((109l),Cons ((112l),Cons ((105l),Cons ((108l),Cons ((101l),Cons ((32l),Cons ((101l),Cons ((114l),Cons ((114l),Cons ((111l),Cons ((114l),Cons ((42l),Empty)))))))))))))))));;
@@ -4070,6 +4582,9 @@ let rec data_int32_and () =
 let rec data_slice_type () = 
     (string_from_list (Cons ((66l),Cons ((121l),Cons ((116l),Cons ((101l),Cons ((115l),Empty)))))));;
 
+let rec data_array_type () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((32l),Cons ((73l),Cons ((110l),Cons ((116l),Cons ((51l),Cons ((50l),Empty)))))))))))));;
+
 let rec data_cempty () = 
     (string_from_list (Cons ((67l),Cons ((69l),Cons ((109l),Cons ((112l),Cons ((116l),Cons ((121l),Empty))))))));;
 
@@ -4124,7 +4639,7 @@ let rec data_newtype () =
 let rec data_where () = 
     (string_from_list (Cons ((119l),Cons ((104l),Cons ((101l),Cons ((114l),Cons ((101l),Empty)))))));;
 
-let rec data_24 () = 
+let rec data_26 () = 
     (string_from_list (Cons ((58l),Cons ((58l),Empty))));;
 
 let rec data_open_bracket2 () = 
@@ -4137,7 +4652,7 @@ let rec data_dot5 () =
     (string_from_list (Cons ((46l),Empty)));;
 
 let rec data_language_exts () = 
-    (string_from_list (Cons ((123l),Cons ((45l),Cons ((35l),Cons ((32l),Cons ((76l),Cons ((65l),Cons ((78l),Cons ((71l),Cons ((85l),Cons ((65l),Cons ((71l),Cons ((69l),Cons ((32l),Cons ((69l),Cons ((120l),Cons ((105l),Cons ((115l),Cons ((116l),Cons ((101l),Cons ((110l),Cons ((116l),Cons ((105l),Cons ((97l),Cons ((108l),Cons ((81l),Cons ((117l),Cons ((97l),Cons ((110l),Cons ((116l),Cons ((105l),Cons ((102l),Cons ((105l),Cons ((99l),Cons ((97l),Cons ((116l),Cons ((105l),Cons ((111l),Cons ((110l),Cons ((32l),Cons ((35l),Cons ((45l),Cons ((125l),Empty))))))))))))))))))))))))))))))))))))))))))));;
+    (string_from_list (Cons ((123l),Cons ((45l),Cons ((35l),Cons ((32l),Cons ((76l),Cons ((65l),Cons ((78l),Cons ((71l),Cons ((85l),Cons ((65l),Cons ((71l),Cons ((69l),Cons ((32l),Cons ((69l),Cons ((120l),Cons ((105l),Cons ((115l),Cons ((116l),Cons ((101l),Cons ((110l),Cons ((116l),Cons ((105l),Cons ((97l),Cons ((108l),Cons ((81l),Cons ((117l),Cons ((97l),Cons ((110l),Cons ((116l),Cons ((105l),Cons ((102l),Cons ((105l),Cons ((99l),Cons ((97l),Cons ((116l),Cons ((105l),Cons ((111l),Cons ((110l),Cons ((44l),Cons ((32l),Cons ((85l),Cons ((110l),Cons ((98l),Cons ((111l),Cons ((120l),Cons ((101l),Cons ((100l),Cons ((84l),Cons ((117l),Cons ((112l),Cons ((108l),Cons ((101l),Cons ((115l),Cons ((44l),Cons ((32l),Cons ((77l),Cons ((97l),Cons ((103l),Cons ((105l),Cons ((99l),Cons ((72l),Cons ((97l),Cons ((115l),Cons ((104l),Cons ((32l),Cons ((35l),Cons ((45l),Cons ((125l),Empty))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))));;
 
 let rec data_pervasives_filename () = 
     (string_from_list (Cons ((80l),Cons ((101l),Cons ((114l),Cons ((118l),Cons ((97l),Cons ((115l),Cons ((105l),Cons ((118l),Cons ((101l),Cons ((115l),Cons ((46l),Cons ((104l),Cons ((115l),Empty)))))))))))))));;
@@ -4167,7 +4682,7 @@ let rec translate_constructor_identifier constructor14 =
     (SourceStringIdentifier (constructor14, IdentifierTransformationCapitalize));;
 
 let rec operator_translation_map () = 
-    (dictionary_of (Cons ((Pair ((data_19 ()), (SourceString ((data_int32_plus ()))))),Cons ((Pair ((data__4 ()), (SourceString ((data_int32_minus ()))))),Cons ((Pair ((data_20 ()), (SourceString ((data_int32_multiply ()))))),Cons ((Pair ((data_21 ()), (SourceString ((data_int32_divide ()))))),Cons ((Pair ((data_22 ()), (SourceString ((data_int32_modulus ()))))),Cons ((Pair ((data_23 ()), (SourceString ((data_int32_and ()))))),Empty))))))));;
+    (dictionary_of (Cons ((Pair ((data_20 ()), (SourceString ((data_int32_plus ()))))),Cons ((Pair ((data__4 ()), (SourceString ((data_int32_minus ()))))),Cons ((Pair ((data_21 ()), (SourceString ((data_int32_multiply ()))))),Cons ((Pair ((data_22 ()), (SourceString ((data_int32_divide ()))))),Cons ((Pair ((data_23 ()), (SourceString ((data_int32_modulus ()))))),Cons ((Pair ((data_24 ()), (SourceString ((data_int32_and ()))))),Empty))))))));;
 
 let rec translate_identifier identifier65 = 
     (match (identifier_is_operator identifier65) with
@@ -4188,16 +4703,20 @@ let rec prefix_type identifier67 =
          | True -> 
             (SourceString ((data_slice_type ())))
          | False -> 
-            (match (identifier_is (identifier_int32 ()) identifier67) with
+            (match (identifier_is (identifier_array ()) identifier67) with
                  | True -> 
-                    (SourceString ((data_int325 ())))
+                    (SourceString ((data_array_type ())))
                  | False -> 
-                    (SourceStringIdentifier (identifier67, IdentifierTransformationCapitalize))));;
+                    (match (identifier_is (identifier_int32 ()) identifier67) with
+                         | True -> 
+                            (SourceString ((data_int325 ())))
+                         | False -> 
+                            (SourceStringIdentifier (identifier67, IdentifierTransformationCapitalize)))));;
 
 let rec translate_less_than translate_expression expressions44 = 
     (match expressions44 with
-         | (Cons (a78, (Cons (b69, (Cons (then_case, (Cons (else_case, Empty)))))))) -> 
-            (join (Cons ((SourceString ((data_if2 ()))),Cons ((source_space ()),Cons ((SourceString ((data_open_bracket2 ()))),Cons ((translate_expression a78),Cons ((SourceString ((data_24 ()))),Cons ((SourceString ((data_int325 ()))),Cons ((SourceString ((data_close_bracket2 ()))),Cons ((SourceString ((data_less_than2 ()))),Cons ((SourceString ((data_open_bracket2 ()))),Cons ((translate_expression b69),Cons ((SourceString ((data_24 ()))),Cons ((SourceString ((data_int325 ()))),Cons ((SourceString ((data_close_bracket2 ()))),Cons ((source_space ()),Cons ((SourceString ((data_then2 ()))),Cons ((source_space ()),Cons ((translate_expression then_case),Cons ((source_space ()),Cons ((SourceString ((data_else2 ()))),Cons ((source_space ()),Cons ((translate_expression else_case),Empty)))))))))))))))))))))))
+         | (Cons (a79, (Cons (b70, (Cons (then_case, (Cons (else_case, Empty)))))))) -> 
+            (join (Cons ((SourceString ((data_if2 ()))),Cons ((source_space ()),Cons ((SourceString ((data_open_bracket2 ()))),Cons ((translate_expression a79),Cons ((SourceString ((data_26 ()))),Cons ((SourceString ((data_int325 ()))),Cons ((SourceString ((data_close_bracket2 ()))),Cons ((SourceString ((data_less_than2 ()))),Cons ((SourceString ((data_open_bracket2 ()))),Cons ((translate_expression b70),Cons ((SourceString ((data_26 ()))),Cons ((SourceString ((data_int325 ()))),Cons ((SourceString ((data_close_bracket2 ()))),Cons ((source_space ()),Cons ((SourceString ((data_then2 ()))),Cons ((source_space ()),Cons ((translate_expression then_case),Cons ((source_space ()),Cons ((SourceString ((data_else2 ()))),Cons ((source_space ()),Cons ((translate_expression else_case),Empty)))))))))))))))))))))))
          | x494 -> 
             (SourceString ((data_compile_error ()))));;
 
@@ -4582,22 +5101,22 @@ let rec data_exists5 () =
 let rec data_pub5 () = 
     (string_from_list (Cons ((112l),Cons ((117l),Cons ((98l),Empty)))));;
 
-let rec data_25 () = 
+let rec data_27 () = 
     (string_from_list (Cons ((43l),Empty)));;
 
 let rec data__5 () = 
     (string_from_list (Cons ((45l),Empty)));;
 
-let rec data_26 () = 
+let rec data_28 () = 
     (string_from_list (Cons ((42l),Empty)));;
 
-let rec data_27 () = 
+let rec data_29 () = 
     (string_from_list (Cons ((47l),Empty)));;
 
-let rec data_28 () = 
+let rec data_30 () = 
     (string_from_list (Cons ((37l),Empty)));;
 
-let rec data_29 () = 
+let rec data_31 () = 
     (string_from_list (Cons ((38l),Empty)));;
 
 let rec data_int32_less_than5 () = 
@@ -4638,6 +5157,87 @@ let rec data_slice5 () =
 
 let rec data_int326 () = 
     (string_from_list (Cons ((105l),Cons ((110l),Cons ((116l),Cons ((51l),Cons ((50l),Empty)))))));;
+
+let rec data_array_foldl5 () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((102l),Cons ((111l),Cons ((108l),Cons ((100l),Cons ((108l),Empty)))))))))))));;
+
+let rec data_arrayadd5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((100l),Cons ((100l),Empty))))))))));;
+
+let rec data_arraysubtract5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((117l),Cons ((98l),Cons ((116l),Cons ((114l),Cons ((97l),Cons ((99l),Cons ((116l),Empty)))))))))))))));;
+
+let rec data_arraymultiply5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((77l),Cons ((117l),Cons ((108l),Cons ((116l),Cons ((105l),Cons ((112l),Cons ((108l),Cons ((121l),Empty)))))))))))))));;
+
+let rec data_arraydivide5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((68l),Cons ((105l),Cons ((118l),Cons ((105l),Cons ((100l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arrayand5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((110l),Cons ((100l),Empty))))))))));;
+
+let rec data_arrayor5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((79l),Cons ((114l),Empty)))))))));;
+
+let rec data_arraynand5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((78l),Cons ((97l),Cons ((110l),Cons ((100l),Empty)))))))))));;
+
+let rec data_arrayxor5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((88l),Cons ((111l),Cons ((114l),Empty))))))))));;
+
+let rec data_arrayequal5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty))))))))))));;
+
+let rec data_arraynotequal5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((78l),Cons ((111l),Cons ((116l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty)))))))))))))));;
+
+let rec data_arraylessthan5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((76l),Cons ((101l),Cons ((115l),Cons ((115l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Empty)))))))))))))));;
+
+let rec data_arraygreaterthan5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((114l),Cons ((101l),Cons ((97l),Cons ((116l),Cons ((101l),Cons ((114l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Empty))))))))))))))))));;
+
+let rec data_arraylessthanequal5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((76l),Cons ((101l),Cons ((115l),Cons ((115l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty))))))))))))))))))));;
+
+let rec data_arraygreaterthanequal5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((114l),Cons ((101l),Cons ((97l),Cons ((116l),Cons ((101l),Cons ((114l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty)))))))))))))))))))))));;
+
+let rec data_arrayofint325 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((79l),Cons ((102l),Cons ((73l),Cons ((110l),Cons ((116l),Cons ((51l),Cons ((50l),Empty))))))))))))));;
+
+let rec data_arrayconcat5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((110l),Cons ((99l),Cons ((97l),Cons ((116l),Empty)))))))))))));;
+
+let rec data_arraygenerate5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((101l),Cons ((110l),Cons ((101l),Cons ((114l),Cons ((97l),Cons ((116l),Cons ((101l),Empty)))))))))))))));;
+
+let rec data_arrayshape5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((104l),Cons ((97l),Cons ((112l),Cons ((101l),Empty))))))))))));;
+
+let rec data_arrayreshape5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((101l),Cons ((115l),Cons ((104l),Cons ((97l),Cons ((112l),Cons ((101l),Empty))))))))))))));;
+
+let rec data_arraymap5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((77l),Cons ((97l),Cons ((112l),Empty))))))))));;
+
+let rec data_arrayreduce5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((101l),Cons ((100l),Cons ((117l),Cons ((99l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arrayscan5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((99l),Cons ((97l),Cons ((110l),Empty)))))))))));;
+
+let rec data_arrayrotate5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((111l),Cons ((116l),Cons ((97l),Cons ((116l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arraycompress5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((109l),Cons ((112l),Cons ((114l),Cons ((101l),Cons ((115l),Cons ((115l),Empty)))))))))))))));;
+
+let rec data_array5 () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Empty)))))));;
+
+let rec data_32 () = 
+    (string_from_list Empty);;
 
 let rec data_compile_error2 () = 
     (string_from_list (Cons ((42l),Cons ((99l),Cons ((111l),Cons ((109l),Cons ((112l),Cons ((105l),Cons ((108l),Cons ((101l),Cons ((32l),Cons ((101l),Cons ((114l),Cons ((114l),Cons ((111l),Cons ((114l),Cons ((42l),Empty)))))))))))))))));;
@@ -4816,7 +5416,7 @@ let rec data_exports () =
 let rec data_moduleexports () = 
     (string_from_list (Cons ((109l),Cons ((111l),Cons ((100l),Cons ((117l),Cons ((108l),Cons ((101l),Cons ((46l),Cons ((101l),Cons ((120l),Cons ((112l),Cons ((111l),Cons ((114l),Cons ((116l),Cons ((115l),Cons ((46l),Empty)))))))))))))))));;
 
-let rec data_30 () = 
+let rec data_33 () = 
     (string_from_list (Cons ((125l),Cons ((59l),Empty))));;
 
 let rec data_cons2 () = 
@@ -4841,7 +5441,7 @@ let rec translate_constructor_identifier2 identifier86 =
     (escape_identifier2 identifier86);;
 
 let rec operator_translation_map2 () = 
-    (dictionary_of (Cons ((Pair ((data_25 ()), (SourceString ((data_int32_plus2 ()))))),Cons ((Pair ((data__5 ()), (SourceString ((data_int32_minus2 ()))))),Cons ((Pair ((data_26 ()), (SourceString ((data_int32_multiply2 ()))))),Cons ((Pair ((data_27 ()), (SourceString ((data_int32_divide2 ()))))),Cons ((Pair ((data_28 ()), (SourceString ((data_int32_modulus2 ()))))),Cons ((Pair ((data_29 ()), (SourceString ((data_int32_and2 ()))))),Empty))))))));;
+    (dictionary_of (Cons ((Pair ((data_27 ()), (SourceString ((data_int32_plus2 ()))))),Cons ((Pair ((data__5 ()), (SourceString ((data_int32_minus2 ()))))),Cons ((Pair ((data_28 ()), (SourceString ((data_int32_multiply2 ()))))),Cons ((Pair ((data_29 ()), (SourceString ((data_int32_divide2 ()))))),Cons ((Pair ((data_30 ()), (SourceString ((data_int32_modulus2 ()))))),Cons ((Pair ((data_31 ()), (SourceString ((data_int32_and2 ()))))),Empty))))))));;
 
 let rec translate_identifier2 identifier87 = 
     (match (identifier_is_operator identifier87) with
@@ -4856,8 +5456,8 @@ let rec translate_identifier2 identifier87 =
 
 let rec translate_less_than2 translate_expression9 expressions53 = 
     (match expressions53 with
-         | (Cons (a79, (Cons (b70, (Cons (then_case2, (Cons (else_case2, Empty)))))))) -> 
-            (wrap_in_brackets2 (join (Cons ((translate_expression9 a79),Cons ((SourceString ((data_less_than3 ()))),Cons ((translate_expression9 b70),Cons ((SourceString ((data_space3 ()))),Cons ((SourceString ((data_question_mark ()))),Cons ((SourceString ((data_space3 ()))),Cons ((translate_expression9 then_case2),Cons ((SourceString ((data_space3 ()))),Cons ((SourceString ((data_colon2 ()))),Cons ((SourceString ((data_space3 ()))),Cons ((translate_expression9 else_case2),Empty))))))))))))))
+         | (Cons (a80, (Cons (b71, (Cons (then_case2, (Cons (else_case2, Empty)))))))) -> 
+            (wrap_in_brackets2 (join (Cons ((translate_expression9 a80),Cons ((SourceString ((data_less_than3 ()))),Cons ((translate_expression9 b71),Cons ((SourceString ((data_space3 ()))),Cons ((SourceString ((data_question_mark ()))),Cons ((SourceString ((data_space3 ()))),Cons ((translate_expression9 then_case2),Cons ((SourceString ((data_space3 ()))),Cons ((SourceString ((data_colon2 ()))),Cons ((SourceString ((data_space3 ()))),Cons ((translate_expression9 else_case2),Empty))))))))))))))
          | x526 -> 
             (SourceString ((data_compile_error2 ()))));;
 
@@ -4986,7 +5586,7 @@ let rec tail_recursive_function identifier98 arguments30 expression75 =
 let rec translate_main_function_definition identifier99 arguments31 expression76 = 
     (match (tail_recursive_function identifier99 arguments31 expression76) with
          | True -> 
-            ((source_string_join (newline ())) (Cons (((line (0l)) (Cons ((SourceString ((data_var ()))),Cons ((source_space ()),Cons ((escape_identifier2 identifier99),Cons ((source_space ()),Cons ((SourceString ((data_equals2 ()))),Cons ((source_space ()),Cons ((translate_argument_list2 arguments31),Cons ((SourceString ((data_lambda_arrow ()))),Cons ((SourceString ((data_open_block ()))),Empty))))))))))),Cons (((line (1l)) (Cons ((SourceString ((data_var ()))),Cons ((source_space ()),Cons ((SourceString ((data_tailcall ()))),Cons ((source_space ()),Cons ((SourceString ((data_equals2 ()))),Cons ((source_space ()),Cons ((translate_argument_list2 arguments31),Cons ((SourceString ((data_lambda_arrow ()))),Empty)))))))))),Cons (((line (2l)) (Cons ((source_string_concat (translate_tail_recursive_function2 identifier99 (2l) expression76) (SourceString ((data_end_statement ())))),Empty))),Cons (((line (1l)) (Cons ((SourceString ((data_return ()))),Cons ((source_space ()),Cons ((SourceString ((data_trampoline ()))),Cons ((SourceString ((data_open_bracket3 ()))),Cons ((SourceString ((data_tailcall ()))),Cons ((source_string_join (string_empty ()) (list_map (fun x' -> x' |> escape_identifier2 |> wrap_in_brackets2) arguments31)),Cons ((SourceString ((data_close_bracket3 ()))),Cons ((SourceString ((data_end_statement ()))),Empty)))))))))),Cons (((line (0l)) (Cons ((SourceString ((data_30 ()))),Empty))),Empty)))))))
+            ((source_string_join (newline ())) (Cons (((line (0l)) (Cons ((SourceString ((data_var ()))),Cons ((source_space ()),Cons ((escape_identifier2 identifier99),Cons ((source_space ()),Cons ((SourceString ((data_equals2 ()))),Cons ((source_space ()),Cons ((translate_argument_list2 arguments31),Cons ((SourceString ((data_lambda_arrow ()))),Cons ((SourceString ((data_open_block ()))),Empty))))))))))),Cons (((line (1l)) (Cons ((SourceString ((data_var ()))),Cons ((source_space ()),Cons ((SourceString ((data_tailcall ()))),Cons ((source_space ()),Cons ((SourceString ((data_equals2 ()))),Cons ((source_space ()),Cons ((translate_argument_list2 arguments31),Cons ((SourceString ((data_lambda_arrow ()))),Empty)))))))))),Cons (((line (2l)) (Cons ((source_string_concat (translate_tail_recursive_function2 identifier99 (2l) expression76) (SourceString ((data_end_statement ())))),Empty))),Cons (((line (1l)) (Cons ((SourceString ((data_return ()))),Cons ((source_space ()),Cons ((SourceString ((data_trampoline ()))),Cons ((SourceString ((data_open_bracket3 ()))),Cons ((SourceString ((data_tailcall ()))),Cons ((source_string_join (string_empty ()) (list_map (fun x' -> x' |> escape_identifier2 |> wrap_in_brackets2) arguments31)),Cons ((SourceString ((data_close_bracket3 ()))),Cons ((SourceString ((data_end_statement ()))),Empty)))))))))),Cons (((line (0l)) (Cons ((SourceString ((data_33 ()))),Empty))),Empty)))))))
          | False -> 
             ((source_string_join (newline ())) (Cons (((line (0l)) (Cons ((SourceString ((data_var ()))),Cons ((source_space ()),Cons ((escape_identifier2 identifier99),Cons ((source_space ()),Cons ((SourceString ((data_equals2 ()))),Cons ((source_space ()),Cons ((translate_argument_list2 arguments31),Cons ((SourceString ((data_lambda_arrow ()))),Empty)))))))))),Cons (((line (1l)) (Cons ((translate_expression17 (1l) expression76),Cons ((SourceString ((data_end_statement ()))),Empty)))),Empty)))));;
 
@@ -5233,22 +5833,22 @@ let rec data_exists6 () =
 let rec data_pub6 () = 
     (string_from_list (Cons ((112l),Cons ((117l),Cons ((98l),Empty)))));;
 
-let rec data_31 () = 
+let rec data_34 () = 
     (string_from_list (Cons ((43l),Empty)));;
 
 let rec data__6 () = 
     (string_from_list (Cons ((45l),Empty)));;
 
-let rec data_32 () = 
+let rec data_35 () = 
     (string_from_list (Cons ((42l),Empty)));;
 
-let rec data_33 () = 
+let rec data_36 () = 
     (string_from_list (Cons ((47l),Empty)));;
 
-let rec data_34 () = 
+let rec data_37 () = 
     (string_from_list (Cons ((37l),Empty)));;
 
-let rec data_35 () = 
+let rec data_38 () = 
     (string_from_list (Cons ((38l),Empty)));;
 
 let rec data_int32_less_than6 () = 
@@ -5289,6 +5889,87 @@ let rec data_slice7 () =
 
 let rec data_int327 () = 
     (string_from_list (Cons ((105l),Cons ((110l),Cons ((116l),Cons ((51l),Cons ((50l),Empty)))))));;
+
+let rec data_array_foldl6 () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((102l),Cons ((111l),Cons ((108l),Cons ((100l),Cons ((108l),Empty)))))))))))));;
+
+let rec data_arrayadd6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((100l),Cons ((100l),Empty))))))))));;
+
+let rec data_arraysubtract6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((117l),Cons ((98l),Cons ((116l),Cons ((114l),Cons ((97l),Cons ((99l),Cons ((116l),Empty)))))))))))))));;
+
+let rec data_arraymultiply6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((77l),Cons ((117l),Cons ((108l),Cons ((116l),Cons ((105l),Cons ((112l),Cons ((108l),Cons ((121l),Empty)))))))))))))));;
+
+let rec data_arraydivide6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((68l),Cons ((105l),Cons ((118l),Cons ((105l),Cons ((100l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arrayand6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((110l),Cons ((100l),Empty))))))))));;
+
+let rec data_arrayor6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((79l),Cons ((114l),Empty)))))))));;
+
+let rec data_arraynand6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((78l),Cons ((97l),Cons ((110l),Cons ((100l),Empty)))))))))));;
+
+let rec data_arrayxor6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((88l),Cons ((111l),Cons ((114l),Empty))))))))));;
+
+let rec data_arrayequal6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty))))))))))));;
+
+let rec data_arraynotequal6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((78l),Cons ((111l),Cons ((116l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty)))))))))))))));;
+
+let rec data_arraylessthan6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((76l),Cons ((101l),Cons ((115l),Cons ((115l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Empty)))))))))))))));;
+
+let rec data_arraygreaterthan6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((114l),Cons ((101l),Cons ((97l),Cons ((116l),Cons ((101l),Cons ((114l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Empty))))))))))))))))));;
+
+let rec data_arraylessthanequal6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((76l),Cons ((101l),Cons ((115l),Cons ((115l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty))))))))))))))))))));;
+
+let rec data_arraygreaterthanequal6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((114l),Cons ((101l),Cons ((97l),Cons ((116l),Cons ((101l),Cons ((114l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty)))))))))))))))))))))));;
+
+let rec data_arrayofint326 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((79l),Cons ((102l),Cons ((73l),Cons ((110l),Cons ((116l),Cons ((51l),Cons ((50l),Empty))))))))))))));;
+
+let rec data_arrayconcat6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((110l),Cons ((99l),Cons ((97l),Cons ((116l),Empty)))))))))))));;
+
+let rec data_arraygenerate6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((101l),Cons ((110l),Cons ((101l),Cons ((114l),Cons ((97l),Cons ((116l),Cons ((101l),Empty)))))))))))))));;
+
+let rec data_arrayshape6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((104l),Cons ((97l),Cons ((112l),Cons ((101l),Empty))))))))))));;
+
+let rec data_arrayreshape6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((101l),Cons ((115l),Cons ((104l),Cons ((97l),Cons ((112l),Cons ((101l),Empty))))))))))))));;
+
+let rec data_arraymap6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((77l),Cons ((97l),Cons ((112l),Empty))))))))));;
+
+let rec data_arrayreduce6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((101l),Cons ((100l),Cons ((117l),Cons ((99l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arrayscan6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((99l),Cons ((97l),Cons ((110l),Empty)))))))))));;
+
+let rec data_arrayrotate6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((111l),Cons ((116l),Cons ((97l),Cons ((116l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arraycompress6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((109l),Cons ((112l),Cons ((114l),Cons ((101l),Cons ((115l),Cons ((115l),Empty)))))))))))))));;
+
+let rec data_array6 () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Empty)))))));;
+
+let rec data_39 () = 
+    (string_from_list Empty);;
 
 let rec data_preamble_filename3 () = 
     (string_from_list (Cons ((112l),Cons ((114l),Cons ((101l),Cons ((97l),Cons ((109l),Cons ((98l),Cons ((108l),Cons ((101l),Cons ((46l),Cons ((114l),Cons ((101l),Cons ((117l),Cons ((115l),Cons ((101l),Empty))))))))))))))));;
@@ -5500,22 +6181,22 @@ let rec data_exists7 () =
 let rec data_pub7 () = 
     (string_from_list (Cons ((112l),Cons ((117l),Cons ((98l),Empty)))));;
 
-let rec data_36 () = 
+let rec data_40 () = 
     (string_from_list (Cons ((43l),Empty)));;
 
 let rec data__7 () = 
     (string_from_list (Cons ((45l),Empty)));;
 
-let rec data_37 () = 
+let rec data_41 () = 
     (string_from_list (Cons ((42l),Empty)));;
 
-let rec data_38 () = 
+let rec data_42 () = 
     (string_from_list (Cons ((47l),Empty)));;
 
-let rec data_39 () = 
+let rec data_43 () = 
     (string_from_list (Cons ((37l),Empty)));;
 
-let rec data_40 () = 
+let rec data_44 () = 
     (string_from_list (Cons ((38l),Empty)));;
 
 let rec data_int32_less_than7 () = 
@@ -5556,6 +6237,87 @@ let rec data_slice8 () =
 
 let rec data_int328 () = 
     (string_from_list (Cons ((105l),Cons ((110l),Cons ((116l),Cons ((51l),Cons ((50l),Empty)))))));;
+
+let rec data_array_foldl7 () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((102l),Cons ((111l),Cons ((108l),Cons ((100l),Cons ((108l),Empty)))))))))))));;
+
+let rec data_arrayadd7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((100l),Cons ((100l),Empty))))))))));;
+
+let rec data_arraysubtract7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((117l),Cons ((98l),Cons ((116l),Cons ((114l),Cons ((97l),Cons ((99l),Cons ((116l),Empty)))))))))))))));;
+
+let rec data_arraymultiply7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((77l),Cons ((117l),Cons ((108l),Cons ((116l),Cons ((105l),Cons ((112l),Cons ((108l),Cons ((121l),Empty)))))))))))))));;
+
+let rec data_arraydivide7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((68l),Cons ((105l),Cons ((118l),Cons ((105l),Cons ((100l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arrayand7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((110l),Cons ((100l),Empty))))))))));;
+
+let rec data_arrayor7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((79l),Cons ((114l),Empty)))))))));;
+
+let rec data_arraynand7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((78l),Cons ((97l),Cons ((110l),Cons ((100l),Empty)))))))))));;
+
+let rec data_arrayxor7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((88l),Cons ((111l),Cons ((114l),Empty))))))))));;
+
+let rec data_arrayequal7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty))))))))))));;
+
+let rec data_arraynotequal7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((78l),Cons ((111l),Cons ((116l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty)))))))))))))));;
+
+let rec data_arraylessthan7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((76l),Cons ((101l),Cons ((115l),Cons ((115l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Empty)))))))))))))));;
+
+let rec data_arraygreaterthan7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((114l),Cons ((101l),Cons ((97l),Cons ((116l),Cons ((101l),Cons ((114l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Empty))))))))))))))))));;
+
+let rec data_arraylessthanequal7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((76l),Cons ((101l),Cons ((115l),Cons ((115l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty))))))))))))))))))));;
+
+let rec data_arraygreaterthanequal7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((114l),Cons ((101l),Cons ((97l),Cons ((116l),Cons ((101l),Cons ((114l),Cons ((84l),Cons ((104l),Cons ((97l),Cons ((110l),Cons ((69l),Cons ((113l),Cons ((117l),Cons ((97l),Cons ((108l),Empty)))))))))))))))))))))));;
+
+let rec data_arrayofint327 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((79l),Cons ((102l),Cons ((73l),Cons ((110l),Cons ((116l),Cons ((51l),Cons ((50l),Empty))))))))))))));;
+
+let rec data_arrayconcat7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((110l),Cons ((99l),Cons ((97l),Cons ((116l),Empty)))))))))))));;
+
+let rec data_arraygenerate7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((71l),Cons ((101l),Cons ((110l),Cons ((101l),Cons ((114l),Cons ((97l),Cons ((116l),Cons ((101l),Empty)))))))))))))));;
+
+let rec data_arrayshape7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((104l),Cons ((97l),Cons ((112l),Cons ((101l),Empty))))))))))));;
+
+let rec data_arrayreshape7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((101l),Cons ((115l),Cons ((104l),Cons ((97l),Cons ((112l),Cons ((101l),Empty))))))))))))));;
+
+let rec data_arraymap7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((77l),Cons ((97l),Cons ((112l),Empty))))))))));;
+
+let rec data_arrayreduce7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((101l),Cons ((100l),Cons ((117l),Cons ((99l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arrayscan7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((83l),Cons ((99l),Cons ((97l),Cons ((110l),Empty)))))))))));;
+
+let rec data_arrayrotate7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((82l),Cons ((111l),Cons ((116l),Cons ((97l),Cons ((116l),Cons ((101l),Empty)))))))))))));;
+
+let rec data_arraycompress7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((109l),Cons ((112l),Cons ((114l),Cons ((101l),Cons ((115l),Cons ((115l),Empty)))))))))))))));;
+
+let rec data_array7 () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Empty)))))));;
+
+let rec data_45 () = 
+    (string_from_list Empty);;
 
 let rec data_compile_error3 () = 
     (string_from_list (Cons ((42l),Cons ((99l),Cons ((111l),Cons ((109l),Cons ((112l),Cons ((105l),Cons ((108l),Cons ((101l),Cons ((32l),Cons ((101l),Cons ((114l),Cons ((114l),Cons ((111l),Cons ((114l),Cons ((42l),Empty)))))))))))))))));;
@@ -5620,6 +6382,9 @@ let rec data_slice9 () =
 let rec data_slice_type2 () = 
     (string_from_list (Cons ((115l),Cons ((108l),Cons ((105l),Cons ((99l),Cons ((101l),Cons ((39l),Empty))))))));;
 
+let rec data_array_type2 () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((39l),Empty))))))));;
+
 let rec data_definition_end () = 
     (string_from_list (Cons ((59l),Cons ((59l),Empty))));;
 
@@ -5651,10 +6416,10 @@ let rec data_cons3 () =
     (string_from_list (Cons ((67l),Cons ((111l),Cons ((110l),Cons ((115l),Empty))))));;
 
 let rec reserved_identifiers3 () = 
-    (list_flatten (Cons ((Cons (data_assert5,Cons (data_asr5,Cons (data_begin5,Cons (data_constraint5,Cons (data_do5,Cons (data_done5,Empty))))))),Cons ((Cons (data_downto5,Cons (data_type5,Cons (data_if5,Cons (data_then5,Cons (data_else5,Cons (data_with6,Cons (data_of5,Empty)))))))),Cons ((Cons (data_end5,Cons (data_in5,Cons (data_fun5,Cons (data_let5,Cons (data_open5,Cons (data_and5,Cons (data_or5,Cons (data_as5,Empty))))))))),Cons ((Cons (data_class5,Cons (data_exception5,Cons (data_external5,Cons (data_false5,Cons (data_true6,Cons (data_for5,Empty))))))),Cons ((Cons (data_function6,Cons (data_functor5,Cons (data_if5,Cons (data_include5,Cons (data_inherit5,Empty)))))),Cons ((Cons (data_initializer5,Cons (data_land5,Cons (data_lazy5,Cons (data_lor5,Cons (data_lsl5,Cons (data_lsr5,Empty))))))),Cons ((Cons (data_lxor5,Cons (data_method5,Cons (data_mod5,Cons (data_module6,Cons (data_mutable5,Cons (data_new5,Empty))))))),Cons ((Cons (data_nonrec5,Cons (data_object5,Cons (data_private5,Cons (data_rec5,Cons (data_sig5,Cons (data_struct5,Empty))))))),Cons ((Cons (data_try5,Cons (data_val5,Cons (data_virtual5,Cons (data_when5,Cons (data_while5,Cons (data_parser5,Empty))))))),Cons ((Cons (data_value5,Cons (data_to5,Cons (data_slice9,Empty)))),Empty))))))))))));;
+    (list_flatten (Cons ((Cons (data_assert5,Cons (data_asr5,Cons (data_begin5,Cons (data_constraint5,Cons (data_do5,Cons (data_done5,Empty))))))),Cons ((Cons (data_downto5,Cons (data_type5,Cons (data_if5,Cons (data_then5,Cons (data_else5,Cons (data_with6,Cons (data_of5,Empty)))))))),Cons ((Cons (data_end5,Cons (data_in5,Cons (data_fun5,Cons (data_let5,Cons (data_open5,Cons (data_and5,Cons (data_or5,Cons (data_as5,Empty))))))))),Cons ((Cons (data_class5,Cons (data_exception5,Cons (data_external5,Cons (data_false5,Cons (data_true6,Cons (data_for5,Empty))))))),Cons ((Cons (data_function6,Cons (data_functor5,Cons (data_if5,Cons (data_include5,Cons (data_inherit5,Empty)))))),Cons ((Cons (data_initializer5,Cons (data_land5,Cons (data_lazy5,Cons (data_lor5,Cons (data_lsl5,Cons (data_lsr5,Empty))))))),Cons ((Cons (data_lxor5,Cons (data_method5,Cons (data_mod5,Cons (data_module6,Cons (data_mutable5,Cons (data_new5,Empty))))))),Cons ((Cons (data_nonrec5,Cons (data_object5,Cons (data_private5,Cons (data_rec5,Cons (data_sig5,Cons (data_struct5,Empty))))))),Cons ((Cons (data_try5,Cons (data_val5,Cons (data_virtual5,Cons (data_when5,Cons (data_while5,Cons (data_parser5,Empty))))))),Cons ((Cons (data_value5,Cons (data_to5,Cons (data_slice9,Cons (data_array7,Empty))))),Empty))))))))))));;
 
 let rec operator_translation_map3 () = 
-    (dictionary_of (Cons ((Pair ((data_36 ()), (SourceString ((data_int32_plus3 ()))))),Cons ((Pair ((data__7 ()), (SourceString ((data_int32_minus3 ()))))),Cons ((Pair ((data_37 ()), (SourceString ((data_int32_multiply3 ()))))),Cons ((Pair ((data_38 ()), (SourceString ((data_int32_divide3 ()))))),Cons ((Pair ((data_39 ()), (SourceString ((data_int32_modulus3 ()))))),Cons ((Pair ((data_40 ()), (SourceString ((data_int32_and3 ()))))),Empty))))))));;
+    (dictionary_of (Cons ((Pair ((data_40 ()), (SourceString ((data_int32_plus3 ()))))),Cons ((Pair ((data__7 ()), (SourceString ((data_int32_minus3 ()))))),Cons ((Pair ((data_41 ()), (SourceString ((data_int32_multiply3 ()))))),Cons ((Pair ((data_42 ()), (SourceString ((data_int32_divide3 ()))))),Cons ((Pair ((data_43 ()), (SourceString ((data_int32_modulus3 ()))))),Cons ((Pair ((data_44 ()), (SourceString ((data_int32_and3 ()))))),Empty))))))));;
 
 let rec translate_type_variable identifier106 = 
     (source_string_concat (SourceStringChar ((39l))) (source_string_concat (SourceStringChar ((84l))) (SourceStringIdentifier (identifier106, IdentifierTransformationNone))));;
@@ -5670,7 +6435,11 @@ let rec translate_type_identifier identifier109 =
          | True -> 
             (SourceString ((data_slice_type2 ())))
          | False -> 
-            (escape_identifier3 identifier109));;
+            (match (identifier_is (identifier_array ()) identifier109) with
+                 | True -> 
+                    (SourceString ((data_array_type2 ())))
+                 | False -> 
+                    (escape_identifier3 identifier109)));;
 
 let rec translate_constructor_identifier3 identifier110 = 
     (SourceStringIdentifier (identifier110, IdentifierTransformationCapitalize));;
@@ -5688,8 +6457,8 @@ let rec translate_identifier3 identifier111 =
 
 let rec translate_less_than3 translate_expression19 expressions63 = 
     (match expressions63 with
-         | (Cons (a80, (Cons (b71, (Cons (then_case3, (Cons (else_case3, Empty)))))))) -> 
-            (join (Cons ((SourceString ((data_if5 ()))),Cons ((SourceString ((data_space5 ()))),Cons ((translate_expression19 a80),Cons ((SourceString ((data_less_than5 ()))),Cons ((translate_expression19 b71),Cons ((SourceString ((data_space5 ()))),Cons ((SourceString ((data_then5 ()))),Cons ((SourceString ((data_space5 ()))),Cons ((translate_expression19 then_case3),Cons ((SourceString ((data_space5 ()))),Cons ((SourceString ((data_else5 ()))),Cons ((SourceString ((data_space5 ()))),Cons ((translate_expression19 else_case3),Empty)))))))))))))))
+         | (Cons (a81, (Cons (b72, (Cons (then_case3, (Cons (else_case3, Empty)))))))) -> 
+            (join (Cons ((SourceString ((data_if5 ()))),Cons ((SourceString ((data_space5 ()))),Cons ((translate_expression19 a81),Cons ((SourceString ((data_less_than5 ()))),Cons ((translate_expression19 b72),Cons ((SourceString ((data_space5 ()))),Cons ((SourceString ((data_then5 ()))),Cons ((SourceString ((data_space5 ()))),Cons ((translate_expression19 then_case3),Cons ((SourceString ((data_space5 ()))),Cons ((SourceString ((data_else5 ()))),Cons ((SourceString ((data_space5 ()))),Cons ((translate_expression19 else_case3),Empty)))))))))))))))
          | x551 -> 
             (SourceString ((data_compile_error3 ()))));;
 
