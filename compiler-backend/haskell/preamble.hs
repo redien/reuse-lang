@@ -90,7 +90,7 @@ _select_op :: ArrayBinaryOperator' -> Int32# -> Int32# -> Int32#
 _select_op ArrayAdd = plusInt32#
 _select_op ArraySubtract = subInt32#
 _select_op ArrayMultiply = timesInt32#
-_select_op ArrayDivide = quotInt32#
+_select_op ArrayDivide = \a b -> if isTrue# (eqInt32# b (intToInt32# 0#)) then (intToInt32# 0#) else quotInt32# a b
 _select_op ArrayAnd = \a b -> word32ToInt32# ((int32ToWord32# a) `andWord32#` (int32ToWord32# b))
 _select_op ArrayOr = \a b -> word32ToInt32# ((int32ToWord32# a) `orWord32#` (int32ToWord32# b))
 _select_op ArrayNand = \a b -> word32ToInt32# (notWord32# ((int32ToWord32# a) `andWord32#` (int32ToWord32# b)))
