@@ -8,7 +8,7 @@ on:
 
 jobs:
   measure:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v2
@@ -19,7 +19,7 @@ jobs:
       - name: Run performance test
         run: $GITHUB_WORKSPACE/measure/performance.sh
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: report
           path: ${{ github.workspace }}/generated/measure/report.csv
