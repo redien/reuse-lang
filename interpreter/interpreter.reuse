@@ -227,13 +227,21 @@
                            (return (ArrayOfInt32 i))
                        _
                            (Error (data-error-array-foldl)))
-            (ValueConstructor identifier (Cons array Empty))
-                (bind (parse-array-constructor array scope) (fn (array)
-                (match (identifier-id identifier)
-                       (Some -43)
-                           (return (ArrayShape array))
+            (ValueConstructor identifier (Cons argument Empty))
+                (match argument
+                       (ValueConstructor _ __)
+                           (bind (parse-array-constructor argument scope) (fn (array)
+                           (match (identifier-id identifier)
+                                  (Some -43)
+                                      (return (ArrayShape array))
+                                  _
+                                      (Error (data-error-array-foldl)))))
                        _
-                           (Error (data-error-array-foldl)))))
+                           (match (identifier-id identifier)
+                                  (Some -64)
+                                      (return (ArrayFromSlice argument))
+                                  _
+                                      (Error (data-error-array-foldl))))
             (ValueConstructor identifier (Cons a (Cons (ValueInteger b) Empty)))
                 (bind (parse-array-constructor a scope) (fn (a)
                 (match (identifier-id identifier)
@@ -283,6 +291,14 @@
                         (apply-function scope stack-trace None (list f ys-value (ValueInteger y))))))
                     (return ys)
                     array)))
+            _
+                (Error (data-error-array-foldl))))
+
+(def eval-array-to-slice (eval-expression scope stack-trace arguments)
+     (match arguments
+            (Cons array Empty)
+                (bind (eval-expression scope stack-trace array) (fn (result)
+                (return (ValueSlice (array-to-slice result)))))
             _
                 (Error (data-error-array-foldl))))
 
@@ -440,7 +456,10 @@
              (Pair (identifier-slice-subslice) (ValueIntrinsic eval-slice-subslice))
              (Pair
                  (identifier-array-foldl)
-                 (ValueIntrinsic (eval-array-foldl eval-expression (apply-function eval-expression)))))
+                 (ValueIntrinsic (eval-array-foldl eval-expression (apply-function eval-expression))))
+             (Pair
+                 (identifier-array-to-slice)
+                 (ValueIntrinsic (eval-array-to-slice eval-expression))))
          scope))
 
 (def definitions-to-scope (definitions)

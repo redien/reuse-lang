@@ -15,8 +15,8 @@ int32-minus         |_int32_sub
 int32-divide        |Prelude.quot
 int32-modulus       |Prelude.rem
 int32-and           |_int32_and
-slice-type          |Bytes
-array-type          |Array Int32
+slice-type          |ByteArray#
+array-type          |Array'
 cempty              |CEmpty
 ccons               |CCons
 comma               |,

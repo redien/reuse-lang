@@ -47,6 +47,8 @@
 
 (pub def identifier-array-foldl () -24)
 
+(pub def identifier-array-to-slice () -25)
+
 (pub def identifier-ArrayOfInt32 () -40)
 
 (pub def identifier-ArrayConcat () -41)
@@ -94,6 +96,8 @@
 (pub def identifier-ArrayRotate () -62)
 
 (pub def identifier-ArrayCompress () -63)
+
+(pub def identifier-ArrayFromSlice () -64)
 
 (pub def identifier-int32 () -100)
 
@@ -162,6 +166,10 @@
          (predefined-identifier
              data-array-foldl
              identifier-array-foldl
+             PrivateFunctionDefinition)
+         (predefined-identifier
+             data-array-to-slice
+             identifier-array-to-slice
              PrivateFunctionDefinition)
          (predefined-identifier
              data-ArrayOfInt32
@@ -258,6 +266,10 @@
          (predefined-identifier
              data-ArrayCompress
              identifier-ArrayCompress
+             PrivateConstructorDefinition)
+         (predefined-identifier
+             data-ArrayFromSlice
+             identifier-ArrayFromSlice
              PrivateConstructorDefinition)
          (predefined-identifier data-int32 identifier-int32 PrivateTypeDefinition)
          (predefined-identifier data-slice identifier-slice PrivateTypeDefinition)

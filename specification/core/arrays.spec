@@ -1,4 +1,15 @@
 
+Construct arrays from slices
+> (array-foldl + 0 (ArrayFromSlice (array-to-slice (ArrayOfInt32 1))))
+= 1
+
+> (array-foldl + 0 (ArrayFromSlice (array-to-slice (ArrayGenerate (ArrayOfInt32 42) 1))))
+= 42
+
+> (array-foldl + 0 (ArrayFromSlice (array-to-slice (ArrayGenerate (ArrayOfInt32 1) 42))))
+= 42
+
+
 Construct arrays from a single int32 value
 > (array-foldl + 0 (ArrayOfInt32 1))
 = 1

@@ -24,6 +24,7 @@ slice-subslice               |slice-subslice
 slice                        |slice
 int32                        |int32
 array-foldl                  |array-foldl
+array-to-slice               |array-to-slice
 ArrayAdd                     |ArrayAdd
 ArraySubtract                |ArraySubtract
 ArrayMultiply                |ArrayMultiply
@@ -48,4 +49,5 @@ ArrayReduce                  |ArrayReduce
 ArrayScan                    |ArrayScan
 ArrayRotate                  |ArrayRotate
 ArrayCompress                |ArrayCompress
+ArrayFromSlice               |ArrayFromSlice
 array                        |array
