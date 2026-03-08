@@ -219,7 +219,7 @@
             _
                 (Error (data-error-array-foldl))))
 
-(def parse-array-constructor (constructor scope)
+(def eval-array-constructor (constructor scope)
      (match constructor
             (ValueConstructor identifier (Cons (ValueInteger i) Empty))
                 (match (identifier-id identifier)
@@ -230,28 +230,28 @@
             (ValueConstructor identifier (Cons argument Empty))
                 (match argument
                        (ValueConstructor _ __)
-                           (bind (parse-array-constructor argument scope) (fn (array)
+                           (bind (eval-array-constructor argument scope) (fn (array)
                            (match (identifier-id identifier)
                                   (Some -43)
                                       (return (ArrayShape array))
                                   _
                                       (Error (data-error-array-foldl)))))
                        _
-                           (match (identifier-id identifier)
-                                  (Some -64)
-                                      (return (ArrayFromSlice argument))
+                           (match (Pair (identifier-id identifier) argument)
+                                  (Pair (Some -64) (ValueSlice slice))
+                                      (return (ArrayFromSlice slice))
                                   _
                                       (Error (data-error-array-foldl))))
             (ValueConstructor identifier (Cons a (Cons (ValueInteger b) Empty)))
-                (bind (parse-array-constructor a scope) (fn (a)
+                (bind (eval-array-constructor a scope) (fn (a)
                 (match (identifier-id identifier)
                        (Some -42)
                            (return (ArrayGenerate a b))
                        _
                            (Error (data-error-array-foldl)))))
             (ValueConstructor identifier (Cons a (Cons b Empty)))
-                (bind (parse-array-constructor a scope) (fn (a)
-                (bind (parse-array-constructor b scope) (fn (b)
+                (bind (eval-array-constructor a scope) (fn (a)
+                (bind (eval-array-constructor b scope) (fn (b)
                 (match (identifier-id identifier)
                        (Some -41)
                            (return (ArrayConcat a b))
@@ -261,7 +261,7 @@
                            (Error (data-error-array-foldl)))))))
             (ValueConstructor identifier (Cons op (Cons (ValueInteger k) (Cons array Empty))))
                 (bind (parse-array-op op scope) (fn (op)
-                (bind (parse-array-constructor array scope) (fn (array)
+                (bind (eval-array-constructor array scope) (fn (array)
                 (match (identifier-id identifier)
                        (Some -46)
                            (return (ArrayReduce op k array))
@@ -271,8 +271,8 @@
                            (Error (data-error-array-foldl)))))))
             (ValueConstructor identifier (Cons op (Cons a (Cons b Empty))))
                 (bind (parse-array-op op scope) (fn (op)
-                (bind (parse-array-constructor a scope) (fn (a)
-                (bind (parse-array-constructor b scope) (fn (b)
+                (bind (eval-array-constructor a scope) (fn (a)
+                (bind (eval-array-constructor b scope) (fn (b)
                 (match (identifier-id identifier)
                        (Some -45)
                            (return (ArrayMap op a b))
@@ -281,10 +281,10 @@
             _
                 (Error (data-error-array-foldl))))
 
-(def eval-array-foldl (eval-expression apply-function scope stack-trace arguments)
+(def eval-array-foldl (apply-function scope stack-trace arguments)
      (match arguments
             (Cons f (Cons ys (Cons constructor Empty)))
-                (bind (parse-array-constructor constructor scope) (fn (array)
+                (bind (eval-array-constructor constructor scope) (fn (array)
                 (array-foldl
                     (fn (ys y)
                         (bind ys (fn (ys-value)
@@ -294,13 +294,13 @@
             _
                 (Error (data-error-array-foldl))))
 
-(def eval-array-to-slice (eval-expression scope stack-trace arguments)
+(def eval-array-to-slice (scope stack-trace arguments)
      (match arguments
-            (Cons array Empty)
-                (bind (eval-expression scope stack-trace array) (fn (result)
-                (return (ValueSlice (array-to-slice result)))))
+            (Cons constructor Empty)
+                (bind (eval-array-constructor constructor scope) (fn (array)
+                (return (ValueSlice (array-to-slice array)))))
             _
-                (Error (data-error-array-foldl))))
+                (Error (data-error-array-to-slice))))
 
 (def eval-function-application (eval-expression stack-trace arguments values scope expression)
      (match (< (list-size values) (list-size arguments))
@@ -456,10 +456,8 @@
              (Pair (identifier-slice-subslice) (ValueIntrinsic eval-slice-subslice))
              (Pair
                  (identifier-array-foldl)
-                 (ValueIntrinsic (eval-array-foldl eval-expression (apply-function eval-expression))))
-             (Pair
-                 (identifier-array-to-slice)
-                 (ValueIntrinsic (eval-array-to-slice eval-expression))))
+                 (ValueIntrinsic (eval-array-foldl (apply-function eval-expression))))
+             (Pair (identifier-array-to-slice) (ValueIntrinsic eval-array-to-slice)))
          scope))
 
 (def definitions-to-scope (definitions)

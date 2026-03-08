@@ -2,6 +2,7 @@ main                        |reuse-main
 no-input-files              |No input files
 intrinsic                   |[intrinsic]
 slice                       |[slice]
+array                       |[array]
 pipe                        |pipe
 list                        |list
 empty                       |Empty
@@ -11,6 +12,7 @@ error-generic               |Error evaluating expression
 error-int32-op              |Integer operator called with incorrect arguments
 error-slice-op              |Slice operator called with incorrect arguments
 error-array-foldl           |Array left fold called with incorrect arguments
+error-array-to-slice        |Array to slice conversion called with incorrect arguments
 error-unmatched-case        |This value does not match any of the cases in a match expression:
 error-unmatched-case2       |Patterns:
 error-stack-trace           |Stack trace:
