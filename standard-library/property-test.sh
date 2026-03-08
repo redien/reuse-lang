@@ -15,11 +15,11 @@ $project_root/bin/reusec --language haskell\
 
 test_file() {
     echo Testing properties of $1
-    cp standard-library/specification/$1.hs $build_dir/$1.hs
+    cp standard-library/tests/$1.hs $build_dir/$1.hs
     ghc -e Main.main $build_dir/$1.hs $build_dir/ReuseStdlib.hs $build_dir/conversions.hs
 }
 
-cp standard-library/specification/conversions.hs $build_dir/conversions.hs
+cp standard-library/tests/conversions.hs $build_dir/conversions.hs
 test_file string
 test_file list
 test_file dictionary
