@@ -47,7 +47,8 @@ type array' = ArrayOfInt32 of int32
             | ArrayMap of array_binary_operator' * array' * array'
             | ArrayReduce of array_binary_operator' * int32 * array'
             | ArrayScan of array_binary_operator' * int32 * array'
-            | ArrayCompress of array' * array';;
+            | ArrayCompress of array' * array'
+            | ArrayFromSlice of bytes;;
 
 (** Reuse array expressions are evaluated to a tuple of OCaml Arrays where the first value is the shape and
     the second value is an array with the actual data. *)
@@ -92,6 +93,14 @@ let compress' selection values =
     done;
     Array.sub result 0 !j;;
 
+let array_from_slice' data =
+    let length = (Bytes.length data) / 4 in
+    let result = Array.make length 0l in
+    for i = 0 to length - 1 do
+        result.(i) <- Bytes.get_int32_ne data (i * 4)
+    done;
+    (Array.make 1 (Int32.of_int length), result);;
+
 let rec array_eval' arr =
     let sizeFromShape shape = Int32.to_int (Array.fold_left (fun a b -> Int32.mul a (Int32.max b 0l)) 1l shape) in
     match arr with
@@ -131,10 +140,21 @@ let rec array_eval' arr =
             let values = snd b in
             let result = compress' selection values in
             let len = Array.length result in
-            (Array.make 1 (Int32.of_int len), result);;
+            (Array.make 1 (Int32.of_int len), result)
+        | ArrayFromSlice slice ->
+            array_from_slice' slice;;
 
 let array_foldl f ys xs =
     Array.fold_left f ys (snd (array_eval' xs));;
+
+let array_to_slice xs =
+    let (_, data) = array_eval' xs in
+    let length = Array.length data in
+    let result = Bytes.make (length * 4) (Char.chr 0) in
+    for i = 0 to length - 1 do
+        Bytes.set_int32_ne result (i * 4) data.(i)
+    done;
+    result;;
 
 
 let rec id x7 = 
@@ -2391,6 +2411,9 @@ let rec data_int32 () =
 let rec data_array_foldl () = 
     (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((102l),Cons ((111l),Cons ((108l),Cons ((100l),Cons ((108l),Empty)))))))))))));;
 
+let rec data_array_to_slice () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((116l),Cons ((111l),Cons ((45l),Cons ((115l),Cons ((108l),Cons ((105l),Cons ((99l),Cons ((101l),Empty))))))))))))))));;
+
 let rec data_arrayadd () = 
     (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((100l),Cons ((100l),Empty))))))))));;
 
@@ -2462,6 +2485,9 @@ let rec data_arrayrotate () =
 
 let rec data_arraycompress () = 
     (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((109l),Cons ((112l),Cons ((114l),Cons ((101l),Cons ((115l),Cons ((115l),Empty)))))))))))))));;
+
+let rec data_arrayfromslice () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((70l),Cons ((114l),Cons ((111l),Cons ((109l),Cons ((83l),Cons ((108l),Cons ((105l),Cons ((99l),Cons ((101l),Empty))))))))))))))));;
 
 let rec data_array () = 
     (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Empty)))))));;
@@ -2538,6 +2564,9 @@ let rec identifier_slice_subslice () =
 let rec identifier_array_foldl () = 
     (-24l);;
 
+let rec identifier_array_to_slice () = 
+    (-25l);;
+
 let rec identifier_arrayofint32 () = 
     (-40l);;
 
@@ -2610,6 +2639,9 @@ let rec identifier_arrayrotate () =
 let rec identifier_arraycompress () = 
     (-63l);;
 
+let rec identifier_arrayfromslice () = 
+    (-64l);;
+
 let rec identifier_int32 () = 
     (-100l);;
 
@@ -2626,7 +2658,7 @@ let rec predefined_identifier text4 id8 kind5 =
     (Identifier ((Some ((Definition ((id8 ()), kind5)))), (identifier_universe_from_kind kind5), (id8 ()), (text4 ()), (SourceReference ((-1l), (string_empty ()), ModuleInternal)), (Range ((0l), (0l)))));;
 
 let rec predefined_identifiers () = 
-    (Cons ((predefined_identifier data_ identifier_ PrivateFunctionDefinition),Cons ((predefined_identifier data__ identifier__ PrivateFunctionDefinition),Cons ((predefined_identifier data_2 identifier_2 PrivateFunctionDefinition),Cons ((predefined_identifier data_3 identifier_3 PrivateFunctionDefinition),Cons ((predefined_identifier data_4 identifier_4 PrivateFunctionDefinition),Cons ((predefined_identifier data_5 identifier_5 PrivateFunctionDefinition),Cons ((predefined_identifier data_int32_less_than identifier_int32_less_than PrivateFunctionDefinition),Cons ((predefined_identifier data_list identifier_list PrivateFunctionDefinition),Cons ((predefined_identifier data_pipe identifier_pipe PrivateFunctionDefinition),Cons ((predefined_identifier data_dot identifier_dot PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_empty identifier_slice_empty PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_of_u8 identifier_slice_of_u8 PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_size identifier_slice_size PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_get identifier_slice_get PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_concat identifier_slice_concat PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_foldl identifier_slice_foldl PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_subslice identifier_slice_subslice PrivateFunctionDefinition),Cons ((predefined_identifier data_array_foldl identifier_array_foldl PrivateFunctionDefinition),Cons ((predefined_identifier data_arrayofint32 identifier_arrayofint32 PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayconcat identifier_arrayconcat PrivateConstructorDefinition),Cons ((predefined_identifier data_arraygenerate identifier_arraygenerate PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayshape identifier_arrayshape PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayreshape identifier_arrayreshape PrivateConstructorDefinition),Cons ((predefined_identifier data_arraymap identifier_arraymap PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayreduce identifier_arrayreduce PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayscan identifier_arrayscan PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayadd identifier_arrayadd PrivateConstructorDefinition),Cons ((predefined_identifier data_arraysubtract identifier_arraysubtract PrivateConstructorDefinition),Cons ((predefined_identifier data_arraymultiply identifier_arraymultiply PrivateConstructorDefinition),Cons ((predefined_identifier data_arraydivide identifier_arraydivide PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayand identifier_arrayand PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayor identifier_arrayor PrivateConstructorDefinition),Cons ((predefined_identifier data_arraynand identifier_arraynand PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayxor identifier_arrayxor PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayequal identifier_arrayequal PrivateConstructorDefinition),Cons ((predefined_identifier data_arraynotequal identifier_arraynotequal PrivateConstructorDefinition),Cons ((predefined_identifier data_arraygreaterthan identifier_arraygreaterthan PrivateConstructorDefinition),Cons ((predefined_identifier data_arraygreaterthanequal identifier_arraygreaterthanequal PrivateConstructorDefinition),Cons ((predefined_identifier data_arraylessthan identifier_arraylessthan PrivateConstructorDefinition),Cons ((predefined_identifier data_arraylessthanequal identifier_arraylessthanequal PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayrotate identifier_arrayrotate PrivateConstructorDefinition),Cons ((predefined_identifier data_arraycompress identifier_arraycompress PrivateConstructorDefinition),Cons ((predefined_identifier data_int32 identifier_int32 PrivateTypeDefinition),Cons ((predefined_identifier data_slice identifier_slice PrivateTypeDefinition),Cons ((predefined_identifier data_array identifier_array PrivateTypeDefinition),Empty))))))))))))))))))))))))))))))))))))))))))))));;
+    (Cons ((predefined_identifier data_ identifier_ PrivateFunctionDefinition),Cons ((predefined_identifier data__ identifier__ PrivateFunctionDefinition),Cons ((predefined_identifier data_2 identifier_2 PrivateFunctionDefinition),Cons ((predefined_identifier data_3 identifier_3 PrivateFunctionDefinition),Cons ((predefined_identifier data_4 identifier_4 PrivateFunctionDefinition),Cons ((predefined_identifier data_5 identifier_5 PrivateFunctionDefinition),Cons ((predefined_identifier data_int32_less_than identifier_int32_less_than PrivateFunctionDefinition),Cons ((predefined_identifier data_list identifier_list PrivateFunctionDefinition),Cons ((predefined_identifier data_pipe identifier_pipe PrivateFunctionDefinition),Cons ((predefined_identifier data_dot identifier_dot PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_empty identifier_slice_empty PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_of_u8 identifier_slice_of_u8 PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_size identifier_slice_size PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_get identifier_slice_get PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_concat identifier_slice_concat PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_foldl identifier_slice_foldl PrivateFunctionDefinition),Cons ((predefined_identifier data_slice_subslice identifier_slice_subslice PrivateFunctionDefinition),Cons ((predefined_identifier data_array_foldl identifier_array_foldl PrivateFunctionDefinition),Cons ((predefined_identifier data_array_to_slice identifier_array_to_slice PrivateFunctionDefinition),Cons ((predefined_identifier data_arrayofint32 identifier_arrayofint32 PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayconcat identifier_arrayconcat PrivateConstructorDefinition),Cons ((predefined_identifier data_arraygenerate identifier_arraygenerate PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayshape identifier_arrayshape PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayreshape identifier_arrayreshape PrivateConstructorDefinition),Cons ((predefined_identifier data_arraymap identifier_arraymap PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayreduce identifier_arrayreduce PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayscan identifier_arrayscan PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayadd identifier_arrayadd PrivateConstructorDefinition),Cons ((predefined_identifier data_arraysubtract identifier_arraysubtract PrivateConstructorDefinition),Cons ((predefined_identifier data_arraymultiply identifier_arraymultiply PrivateConstructorDefinition),Cons ((predefined_identifier data_arraydivide identifier_arraydivide PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayand identifier_arrayand PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayor identifier_arrayor PrivateConstructorDefinition),Cons ((predefined_identifier data_arraynand identifier_arraynand PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayxor identifier_arrayxor PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayequal identifier_arrayequal PrivateConstructorDefinition),Cons ((predefined_identifier data_arraynotequal identifier_arraynotequal PrivateConstructorDefinition),Cons ((predefined_identifier data_arraygreaterthan identifier_arraygreaterthan PrivateConstructorDefinition),Cons ((predefined_identifier data_arraygreaterthanequal identifier_arraygreaterthanequal PrivateConstructorDefinition),Cons ((predefined_identifier data_arraylessthan identifier_arraylessthan PrivateConstructorDefinition),Cons ((predefined_identifier data_arraylessthanequal identifier_arraylessthanequal PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayrotate identifier_arrayrotate PrivateConstructorDefinition),Cons ((predefined_identifier data_arraycompress identifier_arraycompress PrivateConstructorDefinition),Cons ((predefined_identifier data_arrayfromslice identifier_arrayfromslice PrivateConstructorDefinition),Cons ((predefined_identifier data_int32 identifier_int32 PrivateTypeDefinition),Cons ((predefined_identifier data_slice identifier_slice PrivateTypeDefinition),Cons ((predefined_identifier data_array identifier_array PrivateTypeDefinition),Empty))))))))))))))))))))))))))))))))))))))))))))))));;
 
 let rec predefined_identifier_to_symbol identifier36 = 
     (pair_cons (maybe_or_else (-1l) (identifier_id identifier36)) (identifier_name identifier36));;
@@ -2850,6 +2882,9 @@ let rec data_int322 () =
 let rec data_array_foldl2 () = 
     (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((102l),Cons ((111l),Cons ((108l),Cons ((100l),Cons ((108l),Empty)))))))))))));;
 
+let rec data_array_to_slice2 () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((116l),Cons ((111l),Cons ((45l),Cons ((115l),Cons ((108l),Cons ((105l),Cons ((99l),Cons ((101l),Empty))))))))))))))));;
+
 let rec data_arrayadd2 () = 
     (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((100l),Cons ((100l),Empty))))))))));;
 
@@ -2921,6 +2956,9 @@ let rec data_arrayrotate2 () =
 
 let rec data_arraycompress2 () = 
     (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((109l),Cons ((112l),Cons ((114l),Cons ((101l),Cons ((115l),Cons ((115l),Empty)))))))))))))));;
+
+let rec data_arrayfromslice2 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((70l),Cons ((114l),Cons ((111l),Cons ((109l),Cons ((83l),Cons ((108l),Cons ((105l),Cons ((99l),Cons ((101l),Empty))))))))))))))));;
 
 let rec data_array2 () = 
     (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Empty)))))));;
@@ -3813,6 +3851,9 @@ let rec data_int323 () =
 let rec data_array_foldl3 () = 
     (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((102l),Cons ((111l),Cons ((108l),Cons ((100l),Cons ((108l),Empty)))))))))))));;
 
+let rec data_array_to_slice3 () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((116l),Cons ((111l),Cons ((45l),Cons ((115l),Cons ((108l),Cons ((105l),Cons ((99l),Cons ((101l),Empty))))))))))))))));;
+
 let rec data_arrayadd3 () = 
     (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((100l),Cons ((100l),Empty))))))))));;
 
@@ -3884,6 +3925,9 @@ let rec data_arrayrotate3 () =
 
 let rec data_arraycompress3 () = 
     (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((109l),Cons ((112l),Cons ((114l),Cons ((101l),Cons ((115l),Cons ((115l),Empty)))))))))))))));;
+
+let rec data_arrayfromslice3 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((70l),Cons ((114l),Cons ((111l),Cons ((109l),Cons ((83l),Cons ((108l),Cons ((105l),Cons ((99l),Cons ((101l),Empty))))))))))))))));;
 
 let rec data_array3 () = 
     (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Empty)))))));;
@@ -4450,6 +4494,9 @@ let rec data_int324 () =
 let rec data_array_foldl4 () = 
     (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((102l),Cons ((111l),Cons ((108l),Cons ((100l),Cons ((108l),Empty)))))))))))));;
 
+let rec data_array_to_slice4 () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((116l),Cons ((111l),Cons ((45l),Cons ((115l),Cons ((108l),Cons ((105l),Cons ((99l),Cons ((101l),Empty))))))))))))))));;
+
 let rec data_arrayadd4 () = 
     (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((100l),Cons ((100l),Empty))))))))));;
 
@@ -4522,6 +4569,9 @@ let rec data_arrayrotate4 () =
 let rec data_arraycompress4 () = 
     (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((109l),Cons ((112l),Cons ((114l),Cons ((101l),Cons ((115l),Cons ((115l),Empty)))))))))))))));;
 
+let rec data_arrayfromslice4 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((70l),Cons ((114l),Cons ((111l),Cons ((109l),Cons ((83l),Cons ((108l),Cons ((105l),Cons ((99l),Cons ((101l),Empty))))))))))))))));;
+
 let rec data_array4 () = 
     (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Empty)))))));;
 
@@ -4580,10 +4630,10 @@ let rec data_int32_and () =
     (string_from_list (Cons ((95l),Cons ((105l),Cons ((110l),Cons ((116l),Cons ((51l),Cons ((50l),Cons ((95l),Cons ((97l),Cons ((110l),Cons ((100l),Empty))))))))))));;
 
 let rec data_slice_type () = 
-    (string_from_list (Cons ((66l),Cons ((121l),Cons ((116l),Cons ((101l),Cons ((115l),Empty)))))));;
+    (string_from_list (Cons ((66l),Cons ((121l),Cons ((116l),Cons ((101l),Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((35l),Empty))))))))))));;
 
 let rec data_array_type () = 
-    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((32l),Cons ((73l),Cons ((110l),Cons ((116l),Cons ((51l),Cons ((50l),Empty)))))))))))));;
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((39l),Empty))))))));;
 
 let rec data_cempty () = 
     (string_from_list (Cons ((67l),Cons ((69l),Cons ((109l),Cons ((112l),Cons ((116l),Cons ((121l),Empty))))))));;
@@ -5161,6 +5211,9 @@ let rec data_int326 () =
 let rec data_array_foldl5 () = 
     (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((102l),Cons ((111l),Cons ((108l),Cons ((100l),Cons ((108l),Empty)))))))))))));;
 
+let rec data_array_to_slice5 () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((116l),Cons ((111l),Cons ((45l),Cons ((115l),Cons ((108l),Cons ((105l),Cons ((99l),Cons ((101l),Empty))))))))))))))));;
+
 let rec data_arrayadd5 () = 
     (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((100l),Cons ((100l),Empty))))))))));;
 
@@ -5232,6 +5285,9 @@ let rec data_arrayrotate5 () =
 
 let rec data_arraycompress5 () = 
     (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((109l),Cons ((112l),Cons ((114l),Cons ((101l),Cons ((115l),Cons ((115l),Empty)))))))))))))));;
+
+let rec data_arrayfromslice5 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((70l),Cons ((114l),Cons ((111l),Cons ((109l),Cons ((83l),Cons ((108l),Cons ((105l),Cons ((99l),Cons ((101l),Empty))))))))))))))));;
 
 let rec data_array5 () = 
     (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Empty)))))));;
@@ -5893,6 +5949,9 @@ let rec data_int327 () =
 let rec data_array_foldl6 () = 
     (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((102l),Cons ((111l),Cons ((108l),Cons ((100l),Cons ((108l),Empty)))))))))))));;
 
+let rec data_array_to_slice6 () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((116l),Cons ((111l),Cons ((45l),Cons ((115l),Cons ((108l),Cons ((105l),Cons ((99l),Cons ((101l),Empty))))))))))))))));;
+
 let rec data_arrayadd6 () = 
     (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((100l),Cons ((100l),Empty))))))))));;
 
@@ -5964,6 +6023,9 @@ let rec data_arrayrotate6 () =
 
 let rec data_arraycompress6 () = 
     (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((109l),Cons ((112l),Cons ((114l),Cons ((101l),Cons ((115l),Cons ((115l),Empty)))))))))))))));;
+
+let rec data_arrayfromslice6 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((70l),Cons ((114l),Cons ((111l),Cons ((109l),Cons ((83l),Cons ((108l),Cons ((105l),Cons ((99l),Cons ((101l),Empty))))))))))))))));;
 
 let rec data_array6 () = 
     (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Empty)))))));;
@@ -6241,6 +6303,9 @@ let rec data_int328 () =
 let rec data_array_foldl7 () = 
     (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((102l),Cons ((111l),Cons ((108l),Cons ((100l),Cons ((108l),Empty)))))))))))));;
 
+let rec data_array_to_slice7 () = 
+    (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((45l),Cons ((116l),Cons ((111l),Cons ((45l),Cons ((115l),Cons ((108l),Cons ((105l),Cons ((99l),Cons ((101l),Empty))))))))))))))));;
+
 let rec data_arrayadd7 () = 
     (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((65l),Cons ((100l),Cons ((100l),Empty))))))))));;
 
@@ -6312,6 +6377,9 @@ let rec data_arrayrotate7 () =
 
 let rec data_arraycompress7 () = 
     (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((67l),Cons ((111l),Cons ((109l),Cons ((112l),Cons ((114l),Cons ((101l),Cons ((115l),Cons ((115l),Empty)))))))))))))));;
+
+let rec data_arrayfromslice7 () = 
+    (string_from_list (Cons ((65l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Cons ((70l),Cons ((114l),Cons ((111l),Cons ((109l),Cons ((83l),Cons ((108l),Cons ((105l),Cons ((99l),Cons ((101l),Empty))))))))))))))));;
 
 let rec data_array7 () = 
     (string_from_list (Cons ((97l),Cons ((114l),Cons ((114l),Cons ((97l),Cons ((121l),Empty)))))));;

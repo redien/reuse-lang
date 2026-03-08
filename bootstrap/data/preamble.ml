@@ -47,7 +47,8 @@ type array' = ArrayOfInt32 of int32
             | ArrayMap of array_binary_operator' * array' * array'
             | ArrayReduce of array_binary_operator' * int32 * array'
             | ArrayScan of array_binary_operator' * int32 * array'
-            | ArrayCompress of array' * array';;
+            | ArrayCompress of array' * array'
+            | ArrayFromSlice of bytes;;
 
 (** Reuse array expressions are evaluated to a tuple of OCaml Arrays where the first value is the shape and
     the second value is an array with the actual data. *)
@@ -92,6 +93,14 @@ let compress' selection values =
     done;
     Array.sub result 0 !j;;
 
+let array_from_slice' data =
+    let length = (Bytes.length data) / 4 in
+    let result = Array.make length 0l in
+    for i = 0 to length - 1 do
+        result.(i) <- Bytes.get_int32_ne data (i * 4)
+    done;
+    (Array.make 1 (Int32.of_int length), result);;
+
 let rec array_eval' arr =
     let sizeFromShape shape = Int32.to_int (Array.fold_left (fun a b -> Int32.mul a (Int32.max b 0l)) 1l shape) in
     match arr with
@@ -131,7 +140,18 @@ let rec array_eval' arr =
             let values = snd b in
             let result = compress' selection values in
             let len = Array.length result in
-            (Array.make 1 (Int32.of_int len), result);;
+            (Array.make 1 (Int32.of_int len), result)
+        | ArrayFromSlice slice ->
+            array_from_slice' slice;;
 
 let array_foldl f ys xs =
     Array.fold_left f ys (snd (array_eval' xs));;
+
+let array_to_slice xs =
+    let (_, data) = array_eval' xs in
+    let length = Array.length data in
+    let result = Bytes.make (length * 4) (Char.chr 0) in
+    for i = 0 to length - 1 do
+        Bytes.set_int32_ne result (i * 4) data.(i)
+    done;
+    result;;

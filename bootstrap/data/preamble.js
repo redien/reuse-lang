@@ -71,6 +71,7 @@ var ArrayMap = { ArrayMap: true };
 var ArrayReduce = { ArrayReduce: true };
 var ArrayScan = { ArrayScan: true };
 var ArrayCompress = { ArrayCompress: true };
+var ArrayFromSlice = { ArrayFromSlice: true };
 
 var $array_add = (x, y) => x + y;
 var $array_subtract = (x, y) => x - y;
@@ -208,8 +209,15 @@ var $array_eval = array => {
             var array = $array_eval(_array);
             var result = $array_compress(array.data, mask.data);
             return { data: result, shape: [result.length] };
+        },
+        [ArrayFromSlice, $], (slice) => {
+            var result = new Int32Array(slice.buffer, 0, (slice.buffer.byteLength / 4) | 0);
+            return { data: result, shape: [result.length] };
         }
     ]);
 };
 var array_foldl = f => ys => xs => $array_eval(xs).data.reduce((a, b) => f(a)(b), ys);
 module.exports.array_foldl = array_foldl;
+
+var array_to_slice = xs => new Uint8Array($array_eval(xs).data.buffer);
+module.exports.array_to_slice = array_to_slice;

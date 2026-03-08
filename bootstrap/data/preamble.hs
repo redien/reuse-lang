@@ -1,13 +1,19 @@
-import GHC.Exts (State#, ByteArray#, MutableByteArray#, shrinkMutableByteArray#, unsafeFreezeByteArray#, newByteArray#, writeInt32Array#, indexInt32Array#, sizeofByteArray#, copyByteArray#, Int(I#), Int32#, intToInt32#, int32ToInt#, plusInt32#, subInt32#, timesInt32#, quotInt32#, andI#, orI#, xorI#, ltInt32#, leInt32#, gtInt32#, geInt32#, eqInt32#, neInt32#, negateInt32#, isTrue#, notWord32#, andWord32#, orWord32#, xorWord32#, int32ToWord32#, word32ToInt32#, (+#))
+import GHC.Exts (
+    State#,
+    Int(I#), Word(W#), andI#, orI#, xorI#, isTrue#, (+#),
+    ByteArray#, MutableByteArray#, shrinkMutableByteArray#, unsafeFreezeByteArray#, newByteArray#, sizeofByteArray#, copyByteArray#,
+    Int32#, writeInt32Array#, indexInt32Array#, intToInt32#, int32ToInt#, plusInt32#, subInt32#, timesInt32#, quotInt32#, ltInt32#, leInt32#, gtInt32#, geInt32#, eqInt32#, neInt32#, negateInt32#,
+    Word32#, notWord32#, andWord32#, orWord32#, xorWord32#, int32ToWord32#, word32ToInt32#, writeWord32Array#,
+    Word8#, writeWord8Array#, indexWord8Array#, wordToWord8#, word8ToWord#)
 import GHC.ST
 
 import Data.Typeable (Typeable)
 
 import Data.Int (Int32)
+import Data.Word (Word8)
 import qualified Prelude
 import Prelude ((+), (*), (-), (==), (/=), (<), (>), (>=), (<=), (&&), (.), ($), (++))
-import Data.Bits ((.&.), (.|.), complement, xor, shiftL, shiftR, rotateL, rotateR)
-import qualified Data.ByteString as ByteString
+import Data.Bits ((.&.), (.|.))
 _int32_add :: Int32 -> Int32 -> Int32
 _int32_add a b = a + b
 
@@ -19,43 +25,126 @@ _int32_sub a b = a - b
 
 _int32_and :: Int32 -> Int32 -> Int32
 _int32_and a b = a .&. b
-slice_empty :: ByteString.ByteString
-slice_empty = ByteString.empty
-slice_of_u8 :: Int32 -> Int32 -> ByteString.ByteString
-slice_of_u8 x count =
-    if x >= 0 && x < 256 && count >= 1 then
-        ByteString.replicate (Prelude.fromIntegral count) (Prelude.fromIntegral x)
-    else
-        ByteString.singleton 0
-slice_size :: ByteString.ByteString -> Int32
-slice_size = Prelude.fromIntegral . ByteString.length
-slice_get :: ByteString.ByteString -> Int32 -> Int32
-slice_get slice i =
-    if i >= 0 && i < slice_size slice then
-        Prelude.fromIntegral $ ByteString.index slice (Prelude.fromIntegral i)
-    else
-        0
-slice_concat :: ByteString.ByteString -> ByteString.ByteString -> ByteString.ByteString
-slice_concat = ByteString.append
-slice_foldl :: (Int32 -> a -> a) -> a -> ByteString.ByteString -> a
-slice_foldl f ys xs = slice_foldl 0 f ys xs where
-    slice_foldl i f ys xs =
-        if i < Prelude.fromIntegral (slice_size xs) then
-            slice_foldl (i + 1) f (f (Prelude.fromIntegral (ByteString.index xs i)) ys) xs
-        else
-            ys
-slice_subslice :: ByteString.ByteString -> Int32 -> Int32 -> ByteString.ByteString
-slice_subslice slice s e =
-    let size = slice_size slice in
-    let s' = if s < 0 then 0 else (if s >= size then size - 1 else s) in
-    let e' = if e < 0 then 0 else (if e >= size then size - 1 else e) in
-    if e' - s' <= 0 then
-        slice_empty
-    else
-        ByteString.take (Prelude.fromIntegral (e' - s')) (ByteString.drop (Prelude.fromIntegral s') slice)
 
 data ByteArray = ByteArray ByteArray# deriving ( Typeable )
 data MutableByteArray s = MutableByteArray (MutableByteArray# s) deriving ( Typeable )
+
+-- https://hackage.haskell.org/package/base-4.20.0.1/docs/GHC-Exts.html
+
+_min :: Int32# -> Int32# -> Int32#
+_min a b =
+    if isTrue# (a `ltInt32#` b) then
+        a
+    else
+        b
+
+_max :: Int32# -> Int32# -> Int32#
+_max a b =
+    if isTrue# (a `gtInt32#` b) then
+        a
+    else
+        b
+
+_box :: Int32# -> Int32
+_box x = Prelude.fromIntegral (I# (int32ToInt# x))
+
+_unbox :: Int32 -> Int32#
+_unbox x =
+    let (I# x') = Prelude.fromIntegral x
+    in intToInt32# x'
+
+_box8 :: Word8# -> Word8
+_box8 x = Prelude.fromIntegral (W# (word8ToWord# x))
+
+_unbox8 :: Word8 -> Word8#
+_unbox8 x =
+    let (W# x') = Prelude.fromIntegral x
+    in wordToWord8# x'
+
+_box_array :: ByteArray# -> ByteArray
+_box_array x = (ByteArray x)
+
+_unbox_array :: ByteArray -> ByteArray#
+_unbox_array x = let (ByteArray array) = x in array
+
+_int32_to_word8 :: Int32# -> Word8#
+_int32_to_word8 x =
+    _unbox8 (Prelude.fromIntegral (_box x))
+
+_word8_to_int32 :: Word8# -> Int32#
+_word8_to_int32 x =
+    _unbox (Prelude.fromIntegral (_box8 x))
+
+
+-- Returns the size of an unboxed byte array in int32-sized elements
+_byte_array_size :: ByteArray# -> Int32#
+_byte_array_size arr =
+    quotInt32# (intToInt32# (sizeofByteArray# arr)) (intToInt32# 4#)
+
+-- Left fold on an unboxed byte array
+_array_foldl_u8 :: Int32# -> Int32# -> (Int32# -> x -> x) -> x -> ByteArray# -> x
+_array_foldl_u8 i length# f ys xs =
+    if isTrue# (i `ltInt32#` length#) then
+        _array_foldl_u8 (i `plusInt32#` (intToInt32# 1#)) length# f (f (_word8_to_int32 (indexWord8Array# xs (int32ToInt# i))) ys) xs
+    else
+        ys
+
+_array_generate_u8' :: Int32# -> Int32# -> Int32# -> (MutableByteArray s) -> State# s -> (# State# s, (MutableByteArray s) #)
+_array_generate_u8' i length# x (MutableByteArray ys#) s =
+    if isTrue# (i `ltInt32#` length#) then
+        let index# = int32ToInt# i in
+        case writeWord8Array# ys# index# (_int32_to_word8 x) s of
+            s' -> _array_generate_u8' (i `plusInt32#` (intToInt32# 1#)) length# x (MutableByteArray ys#) s'
+    else
+        (# s, (MutableByteArray ys#) #)
+
+-- Applies ƒ to all elements in an array and returns the result
+_array_generate_u8 :: Int32# -> Int32# -> ByteArray
+_array_generate_u8 length# x# = runST $ ST $ \s ->
+    case newByteArray# (int32ToInt# length#) s of
+        (# s', result# #) -> case _array_generate_u8' (intToInt32# 0#) length# x# (MutableByteArray result#) s' of
+            (# s'', (MutableByteArray result'#) #) -> case unsafeFreezeByteArray# result'# s'' of
+                (# s''', result''# #) -> (# s''', (ByteArray result''#) #)
+
+-- Returns an empty byte array
+_empty_byte_array :: ByteArray
+_empty_byte_array = runST $ ST $ \s ->
+    case newByteArray# 0# s of
+        (# s', arr# #) -> case unsafeFreezeByteArray# arr# s' of
+            (# s'', arr'# #) -> (# s'', ByteArray arr'# #)
+
+-- Concatenates two byte arrays
+_concat_arrays :: ByteArray# -> ByteArray# -> ByteArray#
+_concat_arrays a# b# = _unbox_array $ runST $ ST $ \s -> 
+    let new_size = (sizeofByteArray# a#) +# (sizeofByteArray# b#) in
+    case newByteArray# new_size s of
+        (# s', arr# #) -> case copyByteArray# a# 0# arr# 0# (sizeofByteArray# a#) s' of
+            s'' -> case copyByteArray# b# 0# arr# (sizeofByteArray# a#) (sizeofByteArray# b#) s'' of
+                s''' -> case unsafeFreezeByteArray# arr# s''' of
+                    (# s'''', arr'# #) -> (# s'''', ByteArray arr'# #)
+
+slice_empty :: ByteArray
+slice_empty = _empty_byte_array
+slice_of_u8 :: Int32 -> Int32 -> ByteArray
+slice_of_u8 x count = _array_generate_u8 (_unbox count) (_unbox x)
+slice_size :: ByteArray -> Int32
+slice_size a = (_box (intToInt32# (sizeofByteArray# (_unbox_array a))))
+slice_get :: ByteArray -> Int32 -> Int32
+slice_get slice index = Prelude.fromIntegral (_box8 (indexWord8Array# (_unbox_array slice) (int32ToInt# (_unbox index))))
+slice_concat :: ByteArray -> ByteArray -> ByteArray
+slice_concat a b = _box_array (_concat_arrays (_unbox_array a) (_unbox_array b))
+slice_foldl :: (Int32 -> a -> a) -> a -> ByteArray -> a
+slice_foldl f ys xs = _array_foldl_u8 (_unbox 0) (intToInt32# (sizeofByteArray# (_unbox_array xs))) (\x ys -> f (_box x) ys) ys (_unbox_array xs)
+slice_subslice :: ByteArray -> Int32 -> Int32 -> ByteArray
+slice_subslice arr start end = runST $ ST $ \s ->
+    let a# = _unbox_array arr in
+    let end# = _min (intToInt32# (sizeofByteArray# a#)) (_max (intToInt32# 0#) (_unbox end)) in
+    let start# = _min end# (_max (intToInt32# 0#) (_unbox start)) in
+    let new_size# = subInt32# end# start# in
+    case newByteArray# (int32ToInt# new_size#) s of
+        (# s', arr# #) -> case copyByteArray# a# (int32ToInt# start#) arr# 0# (int32ToInt# new_size#) s' of
+            s'' -> case unsafeFreezeByteArray# arr# s'' of
+                (# s''', arr'# #) -> (# s''', ByteArray arr'# #)
 
 data ArrayBinaryOperator' =
      ArrayAdd
@@ -82,6 +171,7 @@ data Array' =
   | ArrayReduce ArrayBinaryOperator' Int32 Array'
   | ArrayScan ArrayBinaryOperator' Int32 Array'
   | ArrayCompress Array' Array'
+  | ArrayFromSlice ByteArray
 
 -- Using Int32# might incur a large performance cost on platforms with a word size < 32 bits 
 -- because it does not use prim ops but makes C FFI calls.
@@ -90,7 +180,7 @@ _select_op :: ArrayBinaryOperator' -> Int32# -> Int32# -> Int32#
 _select_op ArrayAdd = plusInt32#
 _select_op ArraySubtract = subInt32#
 _select_op ArrayMultiply = timesInt32#
-_select_op ArrayDivide = quotInt32#
+_select_op ArrayDivide = \a b -> if isTrue# (eqInt32# b (intToInt32# 0#)) then (intToInt32# 0#) else quotInt32# a b
 _select_op ArrayAnd = \a b -> word32ToInt32# ((int32ToWord32# a) `andWord32#` (int32ToWord32# b))
 _select_op ArrayOr = \a b -> word32ToInt32# ((int32ToWord32# a) `orWord32#` (int32ToWord32# b))
 _select_op ArrayNand = \a b -> word32ToInt32# (notWord32# ((int32ToWord32# a) `andWord32#` (int32ToWord32# b)))
@@ -102,40 +192,21 @@ _select_op ArrayLessThanEqual =  \a b -> intToInt32# (leInt32# a b)
 _select_op ArrayGreaterThan =  \a b -> intToInt32# (gtInt32# a b)
 _select_op ArrayGreaterThanEqual =  \a b -> intToInt32# (geInt32# a b)
 
--- https://hackage.haskell.org/package/base-4.20.0.1/docs/GHC-Exts.html
+-- Returns number of elements represented by the shape
+_size_from_shape :: ByteArray# -> Int32#
+_size_from_shape shape = fold (intToInt32# 0#) (intToInt32# 1#) shape
+    where fold i ys xs = if isTrue# (i `ltInt32#` (_byte_array_size xs))
+                         then fold (i `plusInt32#` (intToInt32# 1#)) (timesInt32# (indexInt32Array# xs (int32ToInt# i)) ys) xs
+                         else ys
 
-_min :: Int32# -> Int32# -> Int32#
-_min a b =
-    if isTrue# (a `ltInt32#` b) then
-        a
-    else
-        b
-
-_max :: Int32# -> Int32# -> Int32#
-_max a b =
-    if isTrue# (a `gtInt32#` b) then
-        a
-    else
-        b
-
-_box :: Int32# -> Int32
-_box x = Prelude.fromIntegral (I# (int32ToInt# x))
-
-_unbox :: Int32 -> Int32#
-_unbox x =
-    let (I# x') = Prelude.fromIntegral x
-    in intToInt32# x'
-
-_box_array :: ByteArray# -> ByteArray
-_box_array x = (ByteArray x)
-
-_unbox_array :: ByteArray -> ByteArray#
-_unbox_array x = let (ByteArray array) = x in array
-
--- Returns the size of an unboxed byte array in int32-sized elements
-_byte_array_size :: ByteArray# -> Int32#
-_byte_array_size arr =
-    quotInt32# (intToInt32# (sizeofByteArray# arr)) (intToInt32# 4#)
+-- Takes an integer and returns a byte array containing the integer
+-- Desugaring the do notation is necessary since it won't work on unlifted values.
+_singleton_byte_array :: Int32# -> ByteArray#
+_singleton_byte_array value# = _unbox_array $ runST $ ST $ \s -> 
+    case newByteArray# 4# s of
+        (# s', arr# #) -> case writeInt32Array# arr# 0# value# s' of
+            s'' -> case unsafeFreezeByteArray# arr# s'' of
+                (# s''', arr'# #) -> (# s''', ByteArray arr'# #)
 
 -- Left fold on an unboxed byte array
 _array_foldl :: Int32# -> (Int32# -> x -> x) -> x -> ByteArray# -> x
@@ -157,39 +228,6 @@ _array_foldl_int32' i length f ys xs =
 _array_foldl_int32 :: (Int32# -> Int32# -> Int32#) -> Int32# -> ByteArray# -> Int32#
 _array_foldl_int32 f ys xs =
     _array_foldl_int32' (intToInt32# 0#) (_byte_array_size xs) f ys xs
-
--- Returns number of elements represented by the shape
-_size_from_shape :: ByteArray# -> Int32#
-_size_from_shape shape = fold (intToInt32# 0#) (intToInt32# 1#) shape
-    where fold i ys xs = if isTrue# (i `ltInt32#` (_byte_array_size xs))
-                         then fold (i `plusInt32#` (intToInt32# 1#)) (timesInt32# (indexInt32Array# xs (int32ToInt# i)) ys) xs
-                         else ys
-
--- Takes an integer and returns a byte array containing the integer
--- Desugaring the do notation is necessary since it won't work on unlifted values.
-_singleton_byte_array :: Int32# -> ByteArray#
-_singleton_byte_array value# = _unbox_array $ runST $ ST $ \s -> 
-    case newByteArray# 4# s of
-        (# s', arr# #) -> case writeInt32Array# arr# 0# value# s' of
-            s'' -> case unsafeFreezeByteArray# arr# s'' of
-                (# s''', arr'# #) -> (# s''', ByteArray arr'# #)
-
--- Returns an empty byte array
-_empty_byte_array :: ByteArray
-_empty_byte_array = runST $ ST $ \s ->
-    case newByteArray# 0# s of
-        (# s', arr# #) -> case unsafeFreezeByteArray# arr# s' of
-            (# s'', arr'# #) -> (# s'', ByteArray arr'# #)
-
--- Concatenates two byte arrays and returns a boxed result
-_concat_arrays :: ByteArray# -> ByteArray# -> ByteArray#
-_concat_arrays a# b# = _unbox_array $ runST $ ST $ \s -> 
-    let new_size = (sizeofByteArray# a#) +# (sizeofByteArray# b#) in
-    case newByteArray# new_size s of
-        (# s', arr# #) -> case copyByteArray# a# 0# arr# 0# (sizeofByteArray# a#) s' of
-            s'' -> case copyByteArray# b# 0# arr# (sizeofByteArray# a#) (sizeofByteArray# b#) s'' of
-                s''' -> case unsafeFreezeByteArray# arr# s''' of
-                    (# s'''', arr'# #) -> (# s'''', ByteArray arr'# #)
 
 _array_map' :: Int32# -> Int32# -> (Int32# -> Int32#) -> ByteArray# -> (MutableByteArray s) -> State# s -> (# State# s, (MutableByteArray s) #)
 _array_map' i length# f xs# (MutableByteArray ys#) s =
@@ -248,20 +286,20 @@ _array_map2 f a# b# = _unbox_array $ runST $ ST $ \s ->
             s'' -> case unsafeFreezeByteArray# result# s'' of
                 (# s''', result'# #) -> (# s''', (ByteArray result'#) #)
 
-_array_generate' :: Int32# -> Int32# -> Int32# -> (MutableByteArray s) -> State# s -> (# State# s, (MutableByteArray s) #)
-_array_generate' i length# x (MutableByteArray ys#) s =
+_array_generate_i32' :: Int32# -> Int32# -> Int32# -> (MutableByteArray s) -> State# s -> (# State# s, (MutableByteArray s) #)
+_array_generate_i32' i length# x (MutableByteArray ys#) s =
     if isTrue# (i `ltInt32#` length#) then
         let index# = int32ToInt# i in
         case writeInt32Array# ys# index# x s of
-            s' -> _array_generate' (i `plusInt32#` (intToInt32# 1#)) length# x (MutableByteArray ys#) s'
+            s' -> _array_generate_i32' (i `plusInt32#` (intToInt32# 1#)) length# x (MutableByteArray ys#) s'
     else
         (# s, (MutableByteArray ys#) #)
 
 -- Applies ƒ to all elements in an array and returns the result
-_array_generate :: Int32# -> Int32# -> ByteArray#
-_array_generate length# x# = _unbox_array $ runST $ ST $ \s ->
+_array_generate_i32 :: Int32# -> Int32# -> ByteArray#
+_array_generate_i32 length# x# = _unbox_array $ runST $ ST $ \s ->
     case newByteArray# (int32ToInt# (length# `timesInt32#` (intToInt32# 4#))) s of
-        (# s', result# #) -> case _array_generate' (intToInt32# 0#) length# x# (MutableByteArray result#) s' of
+        (# s', result# #) -> case _array_generate_i32' (intToInt32# 0#) length# x# (MutableByteArray result#) s' of
             (# s'', (MutableByteArray result'#) #) -> case unsafeFreezeByteArray# result'# s'' of
                 (# s''', result''# #) -> (# s''', (ByteArray result''#) #)
 
@@ -299,7 +337,7 @@ _array_eval arr =
             let (# _, shape'' #) = _array_eval shape' in
             let shape = _compress (_array_map (\x -> (intToInt32# (leInt32# (intToInt32# 0#) x))) shape'') shape'' in
             if isTrue# (gtInt32# (_byte_array_size shape) (intToInt32# 0#)) then
-                (# shape, _array_generate (_size_from_shape shape) (_unbox x) #)
+                (# shape, _array_generate_i32 (_size_from_shape shape) (_unbox x) #)
             else
                 let (ByteArray _empty_byte_array#) = _empty_byte_array in
                 (# _empty_byte_array#, _empty_byte_array# #)
@@ -324,8 +362,16 @@ _array_eval arr =
             let (# shape_b, array_b #) = _array_eval b in
             let result = _compress array_a array_b in
             (# _singleton_byte_array (_byte_array_size result), result #)
+        ArrayFromSlice slice ->
+            let slice# = _unbox_array slice in
+            (# _singleton_byte_array (_byte_array_size slice#), slice# #)
 
 array_foldl :: (x -> Int32 -> x) -> x -> Array' -> x
 array_foldl f ys xs' =
     let (# _, xs #) = _array_eval xs' in
     _array_foldl (intToInt32# 0#) (\a b -> f b (_box a)) ys xs
+
+array_to_slice :: Array' -> ByteArray
+array_to_slice xs =
+    let (# _, xs# #) = _array_eval xs in
+    _box_array xs#
